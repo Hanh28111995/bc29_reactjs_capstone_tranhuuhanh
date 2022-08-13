@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {  useSelector,useDispatch } from "react-redux";
 import { USER_INFO_KEY } from "../../constants/common";
 import { setUserInfoAction } from "../../store/actions/user.action";
+import "./index.scss";
 
 export default function Header() {
   const userState = useSelector((state)=>state.userReducer);
