@@ -1,6 +1,6 @@
 import React from 'react';
-import Detail from '../../modules/detail/Detail';
-import ShowTime from '../../modules/showTime/ShowTime';
+import Detail from 'modules/detail/Detail';
+import ShowTime from 'modules/showTime/ShowTime';
 
 export default function MovieDetail() {
   return (

@@ -1,6 +1,6 @@
 import React from 'react'
-import Carousel from '../../modules/carousel/Carousel'
-import MovieList from '../../modules/movie-list/MovieList'
+import Carousel from 'modules/carousel/Carousel'
+import MovieList from 'modules/movie-list/MovieList'
 
 export default function Home() {
   return (

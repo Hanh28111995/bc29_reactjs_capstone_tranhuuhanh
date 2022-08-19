@@ -1,21 +1,32 @@
 import { Button } from "antd";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchMovieListAPI } from "../../services/movie";
+import { LoadingContext } from "../../contexts/loading.context";
+import { useAsync } from "../../hooks/useAsync";
+import { fetchMovieListAPI } from "services/movie";
 
 export default function MovieList() {
-  const [movieList, setMovieList] = useState([]);
   const navigate = useNavigate();
-  useEffect(() => {
-    fetchMovieList();
-  }, []);
+  // const [movieList, setMovieList] = useState([]);
+  // const [loadingState, setLoadingState] = useContext(LoadingContext);
 
-  const fetchMovieList = async () => {
-    const result = await fetchMovieListAPI();
-    setMovieList(result.data.content);
-    // console.log("a",result)
-  };
+  const { state: movieList = []} = useAsync({
+    dependencies: []  ,
+    service:() => fetchMovieListAPI(),
+  });
+
+  // useEffect(() => {
+  //   fetchMovieList();
+  // }, []);
+
+  // const fetchMovieList = async () => {
+  //   setLoadingState({ isLoading: true });
+  //   const result = await fetchMovieListAPI();
+  //   setLoadingState({ isLoading: false });
+  //   setMovieList(result.data.content);
+  //   // console.log("a",result)
+  // };
   const renderMovieList = () => {
     return movieList.map((ele) => {
       return (
@@ -33,10 +44,11 @@ export default function MovieList() {
             <div className="card-body">
               <h5 className="card-title">{ele.tenPhim}</h5>
               <Button
-              loading={false}
-              size='large' 
-              type="danger" 
-              onClick={() => navigate(`/movie/${ele.maPhim}`)}>
+                loading={false}
+                size="large"
+                type="danger"
+                onClick={() => navigate(`/movie/${ele.maPhim}`)}
+              >
                 XEM CHI TIẾT
               </Button>
             </div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate} from "react-router-dom";
 import { USER_INFO_KEY } from "../../constants/common";
-import { loginAPI } from "../../services/user";
+import { loginAPI } from "services/user";
 import { setUserInfoAction } from "../../store/actions/user.action";
 
 export default function Login() {

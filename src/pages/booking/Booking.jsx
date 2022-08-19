@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Chair from "../../modules/chair/Chair";
-import { bookingTicketAPI, fetchRoomListAPI } from "../../services/booking";
+import Chair from "modules/chair/Chair";
+import { bookingTicketAPI, fetchRoomListAPI } from "services/booking";
 
 export default function Booking() {
   const [danhSachGhe, setdanhSachGhe] = useState([]);

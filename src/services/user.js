@@ -1,3 +1,4 @@
+import { GROUP_ID } from "constants/common";
 import { request } from "../configs/axios";
 
 const loginAPI = (data) => {
@@ -7,4 +8,47 @@ const loginAPI = (data) => {
     method: "POST",
   });
 };
-export { loginAPI };
+
+const registerApi = (data) => {
+  return request({
+    data,
+    url: "/QuanLyNguoiDung/DangKy",
+    method: "POST",
+  });
+};
+
+const userListApi = ()=> {
+  console.log(request({
+    url: `QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${GROUP_ID}`,
+    method: 'GET',
+}));
+  return request({
+    url: `QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${GROUP_ID}`,
+    method: 'GET',
+})
+};
+const userDetailApi = (tk) =>{
+  return request({
+      url: `/QuanLyNguoiDung/LayThongTinNguoiDung?taiKhoan=${tk}`,
+      method: 'POST',
+      data: tk,
+  })
+};
+
+const addUserApi = (data) => {
+  return request({
+    url: '/QuanLyNguoiDung/ThemNguoiDung',
+    method: 'POST',
+    data,
+  });
+};
+
+const updateUserApi = (data) => {
+  return request({
+    url: '/QuanLyNguoiDung/CapNhatThongTinNguoiDung',
+    method: 'POST',
+    data,
+  });
+}
+
+export { loginAPI, registerApi , userListApi, userDetailApi, addUserApi, updateUserApi};

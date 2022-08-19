@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "baseUrl": "./src",
+      "paths": {
+        "pages/*": ["./src/pages/*"],
+        "services/*": ["./src/services/*"],
+        "guards/*": ["./src/guards/*"],
+        "modules/*": ["./src/modules/*"]
+      }
+    }
+  }

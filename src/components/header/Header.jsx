@@ -43,8 +43,8 @@ export default function Header() {
         {!userState.userInfor ? (
           <div className="ml-auto">
             <button
+               onClick={() => navigate("/register")}
               className="btn btn-outline-info my-2 my-sm-0 mr-2"
-              type="sumit"
             >
               Register
             </button>

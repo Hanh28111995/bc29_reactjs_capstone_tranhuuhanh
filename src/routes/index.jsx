@@ -1,16 +1,23 @@
-import React from "react";
+import CreateMovie from "pages/CreateMovie/CreateMovie";
+import EditUser from "pages/EditUser/EditUser";
+import Register from "pages/register/Register";
+import UpdateMovie from "pages/UpdateMovie/UpdateMovie";
+import UserManagement from "pages/user-management/UserManagement";
+
+import React, { lazy } from "react";
 
 import { useRoutes } from "react-router-dom";
-import AdminGuards from "../guards/admin.guards";
-import AuthGuards from "../guards/auth.guards";
-import NoAuthGuards from "../guards/no-auth.guards";
-import AdminLayout from "../layouts/AdminLayout";
-import HomeLayout from "../layouts/HomeLayout";
-import Booking from "../pages/booking/Booking";
-import Home from "../pages/home/Home";
-import Login from "../pages/login/Login";
-import MovieDetail from "../pages/movie-detail/MovieDetail";
-import MovieManagement from "../pages/movie-management/MovieManagement";
+const Booking = lazy(()=> import( "pages/booking/Booking"));
+const Login = lazy(()=> import( "pages/login/Login"));
+const MovieManagement = lazy(()=> import( "pages/movie-management/MovieManagement"));
+const AdminGuards = lazy(()=> import( "guards/admin.guards"));
+const AuthGuards = lazy(()=> import( "guards/auth.guards"));
+const NoAuthGuards = lazy(()=> import( "guards/no-auth.guards"));
+const AdminLayout = lazy(()=> import( "../layouts/AdminLayout"));
+
+const HomeLayout = lazy(()=> import("../layouts/HomeLayout"));
+const Home = lazy(()=> import("pages/home/Home"));
+const MovieDetail = lazy(()=> import("pages/movie-detail/MovieDetail"));
 
 export default function Router() {
   const routing = useRoutes([
@@ -45,6 +52,10 @@ export default function Router() {
               path: "/login",
               element: <Login />,
             },
+            {
+              path: "/register",
+              element: <Register />,
+            },
           ],
         },
       ],
@@ -60,7 +71,24 @@ export default function Router() {
             {
               path: '/admin/movie-management',
               element:<MovieManagement/>,
-            }
+            },
+            {
+              path: '/admin/user-management',
+              element:<UserManagement/>,
+            },
+            {
+              path: '/admin/movie-management/create',
+              element:<CreateMovie/>,
+            },
+      
+            {
+              path: '/admin/movie-management/:movieId/update',
+              element:<UpdateMovie/>,
+            },
+            {
+              path: '/admin/user-management/:tk/edit',
+              element:<EditUser/>,
+            },
           ]
         }
       ]
