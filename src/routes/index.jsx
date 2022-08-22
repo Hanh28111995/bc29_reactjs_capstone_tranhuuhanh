@@ -1,8 +1,11 @@
 import CreateMovie from "pages/CreateMovie/CreateMovie";
+import CreateUser from "pages/CreateUser/CreateUser";
+import EditShowTime from "pages/EditShowTime/EditShowTime";
 import EditUser from "pages/EditUser/EditUser";
 import Register from "pages/register/Register";
 import UpdateMovie from "pages/UpdateMovie/UpdateMovie";
 import UserManagement from "pages/user-management/UserManagement";
+import PageNotFound from "pages/PageNotFound/PageNotFound";
 
 import React, { lazy } from "react";
 
@@ -80,7 +83,10 @@ export default function Router() {
               path: '/admin/movie-management/create',
               element:<CreateMovie/>,
             },
-      
+            {
+              path: '/admin/user-management/create',
+              element:<CreateUser/>,
+            },
             {
               path: '/admin/movie-management/:movieId/update',
               element:<UpdateMovie/>,
@@ -89,10 +95,18 @@ export default function Router() {
               path: '/admin/user-management/:tk/edit',
               element:<EditUser/>,
             },
+            {
+              path: '/admin/movie-management/:movieId/edit-showtime',
+              element:<EditShowTime/>,
+            },
           ]
         }
       ]
-    }
+    },
+    {
+      path: '*',
+      element: <PageNotFound />
+    },
   ]);
   return routing;
 }

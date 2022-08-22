@@ -5,7 +5,7 @@ import moment from "moment";
 import { formatDate } from "../../utils/common";
 import { useAsync } from "hooks/useAsync";
 
-export default function ShowTime() {
+export default function DetailShowTime() {
   const params = useParams();
   // const [showTimes, setShowTimes] = useState({});
 
@@ -53,8 +53,8 @@ const {state: showTimes =[]} = useAsync({
         >
           {ele.cumRapChieu.map((ele) => {
             return (
-              <div key={ele.maCumRap} className="row mb-5">
-                <div className="col-1">
+              <div key={ele.maCumRap} className="row mb-1">
+                <div className="col-1 ">
                   <img className="img-fluid rounded" src={ele.hinhAnh} />
                 </div>
                 <div className="col-11 pl-0">
@@ -62,13 +62,13 @@ const {state: showTimes =[]} = useAsync({
                   <span className="text-muted">{ele.diaChi}</span>
                 </div>
                 <div className="col-12">
-                  <div className="row">
+                  <div className="row mt-2">
                     {ele.lichChieuPhim.map((ele) => {
                       return (
                         <div key={ele.maLichChieu} className="col-3">
-                          <Link to={`/booking/${ele.maLichChieu}`}>
+                          <p>
                           {formatDate(ele.ngayChieuGioChieu)}
-                          </Link>
+                          </p>
                         </div>
                       );
                     })}
@@ -85,7 +85,7 @@ const {state: showTimes =[]} = useAsync({
     <div className="row">
       <div className="col-3">
         <div
-          className="nav flex-column nav-pills"
+          className="nav flex-column nav-pills px-3"
           id="v-pills-tab"
           role="tablist"
           aria-orientation="vertical"
@@ -93,11 +93,13 @@ const {state: showTimes =[]} = useAsync({
           {renderTabs()}
         </div>
       </div>
-      <div className="col-9">
-        <div className="tab-content" id="v-pills-tabContent">
+      <div className="col-9 ">
+        <div className="tab-content pl-5" id="v-pills-tabContent">
           {renderContent()}
         </div>
       </div>
     </div>
   );
 }
+
+

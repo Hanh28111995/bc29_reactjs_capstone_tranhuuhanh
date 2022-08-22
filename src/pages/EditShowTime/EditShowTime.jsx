@@ -1,21 +1,22 @@
-import React from 'react';
-import Detail from 'modules/detail/Detail';
-import ShowTime from 'modules/showTime/ShowTime';
+import DetailShowTime from 'modules/showTime/DetailShowTime';
+import ShowTimeForm from 'modules/showTime/ShowTimeForm';
+import React from 'react'
 
-export default function MovieDetail() {
+export default function EditShowTime() {
+
   return (
     <div className="py-5">
       <div className="container">
         <div className="row">
           <div className="col-12">
-            <Detail />
+            <DetailShowTime />
           </div>
           <div className="col-12 mt-5">
-            <ShowTime />
+            <ShowTimeForm />
           </div>
         </div>
       </div>
     </div>
+  );
 
-  )
 }

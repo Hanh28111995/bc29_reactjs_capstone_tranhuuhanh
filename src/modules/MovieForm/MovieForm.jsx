@@ -1,14 +1,11 @@
 import {
   Button,
-  Cascader,
   DatePicker,
   Form,
   Input,
   InputNumber,
   Radio,
-  Select,
   Switch,
-  TreeSelect,
   Image,
   notification,
 } from "antd";
@@ -36,6 +33,7 @@ export default function MovieForm() {
 
   useEffect(() => {
     if (movieDetail) {
+      console.log(movieDetail);
       form.setFieldsValue({
         ...movieDetail,
         ngayKhoiChieu: moment(movieDetail.ngayKhoiChieu),
@@ -57,13 +55,13 @@ export default function MovieForm() {
     }
     file && formData.append("File", file, file.name);
     params.movieId && formData.append("maPhim", params.movieId);
-
+    console.log(values);
     if (params.movieId) {
       await updateMovieUploadImage(formData);
     } else {
       await addMovieUploadImage(formData);
     }
-    // console.log(values);
+   
     notification.success({
       description: "Successfully !",
     });
@@ -110,7 +108,7 @@ export default function MovieForm() {
           <Radio.Button value="large">Large</Radio.Button>
         </Radio.Group>
       </Form.Item>
-      <Form.Item label="Tên Phim" name="tenPhim">
+      <Form.Item label="Tên Phim" name="tenPhim" >
         <Input />
       </Form.Item>
       <Form.Item label="Trailer" name="trailer">

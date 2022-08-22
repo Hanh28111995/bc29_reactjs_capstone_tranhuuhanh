@@ -11,10 +11,16 @@ export const useAsync = ({ dependencies = [], service, codintion = true }) => {
   }, dependencies);
 
   const fetchData = async () => {
-    setLoadingState({ isLoading: true });
-    const result = await service();
-    setLoadingState({ isLoading: false });
-    setState(result.data.content);
+    try {
+      setLoadingState({ isLoading: true });
+      const result = await service();
+      setLoadingState({ isLoading: false });
+      setState(result.data.content);
+    } catch (err) {
+      console.log(err);
+    }
+
   };
   return { state };
 };
+

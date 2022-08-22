@@ -14,12 +14,14 @@ export default function AdminGuards() {
     if (
       userState.userInfor &&
       userState.userInfor.maLoaiNguoiDung !== MaLoaiNguoiDung.QuanTri
-    ) {
+    ) 
+    {
       notification.warning({
         message: "Khach hang ko the truy cap vao trang Admin",
       });
       return navigate("/");
     }
+    
   }, []);
   return <Outlet />;
 }

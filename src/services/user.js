@@ -18,15 +18,13 @@ const registerApi = (data) => {
 };
 
 const userListApi = ()=> {
-  console.log(request({
-    url: `QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${GROUP_ID}`,
-    method: 'GET',
-}));
+
   return request({
-    url: `QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${GROUP_ID}`,
+    url: `/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${GROUP_ID}`,
     method: 'GET',
 })
 };
+
 const userDetailApi = (tk) =>{
   return request({
       url: `/QuanLyNguoiDung/LayThongTinNguoiDung?taiKhoan=${tk}`,
@@ -50,5 +48,11 @@ const updateUserApi = (data) => {
     data,
   });
 }
+  const deleteUserApi = (tk) => {
+    return request({
+      url: `/QuanLyNguoiDung/XoaNguoiDung?TaiKhoan=${tk}`,
+      method: 'DELETE',
+    });
+  }
 
-export { loginAPI, registerApi , userListApi, userDetailApi, addUserApi, updateUserApi};
+export { loginAPI, registerApi , userListApi, userDetailApi, addUserApi, updateUserApi, deleteUserApi};
