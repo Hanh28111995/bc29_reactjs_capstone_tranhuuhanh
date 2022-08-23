@@ -1,8 +1,8 @@
 export const TOKEN_CYBERSOFT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3AiOiJCb290Y2FtcCAyOSIsIkhldEhhblN0cmluZyI6IjE5LzAxLzIwMjMiLCJIZXRIYW5UaW1lIjoiMTY3NDA4NjQwMDAwMCIsIm5iZiI6MTY0NTk4MTIwMCwiZXhwIjoxNjc0MjM0MDAwfQ.YESwad1hPeFZLi1alQUINpqBwiG-eLBBTADYwGZBfQc';
 export const BASE_URL ='https://movienew.cybersoft.edu.vn/api';
 export const USER_INFO_KEY = "USER_INFO_KEY";
-export const GROUP_ID = 'GP03';
-export const HOUR = ["9:00 AM","12:00 AM","03:00 PM","6:00 PM","9:00 PM"];
+export const GROUP_ID = 'GP01';
+export const HOUR = ["09:00:00","12:00:00","15:00:00","18:00:00","21:00:00"];
 function removeVietnameseTones(str) {
     str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
     str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");

@@ -9,7 +9,7 @@ import PageNotFound from "pages/PageNotFound/PageNotFound";
 
 import React, { lazy } from "react";
 
-import { useRoutes } from "react-router-dom";
+import { useRoutes, Navigate } from "react-router-dom";
 const Booking = lazy(()=> import( "pages/booking/Booking"));
 const Login = lazy(()=> import( "pages/login/Login"));
 const MovieManagement = lazy(()=> import( "pages/movie-management/MovieManagement"));
@@ -17,7 +17,6 @@ const AdminGuards = lazy(()=> import( "guards/admin.guards"));
 const AuthGuards = lazy(()=> import( "guards/auth.guards"));
 const NoAuthGuards = lazy(()=> import( "guards/no-auth.guards"));
 const AdminLayout = lazy(()=> import( "../layouts/AdminLayout"));
-
 const HomeLayout = lazy(()=> import("../layouts/HomeLayout"));
 const Home = lazy(()=> import("pages/home/Home"));
 const MovieDetail = lazy(()=> import("pages/movie-detail/MovieDetail"));
@@ -71,6 +70,10 @@ export default function Router() {
           path: '/admin/',
           element:<AdminGuards/>,
           children: [
+            {
+              path: '/admin/',
+              element:<Navigate to='/admin/movie-management'/>,
+            },
             {
               path: '/admin/movie-management',
               element:<MovieManagement/>,

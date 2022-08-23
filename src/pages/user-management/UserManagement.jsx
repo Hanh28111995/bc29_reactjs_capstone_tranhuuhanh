@@ -1,6 +1,7 @@
 import UserTable from "modules/user-table/UserTable";
 import React from "react";
 
-export default function UserManagement() {
+function UserManagement() {
   return <UserTable />;
 }
+export default UserManagement

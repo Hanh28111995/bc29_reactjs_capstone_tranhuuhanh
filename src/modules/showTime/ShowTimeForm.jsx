@@ -19,6 +19,7 @@ import { addMovieUploadImage } from "services/movie";
 import { updateMovieUploadImage } from "services/movie";
 import { HethongrapListApi } from "services/showtime";
 import { HethongrapCumrapListApi } from "services/showtime";
+import { taoLichChieuApi } from "services/showtime";
 const { Option } = Select;
 
 export default function ShowTimeForm() {
@@ -80,7 +81,10 @@ export default function ShowTimeForm() {
     const giaVe = values.giaVe;
     const data = {maPhim, ngayChieuGioChieu, maRap, giaVe};
     console.log(data);
-
+    await taoLichChieuApi(data);
+    notification.success({
+          description: "Successfully !",
+        });
 
       // values.ngayKhoiChieu = values.ngayKhoiChieu.format("DD/MM/YYYY");
     //   values.maNhom = GROUP_ID;

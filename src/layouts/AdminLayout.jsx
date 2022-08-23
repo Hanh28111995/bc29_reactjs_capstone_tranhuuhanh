@@ -2,31 +2,15 @@ import {
   DesktopOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { NavLink, Route, } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu } from "antd";
 import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 const { Header, Content, Footer, Sider } = Layout;
 
-function getItem(label, key, icon, children) {
-  return {
-    key,
-    icon,
-    children,
-    label,
-  };
-}
 
-const items = [
-  getItem("Movie Management", "/admin/movie-management", <DesktopOutlined />),
-  getItem("User Management", "/admin/user-management", <UserOutlined />),
-];
-
-export default function AdminLayout() {
+ function AdminLayout() {
   const navigate = useNavigate();
-  const handleMenuClick = (e) => {
-    navigate(e.key);
-  }
-
   const [collapsed, setCollapsed] = useState(false);
   return (
     <Layout
@@ -36,7 +20,14 @@ export default function AdminLayout() {
     >
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
         <div className="logo" />
-        <Menu theme="dark"  mode="inline" items={items} onClick={handleMenuClick} />
+        <Menu defaultSelectedKeys={['link1']} theme="dark">
+          <Menu.Item key='link1' theme="dark" mode="vertical"  >
+            <NavLink to={'/admin/movie-management'} className='d-flex align-items-center text-decoration-none'><DesktopOutlined className="mr-2"/> Movie management</NavLink>
+          </Menu.Item>
+          <Menu.Item key='link2' theme="dark" mode="inline" >
+            <NavLink to={'/admin/user-management'} className='d-flex align-items-center text-decoration-none'><UserOutlined className="mr-2"/>User management</NavLink>
+          </Menu.Item>
+        </Menu>
       </Sider>
       <Layout className="site-layout">
         <Header
@@ -79,3 +70,5 @@ export default function AdminLayout() {
     </Layout>
   );
 }
+
+export default AdminLayout;
