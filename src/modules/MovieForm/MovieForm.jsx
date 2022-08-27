@@ -61,7 +61,7 @@ export default function MovieForm() {
     } else {
       await addMovieUploadImage(formData);
     }
-   
+
     notification.success({
       description: "Successfully !",
     });
@@ -70,12 +70,16 @@ export default function MovieForm() {
 
   const handleChangeImage = (event) => {
     const file = event.target.files[0];
+    //  if(!file.name){
+    //   setError({message:"Vui long chon hinh anh"})
+    //  }
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (e) => {
       setImg(e.target.result);
       setFile(file);
     };
+    console.log(file.name)
   };
   return (
     <Form
@@ -108,16 +112,21 @@ export default function MovieForm() {
           <Radio.Button value="large">Large</Radio.Button>
         </Radio.Group>
       </Form.Item>
-      <Form.Item label="Tên Phim" name="tenPhim" >
+      <Form.Item label="Tên Phim" name="tenPhim" validateTrigger={['onBlur']}
+        rules={[
+          { required: true, message: ' Vui lòng nhập tên phim ' },
+          { pattern: '^[a-zA-Z_ÀÁÂÃÈÉÊẾÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶ" + "ẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểếệễỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỉịọỏốồổỗộớờởỡợ" + "ụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ" + "0-9"+"\\s]+$', message: 'Tên phim không hợp lệ ' },
+        ]}
+      >
         <Input />
       </Form.Item>
-      <Form.Item label="Trailer" name="trailer">
+      <Form.Item label="Trailer" name="trailer" validateTrigger={['onBlur']} rules={[{ required: true, message: ' Vui lòng nhập url trailer ' }]}>
         <Input />
       </Form.Item>
-      <Form.Item label="Mô tả" name="moTa">
+      <Form.Item label="Mô tả" name="moTa" validateTrigger={['onBlur']} rules={[{ required: true, message: ' Vui lòng nhập Mô tả ' }]}>
         <Input />
       </Form.Item>
-      <Form.Item label="Ngày khởi chiếu" name="ngayKhoiChieu">
+      <Form.Item label="Ngày khởi chiếu" validateTrigger={['onBlur']} name="ngayKhoiChieu" rules={[{ required: true, message: ' Vui lòng nhập Ngày Khởi Chiếu ' }]}>
         <DatePicker />
       </Form.Item>
       <Form.Item label="Đang chiếu" valuePropName="checked" name="dangChieu">
@@ -129,11 +138,17 @@ export default function MovieForm() {
       <Form.Item label="Hot" valuePropName="checked" name="hot">
         <Switch />
       </Form.Item>
-      <Form.Item label="Số sao" name="danhGia">
-        <InputNumber />
+      <Form.Item label="Số sao" name="danhGia"
+        validateTrigger={['onBlur']}
+        rules={[
+          { required: true, message: ' Vui lòng nhập điểm Đánh giá ' },
+          { type: 'number', },
+        ]}>
+        <InputNumber min={0} max={10}/>
       </Form.Item>
       <Form.Item label="Hình ảnh">
         <Input type="file" onChange={handleChangeImage} />
+        {/* <span style={}>Vui lòng chọn Hình ảnh</span> */}
       </Form.Item>
       <Image src={img} />
       <Form.Item className="mt-2">

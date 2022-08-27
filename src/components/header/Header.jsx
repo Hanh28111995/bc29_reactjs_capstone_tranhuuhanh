@@ -19,7 +19,7 @@ export default function Header() {
   return (
     <nav className="navbar navbar-expand-sm navbar-light bg-light">
       <a className="navbar-brand" href="#">
-        Movie
+        <img src="https://cybersoft.edu.vn/wp-content/uploads/2017/03/MIN-OP1.png" alt="" style={{height:'45px',marginLeft:'10%'}}/>
       </a>
       <button
         className="navbar-toggler d-lg-none"
@@ -32,11 +32,21 @@ export default function Header() {
       >
         <span className="navbar-toggler-icon"></span>
       </button>
-      <div className="collapse navbar-collapse" id="collapsibleNavId">
-        <ul className="navbar-nav mr-auto mt-2 mt-lg-0">
+      <div className="collapse navbar-collapse " id="collapsibleNavId">
+        <ul className="navbar-nav mx-auto mt-2 mt-lg-0">
           <li className="nav-item active">
             <a className="nav-link" href="#">
-              Home
+              PHIM
+            </a>
+          </li>
+          <li className="nav-item active">
+            <a className="nav-link" href="#">
+              RẠP CHIẾU PHIM
+            </a>
+          </li>
+          <li className="nav-item active">
+            <a className="nav-link" href="#">
+             KHUYẾN MÃI
             </a>
           </li>
         </ul>
@@ -46,13 +56,13 @@ export default function Header() {
                onClick={() => navigate("/register")}
               className="btn btn-outline-info my-2 my-sm-0 mr-2"
             >
-              Register
+              Đăng ký
             </button>
             <button
               onClick={() => navigate("/login")}
               className="btn btn-outline-success my-2 my-sm-0"
             >
-              Login
+              Đăng nhập
             </button>
           </div>
         ) : (
@@ -63,7 +73,7 @@ export default function Header() {
               className="btn btn-outline-info my-2 my-sm-0 mr-2"
               type="sumit"
             >
-              Log out
+              Đăng xuất
             </button>
           </div>
         )}

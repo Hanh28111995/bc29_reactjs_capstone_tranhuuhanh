@@ -1,5 +1,15 @@
-import React from "react";
+import { Row, Col } from 'antd';
+
+import React, { useEffect } from "react";
 import { Carousel as CarouselAntd } from "antd";
+import "antd/dist/antd.css";
+import { bannerMovieApi } from "services/movie";
+import { useAsync } from "hooks/useAsync";
+import {
+  LeftOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
+import "./index.scss";
 
 const contentStyle = {
   objectFit: "fill",
@@ -7,14 +17,80 @@ const contentStyle = {
   height: "500px",
 };
 
-export default function Carousel() {
-  const onChange = (currentSlide) => {
-    console.log(currentSlide);
-  };
+const SampleNextArrow = props => {
+  const { className, style, onClick } = props
   return (
-    <CarouselAntd  afterChange={onChange}>
-     
-    
-    </CarouselAntd>
+    <div
+      className={className}
+      style={{
+        ...style,
+        color: 'black',
+        fontSize: '15px',
+        lineHeight: '1.5715'
+      }}
+      onClick={onClick}
+    >
+      <RightOutlined />
+    </div>
+  )
+}
+
+const SamplePrevArrow = props => {
+  const { className, style, onClick } = props
+  return (
+    <div
+      className={className}
+      style={{
+        ...style,
+        color: 'black',
+        fontSize: '20px',
+        lineHeight: '1.5715'
+      }}
+      onClick={onClick}
+    >
+      <LeftOutlined />
+    </div>
+  )
+}
+
+const settings = {
+  nextArrow: <SampleNextArrow />,
+  prevArrow: <SamplePrevArrow />
+}
+
+
+export default function CarouselArrows() {
+
+  const { state: banner = [] } = useAsync({
+    dependencies: [],
+    service: () => bannerMovieApi(),
+  })
+
+  const bannerList =
+    banner.map((item, index) => {
+      return (
+        <div key={index}>
+          <img style={contentStyle} src={item.hinhAnh} alt="" />
+        </div>)
+    }
+    );
+
+
+  return (<>
+    <div className="TitleCarousel">
+      <ul style={{marginBottom:'0'}}>
+        <li>
+        <p>PHIM HOT TẠI RẠP</p></li>
+      </ul>
+    </div>
+
+    <Row justify="center" >
+      <Col span={16}>
+        <CarouselAntd arrows autoplay={true} {...settings}>
+          {bannerList}
+        </CarouselAntd>
+      </Col>
+    </Row>
+  </>
   );
 }

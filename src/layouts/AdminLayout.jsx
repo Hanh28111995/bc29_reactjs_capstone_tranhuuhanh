@@ -2,16 +2,36 @@ import {
   DesktopOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { NavLink, Route, } from 'react-router-dom';
-import { Breadcrumb, Layout, Menu } from "antd";
+import { NavLink, Route, useLocation, } from 'react-router-dom';
+import { Breadcrumb, Layout, Menu, Image } from "antd";
 import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 const { Header, Content, Footer, Sider } = Layout;
 
+function getItem(label, key, icon, children, type) {
+  return {
+    key,
+    icon,
+    children,
+    label,
+    type,
+  };
+}
+const items = [
+  getItem('Movie management', '/admin/movie-management', <DesktopOutlined/>),
+  getItem('User management', '/admin/user-management', <UserOutlined />),
+]
 
  function AdminLayout() {
   const navigate = useNavigate();
+  const {pathname} = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const MenuClick =(value) => {
+    navigate(value.key);
+  }
+  const breadcrumb = pathname.split('/');
+  console.log(breadcrumb)
+  
   return (
     <Layout
       style={{
@@ -19,15 +39,18 @@ const { Header, Content, Footer, Sider } = Layout;
       }}
     >
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-        <div className="logo" />
-        <Menu defaultSelectedKeys={['link1']} theme="dark">
-          <Menu.Item key='link1' theme="dark" mode="vertical"  >
-            <NavLink to={'/admin/movie-management'} className='d-flex align-items-center text-decoration-none'><DesktopOutlined className="mr-2"/> Movie management</NavLink>
-          </Menu.Item>
-          <Menu.Item key='link2' theme="dark" mode="inline" >
-            <NavLink to={'/admin/user-management'} className='d-flex align-items-center text-decoration-none'><UserOutlined className="mr-2"/>User management</NavLink>
-          </Menu.Item>
-        </Menu>
+        <div className="logo" >
+          <Image  src="https://cybersoft.edu.vn/wp-content/uploads/2021/03/logo-cyber-nav.svg" width={100} preview={false} />
+          </div>
+        <Menu
+        defaultSelectedKeys={['/admin/movie-management']}
+        mode="inline"
+        theme="dark"
+        // inlineCollapsed={collapsed}
+        items={items}
+        selectedKeys={[pathname]}
+        onClick={MenuClick}
+      />
       </Sider>
       <Layout className="site-layout">
         <Header
@@ -46,8 +69,8 @@ const { Header, Content, Footer, Sider } = Layout;
               margin: '16px 0',
             }}
           >
-            <Breadcrumb.Item>User</Breadcrumb.Item>
-            <Breadcrumb.Item>Bill</Breadcrumb.Item>
+            <Breadcrumb.Item>{breadcrumb[1]}</Breadcrumb.Item>
+            <Breadcrumb.Item>{breadcrumb[2]}</Breadcrumb.Item>
           </Breadcrumb>
           <div
             className="site-layout-background"

@@ -37,4 +37,11 @@ const addMovieUploadImage = (data) => {
     });
   }
 
-export {fetchMovieListAPI, fetchMovieDetailAPI, addMovieUploadImage, updateMovieUploadImage, deleteMovieAPI};
+  const bannerMovieApi = () => {
+    return request({
+      url: '/QuanLyPhim/LayDanhSachBanner',
+      method: 'GET',
+  })
+  }
+
+export {fetchMovieListAPI, fetchMovieDetailAPI, addMovieUploadImage, updateMovieUploadImage, deleteMovieAPI, bannerMovieApi};
