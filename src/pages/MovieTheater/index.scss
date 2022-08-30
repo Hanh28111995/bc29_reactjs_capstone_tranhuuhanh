@@ -1,0 +1,48 @@
+.nav-theater {
+    color: gray;
+    border: solid 1px #856307;
+    background-color: whitesmoke;
+}
+
+.nav-theater:hover {
+    color: #856307;
+}
+
+.nav-pills .active {
+    background-color: #856307 !important;
+    color: antiquewhite !important;
+}
+
+.nav-pills a {
+    text-decoration: none;
+}
+
+.tab-content {
+    background-color: #dad2b4;
+}
+
+.container-fix {
+    margin-top: 0 !important;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+}
+
+.header-table {
+    font-weight: bold !important;
+    // text-align: center;
+    background-color: transparent !important;
+}
+
+tr.ant-table-row:hover td {
+    background-color: #dad2b4 !important;
+}
+
+.nav-item {
+    margin-top: 5px;
+}
+
+.list-theater {
+    justify-content: center;
+    // margin-top: 25px;
+    // margin-bottom: 35px;
+}

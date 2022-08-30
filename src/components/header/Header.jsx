@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {  useSelector,useDispatch } from "react-redux";
 import { USER_INFO_KEY } from "../../constants/common";
 import { setUserInfoAction } from "../../store/actions/user.action";
@@ -34,43 +34,46 @@ export default function Header() {
       </button>
       <div className="collapse navbar-collapse " id="collapsibleNavId">
         <ul className="navbar-nav mx-auto mt-2 mt-lg-0">
-          <li className="nav-item active">
-            <a className="nav-link" href="#">
+          <li className="nav-item ">
+            <NavLink className="nav-link nav-header" to="/">
               PHIM
-            </a>
+            </NavLink>
           </li>
-          <li className="nav-item active">
-            <a className="nav-link" href="#">
-              RẠP CHIẾU PHIM
-            </a>
+          <li className="nav-item ">
+            <NavLink className="nav-link nav-header" to="/movie-theater">
+            RẠP CHIẾU PHIM
+            </NavLink>
           </li>
-          <li className="nav-item active">
-            <a className="nav-link" href="#">
-             KHUYẾN MÃI
-            </a>
+          <li className="nav-item ">
+            <NavLink className="nav-link nav-header" to="/khuyenmai">
+            KHUYẾN MÃI
+            </NavLink>
           </li>
         </ul>
         {!userState.userInfor ? (
-          <div className="ml-auto">
+          <div className="ml-auto d-flex align-items-center">
             <button
                onClick={() => navigate("/register")}
-              className="btn btn-outline-info my-2 my-sm-0 mr-2"
+              className="btn-more-infor my-2 my-sm-0 mr-2"
+              style={{height:"40px", width:"100px", display:'inline-block'}}
             >
               Đăng ký
             </button>
             <button
               onClick={() => navigate("/login")}
-              className="btn btn-outline-success my-2 my-sm-0"
+              className="btn-more-infor my-2 my-sm-0 mr-2"
+              style={{height:"40px" , width:"100px", display:'inline-block'}}
             >
               Đăng nhập
             </button>
           </div>
         ) : (
-          <div className="ml-auto">
-            <span>Xin chào {userState.userInfor.hoTen} </span>
+          <div className="ml-auto d-flex align-items-center" style={{fontSize:'12px'}}>
+            <span>Xin chào! {userState.userInfor.hoTen} </span>
             <button
               onClick={handleLogout}
-              className="btn btn-outline-info my-2 my-sm-0 mr-2"
+              className="btn-more-infor my-2 my-sm-0 mr-2"
+              style={{height:"40px" , width:"100px", display:'inline-block'}}
               type="sumit"
             >
               Đăng xuất

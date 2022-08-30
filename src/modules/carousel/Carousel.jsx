@@ -77,11 +77,8 @@ export default function CarouselArrows() {
 
 
   return (<>
-    <div className="TitleCarousel">
-      <ul style={{marginBottom:'0'}}>
-        <li>
-        <p>PHIM HOT TẠI RẠP</p></li>
-      </ul>
+    <div className="TitleCarousel" style={{ marginBottom: '0' }}>
+      <p>PHIM HOT TẠI RẠP</p>
     </div>
 
     <Row justify="center" >
@@ -91,6 +88,8 @@ export default function CarouselArrows() {
         </CarouselAntd>
       </Col>
     </Row>
+    <div className="TitleCarousel">
+    </div>
   </>
   );
 }

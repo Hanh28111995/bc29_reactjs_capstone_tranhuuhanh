@@ -2,3 +2,41 @@
 {
     color: red !important;
 }
+ul li {
+    margin-left:  20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+.nav-header{
+    color: gray ;
+}
+.active{
+    color: #856307 !important;
+}
+.active::after {
+    transform: scaleX(1) !important;
+}
+.nav-header:hover{
+    color: #856307 !important;
+}
+.nav-header::after {
+    content: "";
+    width: 100%;
+    height: 2px;
+    display: block;
+    background-color: black ;
+    transform: scaleX(0);
+    transition: 0.2s;
+}
+.nav-header:hover::after {
+    transform: scaleX(1);
+  }
+// .nav-link:hover {
+
+// }
+
+// .active
+//   {
+//     background-color: yellow;
+// color: #856307 !important;
+// }

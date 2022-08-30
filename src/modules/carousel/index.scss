@@ -1,19 +1,25 @@
 .ant-carousel {
-    .slick-next {
-      &::before {
-        content: '';
-      }
-    }
-    .slick-prev { 
-      &::before {
-        content: '';
-      }
+  .slick-next {
+    &::before {
+      content: '';
     }
   }
-  .ant-row {
-    background-color: #dad2b4 ;
+
+  .slick-prev {
+    &::before {
+      content: '';
+    }
   }
-  
-  .ant-col-16 {
-    max-width: 70% ;
-  }
+}
+
+.ant-row {
+  background-color: #dad2b4;
+}
+
+.ant-col-16 {
+  max-width: 70%;
+}
+
+
+
+

@@ -1,0 +1,21 @@
+.num {
+    display: inline-block;
+    vertical-align: bottom;
+    padding-right: 10px;
+    font-family: 'linlivertine';
+    color: #231f20;
+    font-size: 28px;
+    font-style: italic;
+    font-weight: bold;
+    line-height: 24px;
+    padding-bottom: 2px;
+}
+
+.col-8 {
+    h2 {
+        margin-bottom: 25px !important;
+    }
+    p span {
+        font-weight: bold;
+    }
+}

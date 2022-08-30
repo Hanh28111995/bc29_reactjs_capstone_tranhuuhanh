@@ -22,7 +22,7 @@ export default function MovieList() {
       );
     });
     setMovieShowList(PhimDangChieu);
-    console.log(PhimDangChieu)
+    // console.log(PhimDangChieu)
   },[movieList])
 
   const FilterMovie1 = () =>{
@@ -54,12 +54,12 @@ export default function MovieList() {
           > 
           <div className="overlay"> 
             <button className="btn-more-infor" 
-                onClick={() => navigate(`/movie/${ele.maPhim}`)}
+                onClick={() => navigate(`/movie/detail/${ele.maPhim}`)}
               >
                 CHI TIẾT
               </button>
               <button className="btn-more-infor" 
-                onClick={() => navigate(`/movie/${ele.maPhim}`)}
+                onClick={() => navigate(`/movie/selectT/${ele.maPhim}`)}
               >
                 ĐẶT VÉ
               </button>

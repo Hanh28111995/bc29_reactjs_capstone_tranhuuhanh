@@ -10,13 +10,9 @@ import {
   Select
 } from "antd";
 import React, { useEffect, useState } from "react";
-import moment from "moment";
 import { HOUR } from "constants/common";
-import { useNavigate, useParams } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
-import { fetchMovieDetailAPI } from "services/movie";
-import { addMovieUploadImage } from "services/movie";
-import { updateMovieUploadImage } from "services/movie";
 import { HethongrapListApi } from "services/showtime";
 import { HethongrapCumrapListApi } from "services/showtime";
 import { taoLichChieuApi } from "services/showtime";
@@ -24,8 +20,6 @@ const { Option } = Select;
 
 export default function ShowTimeForm() {
   const [componentSize, setComponentSize] = useState("default");
-  const [img, setImg] = useState();
-  const [file, setFile] = useState();
   // const navigate = useNavigate();
   const [form] = Form.useForm();
   const params = useParams();
@@ -43,11 +37,11 @@ export default function ShowTimeForm() {
   const [option3, setOption3] = useState();
   const [moreOption, setmoreOption] = useState();
 
-  const { state: Hethongrap =[] } = useAsync({
+  const { state: Hethongrap = [] } = useAsync({
     service: () => HethongrapListApi(),
     dependencies: [],
   })
-  const { state: Cumrap =[] } = useAsync({
+  const { state: Cumrap = [] } = useAsync({
     service: () => HethongrapCumrapListApi(moreOption),
     dependencies: [moreOption],
   })
@@ -57,54 +51,35 @@ export default function ShowTimeForm() {
   const ThoigianChild = [];
 
   useEffect(() => {
-      for (let i = 0; i < Hethongrap.length; i++) {
-        HethongrapChild.push(<Option key={i + 1} value={Hethongrap[i].maHeThongRap}>{Hethongrap[i].tenHeThongRap}</Option>);
+    for (let i = 0; i < Hethongrap.length; i++) {
+      HethongrapChild.push(<Option key={i + 1} value={Hethongrap[i].maHeThongRap}>{Hethongrap[i].tenHeThongRap}</Option>);
       setOption1(HethongrapChild);
     }
     for (let i = 0; i < HOUR.length; i++) {
       ThoigianChild.push(<Option key={i + 1} value={HOUR[i]}>{HOUR[i]}</Option>);
-  }
+    }
     setOption3(ThoigianChild);
   }, [Hethongrap]);
 
-  useEffect(()=>{
+  useEffect(() => {
     for (let i = 0; i < Cumrap.length; i++) {
       CumrapChild.push(<Option key={i + 1} value={Cumrap[i].maCumRap}>{Cumrap[i].tenCumRap}</Option>);
-      setOption2(CumrapChild); }  
-  },[Cumrap]);
+      setOption2(CumrapChild);
+    }
+  }, [Cumrap]);
 
   const handleSave = async (values) => {
     values.ngayChieu = values.ngayChieu.format("DD/MM/YYYY");
     const maPhim = params.movieId;
-    const ngayChieuGioChieu = values.ngayChieu +" "+values.gioChieu;
+    const ngayChieuGioChieu = values.ngayChieu + " " + values.gioChieu;
     const maRap = values.cumRapChieu;
     const giaVe = values.giaVe;
-    const data = {maPhim, ngayChieuGioChieu, maRap, giaVe};
+    const data = { maPhim, ngayChieuGioChieu, maRap, giaVe };
     console.log(data);
     await taoLichChieuApi(data);
     notification.success({
-          description: "Successfully !",
-        });
-
-      // values.ngayKhoiChieu = values.ngayKhoiChieu.format("DD/MM/YYYY");
-    //   values.maNhom = GROUP_ID;
-    //   const formData = new FormData();
-    //   for (const key in values) {
-    //     formData.append(key, values[key]);
-    //   }
-    //   file && formData.append("File", file, file.name);
-    //   params.movieId && formData.append("maPhim", params.movieId);
-    //   console.log(values);
-    //   if (params.movieId) {
-    //     await updateMovieUploadImage(formData);
-    //   } else {
-    //     await addMovieUploadImage(formData);
-    //   }
-
-    //   notification.success({
-    //     description: "Successfully !",
-    //   });
-    //   navigate("/admin/movie-management");
+      description: "Successfully !",
+    });
   };
 
   const uploadAddress = (value) => {
@@ -124,8 +99,8 @@ export default function ShowTimeForm() {
       initialValues={{
         maHeThongRap: undefined,
         cumRapChieu: undefined,
-        giaVe:"",
-        gioChieu:undefined,
+        giaVe: "",
+        gioChieu: undefined,
         ngayChieu: "",
       }}
       onFinish={handleSave}
@@ -145,7 +120,7 @@ export default function ShowTimeForm() {
       </Form.Item>
       <Form.Item label="Cụm rạp" name="cumRapChieu">
         <Select placeholder="Select Address" >
-        {option2}
+          {option2}
         </Select>
       </Form.Item>
       <Form.Item label="Ngày chiếu" name="ngayChieu">
@@ -153,19 +128,12 @@ export default function ShowTimeForm() {
       </Form.Item>
       <Form.Item label="Giờ chiếu" name="gioChieu">
         <Select placeholder="Select Time" >
-        {option3}
+          {option3}
         </Select>
       </Form.Item>
       <Form.Item label="Giá vé" name="giaVe"  >
-        <Input placeholder="VND"/>
+        <Input placeholder="VND" />
       </Form.Item>
-    
-     {/* <Form.Item label="Giá vé" name="danhGia">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Chức năng" name="tenPhim">
-        <Select />
-      </Form.Item> */}
 
       <Form.Item className="mt-2">
         <Button htmlType="sumbit" type="prymary">

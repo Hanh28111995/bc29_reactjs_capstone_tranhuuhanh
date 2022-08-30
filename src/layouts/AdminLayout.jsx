@@ -4,7 +4,7 @@ import {
 } from "@ant-design/icons";
 import { NavLink, Route, useLocation, } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Image } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 const { Header, Content, Footer, Sider } = Layout;
 

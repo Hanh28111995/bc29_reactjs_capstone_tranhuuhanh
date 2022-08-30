@@ -69,6 +69,10 @@ code {
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
+  font-size: 12px;
+  border-radius: 5px;
+  margin: 5px;
+  outline: none !important;
 }
 .btn-more-infor:hover 
 {
@@ -111,18 +115,17 @@ h4 {
 .card:hover .overlay {
   opacity: 1;
 }
-.TitleCarousel
-{
+.TitleCarousel {
   background: #231f20;
   height: 40px;
   display: flex;
- justify-content: center;
-}
-.TitleCarousel ul {
-  align-items: center;
-    display: flex;
-}
-.TitleCarousel ul p {
+  justify-content: center;
   color: aliceblue;
-  font-weight: bold;
+  font-weight: normal;
+  margin-bottom: 0;
+  align-items: center;
+  
+}
+.TitleCarousel p {
+  margin-bottom: 0;
 }

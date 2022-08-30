@@ -10,16 +10,18 @@ import PageNotFound from "pages/PageNotFound/PageNotFound";
 import React, { lazy } from "react";
 
 import { useRoutes, Navigate } from "react-router-dom";
-const Booking = lazy(()=> import( "pages/booking/Booking"));
-const Login = lazy(()=> import( "pages/login/Login"));
-const MovieManagement = lazy(()=> import( "pages/movie-management/MovieManagement"));
-const AdminGuards = lazy(()=> import( "guards/admin.guards"));
-const AuthGuards = lazy(()=> import( "guards/auth.guards"));
-const NoAuthGuards = lazy(()=> import( "guards/no-auth.guards"));
-const AdminLayout = lazy(()=> import( "../layouts/AdminLayout"));
-const HomeLayout = lazy(()=> import("../layouts/HomeLayout"));
-const Home = lazy(()=> import("pages/home/Home"));
-const MovieDetail = lazy(()=> import("pages/movie-detail/MovieDetail"));
+import MovieTheater from "pages/MovieTheater/MovieTheater";
+import MovieDtail from "pages/movie-detail/MovieDtail";
+const Booking = lazy(() => import("pages/booking/Booking"));
+const Login = lazy(() => import("pages/login/Login"));
+const MovieManagement = lazy(() => import("pages/movie-management/MovieManagement"));
+const AdminGuards = lazy(() => import("guards/admin.guards"));
+const AuthGuards = lazy(() => import("guards/auth.guards"));
+const NoAuthGuards = lazy(() => import("guards/no-auth.guards"));
+const AdminLayout = lazy(() => import("../layouts/AdminLayout"));
+const HomeLayout = lazy(() => import("../layouts/HomeLayout"));
+const Home = lazy(() => import("pages/home/Home"));
+const MovieDetail = lazy(() => import("pages/movie-detail/MovieDetail"));
 
 export default function Router() {
   const routing = useRoutes([
@@ -32,8 +34,19 @@ export default function Router() {
           element: <Home />,
         },
         {
-          path: "/movie/:movieId",
+          path: "/movie/selectT/:movieId",
           element: <MovieDetail />,
+        },
+        {
+          path: "/movie/detail/:movieId",
+          element: <MovieDtail />,
+        },
+
+
+
+        {
+          path: "/movie-theater",
+          element: <MovieTheater />,
         },
         {
           path: "/",
@@ -63,44 +76,44 @@ export default function Router() {
       ],
     },
     {
-      path:"/admin",
-      element: <AdminLayout/>,
+      path: "/admin",
+      element: <AdminLayout />,
       children: [
         {
           path: '/admin/',
-          element:<AdminGuards/>,
+          element: <AdminGuards />,
           children: [
             {
               path: '/admin/',
-              element:<Navigate to='/admin/movie-management'/>,
+              element: <Navigate to='/admin/movie-management' />,
             },
             {
               path: '/admin/movie-management',
-              element:<MovieManagement/>,
+              element: <MovieManagement />,
             },
             {
               path: '/admin/user-management',
-              element:<UserManagement/>,
+              element: <UserManagement />,
             },
             {
               path: '/admin/movie-management/create',
-              element:<CreateMovie/>,
+              element: <CreateMovie />,
             },
             {
               path: '/admin/user-management/create',
-              element:<CreateUser/>,
+              element: <CreateUser />,
             },
             {
               path: '/admin/movie-management/:movieId/update',
-              element:<UpdateMovie/>,
+              element: <UpdateMovie />,
             },
             {
               path: '/admin/user-management/:tk/edit',
-              element:<EditUser/>,
+              element: <EditUser />,
             },
             {
               path: '/admin/movie-management/:movieId/edit-showtime',
-              element:<EditShowTime/>,
+              element: <EditShowTime />,
             },
           ]
         }
