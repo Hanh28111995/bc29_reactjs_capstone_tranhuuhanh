@@ -36,8 +36,8 @@ export default function Detail() {
   }, [movieDetail])
 
   return (
-    <div className="container w-80" >
-      <div className="row mt-3 mx-auto w-75">
+    <div className="container" >
+      <div className="row mt-3 mx-auto ">
         <div className="col-12">
 
           <div className="row">

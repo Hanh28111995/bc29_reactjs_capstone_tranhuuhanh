@@ -15,7 +15,31 @@
     h2 {
         margin-bottom: 25px !important;
     }
+
     p span {
         font-weight: bold;
     }
+}
+
+.icon_play {
+    position: absolute;
+    top: 230px ;
+    left: 50%;
+    transform: translateX(-50%);
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.ant-modal-content {
+    background-color: black !important;
+}
+
+.ant-modal-footer {
+    display: none !important;
+}
+
+.ant-modal-close {
+    color: white !important;
 }
