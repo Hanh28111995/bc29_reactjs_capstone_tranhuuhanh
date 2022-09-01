@@ -47,7 +47,7 @@ function MovieTheater() {
                     <div className='my-5'>
                         <table className='mx-auto' style={{ tableLayout: 'auto' ,width:'100%'}}>
                             <colgroup></colgroup>
-                            <thead className="ant-table-thead">
+                            <thead className="ant-table-thead" style={{backgroundColor: '#dad2b4'}}>
                                 <tr>
                                     <th className="ant-table-cell header-table" style={{width:'10%'}}>STT</th>
                                     <th className="ant-table-cell header-table" style={{width:'40%'}}>Tên rạp</th>

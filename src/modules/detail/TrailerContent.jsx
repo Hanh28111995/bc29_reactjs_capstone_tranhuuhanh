@@ -32,7 +32,7 @@ export default function TrailerContent() {
         let imgURL = '';
         if (movieDetail) {
             imgURL = (movieDetail.trailer)?.split('=');
-            if (imgURL) { setOption1(`https://i2.ytimg.com/vi/${imgURL[1]}/hqdefault.jpg`); }
+            if (imgURL) { setOption1(`https://i2.ytimg.com/vi/${imgURL[1]}/maxresdefault.jpg`); }
         }
     }, [movieDetail])
 
@@ -43,20 +43,21 @@ export default function TrailerContent() {
             </div>
             <div className="ant-row ant-row-center" style={{ backgroundColor: '#dad2b4' }}>
                 <div className="ant-col ant-col-16 text-center">
-                    <img src={option1} alt="" style={{ objectFit: 'fill', width: '85%', height: '600px' }} />
+                    <img src={option1} alt="" style={{ objectFit: 'cover', width: '85%', height: '600px' }} />
                     <img className="icon_play" src="/btnc_play.png" alt="image" onClick={showModal} />
                 </div>
             </div>
             <div className="TitleCarousel" style={{ marginBottom: 0 }}>
             </div>
             <Modal 
-                visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} centered={true}  >
+                visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} centered={true}  width={'70%'} height={800}>
                 <ReactPlayer
                     url={movieDetail.trailer}
                     playing={true}
                     controls={true}
                     className='mx-auto w-100'
-                    height={'80%'}
+                    width={800}
+                    height={500}
                 />
             </Modal>
         </div>

@@ -41,9 +41,6 @@ export default function Router() {
           path: "/movie/detail/:movieId",
           element: <MovieDtail />,
         },
-
-
-
         {
           path: "/movie-theater",
           element: <MovieTheater />,

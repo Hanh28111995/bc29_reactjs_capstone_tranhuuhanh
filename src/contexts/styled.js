@@ -7,10 +7,10 @@ export const WrapperSpin = styled.div`
   justify-content: center;
   align-items: center;
   position: absolute;
-  z-index: 1;
+  z-index: 100;
   background: #ffffffcc;
   // p {}
   @media screen and (max-width: 768px) {
-    background: red;
+    background: white;
   }
 `;
