@@ -86,7 +86,7 @@ function UserTable() {
     const keyword = value;  
     let DT = data.filter((ele) => {
       return (
-        removeVietnameseTones(ele.hoTen)
+        removeVietnameseTones(ele.taiKhoan)
           .toLowerCase()
           .trim()
           .indexOf(removeVietnameseTones(keyword).toLowerCase().trim()) !== -1
@@ -101,7 +101,7 @@ function UserTable() {
     <div className='text-left mb-3'>
     <Space direction="vertical" className='mb-3' style={{ width: "100%" }}>
         <Search
-          placeholder="User search "
+          placeholder="ID search "
           onSearch={onSearch}
         />
       </Space>
