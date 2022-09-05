@@ -82,7 +82,7 @@ const {state: showTimes =[]} = useAsync({
     });
   };
   return (
-    <div className="row">
+    <div className="row my-3">
       <div className="col-3">
         <div
           className="nav flex-column nav-pills"

@@ -5,6 +5,7 @@ import { LoaiGhe } from "../../enums/common";
 export default function Chair(props) {
   const [isSelected, setSelected] = useState(false);
   const populateClass = () => {
+
     let defaultClass = "ghe";
     if (props.item.loaiGhe === LoaiGhe.Vip) {
       defaultClass += " gheVip";
@@ -14,6 +15,9 @@ export default function Chair(props) {
     }
     if (props.item.daDat) {
       defaultClass += " daDat";
+    }
+    if ((props.idx >= 65) && (props.idx <= 80)) {
+      defaultClass += " mb-3";
     }
     return defaultClass;
   };

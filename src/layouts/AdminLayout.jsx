@@ -30,7 +30,7 @@ const items = [
     navigate(value.key);
   }
   const breadcrumb = pathname.split('/');
-  console.log(breadcrumb)
+  // console.log(breadcrumb)
   
   return (
     <Layout

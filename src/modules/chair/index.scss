@@ -3,13 +3,16 @@
     height: 35px;
     background: #ccc;
     margin: 3px;
-    &.gheVip{
+
+    &.gheVip {
         background-color: pink;
     }
-    &.dangDat{
+
+    &.dangDat {
         background-color: yellow;
     }
-    &.daDat{
+
+    &.daDat {
         cursor: not-allowed;
         background-color: gray;
     }

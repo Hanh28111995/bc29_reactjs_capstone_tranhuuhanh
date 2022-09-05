@@ -1,21 +1,24 @@
 import React from 'react';
-import Detail from 'modules/detail/Detail';
 import ShowTime from 'modules/showTime/ShowTime';
+import DetailCopy from 'modules/detail/Detail copy';
+import "./index.scss";
 
 export default function MovieDetail() {
   return (
-    <div className="py-5">
-      <div className="container">
-        <div className="row">
-          <div className="col-12">
-            <Detail />
-          </div>
-          <div className="col-12 mt-5">
-            <ShowTime />
-          </div>
-        </div>
+    <div>
+      <div className="calendar">
+        {/* .noDate 비활성 / .sat 토요일 / .sun 일요일 / */}
+        <a href="javascript:void(0);" className="month-picker-nav prev nodata" title="Ngày trước">{/*이전*/}</a>
+        <fieldset className="month-picker-fieldset">
+          <div className="calendarArea"><input type="radio" name="day" defaultValue={20220901} id="September1" /><label htmlFor="September1" className="month-picker-label sun ckon" style={{ left: 0 }}><span>Năm</span><em>1</em></label><input type="radio" name="day" defaultValue={20220902} id="September2" /><label htmlFor="September2" className="month-picker-label sun" style={{ left: 120 }}><span>Sáu</span><em>2</em></label><input type="radio" name="day" defaultValue={20220903} id="September3" /><label htmlFor="September3" className="month-picker-label sat" style={{ left: 240 }}><span>Bảy</span><em>3</em></label><input type="radio" name="day" defaultValue={20220904} id="September4" /><label htmlFor="September4" className="month-picker-label sun" style={{ left: 360 }}><span>CN</span><em>4</em></label><input type="radio" name="day" defaultValue={20220905} id="September5" /><label htmlFor="September5" className="month-picker-label" style={{ left: 480 }}><span>Hai</span><em>5</em></label><input type="radio" name="day" defaultValue={20220906} id="September6" /><label htmlFor="September6" className="month-picker-label" style={{ left: 600 }}><span>Ba</span><em>6</em></label><input type="radio" name="day" defaultValue={20220907} id="September7" /><label htmlFor="September7" className="month-picker-label" style={{ left: 720 }}><span>Tư</span><em>7</em></label><input type="radio" name="day" defaultValue={20220908} id="September8" /><label htmlFor="September8" className="month-picker-label" style={{ left: 840 }}><span>Năm</span><em>8</em></label><input type="radio" name="day" defaultValue={20220909} id="September9" /><label htmlFor="September9" className="month-picker-label" style={{ left: 960 }}><span>Sáu</span><em>9</em></label><input type="radio" name="day" defaultValue={20220910} id="September10" disabled="disabled" /><label htmlFor="September10" className="month-picker-label noDate sat" style={{ left: 1080 }}><span>Bảy</span><em>10</em></label><input type="radio" name="day" defaultValue={20220911} id="September11" disabled="disabled" /><label htmlFor="September11" className="month-picker-label noDate sun" style={{ left: 1200 }}><span>CN</span><em>11</em></label><input type="radio" name="day" defaultValue={20220912} id="September12" disabled="disabled" /><label htmlFor="September12" className="month-picker-label noDate" style={{ left: 1320 }}><span>Hai</span><em>12</em></label><input type="radio" name="day" defaultValue={20220913} id="September13" disabled="disabled" /><label htmlFor="September13" className="month-picker-label noDate" style={{ left: 1440 }}><span>Ba</span><em>13</em></label><input type="radio" name="day" defaultValue={20220914} id="September14" disabled="disabled" /><label htmlFor="September14" className="month-picker-label noDate" style={{ left: 1560 }}><span>Tư</span><em>14</em></label><input type="radio" name="day" defaultValue={20220915} id="September15" disabled="disabled" /><label htmlFor="September15" className="month-picker-label noDate" style={{ left: 1680 }}><span>Năm</span><em>15</em></label><input type="radio" name="day" defaultValue={20220916} id="September16" disabled="disabled" /><label htmlFor="September16" className="month-picker-label noDate" style={{ left: 1800 }}><span>Sáu</span><em>16</em></label><input type="radio" name="day" defaultValue={20220917} id="September17" disabled="disabled" /><label htmlFor="September17" className="month-picker-label noDate sat" style={{ left: 1920 }}><span>Bảy</span><em>17</em></label><input type="radio" name="day" defaultValue={20220918} id="September18" disabled="disabled" /><label htmlFor="September18" className="month-picker-label noDate sun" style={{ left: 2040 }}><span>CN</span><em>18</em></label><input type="radio" name="day" defaultValue={20220919} id="September19" disabled="disabled" /><label htmlFor="September19" className="month-picker-label noDate" style={{ left: 2160 }}><span>Hai</span><em>19</em></label><input type="radio" name="day" defaultValue={20220920} id="September20" disabled="disabled" /><label htmlFor="September20" className="month-picker-label noDate" style={{ left: 2280 }}><span>Ba</span><em>20</em></label><input type="radio" name="day" defaultValue={20220921} id="September21" disabled="disabled" /><label htmlFor="September21" className="month-picker-label noDate" style={{ left: 2400 }}><span>Tư</span><em>21</em></label><input type="radio" name="day" defaultValue={20220922} id="September22" disabled="disabled" /><label htmlFor="September22" className="month-picker-label noDate" style={{ left: 2520 }}><span>Năm</span><em>22</em></label><input type="radio" name="day" defaultValue={20220923} id="September23" /><label htmlFor="September23" className="month-picker-label" style={{ left: 2640 }}><span>Sáu</span><em>23</em></label><input type="radio" name="day" defaultValue={20220924} id="September24" disabled="disabled" /><label htmlFor="September24" className="month-picker-label noDate sat" style={{ left: 2760 }}><span>Bảy</span><em>24</em></label><input type="radio" name="day" defaultValue={20220925} id="September25" disabled="disabled" /><label htmlFor="September25" className="month-picker-label noDate sun" style={{ left: 2880 }}><span>CN</span><em>25</em></label><input type="radio" name="day" defaultValue={20220926} id="September26" disabled="disabled" /><label htmlFor="September26" className="month-picker-label noDate" style={{ left: 3000 }}><span>Hai</span><em>26</em></label><input type="radio" name="day" defaultValue={20220927} id="September27" disabled="disabled" /><label htmlFor="September27" className="month-picker-label noDate" style={{ left: 3120 }}><span>Ba</span><em>27</em></label><input type="radio" name="day" defaultValue={20220928} id="September28" disabled="disabled" /><label htmlFor="September28" className="month-picker-label noDate" style={{ left: 3240 }}><span>Tư</span><em>28</em></label></div>
+          <span className="month" style={{ top: '-47px', left: 47 }}><em>9</em><span>2022 September</span></span></fieldset>
+        <a href="javascript:void(0);" className="month-picker-nav next" title="Ngày tiếp theo">{/*다음*/}</a>
+      </div>
+
+      <div className="py-3 container">
+        <DetailCopy />
+        <ShowTime />
       </div>
     </div>
-
   )
 }

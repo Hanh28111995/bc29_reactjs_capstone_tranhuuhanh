@@ -3,9 +3,7 @@ import {
   DatePicker,
   Form,
   Input,
-  InputNumber,
   Radio,
-  Switch,
   notification,
   Select
 } from "antd";
@@ -35,7 +33,7 @@ export default function ShowTimeForm() {
   const [option1, setOption1] = useState();
   const [option2, setOption2] = useState();
   const [option3, setOption3] = useState();
-  const [moreOption, setmoreOption] = useState();
+  const [moreOption, setmoreOption] = useState('');
 
   const { state: Hethongrap = [] } = useAsync({
     service: () => HethongrapListApi(),
@@ -44,6 +42,7 @@ export default function ShowTimeForm() {
   const { state: Cumrap = [] } = useAsync({
     service: () => HethongrapCumrapListApi(moreOption),
     dependencies: [moreOption],
+    codintion : moreOption,
   })
 
   const HethongrapChild = [];
