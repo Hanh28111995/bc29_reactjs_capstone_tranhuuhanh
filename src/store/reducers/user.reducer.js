@@ -6,6 +6,10 @@ if(userInfor)
 {
     userInfor = JSON.parse(userInfor);
 }
+else
+{
+  userInfor ='';
+}
 const DEFAULT_STATE = {
   userInfor: userInfor,
 };
