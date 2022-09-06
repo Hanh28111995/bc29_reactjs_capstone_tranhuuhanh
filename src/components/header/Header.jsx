@@ -13,6 +13,7 @@ export default function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  
   const handleLogout = () => {
     localStorage.removeItem(USER_INFO_KEY);
     dispatch(setUserInfoAction(null));
@@ -21,7 +22,7 @@ export default function Header() {
 
   const { state: userDetail = [] } = useAsync({
     service: () => userDetailApi(userState.userInfor.taiKhoan),
-    dependencies: [userState.userInfor],
+    dependencies: [],
     codintion: userState.userInfor ,
   });
   console.log(userState.userInfor)

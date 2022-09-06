@@ -27,10 +27,11 @@ export default function Login() {
     const result = await loginAPI(state);
     localStorage.setItem(USER_INFO_KEY, JSON.stringify(result.data.content));
     dispatch(setUserInfoAction(result.data.content));
-    navigate("/");
     notification.success({
       description: ` Log in success`,
     })
+    navigate("/");
+    window.location.reload()
     }
     catch (err) {
       notification.warning({
