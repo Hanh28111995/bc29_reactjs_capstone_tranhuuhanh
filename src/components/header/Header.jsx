@@ -3,9 +3,10 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { USER_INFO_KEY } from "../../constants/common";
 import { setUserInfoAction } from "../../store/actions/user.action";
-import "./index.scss";
 import { useAsync } from "hooks/useAsync";
 import { userDetailApi } from "services/user";
+import "./index.scss";
+
 
 export default function Header() {
   const userState = useSelector((state) => state.userReducer);
@@ -21,9 +22,9 @@ export default function Header() {
   const { state: userDetail = [] } = useAsync({
     service: () => userDetailApi(userState.userInfor.taiKhoan),
     dependencies: [userState.userInfor],
-    codintion: userState.userInfor,
+    codintion: userState.userInfor ,
   });
-
+  console.log(userState.userInfor)
   let render_card1 =
     userDetail.thongTinDatVe?.map(ele => {
       return [
@@ -138,7 +139,7 @@ export default function Header() {
         <div className="collapse navbar-collapse " id="collapsibleNavId">
           <ul className="navbar-nav mx-auto mt-2 mt-lg-0">
             <li className="nav-item ">
-              <NavLink className={((pathname.includes('/movie/')) || (pathname == '/')) ? 'nav-link nav-header active' : 'nav-link nav-header inactive'} to="/" >
+              <NavLink className={((pathname.includes('/movie/')) || (pathname === '/')) ? 'nav-link nav-header active' : 'nav-link nav-header inactive'} to="/" >
                 PHIM
               </NavLink>
             </li>

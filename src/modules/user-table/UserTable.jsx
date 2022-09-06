@@ -92,7 +92,7 @@ function UserTable() {
           .indexOf(removeVietnameseTones(keyword).toLowerCase().trim()) !== -1
       );
     });
-    console.log(DT);
+    // console.log(DT);
     setuserlist(DT);
   }
 

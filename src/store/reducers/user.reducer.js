@@ -8,10 +8,10 @@ if(userInfor)
 }
 else
 {
-  userInfor ='';
+  userInfor = undefined;
 }
 const DEFAULT_STATE = {
-  userInfor: userInfor,
+  userInfor,
 };
 export const userReducer = (state = DEFAULT_STATE, { type, payload }) => {
   switch (type) {

@@ -4,6 +4,7 @@ import { useNavigate} from "react-router-dom";
 import { USER_INFO_KEY } from "../../constants/common";
 import { loginAPI } from "services/user";
 import { setUserInfoAction } from "../../store/actions/user.action";
+import { notification } from "antd";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -22,11 +23,20 @@ export default function Login() {
   } 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    try{
     const result = await loginAPI(state);
-    console.log(result);
     localStorage.setItem(USER_INFO_KEY, JSON.stringify(result.data.content));
     dispatch(setUserInfoAction(result.data.content));
     navigate("/");
+    notification.success({
+      description: ` Log in success`,
+    })
+    }
+    catch (err) {
+      notification.warning({
+        description: `${err.response.data.content}`,
+      });
+     }
   } 
   return (
     <form className="w-25 mx-auto my-5" onSubmit={handleSubmit}>
