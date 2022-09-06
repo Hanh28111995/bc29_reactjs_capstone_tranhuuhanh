@@ -2,10 +2,12 @@
     color: red !important;
 }
 
-ul li {
-    margin-left: 20px;
-    font-size: 14px;
-    font-weight: bold;
+.navbar-collapse {
+    ul li {
+        margin-left: 20px;
+        font-size: 14px;
+        font-weight: bold;
+    }
 }
 
 .nav-header {
@@ -40,6 +42,7 @@ ul li {
 
 #showCartBtn {
     position: relative;
+
     .numCartItem {
         text-align: center;
         padding-top: 1px;

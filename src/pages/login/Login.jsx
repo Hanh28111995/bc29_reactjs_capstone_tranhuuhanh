@@ -31,7 +31,7 @@ export default function Login() {
       description: ` Log in success`,
     })
     navigate("/");
-    window.location.reload()
+    // window.location.reload()
     }
     catch (err) {
       notification.warning({

@@ -22,10 +22,10 @@ export default function Header() {
 
   const { state: userDetail = [] } = useAsync({
     service: () => userDetailApi(userState.userInfor.taiKhoan),
-    dependencies: [],
+    dependencies: [userState.userInfor],
     codintion: userState.userInfor ,
   });
-  console.log(userState.userInfor)
+  
   let render_card1 =
     userDetail.thongTinDatVe?.map(ele => {
       return [

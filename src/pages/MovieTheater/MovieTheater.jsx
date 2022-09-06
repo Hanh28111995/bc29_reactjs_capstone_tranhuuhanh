@@ -29,7 +29,7 @@ function MovieTheater() {
     const Nav_Hethongrap1 = () => {
         return Hethongrap.map((ele, index) => {
             return (
-                <li key={index} className="nav-item " onClick={() => uploadAddress(ele.maHeThongRap)} style={{width:'8%'}}>
+                <li key={index} className="nav-item col-4 col-md-2 col-lg-2" onClick={() => uploadAddress(ele.maHeThongRap)} >
                     <a className={`nav-link nav-theater ${index === 0 && "active"}`} data-toggle="pill" href={'#' + ele.maHeThongRap}>{ele.maHeThongRap}</a>
                 </li>
             )
@@ -39,7 +39,7 @@ function MovieTheater() {
     const Nav_Hethongrap2 = () => {
         return Hethongrap.map((ele, index) => {
             return (
-                <div key={ele.maHeThongRap} id={ele.maHeThongRap} className={`container container-fix tab-pane ${index === 0 && "active"}`}>
+                <div key={ele.maHeThongRap} id={ele.maHeThongRap} className={`tab-pane ${index === 0 && "active"}`}>
                     {/* <h3>{ele.maHeThongRap}</h3> */}
                     <div className='text-center'>
                         <img src={banner_theater[index]} width={'100%'} height="525px" alt="" />
@@ -74,10 +74,10 @@ function MovieTheater() {
     }
 
     return (
-        <div className="" >
+        <div className="container px-0" >
             {/* Nav pills */}
             <div className='my-4' width="100%">
-                <ul className="nav nav-pills list-theater" style={{width:'100%'}} role="tablist">
+                <ul className="nav nav-pills list-theater text-center mx-auto row" style={{width:'100%'}} role="tablist">
                     {Nav_Hethongrap1()}
                 </ul>
             </div>
