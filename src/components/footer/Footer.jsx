@@ -77,22 +77,22 @@ export default function Footer() {
             <div className="row">
               <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <a href="/">
-                  <img src='/BHD_Cinema.png' alt="BHD Cinema" className="loading" data-was-processed="true" />
+                  <img src='/BHD_Cinema.png' alt="BHD Cinema" className="loading" data-was-processed="true" style={{width:'100px'}}/>
                 </a>
                 <a href="/">
-                  <img src="https://www.cgv.vn/skin/frontend/cgv/default/images/cgvlogo.png" alt="CGV Cinema" className="loading" data-was-processed="true" />
+                  <img src="https://www.cgv.vn/skin/frontend/cgv/default/images/cgvlogo.png" alt="CGV Cinema" className=" col-md-2" data-was-processed="true" style={{width:'80px'}}/>
                 </a>
                 <a href="/">
-                  <img src="https://cinestar.com.vn/pictures/cache/moi/9Logo/trang-100x100.png" alt="Cinestar Cinema" className="loading" data-was-processed="true" />
+                  <img src="https://cinestar.com.vn/pictures/cache/moi/9Logo/trang-100x100.png" alt="Cinestar Cinema" className=" col-md-2" data-was-processed="true" style={{width:'110px'}}/>
                 </a>
                 <a href="/">
-                  <img src="https://www.galaxycine.vn/website/images/galaxy-logo.png" alt="Galaxy Cinema" className="loading" data-was-processed="true" />
+                  <img src="https://www.galaxycine.vn/website/images/galaxy-logo.png" alt="Galaxy Cinema" className=" col-md-2" data-was-processed="true" style={{width:''}}/>
                 </a>
                 <a href="/">
-                  <img src="https://www.lottecinemavn.com/LCHS/Image/logo_footer.gif?v=17111301" alt="Lotte Cinema" className="loading" data-was-processed="true" />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Lotte_Logo_%282017%29.svg/1920px-Lotte_Logo_%282017%29.svg.png?20220405153618" alt="Lotte Cinema" className=" col-md-2" data-was-processed="true" style={{width:'130px'}}/>
                 </a>
                 <a href="/">
-                  <img src="https://www.megagscinemas.vn/images/home/logo.png" alt="MegaGS Cinema" className="loading" data-was-processed="true" />
+                  <img src="https://www.megagscinemas.vn/images/home/logo.png" alt="MegaGS Cinema" className=" col-md-2" data-was-processed="true" style={{width:''}}/>
                 </a>
                 
               </div>
