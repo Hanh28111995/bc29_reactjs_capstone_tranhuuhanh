@@ -5,7 +5,7 @@ let userInfor = localStorage.getItem(USER_INFO_KEY);
 if (userInfor) {
     userInfor = JSON.parse(userInfor);
 }
-console.log('debugger');
+// console.log('debugger');
 export const request = axios.create({
     headers:
     {
