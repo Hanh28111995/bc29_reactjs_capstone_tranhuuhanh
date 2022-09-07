@@ -1,0 +1,40 @@
+.footer {
+    background-color: #dad2b4 !important;
+
+    .footer-bg {
+        ul {
+            list-style-type: none;
+
+            a {
+                text-decoration: none;
+                color: gray;
+                i 
+                {
+                    font-size: 30px;
+                    margin-left: 10px;
+                }
+            }
+        }
+
+    }
+
+    .footer-bottom {
+        border-top: solid 1px whitesmoke;
+        margin: auto;
+
+        .container-fluid {
+            .row {
+                .col-lg-6 {
+                    a {
+                        display: inline-flex;
+                    }
+
+                    align-items: center;
+                    display: flex;
+                    justify-content: space-around;
+                }
+            }
+
+        }
+    }
+}
