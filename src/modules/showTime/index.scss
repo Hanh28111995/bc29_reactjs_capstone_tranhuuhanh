@@ -1,0 +1,86 @@
+.ant-carousel {
+  .slick-next {
+    &::before {
+      content: '';
+    }
+  }
+
+  .slick-prev {
+    &::before {
+      content: '';
+    }
+  }
+}
+
+.table {
+  margin-bottom: 0px;
+
+  td {
+    cursor: pointer;
+  }
+
+  .yesterday {
+    color: gray !important;
+    pointer-events: none !important;
+  }
+
+  .today {
+    color: #fff !important;
+    position: relative;
+    z-index: 2;
+
+    &::after {
+      content: '';
+      position: absolute;
+      background-color: rgba(46, 46, 46, 0.8) !important;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      left: 50%;
+      bottom: 8px;
+      transform: translateX(-50%);
+      z-index: -1;
+    }
+  }
+  .active {
+    color: #fff;
+    position: relative;
+    z-index: 2;
+    &::after {
+      content: '';
+      position: absolute;
+      background-color: burlywood;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      left: 50%;
+      bottom: 8px;
+      transform: translateX(-50%) !important;
+      z-index: -1;
+    }
+  }
+  .inactive {
+    color: black;
+    position: relative;
+    z-index: 2;
+    &::after {
+      content: '';
+      position: absolute;
+      background-color: transparent;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      left: 50%;
+      bottom: 8px;
+      transform: translateX(-50%);
+      z-index: -1;
+    }
+  }
+}
+
+
+
+
+
+
+

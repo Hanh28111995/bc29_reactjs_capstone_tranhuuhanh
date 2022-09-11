@@ -1,5 +1,4 @@
 import { Row, Col } from 'antd';
-
 import React, { useEffect } from "react";
 import { Carousel as CarouselAntd } from "antd";
 import "antd/dist/antd.css";
@@ -26,11 +25,14 @@ const SampleNextArrow = props => {
         ...style,
         color: 'black',
         fontSize: '15px',
-        lineHeight: '1.5715'
+        lineHeight: '1.5715',
+        fontSize: '50px',
+        right: '-10px' ,
+        zIndex: '2' ,
       }}
       onClick={onClick}
     >
-      <RightOutlined />
+      <RightOutlined  />
     </div>
   )
 }
@@ -44,7 +46,10 @@ const SamplePrevArrow = props => {
         ...style,
         color: 'black',
         fontSize: '20px',
-        lineHeight: '1.5715'
+        lineHeight: '1.5715',
+        fontSize: '50px',
+        left: '-40px' ,
+        zIndex: '2' ,
       }}
       onClick={onClick}
     >
@@ -59,7 +64,7 @@ const settings = {
 }
 
 
-export default function CarouselArrows() {
+export default function Carousel() {
 
   const { state: banner = [] } = useAsync({
     dependencies: [],

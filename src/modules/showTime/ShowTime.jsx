@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchMovieShowTimesAPI } from "services/cinema";
-import moment from "moment";
-import { formatDate } from "../../utils/common";
+import { formatDate, formatDate1, formatDate2, formatDate3 } from "../../utils/common";
 import { useAsync } from "hooks/useAsync";
+import { useSelector } from "react-redux";
+import useCalendar from "hooks/useCalendar";
 
 export default function ShowTime() {
   const params = useParams();
-  // const [showTimes, setShowTimes] = useState({});
-
-const {state: showTimes =[]} = useAsync({
-  dependencies: [],
-  service:() =>  fetchMovieShowTimesAPI(params.movieId),
-})
+  const userState = useSelector((state) => state.userReducer);
+  const { todayFormatted } = useCalendar();
+  const { state: showTimes = [] } = useAsync({
+    dependencies: [],
+    service: () => fetchMovieShowTimesAPI(params.movieId),
+  })
+  let store_date = (userState.date||todayFormatted).replaceAll('-', '/');
+  console.log(store_date)
 
   // useEffect(() => {
   //   fetchMovieShowTimes();
@@ -23,7 +26,6 @@ const {state: showTimes =[]} = useAsync({
   //   setShowTimes(result.data.content);
   //   console.log("a",result)
   // };
-
 
   const renderTabs = () => {
     return showTimes?.heThongRapChieu?.map((ele, idx) => {
@@ -64,13 +66,15 @@ const {state: showTimes =[]} = useAsync({
                 <div className="col-12">
                   <div className="row">
                     {ele.lichChieuPhim.map((ele) => {
-                      return (
-                        <div key={ele.maLichChieu} className="col-3">
-                          <Link to={`/booking/${ele.maLichChieu}`}>
-                          {formatDate(ele.ngayChieuGioChieu)}
-                          </Link>
-                        </div>
-                      );
+                      // if (formatDate3(ele.ngayChieuGioChieu) === store_date) {
+                        return (
+                          <div key={ele.maLichChieu} className="col-3">
+                            <Link to={`/booking/${ele.maLichChieu}`}>
+                              {formatDate(ele.ngayChieuGioChieu)}
+                            </Link>
+                          </div>
+                        )
+                      // };
                     })}
                   </div>
                 </div>
@@ -81,6 +85,7 @@ const {state: showTimes =[]} = useAsync({
       );
     });
   };
+
   return (
     <div className="row my-3">
       <div className="col-3">
@@ -90,7 +95,7 @@ const {state: showTimes =[]} = useAsync({
           role="tablist"
           aria-orientation="vertical"
         >
-          {renderTabs()}
+          {(showTimes.heThongRapChieu?.length) ? (renderTabs()) : (<h3>Lịch chiếu không tồn tại</h3>)}
         </div>
       </div>
       <div className="col-9">

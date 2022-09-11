@@ -8,12 +8,13 @@ import { userDetailApi } from "services/user";
 import "./index.scss";
 
 
+
 export default function Header() {
   const userState = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  
+
   const handleLogout = () => {
     localStorage.removeItem(USER_INFO_KEY);
     dispatch(setUserInfoAction(null));
@@ -23,9 +24,9 @@ export default function Header() {
   const { state: userDetail = [] } = useAsync({
     service: () => userDetailApi(userState.userInfor.taiKhoan),
     dependencies: [userState.userInfor],
-    codintion: userState.userInfor ,
+    codintion: userState.userInfor,
   });
-  
+
   let render_card1 =
     userDetail.thongTinDatVe?.map(ele => {
       return [
@@ -53,33 +54,33 @@ export default function Header() {
   const render_in_cart =
     render_card.map((ele, index) => {
       return (
-        <>
-          <tr key={index}>
-            <td>{index + 1}</td>
-            <td>{ele[0]}</td>
-            <td>
-              {
-                ele.slice(2).map(item => {
-                  return (item[0] + [', '])
-                })
-              }
-            </td>
-            <td> {
-              ele.slice(2).map((item, index) => {
-                if (index === 0) {
-                  return item[1]
-                }
+
+        <tr key={index}>
+          <td>{index + 1}</td>
+          <td>{ele[0]}</td>
+          <td>
+            {
+              ele.slice(2).map(item => {
+                return (item[0] + [', '])
               })
-            }</td>
-            <td>{ele[1].toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}</td>
-          </tr>
-        </>
+            }
+          </td>
+          <td> {
+            ele.slice(2).map((item, index) => {
+              if (index === 0) {
+                return item[1]
+              }
+            })
+          }</td>
+          <td>{ele[1].toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}</td>
+        </tr>
+
       )
     })
 
   // console.log(render_card1, render_card2)
   return (
-    <>
+    < div >
       <div className="modal fade show" id="myModal" aria-modal="true" style={{ display: 'none' }}>
         <div className="modal-dialog modal-lg">
           <div className="modal-content">
@@ -106,7 +107,7 @@ export default function Header() {
                 </tbody>
                 <tfoot>
                   <tr>
-                    { (render_card1)&&(render_card2)&&
+                    {(render_card1) && (render_card2) &&
                       <td style={{ textAlign: 'right', fontWeight: 700 }} colSpan={6}>Total price: <span>{(render_card1[0][1] * render_card2[0].length).toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}</span></td>
                     }
                   </tr>
@@ -122,7 +123,7 @@ export default function Header() {
         </div>
       </div>
 
-      <nav className="navbar navbar-expand-lg navbar-light bg-light">
+      <nav className="navbar navbar-expand-lg navbar-light py-3">
         <a className="navbar-brand" href="/">
           <img src="https://cybersoft.edu.vn/wp-content/uploads/2017/03/MIN-OP1.png" alt="" style={{ height: '45px', marginLeft: '10%' }} />
         </a>
@@ -193,6 +194,6 @@ export default function Header() {
           )}
         </div>
       </nav>
-    </>
+    </div>
   );
 }

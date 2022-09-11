@@ -1,8 +1,15 @@
-import {SET_USER_INFO } from "../types/user.type";
+import {SET_USER_INFO ,SET_DATE } from "../types/user.type";
  const setUserInfoAction = (data) => {
     return {
         type: SET_USER_INFO,
         payload: data,
     }
  };
- export {setUserInfoAction}
+ const setDate = (date) => {
+    return {
+        type: SET_DATE,
+        payload: date,
+    }
+ };
+
+ export {setUserInfoAction, setDate}

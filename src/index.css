@@ -25,24 +25,6 @@ code {
   height: 65px;
 }
 
-.ant-carousel .slick-prev,
-.ant-carousel .slick-prev:focus,
-.ant-carousel .slick-prev:hover {
-  left: -40px !important;
-  z-index: 2 !important;
-  color: #231f20 !important;
-  font-size: 50px !important;
-}
-
-.ant-carousel .slick-next,
-.ant-carousel .slick-next:focus,
-.ant-carousel .slick-next:hover {
-  right: -10px !important;
-  z-index: 2 !important;
-  color: #231f20 !important;
-  font-size: 50px !important;
-}
-
 .ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
   color: #cdc197 !important;
   background: #231f20 !important;
@@ -128,4 +110,7 @@ h4 {
 }
 .TitleCarousel p {
   margin-bottom: 0;
+}
+.ant-col-16 {
+  max-width: 70%;
 }

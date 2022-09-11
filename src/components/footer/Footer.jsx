@@ -2,10 +2,11 @@ import React from 'react';
 import "./index.scss";
 
 export default function Footer() {
+ 
   return (
-    <div className="footer bg-light py-5 text-center">
+    <footer className="footer pb-3 text-center">
       <div className="footer-content">
-        <footer className="footer-bg">
+        {/* <footer className="footer-bg">
           <div className="container"><div className="row">
             <div style={{ zIndex: 2 }} className="col-lg-3 col-md-3 col-sm-6 col-xs-6">
               <ul className="m-0">
@@ -61,7 +62,7 @@ export default function Footer() {
               <div className="store">
                 <ul className="list-unstyled clear-margins">
                   <li className="widget-container widget_recent_news"><h4 className="title-widget">Download app</h4><div className="social-icons">
-                    <ul className="nomargin">{/*a(href='#{config.iosAppUrl}' target="_blank")*/}
+                    <ul className="nomargin">
                       <a href="#" target="_blank"><i class="fa-brands fa-apple"></i></a>
                       <a href="#" target="_blank"><i class="fa-brands fa-google-play"></i></a>
                     </ul>
@@ -73,31 +74,31 @@ export default function Footer() {
           </div>
           </div>
 
-        </footer>
+        </footer> */}
         <div className="footer-bottom">
           <div className="container-fluid">
             <div className="row col-12">
 
               <div className='col-12 col-lg-6'>
                 <a href="/" className=''>
-                  <img src='/BHD_Cinema.png' alt="BHD Cinema" className="img-fluid" style={{ width: '110px' }} />
+                  <img src='/BHD_Cinema.png' alt="BHD Cinema" className="img-fluid" style={{ width: '80px' }} />
                 </a>
                 <a href="/" className=''>
-                  <img src="https://www.cgv.vn/skin/frontend/cgv/default/images/cgvlogo.png" alt="CGV Cinema" className="img-fluid" style={{ width: '80px' }} />
+                  <img src="https://www.cgv.vn/skin/frontend/cgv/default/images/cgvlogo.png" alt="CGV Cinema" className="img-fluid" style={{ width: '50px' }} />
                 </a>
                 <a href="/" className=''>
-                  <img src="https://cinestar.com.vn/pictures/cache/moi/9Logo/trang-100x100.png" alt="Cinestar Cinema" className="img-fluid" style={{ width: '110px' }} />
+                  <img src="https://cinestar.com.vn/pictures/cache/moi/9Logo/trang-100x100.png" alt="Cinestar Cinema" className="img-fluid" style={{ width: '90px' }} />
                 </a>
               </div>
               <div className='col-12 col-lg-6'>
                 <a href="/" className=''>
-                  <img src="https://www.galaxycine.vn/website/images/galaxy-logo.png" alt="Galaxy Cinema" className="img-fluid" style={{ width: '190px' }} />
+                  <img src="https://www.galaxycine.vn/website/images/galaxy-logo.png" alt="Galaxy Cinema" className="img-fluid" style={{ width: '150px' }} />
                 </a>
                 <a href="/" className=''>
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Lotte_Logo_%282017%29.svg/1920px-Lotte_Logo_%282017%29.svg.png?20220405153618" alt="Lotte Cinema" className="img-fluid" style={{ width: '125px' }} />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Lotte_Logo_%282017%29.svg/1920px-Lotte_Logo_%282017%29.svg.png?20220405153618" alt="Lotte Cinema" className="img-fluid" style={{ width: '90px' }} />
                 </a>
                 <a href="/" className=''>
-                  <img src="/MegaGS.png" alt="MegaGS Cinema" className="img-fluid" style={{ width: '85px' }} />
+                  <img src="/MegaGS.png" alt="MegaGS Cinema" className="img-fluid" style={{ width: '50px' }} />
                 </a>
               </div>
 
@@ -106,6 +107,6 @@ export default function Footer() {
         </div>
       </div>
 
-    </div>
+    </footer>
   )
 }
