@@ -88,7 +88,7 @@ export default function Carousel() {
 
     <Row justify="center" >
       <Col span={16}>
-        <CarouselAntd arrows autoplay={true} {...settings}>
+        <CarouselAntd arrows autoplay={true} autoplaySpeed={2500} {...settings}>
           {bannerList}
         </CarouselAntd>
       </Col>
