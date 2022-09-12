@@ -104,7 +104,7 @@ export default function MovieForm() {
       <Form.Item label="Tên Phim" name="tenPhim" validateTrigger={['onBlur']}
         rules={[
           { required: true, message: ' Vui lòng nhập tên phim ' },
-          { pattern: '^[a-zA-Z_ÀÁÂÃÈÉÊẾÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶ" + "ẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểếệễỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỉịọỏốồổỗộớờởỡợ" + "ụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ" + "0-9"+"\\s]+$', message: 'Tên phim không hợp lệ ' },
+          { pattern: "^[a-zA-Z_ÀÁÂÃÈÉÊẾÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶ" + "ẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểếệễỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỉịọỏốồổỗộớờởỡợ" + "ộụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ" + "0-9"+"\\s]+$", message: 'Tên phim không hợp lệ ' },
         ]}
       >
         <Input />

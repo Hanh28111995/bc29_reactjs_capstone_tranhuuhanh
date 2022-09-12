@@ -31,8 +31,9 @@ export default function TrailerContent() {
     useEffect(() => {
         let imgURL = '';
         if (movieDetail) {
-            imgURL = (movieDetail.trailer)?.split('=');
-            if (imgURL) { setOption1(`https://i2.ytimg.com/vi/${imgURL[1]}/maxresdefault.jpg`); }
+            imgURL = (movieDetail.trailer)?.split('/');
+            console.log(imgURL)
+            if (imgURL) { setOption1(`https://i2.ytimg.com/vi/${imgURL[3]}/maxresdefault.jpg`); }
         }
     }, [movieDetail])
 

@@ -40,7 +40,9 @@ const items = [
     >
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
         <div className="logo" >
+          <a href="/">
           <Image  src="https://cybersoft.edu.vn/wp-content/uploads/2021/03/logo-cyber-nav.svg" width={100} preview={false} />
+          </a>
           </div>
         <Menu
         defaultSelectedKeys={['/admin/movie-management']}
