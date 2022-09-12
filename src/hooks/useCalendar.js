@@ -4,7 +4,7 @@ import { isEqual } from 'constants/common';
 
 
 const daysShortArr = [
-  'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+  'CN', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'
 ];
 
 const monthNamesArr = [

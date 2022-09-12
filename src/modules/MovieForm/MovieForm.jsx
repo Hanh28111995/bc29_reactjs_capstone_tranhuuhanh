@@ -18,7 +18,6 @@ import { fetchMovieDetailAPI } from "services/movie";
 import { addMovieUploadImage } from "services/movie";
 import { updateMovieUploadImage } from "services/movie";
 export default function MovieForm() {
-  const [componentSize, setComponentSize] = useState("default");
   const [img, setImg] = useState();
   const [file, setFile] = useState();
   const navigate = useNavigate();
@@ -42,9 +41,6 @@ export default function MovieForm() {
     }
   }, [movieDetail]);
 
-  const onFormLayoutChange = (event) => {
-    setComponentSize(event.target.value);
-  };
 
   const handleSave = async (values) => {
     values.ngayKhoiChieu = values.ngayKhoiChieu.format("DD/MM/YYYY");
@@ -103,15 +99,8 @@ export default function MovieForm() {
         // File: "",
       }}
       onFinish={handleSave}
-      size={componentSize}
+      size={'default'}
     >
-      <Form.Item label="Form Size">
-        <Radio.Group defaultValue={componentSize} onChange={onFormLayoutChange}>
-          <Radio.Button value="small">Small</Radio.Button>
-          <Radio.Button value="default">Default</Radio.Button>
-          <Radio.Button value="large">Large</Radio.Button>
-        </Radio.Group>
-      </Form.Item>
       <Form.Item label="Tên Phim" name="tenPhim" validateTrigger={['onBlur']}
         rules={[
           { required: true, message: ' Vui lòng nhập tên phim ' },

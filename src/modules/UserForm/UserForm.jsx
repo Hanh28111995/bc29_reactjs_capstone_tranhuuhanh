@@ -16,7 +16,6 @@ import { userDetailApi } from "services/user";
 import { updateUserApi } from "services/user";
 import { addUserApi } from "services/user";
 export default function UserForm() {
-  const [componentSize, setComponentSize] = useState("default");
   // const [img, setImg] = useState();
   // const [file, setFile] = useState();
   const navigate = useNavigate();
@@ -34,13 +33,8 @@ export default function UserForm() {
       form.setFieldsValue({
         ...userDetail,
       });
-      // setImg(movieDetail.hinhAnh);
     }
   }, [userDetail]);
-
-  const onFormLayoutChange = (event) => {
-    setComponentSize(event.target.value);
-  };
 
   const handleSave = async (values) => {
     values.maNhom = GROUP_ID;
@@ -71,16 +65,8 @@ export default function UserForm() {
         maLoaiNguoiDung: "",
       }}
       onFinish={handleSave}
-      size={componentSize}
+      size={"default"}
     >
-      <Form.Item label="Form Size">
-        <Radio.Group defaultValue={componentSize} onChange={onFormLayoutChange}>
-          <Radio.Button value="small">Small</Radio.Button>
-          <Radio.Button value="default">Default</Radio.Button>
-          <Radio.Button value="large">Large</Radio.Button>
-        </Radio.Group>
-
-      </Form.Item>
       <Form.Item label="Tài Khoản" name="taiKhoan">
         <Input disabled={userDetail} />
       </Form.Item>

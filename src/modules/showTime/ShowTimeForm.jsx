@@ -17,19 +17,10 @@ import { taoLichChieuApi } from "services/showtime";
 const { Option } = Select;
 
 export default function ShowTimeForm() {
-  const [componentSize, setComponentSize] = useState("default");
   // const navigate = useNavigate();
   const [form] = Form.useForm();
   const params = useParams();
-
-  // const { state: movieDetail } = useAsync({
-  //   service: () => fetchMovieDetailAPI(params.movieId),
-  //   dependencies: [params.movieId],
-  //   codintion: !!params.movieId,
-  // });
-  const onFormLayoutChange = (event) => {
-    setComponentSize(event.target.value);
-  };
+ 
   const [option1, setOption1] = useState();
   const [option2, setOption2] = useState();
   const [option3, setOption3] = useState();
@@ -103,15 +94,9 @@ export default function ShowTimeForm() {
         ngayChieu: "",
       }}
       onFinish={handleSave}
-      size={componentSize}
+      size={'default'}
     >
-      <Form.Item label="Form Size">
-        <Radio.Group defaultValue={componentSize} onChange={onFormLayoutChange}>
-          <Radio.Button value="small">Small</Radio.Button>
-          <Radio.Button value="default">Default</Radio.Button>
-          <Radio.Button value="large">Large</Radio.Button>
-        </Radio.Group>
-      </Form.Item>
+      
       <Form.Item label="Hệ thống rạp" name="maHeThongRap">
         <Select placeholder="Select Cinema" onChange={uploadAddress}>
           {option1}

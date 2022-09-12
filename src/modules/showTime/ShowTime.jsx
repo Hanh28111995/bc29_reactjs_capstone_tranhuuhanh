@@ -15,7 +15,7 @@ export default function ShowTime() {
     service: () => fetchMovieShowTimesAPI(params.movieId),
   })
   let store_date = (userState.date||todayFormatted).replaceAll('-', '/');
-  console.log(store_date)
+  // console.log(store_date)
 
   // useEffect(() => {
   //   fetchMovieShowTimes();

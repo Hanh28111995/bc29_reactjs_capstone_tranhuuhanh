@@ -120,8 +120,8 @@ const toggleActiveStyles = (index,idx) =>{
 
   return (
     <>
-      <span className="month" style={{ top: '-47px', left: 47 }}><em>{formatDate1(today)}</em><span>{formatDate2(today)}</span></span>
-      <Row justify="center mb-5" >
+      <span className="month" style={{ top: '-47px', left: 47 }}><em>{formatDate1(today)}</em><span>&nbsp;{formatDate2(today)}</span></span>
+      <Row justify="center" style={{ marginBottom: '4rem' }} >
         <Col span={16}>
           <CarouselAntd arrows autoplay={false} {...settings} dots={false}>
             {bannerList}

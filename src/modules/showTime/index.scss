@@ -42,10 +42,12 @@
       z-index: -1;
     }
   }
+
   .active {
     color: #fff;
     position: relative;
     z-index: 2;
+
     &::after {
       content: '';
       position: absolute;
@@ -59,10 +61,12 @@
       z-index: -1;
     }
   }
+
   .inactive {
     color: black;
     position: relative;
     z-index: 2;
+
     &::after {
       content: '';
       position: absolute;
@@ -78,9 +82,15 @@
   }
 }
 
-
-
-
-
-
-
+.month {
+  font-weight: bold;
+  em {
+    font-size: 34px;
+    margin: 0 15px 0 0;
+    border-bottom: 2px solid #231f20;
+    font-family: 'Linux Libertine';
+    color: #231f20;
+    font-weight: bold;
+    font-style: normal;
+  }
+}
