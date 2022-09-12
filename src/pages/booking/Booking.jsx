@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Chair from "modules/chair/Chair";
 import { bookingTicketAPI, fetchRoomListAPI } from "services/booking";
@@ -85,6 +85,12 @@ export default function Booking() {
           </button>
         </div>
         <div className="col-9 text-center my-auto mb-4">
+          <ul>
+            <li><span style={{backgroundColor:'burlywood'}}> &ensp;&ensp;</span>&ensp;Ghế VIP</li>
+            <li><span style={{backgroundColor:'#dad2b4'}}> &ensp;&ensp;</span>&ensp;Ghế trống</li>
+            <li><span style={{backgroundColor:'#856307'}}> &ensp;&ensp;</span>&ensp;Ghế đã đặt</li>
+            <li><span style={{backgroundColor:'mediumaquamarine'}}> &ensp;&ensp;</span>&ensp;Ghế được chọn</li>
+          </ul>
           <div className="screen mx-auto ">
             <h2 className="wthree">Screen this way</h2>
           </div>

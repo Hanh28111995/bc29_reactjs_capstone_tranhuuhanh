@@ -1,20 +1,20 @@
 .ghe {
     width: 35px;
     height: 35px;
-    background: #ccc;
+    background: #dad2b4;
     margin: 3px;
 
     &.gheVip {
-        background-color: pink;
+        background-color: burlywood;
     }
 
     &.dangDat {
-        background-color: yellow;
+        background-color: mediumaquamarine;
     }
 
     &.daDat {
         cursor: not-allowed;
-        background-color: gray;
+        background-color: #856307;
     }
 
 }
