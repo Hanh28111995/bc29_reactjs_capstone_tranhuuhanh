@@ -1,27 +1,28 @@
-import CreateMovie from "pages/CreateMovie/CreateMovie";
-import CreateUser from "pages/CreateUser/CreateUser";
-import EditShowTime from "pages/EditShowTime/EditShowTime";
-import EditUser from "pages/EditUser/EditUser";
-import Register from "pages/register/Register";
-import UpdateMovie from "pages/UpdateMovie/UpdateMovie";
-import UserManagement from "pages/user-management/UserManagement";
+import React, { lazy } from "react";
+import { useRoutes, Navigate } from "react-router-dom";
 import PageNotFound from "pages/PageNotFound/PageNotFound";
 
-import React, { lazy } from "react";
-
-import { useRoutes, Navigate } from "react-router-dom";
-import MovieTheater from "pages/MovieTheater/MovieTheater";
-import MovieDtail from "pages/movie-detail/MovieDtail";
-const Booking = lazy(() => import("pages/booking/Booking"));
 const Login = lazy(() => import("pages/login/Login"));
-const MovieManagement = lazy(() => import("pages/movie-management/MovieManagement"));
+const Register = lazy(() => import("pages/register/Register"));
 const AdminGuards = lazy(() => import("guards/admin.guards"));
 const AuthGuards = lazy(() => import("guards/auth.guards"));
 const NoAuthGuards = lazy(() => import("guards/no-auth.guards"));
+
 const AdminLayout = lazy(() => import("../layouts/AdminLayout"));
-const HomeLayout = lazy(() => import("../layouts/HomeLayout"));
+const MovieManagement = lazy(() => import("pages/movie-management/MovieManagement"));
+const UserManagement = lazy(() => import("pages/user-management/UserManagement"));
+const CreateMovie = lazy(() => import("pages/CreateMovie/CreateMovie"));
+const CreateUser = lazy(() => import("pages/CreateUser/CreateUser"));
+const EditShowTime = lazy(() => import("pages/EditShowTime/EditShowTime"));
+const EditUser = lazy(() => import("pages/EditUser/EditUser"));
+const UpdateMovie = lazy(() => import("pages/UpdateMovie/UpdateMovie"));
+
 const Home = lazy(() => import("pages/home/Home"));
+const HomeLayout = lazy(() => import("../layouts/HomeLayout"));
 const MovieDetail = lazy(() => import("pages/movie-detail/MovieDetail"));
+const MovieDtail = lazy(() => import("pages/movie-detail/MovieDtail"));
+const MovieTheater = lazy(() => import("pages/MovieTheater/MovieTheater"));
+const Booking = lazy(() => import("pages/booking/Booking"));
 
 export default function Router() {
   const routing = useRoutes([
