@@ -2,7 +2,7 @@ import {
   DesktopOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { NavLink, Route, useLocation, } from 'react-router-dom';
+import { useLocation, } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Image } from "antd";
 import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -18,20 +18,20 @@ function getItem(label, key, icon, children, type) {
   };
 }
 const items = [
-  getItem('Movie management', '/admin/movie-management', <DesktopOutlined/>),
+  getItem('Movie management', '/admin/movie-management', <DesktopOutlined />),
   getItem('User management', '/admin/user-management', <UserOutlined />),
 ]
 
- function AdminLayout() {
+function AdminLayout() {
   const navigate = useNavigate();
-  const {pathname} = useLocation();
+  const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const MenuClick =(value) => {
+  const MenuClick = (value) => {
     navigate(value.key);
   }
   const breadcrumb = pathname.split('/');
   // console.log(breadcrumb)
-  
+
   return (
     <Layout
       style={{
@@ -41,18 +41,18 @@ const items = [
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
         <div className="logo" >
           <a href="/">
-          <Image  src="https://cybersoft.edu.vn/wp-content/uploads/2021/03/logo-cyber-nav.svg" width={100} preview={false} />
+            <Image src="https://cybersoft.edu.vn/wp-content/uploads/2021/03/logo-cyber-nav.svg" width={100} preview={false} />
           </a>
-          </div>
+        </div>
         <Menu
-        defaultSelectedKeys={['/admin/movie-management']}
-        mode="inline"
-        theme="dark"
-        // inlineCollapsed={collapsed}
-        items={items}
-        selectedKeys={[pathname]}
-        onClick={MenuClick}
-      />
+          defaultSelectedKeys={['/admin/movie-management']}
+          mode="inline"
+          theme="dark"
+          // inlineCollapsed={collapsed}
+          items={items}
+          selectedKeys={[(pathname.includes('/admin/user-management') ? ('/admin/user-management') : ('/admin/movie-management') )]}
+          onClick={MenuClick}
+        />
       </Sider>
       <Layout className="site-layout">
         <Header
