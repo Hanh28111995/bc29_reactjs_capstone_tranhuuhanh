@@ -2,7 +2,7 @@ import { Space, Table, Input, Button, Image, } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useAsync } from "../../hooks/useAsync";
 import { fetchMovieListAPI } from "services/movie";
-import { formatDate, formatDate3 } from "../../utils/common";
+import { formatDate3 } from "../../utils/common";
 import { useNavigate } from 'react-router-dom';
 import { deleteMovieAPI } from 'services/movie';
 import { notification, } from 'antd';

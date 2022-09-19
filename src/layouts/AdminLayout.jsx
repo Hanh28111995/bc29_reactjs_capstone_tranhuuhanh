@@ -6,6 +6,8 @@ import { useLocation, } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Image } from "antd";
 import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
+import "./index.scss";
+
 const { Header, Content, Footer, Sider } = Layout;
 
 function getItem(label, key, icon, children, type) {

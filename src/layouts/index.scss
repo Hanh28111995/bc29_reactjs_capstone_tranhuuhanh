@@ -5,3 +5,11 @@
     width: 100%;
     min-width: 576px ;
 }
+.ant-layout, .ant-layout.ant-layout-has-sider
+{
+    width: auto !important;
+}
+.ant-layout-sider-trigger
+{
+    position: absolute !important; 
+}
