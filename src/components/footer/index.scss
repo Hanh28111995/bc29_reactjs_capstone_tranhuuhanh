@@ -1,5 +1,6 @@
+@import "./../../variable/variable";
 .footer {
-    background-color: #dad2b4 ;
+    background-color: $color-1 ;
 
     .footer-bg {
         ul {
@@ -7,10 +8,10 @@
 
             a {
                 text-decoration: none;
-                color: gray;
+                color: $color-2;
                 i 
                 {
-                    font-size: 30px;
+                    font-size: $fs-8;
                     margin-left: 10px;
                 }
             }
