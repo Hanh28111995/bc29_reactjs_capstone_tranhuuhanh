@@ -133,7 +133,7 @@ const useCalendar = (daysShort = daysShortArr, monthNames = monthNamesArr) => {
         }
 
       }
-      console.log(date_render_array_today[1], date_calendarRow[0])
+      // console.log(date_render_array_today[1], date_calendarRow[0])
 
       if (date_render_array_today[1] !== undefined)
         if (isEqual(date_render_array_today[1], date_calendarRow[0])) {

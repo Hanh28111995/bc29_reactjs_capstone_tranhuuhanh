@@ -6,6 +6,8 @@ import { setUserInfoAction } from "../../store/actions/user.action";
 import { useAsync } from "hooks/useAsync";
 import { userDetailApi } from "services/user";
 import "./index.scss";
+import { useEffect } from "react";
+import { useState } from "react";
 
 
 
@@ -27,32 +29,50 @@ export default function Header() {
     codintion: userState.userInfor,
   });
 
-  let render_card1 =
-    userDetail.thongTinDatVe?.map(ele => {
-      return [
-        ele.tenPhim,
-        ele.giaVe,
-      ]
-    })
-  let render_card2 =
-    userDetail.thongTinDatVe?.map(ele => {
-      return (ele.danhSachGhe.map(eles => {
-        return [
-          eles.tenGhe,
-          eles.tenHeThongRap,
-        ]
-      }))
-    })
-  let render_card = [];
-  if ((render_card1) && (render_card2)) {
-    for (let i = 0; i < render_card2.length; i++) {
-      render_card[i] = render_card1[i].concat(render_card2[i]);
+  const [render, setRender] = useState([]);
+  const [render1, setRender1] = useState([]);
+
+  useEffect(() => {
+    console.log(userState.userInfor? 'true': 'false')
+    if (userDetail.length !== 0) {
+      let render_card1 =
+        userDetail.thongTinDatVe?.map(ele => {
+          return [
+            ele.tenPhim,
+            ele.giaVe,
+          ]
+        })
+      let render_card2 =
+        userDetail.thongTinDatVe?.map(ele => {
+          return (ele.danhSachGhe.map(eles => {
+            return [
+              eles.tenGhe,
+              eles.tenHeThongRap,
+            ]
+          }))
+        })
+      let render_card = [];
+      if ((render_card1) && (render_card2)) {
+        for (let i = 0; i < render_card2.length; i++) {
+          render_card[i] = render_card1[i].concat(render_card2[i]);
+        }
+      }
+      setRender1(render_card1)
+      setRender(render_card)
     }
 
+  }, [userDetail])
+
+  const sumTotal = (x) => {
+    let total = 0;
+    x.map(ele => {
+      total += (ele[1] * (ele.length - 2));
+    })
+    return total
   }
-  // console.log(render_card)
+
   const render_in_cart =
-    render_card.map((ele, index) => {
+    render.map((ele, index) => {
       return (
 
         <tr key={index}>
@@ -101,15 +121,17 @@ export default function Header() {
                     <td />
                   </tr></thead>
                 <tbody >
-
                   {render_in_cart}
-
                 </tbody>
                 <tfoot>
                   <tr>
-                    {(render_card1) && (render_card2) &&
-                      <td style={{ textAlign: 'right', fontWeight: 700 }} colSpan={6}>Total price: <span>{(render_card1[0][1] * render_card2[0].length).toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}</span></td>
-                    }
+                    <td style={{ textAlign: 'right', fontWeight: 700 }} colSpan={6}>Total price:
+                      <span>{
+                        ' '+sumTotal(render).toLocaleString('it-IT', { style: 'currency', currency: 'VND' })
+                      }
+                      </span>
+                    </td>
+
                   </tr>
                 </tfoot>
               </table>
@@ -177,7 +199,7 @@ export default function Header() {
             <div className="ml-auto d-flex align-items-center justify-content-between pl-2" >
               <button className="btn mx-2" id="showCartBtn" data-toggle="modal" data-target="#myModal">
                 <i className="fa fa-shopping-cart" />
-                <p className="numCartItem">{render_card1?.length}</p>
+                <p className="numCartItem">{render1.length}</p>
               </button>
               <div style={{ fontSize: '12px', flexDirection: 'column' }}>
                 <button

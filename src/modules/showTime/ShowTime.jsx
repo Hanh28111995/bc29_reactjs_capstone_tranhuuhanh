@@ -17,9 +17,13 @@ export default function ShowTime() {
   let store_date = (userState.date||todayFormatted).replaceAll('-', '/');
   // console.log(store_date)
 
-  // useEffect(() => {
-  //   fetchMovieShowTimes();
-  // }, []);
+  useEffect(() => {
+    if(showTimes.length !== 0)
+    {
+      console.log(showTimes)
+    }
+    
+  }, [showTimes]);
 
   // const fetchMovieShowTimes = async () => {
   //   const result = await fetchMovieShowTimesAPI(params.movieId);

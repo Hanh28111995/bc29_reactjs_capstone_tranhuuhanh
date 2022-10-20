@@ -32,7 +32,6 @@ export default function TrailerContent() {
         let imgURL = '';
         if (movieDetail) {
             imgURL = (movieDetail.trailer)?.split('/');
-            console.log(imgURL)
             if (imgURL) { setOption1(`https://i2.ytimg.com/vi/${imgURL[3]}/maxresdefault.jpg`); }
         }
     }, [movieDetail])
