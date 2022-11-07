@@ -2,13 +2,13 @@ import React from 'react';
 import "./index.scss";
 
 export default function Footer() {
- 
+
   return (
     <footer className="footer pb-3 text-center">
       <div className="footer-content">
         <div className="footer-bottom">
           <div className="container-fluid">
-            <div className="row col-12">
+            <div className="row col-12" style={{ margin: '0', padding:'0'}}>
 
               <div className='col-12 col-lg-6'>
                 <a href="/" className=''>

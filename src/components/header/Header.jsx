@@ -33,7 +33,7 @@ export default function Header() {
   const [render1, setRender1] = useState([]);
 
   useEffect(() => {
-    console.log(userState.userInfor? 'true': 'false')
+    // console.log(userState.userInfor? 'true': 'false')
     if (userDetail.length !== 0) {
       let render_card1 =
         userDetail.thongTinDatVe?.map(ele => {

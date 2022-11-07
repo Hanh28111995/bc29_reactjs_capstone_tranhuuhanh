@@ -42,7 +42,8 @@ export default function MovieList() {
             className="card movie-card"
             style={{ marginBottom: 20, height: 450 }}
           >
-            <div className="overlay">
+            <div className="overlay"></div>
+            <div className="btn-cover">
               <button className="btn-more-infor"
                 onClick={() => navigate(`/movie/detail/${ele.maPhim}`)}
               >
