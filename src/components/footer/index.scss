@@ -39,3 +39,12 @@
         }
     }
 }
+
+@media screen and (max-width: 576px) {
+    .footer-content .footer-bottom {
+        img {
+            width: 50px !important;
+            align-self: flex-start;
+        }
+    }
+}
