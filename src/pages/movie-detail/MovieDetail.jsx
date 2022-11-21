@@ -9,7 +9,7 @@ export default function MovieDetail() {
     <div className="py-3 container detailPage" style={{ flex: '1' }}>
       <DetailCopy />
       <Calendar />
-      {/* <ShowTime /> */}
+      <ShowTime />
     </div>
   )
 }
