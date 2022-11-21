@@ -22,8 +22,8 @@ const SampleNextArrow = props => {
         color: 'black',
         fontSize: '15px',
         lineHeight: '1.5715',
-        right: '-50px' ,
-        zIndex: '2' ,
+        right: '-50px',
+        zIndex: '2',
       }}
       onClick={onClick}
     >
@@ -42,8 +42,8 @@ const SamplePrevArrow = props => {
         color: 'black',
         fontSize: '15px',
         lineHeight: '1.5715',
-        left: '-50px' ,
-        zIndex: '2' ,
+        left: '-50px',
+        zIndex: '2',
       }}
       onClick={onClick}
     >
@@ -59,39 +59,38 @@ const settings = {
 
 export default function Calendar() {
   const { selectedDate, todayFormatted, daysShort, render_array_today, today } = useCalendar();
+  // console.log(todayFormatted, daysShort, render_array_today, today)
   const dispatch = useDispatch();
   const [appState, changeState] = useState({
     activeObject: null,
     object: render_array_today,
   })
 
-  const dateClickHandler = (date,index,idx) => {
+  const dateClickHandler = (date, index, idx) => {
     dispatch(setDate(date));
-    changeState({...appState, activeObject: appState.object[index][idx] })
+    changeState({ ...appState, activeObject: render_array_today[index][idx] })
   }
-const toggleActiveStyles = (index,idx) =>{
-  if (appState.activeObject === null) {return 'inactive'}
-  if(isEqual(appState.object[index][idx], appState.activeObject ))
-  {
-    return 'active'
+  const toggleActiveStyles = (index, idx) => {
+    if (appState.activeObject === null) { return 'inactive ' }
+    if (isEqual(render_array_today[index][idx], appState.activeObject)) {
+      return 'active '
+    }
+    else {
+      return 'inactive '
+    }
   }
-  else 
-  {
-    return 'inactive'
-  }
-}
-
 
   const Day_bar =
     daysShort.map(day => {
       return (<th key={day}>{day}</th>)
     });
+
   let today_idx = 0;
-  for (let i = 0; i < render_array_today[0].length; i++) {
+  for (let i = 0; i < render_array_today[0]?.length; i++) {
     if (render_array_today[0][i].date === todayFormatted) { today_idx = i }
   }
-  for (let i = 0; i < render_array_today[0].length; i++) {
-    if (i < today_idx) { render_array_today[0][i].classes = ' yesterday'}
+  for (let i = 0; i < render_array_today[0]?.length; i++) {
+    if (i < today_idx) { render_array_today[0][i].classes = ' yesterday' }
   }
 
   const bannerList = Object.values(render_array_today).map((cols, index) => {
@@ -106,8 +105,8 @@ const toggleActiveStyles = (index,idx) =>{
           <tr key={cols[0].date}>
             {cols.map((col, idx) => (
               (col.date === todayFormatted) ?
-                (<td key={col.date} className={toggleActiveStyles(index,idx) +`${col.classes} today`} onClick={() => dateClickHandler(col.date,index,idx)}>{col.value}</td>)
-                : (<td key={col.date} className={toggleActiveStyles(index,idx) + `${col.classes}`} onClick={() => dateClickHandler(col.date,index,idx)}>{col.value}</td>)
+                (<td key={col.date} className={toggleActiveStyles(index, idx) + `${col.classes} today`} onClick={() => dateClickHandler(col.date, index, idx)}>{col.value}</td>)
+                : (<td key={col.date} className={toggleActiveStyles(index, idx) + `${col.classes}`} onClick={() => dateClickHandler(col.date, index, idx)}>{col.value}</td>)
             )
             )}
           </tr>

@@ -14,10 +14,9 @@ const monthNamesArr = [
 ];
 const useCalendar = (daysShort = daysShortArr, monthNames = monthNamesArr) => {
   const [backup, setbackup] = useState([]);
-  
+
   const today = new Date();
-  const todayFormatted =
-    `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+  const todayFormatted = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
   const daysInWeek = [0, 1, 2, 3, 4, 5, 6];
 
   const [selectedDate, setSelectedDate] = useState(today);
@@ -102,7 +101,7 @@ const useCalendar = (daysShort = daysShortArr, monthNames = monthNamesArr) => {
   }
 
   if (backup.length !== 0) {
-    if (todayFormatted.includes('1-')) {
+    if ((todayFormatted[0] === '1') && (todayFormatted[1] === '-')) {
       setbackup([]);
     }
     else {
