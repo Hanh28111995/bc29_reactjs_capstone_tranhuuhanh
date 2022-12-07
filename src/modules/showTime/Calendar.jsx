@@ -68,11 +68,11 @@ export default function Calendar() {
 
   const dateClickHandler = (date, index, idx) => {
     dispatch(setDate(date));
-    changeState({ ...appState, activeObject: render_array_today[index][idx] })
+    changeState({activeObject: render_array_today[index][idx], object: render_array_today })
   }
   const toggleActiveStyles = (index, idx) => {
     if (appState.activeObject === null) { return 'inactive ' }
-    if (isEqual(render_array_today[index][idx], appState.activeObject)) {
+    if (isEqual(appState.object[index][idx], appState.activeObject)) {
       return 'active '
     }
     else {

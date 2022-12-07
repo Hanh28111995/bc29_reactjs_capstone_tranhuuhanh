@@ -63,7 +63,7 @@ export default function MovieList() {
             />
             <div className="card-body text-center" style={{ height: "100px", backgroundColor: "#efebdb" }}>
               <h3 className="card-title" >{ele.tenPhim}</h3>
-              <h4 className="card-title" >Ngày khởi chiếu | {moment(ele.ngayKhoiChieu).format('DD/MM/YYYY')}</h4>;
+              <h4 className="card-title" >Ngày khởi chiếu | {moment(ele.ngayKhoiChieu).format('DD/MM/YYYY')}</h4>
             </div>
           </div>
         </div>
