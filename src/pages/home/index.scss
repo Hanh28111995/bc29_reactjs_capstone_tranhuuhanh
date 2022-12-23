@@ -1,3 +1,13 @@
-.homePage .ant-row {
-    background-color: #dad2b4 ;
+.homePage {
+  .ant-row {
+    background-color: #dad2b4;
   }
+  .ant-radio-button-wrapper{
+    width: 150px;
+    span
+    {
+      font-size: 14px;
+      font-weight: 300;
+    }
+  }
+}

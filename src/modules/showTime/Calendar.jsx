@@ -68,7 +68,7 @@ export default function Calendar() {
 
   const dateClickHandler = (date, index, idx) => {
     dispatch(setDate(date));
-    changeState({activeObject: render_array_today[index][idx], object: render_array_today })
+    changeState({ activeObject: render_array_today[index][idx], object: render_array_today })
   }
   const toggleActiveStyles = (index, idx) => {
     if (appState.activeObject === null) { return 'inactive ' }
@@ -118,8 +118,8 @@ export default function Calendar() {
 
 
   return (
-    <>
-      <span className="month" style={{ top: '-47px', left: 47 }}><em>{formatDate1(today)}</em><span>&nbsp;{formatDate2(today)}</span></span>
+    <div className='Calendar'>
+      <span className="month" style={{ top: '-47px', left: 47 }}><em>{formatDate1(today)}</em><span style={{ textTransform: 'capitalize' }}>&nbsp;{formatDate2(today)}</span></span>
       <Row justify="center" style={{ marginBottom: '4rem' }} >
         <Col span={16}>
           <CarouselAntd arrows autoplay={false} {...settings} dots={false}>
@@ -127,9 +127,7 @@ export default function Calendar() {
           </CarouselAntd>
         </Col>
       </Row>
-
-
-    </>
+    </div>
   );
 }
 

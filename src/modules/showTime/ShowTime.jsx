@@ -5,6 +5,7 @@ import { formatDate, formatDate1, formatDate2, formatDate3 } from "../../utils/c
 import { useAsync } from "hooks/useAsync";
 import { useSelector } from "react-redux";
 import useCalendar from "hooks/useCalendar";
+import "./index.scss";
 
 export default function ShowTime() {
   const params = useParams();
@@ -14,15 +15,14 @@ export default function ShowTime() {
     dependencies: [],
     service: () => fetchMovieShowTimesAPI(params.movieId),
   })
-  let store_date = (userState.date||todayFormatted).replaceAll('-', '/');
+  let store_date = (userState.date || todayFormatted).replaceAll('-', '/');
   // console.log(store_date)
 
   useEffect(() => {
-    if(showTimes.length !== 0)
-    {
+    if (showTimes.length !== 0) {
       console.log(showTimes)
     }
-    
+
   }, [showTimes]);
 
   // const fetchMovieShowTimes = async () => {
@@ -60,10 +60,10 @@ export default function ShowTime() {
           {ele.cumRapChieu.map((ele) => {
             return (
               <div key={ele.maCumRap} className="row mb-5">
-                <div className="col-1">
+                <div className="col-2 pb-3">
                   <img className="img-fluid rounded" src={ele.hinhAnh} />
                 </div>
-                <div className="col-11 pl-0">
+                <div className="col-10 pl-0">
                   <h5>{ele.tenCumRap}</h5>
                   <span className="text-muted">{ele.diaChi}</span>
                 </div>
@@ -71,27 +71,26 @@ export default function ShowTime() {
                   <div className="row">
                     {ele.lichChieuPhim.map((ele) => {
                       // if (formatDate3(ele.ngayChieuGioChieu) === store_date) {
-                        return (
-                          <div key={ele.maLichChieu} className="col-3">
-                            <Link to={`/booking/${ele.maLichChieu}`}>
-                              {formatDate(ele.ngayChieuGioChieu)}
-                            </Link>
-                          </div>
-                        )
+                      return (
+                        <Link to={`/booking/${ele.maLichChieu}`} className="col-3 pb-2 box_select" key={ele.maLichChieu} >
+                            {formatDate(ele.ngayChieuGioChieu)}
+                        </Link>
+                      )
                       // };
                     })}
                   </div>
                 </div>
               </div>
             );
-          })}
-        </div>
+          })
+          }
+        </div >
       );
     });
   };
 
   return (
-    <div className="row my-3">
+    <div className="Showtime row my-3">
       <div className="col-3">
         <div
           className="nav flex-column nav-pills"

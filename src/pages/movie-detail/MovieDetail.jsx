@@ -6,7 +6,7 @@ import "./index.scss";
 
 export default function MovieDetail() {
   return (
-    <div className="py-3 container detailPage" style={{ flex: '1' }}>
+    <div className="detailPage py-3 container" style={{ flex: '1' }}>
       <DetailCopy />
       <Calendar />
       <ShowTime />

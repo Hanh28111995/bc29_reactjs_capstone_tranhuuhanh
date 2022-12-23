@@ -2,7 +2,7 @@ export const TOKEN_CYBERSOFT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3A
 
 export const BASE_URL = 'https://movienew.cybersoft.edu.vn/api';
 export const USER_INFO_KEY = "USER_INFO_KEY";
-export const GROUP_ID = 'GP01';
+export const GROUP_ID = 'GP03';
 export const HOUR = ["09:00:00", "12:00:00", "15:00:00", "18:00:00", "21:00:00"];
 export const banner_theater = ['http://codienlanh.com/wp-content/uploads/2018/08/z956243662384_d93c08ef99c98bbfff72d797dee26919-1024x778.jpg',
   'https://cafefcdn.com/thumb_w/650/203337114487263232/2022/6/27/photo1656323960029-1656323961697468219282.jpg',

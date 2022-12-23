@@ -1,3 +1,12 @@
 .detailPage .ant-row {
-    background-color: #dad2b4 ;
+  background-color: #dad2b4;
+}
+
+.trailerPage,
+.detailPage {
+  @media only screen and (max-width: 500px) {
+    h2 {
+      font-size: 1.5rem;
+    }
   }
+}
