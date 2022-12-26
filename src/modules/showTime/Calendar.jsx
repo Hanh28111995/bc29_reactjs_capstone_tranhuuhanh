@@ -59,7 +59,7 @@ const settings = {
 
 export default function Calendar() {
   const { selectedDate, todayFormatted, daysShort, render_array_today, today } = useCalendar();
-  // console.log(todayFormatted, daysShort, render_array_today, today)
+  // console.log(todayFormatted, render_array_today)
   const dispatch = useDispatch();
   const [appState, changeState] = useState({
     activeObject: null,

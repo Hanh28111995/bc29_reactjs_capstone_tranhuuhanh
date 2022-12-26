@@ -1,18 +1,15 @@
-.ant-carousel {
-  .slick-next {
-    &::before {
-      content: '';
+.homeCarousel {
+  .ant-carousel {
+    .slick-next {
+      &::before {
+        content: '';
+      }
     }
-  }
 
-  .slick-prev {
-    &::before {
-      content: '';
+    .slick-prev {
+      &::before {
+        content: '';
+      }
     }
   }
 }
-
-
-
-
-

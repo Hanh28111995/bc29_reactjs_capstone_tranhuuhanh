@@ -72,7 +72,7 @@ export default function ShowTime() {
                     {ele.lichChieuPhim.map((ele) => {
                       // if (formatDate3(ele.ngayChieuGioChieu) === store_date) {
                       return (
-                        <Link to={`/booking/${ele.maLichChieu}`} className="col-3 pb-2 box_select" key={ele.maLichChieu} >
+                        <Link to={`/booking/${ele.maLichChieu}`} className="col-3 pb-2 box_select w-100" key={ele.maLichChieu} >
                             {formatDate(ele.ngayChieuGioChieu)}
                         </Link>
                       )

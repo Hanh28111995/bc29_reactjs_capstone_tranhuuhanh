@@ -27,12 +27,12 @@ const SampleNextArrow = props => {
         fontSize: '15px',
         lineHeight: '1.5715',
         fontSize: '50px',
-        right: '-10px' ,
-        zIndex: '2' ,
+        right: '-10px',
+        zIndex: '2',
       }}
       onClick={onClick}
     >
-      <RightOutlined  />
+      <RightOutlined />
     </div>
   )
 }
@@ -48,8 +48,8 @@ const SamplePrevArrow = props => {
         fontSize: '20px',
         lineHeight: '1.5715',
         fontSize: '50px',
-        left: '-40px' ,
-        zIndex: '2' ,
+        left: '-40px',
+        zIndex: '2',
       }}
       onClick={onClick}
     >
@@ -81,20 +81,21 @@ export default function Carousel() {
     );
 
 
-  return (<>
-    <div className="TitleCarousel" style={{ marginBottom: '0' }}>
-      <p>PHIM HOT TẠI RẠP</p>
-    </div>
+  return (
+    <div className='homeCarousel'>
+      <div className="TitleCarousel" style={{ marginBottom: '0' }}>
+        <p>PHIM HOT TẠI RẠP</p>
+      </div>
 
-    <Row justify="center" >
-      <Col span={16}>
-        <CarouselAntd arrows autoplay={true} autoplaySpeed={2500} {...settings}>
-          {bannerList}
-        </CarouselAntd>
-      </Col>
-    </Row>
-    <div className="TitleCarousel">
+      <Row justify="center" >
+        <Col span={16}>
+          <CarouselAntd arrows autoplay={true} autoplaySpeed={2500} {...settings}>
+            {bannerList}
+          </CarouselAntd>
+        </Col>
+      </Row>
+      <div className="TitleCarousel">
+      </div>
     </div>
-  </>
   );
 }
