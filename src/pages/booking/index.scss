@@ -1,3 +1,8 @@
+.bookingPage {
+    width: 100%;
+
+}
+
 @media screen and (max-width: 1200px) {
     .container-fluid {
         .col-9 {
@@ -35,6 +40,10 @@
 
 @media screen and (max-width: 825px) {
     .container-fluid {
+        .col-3 {
+            width: 500px;
+        }
+
         .col-9 {
             margin: auto !important;
 
@@ -51,50 +60,57 @@
     }
 }
 
-@media screen and (max-width: 709px) {
-    .container-fluid {
+@media screen and (max-width: 714px) {
+    .bookingPage {
+        width: 100%;
+        min-width: 300px;
+
         .row {
-            flex-direction: column;
-            .col-3 {
-                text-align: center;
-                max-width: 60%;
-                margin: auto;
-            }
+            display: block;
+
+            .col-3,
             .col-9 {
-                margin: auto !important;
-                max-width: 100%;
-                margin: auto;
-                .ghe {
-                    width: 20px;
-                    height: 20px;
-                    font-size: 10px;
-                }
+                min-width: 100%;
+                width: 100%;
+                display: block;
+                padding: 0;
+                margin: 0 !important;
 
                 .d-screen {
-                    margin-top: 0px;
+                    min-width: 300px;
+                    width: 100%;
+                }
+
+                .ghe {
+                    width: 15px;
+                    height: 15px;
+                    font-size: 8px;
+                }
+
+
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .bookingPage {
+        .row {
+            .col-9 {
+                h2 {
+                    font-size: 0.7rem;
+                    bottom: 52px;
+                }
+                .ghe {
+                    width: 12px;
+                    height: 12px;
+                    font-size: 6px;
                 }
             }
         }
     }
 }
 
-// @media screen and (max-width: 599px) {
-//     .container-fluid {
-//         .col-9 {
-//             margin: auto !important;
-
-//             .ghe {
-//                 width: 21px;
-//                 height: 21px;
-//                 font-size: 10px;
-//             }
-//             .d-screen
-//             {
-//                 margin-top: 5px;
-//             }
-//         }
-//     }
-// }
 .screen {
     border-top: 50px solid rgb(255, 159, 95);
     border-left: 50px solid transparent;
@@ -121,13 +137,14 @@
         text-align: center;
     }
 }
-.col-9
-{
-    ul{
+
+.col-9 {
+    ul {
         list-style-type: none;
-    li{
-        display: inline-block;
-        margin-left: 20px;
+
+        li {
+            display: inline-block;
+            margin-left: 20px;
+        }
     }
-} 
 }

@@ -54,7 +54,7 @@ export default function Booking() {
   };
 
   return roomList?.thongTinPhim ? (
-    <div className="container-fluid">
+    <div className="container-fluid bookingPage">
       <div className="row w-100 mx-auto my-5">
         <div className="col-3 mb-4">
           <img
