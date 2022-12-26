@@ -11,15 +11,19 @@ export default function TrailerContent() {
     const param = useParams();
     const [option1, setOption1] = useState();
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [play, setPlay] = useState(false);
 
     const showModal = () => {
+        setPlay(true)
         setIsModalVisible(true);
     };
     const handleOk = () => {
+        setPlay(false)
         setIsModalVisible(false);
     };
 
     const handleCancel = () => {
+        setPlay(false)
         setIsModalVisible(false);
     };
 
@@ -44,16 +48,16 @@ export default function TrailerContent() {
             <div className="ant-row ant-row-center" style={{ backgroundColor: '#dad2b4' }}>
                 <div className="ant-col ant-col-16 text-center">
                     <img src={option1} alt="" style={{ objectFit: 'cover', width: '85%', height: '600px' }} />
-                    <img className="icon_play" src="/btnc_play.png" alt="image" onClick={showModal} />
+                    <img className="icon_play" src="/btnc_play.png" alt="image" onClick={showModal} onBlur={handleCancel}/>
                 </div>
             </div>
             <div className="TitleCarousel" style={{ marginBottom: 0 }}>
             </div>
             <Modal 
-                visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} centered={true}  width={'70%'} height={800}>
-                <ReactPlayer
+                visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} centered={true}  width={'70%'} height={800} destroyOnClose={true}>
+                <ReactPlayer 
                     url={movieDetail.trailer}
-                    playing={true}
+                    playing={play}
                     controls={true}
                     className='mx-auto w-100'
                     width={800}
