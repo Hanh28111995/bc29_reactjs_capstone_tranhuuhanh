@@ -80,7 +80,7 @@ export default function Booking() {
               }, 0)
               .toLocaleString()}
           </p>
-          <button className="btn btn-info" onClick={handleSubmitTicket}>
+          <button className="btn btn-info mb-3" onClick={handleSubmitTicket}>
             ĐẶT VÉ
           </button>
         </div>
