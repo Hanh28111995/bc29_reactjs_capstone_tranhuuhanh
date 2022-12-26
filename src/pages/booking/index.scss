@@ -66,6 +66,7 @@
 
         .row {
             display: block;
+
             .col-9,
             .col-3 {
                 min-width: 100%;
@@ -85,8 +86,9 @@
                     font-size: 6px;
                 }
             }
-            .col-3{
-            text-align: center;
+
+            .col-3 {
+                text-align: center;
             }
         }
     }
