@@ -8,7 +8,7 @@ import "./index.scss";
 
 export default function HomeLayout() {
   return (
-    < div className="wrapper">
+    < div className="wrapper" style={{caretColor: 'transparent'}}>
       <Header />
       <Outlet/>
       <Footer />
