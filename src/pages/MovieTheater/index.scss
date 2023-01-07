@@ -36,6 +36,12 @@ tr.ant-table-row:hover td {
         a{
             font-size: 14px;
         }
+        @media screen and (max-width: 500px) {
+            a{
+                font-size: 10px;
+            }
+        }
     }
+    
     
 }
