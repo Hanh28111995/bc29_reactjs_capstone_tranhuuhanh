@@ -1,8 +1,8 @@
-import { notification } from 'antd';
-import React, { useState } from 'react';
-import { createRef } from 'react';
-import { useNavigate } from "react-router-dom";
-import { registerApi } from 'services/user';
+import { notification } from 'antd'
+import React, { useState } from 'react'
+import { createRef } from 'react'
+import { useNavigate } from "react-router-dom"
+import { registerApi } from 'services/user'
 
 const DEFAULT_VALUES = {
     taiKhoan: "",
