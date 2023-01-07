@@ -15,9 +15,9 @@
     position: absolute !important;
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 500px) {
     .wrapper {
-        min-width: 1000px;
+        min-width: 400px;
 
         .slick-list .slick-slide {
             img {
@@ -28,6 +28,6 @@
 }
 @media screen and (max-width: 375px) {
     .wrapper {
-        min-width: 300px;
+        min-width: 280px
     }
 }
