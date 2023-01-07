@@ -120,7 +120,7 @@ export default function Register() {
     const { taiKhoan, matKhau, hoTen, email, soDT } = state.values;
     return (
         <form ref={formRef} noValidate className='w-25 mx-auto my-5'
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit} style={{ caretColor: 'black' }}
         >
             <div className='form-group'>
                 <label>Tài khoản</label>

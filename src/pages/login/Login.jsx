@@ -40,7 +40,7 @@ export default function Login() {
      }
   } 
   return (
-    <form className="w-25 mx-auto my-5" onSubmit={handleSubmit}>
+    <form className="w-25 mx-auto my-5" onSubmit={handleSubmit} style={{ caretColor: 'black' }}>
       <div className="form-group">
         <label>Tài khoản</label>
         <input
