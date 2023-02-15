@@ -16,6 +16,8 @@ export default function MovieList() {
     service: () => fetchMovieListAPI(),
   });
 
+  console.log(movieList)
+
   const FilterMovie1 = () => {
     let PhimDangChieu = movieList.filter((ele) => {
       return (

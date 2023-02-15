@@ -65,8 +65,8 @@ h3 {
   white-space: pre;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 18px !important;
-  font-weight: bold !important;
+  font-size: 18px;
+  font-weight: bold ;
 }
 
 h4 {
