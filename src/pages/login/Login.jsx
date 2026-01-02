@@ -10,8 +10,8 @@ export default function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [state, setState] = useState({
-    taiKhoan: "huu_hanh2022",
-    matKhau: "987654321",
+    username: "hanhtran",
+    password: "123456",
   });
 
   const handleChange = (event) => {

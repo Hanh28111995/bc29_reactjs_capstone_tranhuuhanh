@@ -2,13 +2,13 @@ import { Row, Col } from 'antd';
 import React, { useEffect } from "react";
 import { Carousel as CarouselAntd } from "antd";
 import "antd/dist/antd.css";
-import { bannerMovieApi } from "services/movie";
 import { useAsync } from "hooks/useAsync";
 import {
   LeftOutlined,
   RightOutlined,
 } from "@ant-design/icons";
 import "./index.scss";
+import { fetchMoviebannerAPI } from 'services/movie';
 
 const contentStyle = {
   objectFit: "fill",
@@ -68,15 +68,16 @@ export default function Carousel() {
 
   const { state: banner = [] } = useAsync({
     dependencies: [],
-    service: () => bannerMovieApi(),
-  })
-
-  const bannerList =
-    banner.map((item, index) => {
+    service: () => fetchMoviebannerAPI(),
+  })  
+  const bannerList = 
+    banner?.map((item, index) => {
+      console.log('item', item);
       return (
         <div key={index}>
-          <img style={contentStyle} src={item.hinhAnh} alt="" />
-        </div>)
+          <img style={contentStyle} src={item} alt="" />          
+        </div>
+        )
     }
     );
 

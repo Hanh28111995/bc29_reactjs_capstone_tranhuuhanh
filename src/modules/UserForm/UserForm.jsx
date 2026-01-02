@@ -9,7 +9,6 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 // import moment from "moment";
-import { GROUP_ID } from "constants/common";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
 import { userDetailApi } from "services/user";
@@ -36,8 +35,7 @@ export default function UserForm() {
     }
   }, [userDetail]);
 
-  const handleSave = async (values) => {
-    values.maNhom = GROUP_ID;
+  const handleSave = async (values) => {    
     if (userDetail) { await updateUserApi(values); }
     else { await addUserApi(values); }
     notification.success({

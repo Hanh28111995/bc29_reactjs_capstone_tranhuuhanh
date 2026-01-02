@@ -9,8 +9,8 @@ if (userInfor) {
 export const request = axios.create({
     headers:
     {
-        TokenCybersoft: TOKEN_CYBERSOFT,
-        // Authorization: userInfor?.accessToken,
+        // TokenCybersoft: TOKEN_CYBERSOFT,
+        Authorization: userInfor?.accessToken,
     },
     baseURL: BASE_URL,
 })

@@ -1,10 +1,10 @@
-import {TOKEN_CYBERSOFT,BASE_URL, GROUP_ID} from '../constants/common';
+import {TOKEN_CYBERSOFT,BASE_URL} from '../constants/common';
 import { request } from "../configs/axios";
 
 const loginAPI = (data) => {
   return request({
     data: data,
-    url: `/QuanLyNguoiDung/DangNhap`,
+    url: `/auth/login`,
     method: "POST",
   });
 };
@@ -12,7 +12,7 @@ const loginAPI = (data) => {
 const registerApi = (data) => {
   return request({
     data,
-    url: "/QuanLyNguoiDung/DangKy",
+    url: "/auth/register",
     method: "POST",
   });
 };
@@ -20,7 +20,7 @@ const registerApi = (data) => {
 const userListApi = ()=> {
 
   return request({
-    url: `/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${GROUP_ID}`,
+    url: `/QuanLyNguoiDung/LayDanhSachNguoiDung`,
     method: 'GET',
 })
 };

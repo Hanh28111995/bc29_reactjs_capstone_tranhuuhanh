@@ -1,6 +1,6 @@
 export const MaLoaiNguoiDung = {
-    QuanTri: 'QuanTri',
-    KhachHang: 'KhachHang',
+    QuanTri: 'admin',
+    KhachHang: 'customer',
 };
 
 export const LoaiGhe = {

@@ -1,10 +1,18 @@
 import axios from "axios";
 import { request } from "../configs/axios";
-import {TOKEN_CYBERSOFT,BASE_URL, GROUP_ID} from '../constants/common';
+import {TOKEN_CYBERSOFT,BASE_URL} from '../constants/common';
+
+
+const fetchMoviebannerAPI = () => {
+    return request({
+        url: `/general/showBanners`,
+        method: 'GET',
+    })
+}
 
 const fetchMovieListAPI = () =>{
    return request({
-        url: `/QuanLyPhim/LayDanhSachPhim?maNhom=${GROUP_ID}`,
+        url: `/QuanLyPhim/LayDanhSachPhim`,
         method: 'GET',
     })
 };
@@ -44,4 +52,4 @@ const addMovieUploadImage = (data) => {
   })
   }
 
-export {fetchMovieListAPI, fetchMovieDetailAPI, addMovieUploadImage, updateMovieUploadImage, deleteMovieAPI, bannerMovieApi};
+export {fetchMovieListAPI, fetchMovieDetailAPI, addMovieUploadImage, updateMovieUploadImage, deleteMovieAPI, bannerMovieApi, fetchMoviebannerAPI };

@@ -1,7 +1,7 @@
 import { useAsync } from 'hooks/useAsync';
 import React from 'react';
 import { HethongrapListApi } from 'services/showtime';
-import { banner_theater } from 'constants/common';
+
 import {  useState } from "react";
 import { HethongrapCumrapListApi } from "services/showtime";
 import "./index.scss";
@@ -42,7 +42,7 @@ function MovieTheater() {
                 <div key={ele.maHeThongRap} id={ele.maHeThongRap} className={`tab-pane ${index === 0 && "active"}`}>
                     {/* <h3>{ele.maHeThongRap}</h3> */}
                     <div className='text-center'>
-                        <img src={banner_theater[index]} width={'100%'} height="525px" alt="" />
+                        <img  width={'100%'} height="525px" alt="" />
                     </div>
                     <div className='my-5'>
                         <table className='mx-auto' style={{ tableLayout: 'auto' ,width:'100%'}}>

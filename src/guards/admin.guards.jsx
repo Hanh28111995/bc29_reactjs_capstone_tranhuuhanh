@@ -8,12 +8,13 @@ export default function AdminGuards() {
   const userState = useSelector((state) => state.userReducer);
   const navigate = useNavigate();
   useEffect(() => {
+    console.log('userState', userState);
     if (!userState.userInfor) {
       return navigate("/login");
     }
     if (
-      userState.userInfor &&
-      userState.userInfor.maLoaiNguoiDung !== MaLoaiNguoiDung.QuanTri
+      userState.userInfor?.user_inf &&
+      userState.userInfor?.user_inf.role !== MaLoaiNguoiDung.QuanTri
     ) 
     {
       notification.warning({

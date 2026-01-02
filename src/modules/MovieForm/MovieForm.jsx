@@ -11,7 +11,6 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { GROUP_ID } from "constants/common";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
 import { fetchMovieDetailAPI } from "services/movie";
@@ -43,8 +42,7 @@ export default function MovieForm() {
 
 
   const handleSave = async (values) => {
-    values.ngayKhoiChieu = values.ngayKhoiChieu.format("DD/MM/YYYY");
-    values.maNhom = GROUP_ID;
+    values.ngayKhoiChieu = values.ngayKhoiChieu.format("DD/MM/YYYY");    
     const formData = new FormData();
     for (const key in values) {
       formData.append(key, values[key]);
