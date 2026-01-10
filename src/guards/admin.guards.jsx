@@ -7,8 +7,7 @@ import { MaLoaiNguoiDung } from "../enums/common";
 export default function AdminGuards() {
   const userState = useSelector((state) => state.userReducer);
   const navigate = useNavigate();
-  useEffect(() => {
-    console.log('userState', userState);
+  useEffect(() => {    
     if (!userState.userInfor) {
       return navigate("/login");
     }

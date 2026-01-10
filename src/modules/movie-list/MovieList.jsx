@@ -2,24 +2,30 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoadingContext } from "../../contexts/loading.context";
 import { useAsync } from "../../hooks/useAsync";
-import { fetchMovieListAPI } from "services/movie";
-import { Radio, Button } from "antd";
+
+import { Radio } from "antd";
 import moment from "moment";
+import { fetchMovieListAPI } from "services/general";
 
 export default function MovieList() {
   const navigate = useNavigate();
+  const [, setLoadingState] = useContext(LoadingContext);
   // const [MovieShowList, setMovieShowList] = useState([]);
   const [movieListType, setMovieListType] = useState("SHOWING");
 
-  const { state: movieList = [] } = useAsync({
+  const { state: movieList = [], loading } = useAsync({
     dependencies: [],
     service: () => fetchMovieListAPI(),
   });
 
+  useEffect(() => {
+    setLoadingState({ isLoading: loading });
+  }, [loading, setLoadingState]);
+
   const FilterMovie1 = () => {
     let PhimDangChieu = movieList.filter((ele) => {
       return (
-        ele.dangChieu === true
+        ele.showing === true
       );
     });
     return PhimDangChieu
@@ -27,7 +33,7 @@ export default function MovieList() {
   const FilterMovie2 = () => {
     let PhimSapChieu = movieList.filter((ele) => {
       return (
-        (ele.sapChieu === true)
+        (ele.coming === true)
       );
     });
     return PhimSapChieu
@@ -37,7 +43,7 @@ export default function MovieList() {
     const MovieShowList = movieListType === "SHOWING" ? FilterMovie1() : FilterMovie2();
     return MovieShowList.map((ele) => {
       return (
-        <div className="col-xl-3 col-md-4 col-sm-6 col-xs-12 align-items-center px-3" key={ele.maPhim}>
+        <div className="col-xl-3 col-md-4 col-sm-6 col-xs-12 align-items-center px-3" key={ele._id}>
           <div
             className="card movie-card"
             style={{ marginBottom: 20, height: 450 }}
@@ -45,12 +51,12 @@ export default function MovieList() {
             <div className="overlay"></div>
             <div className="btn-cover">
               <button className="btn-more-infor"
-                onClick={() => navigate(`/movie/detail/${ele.maPhim}`)}
+                onClick={() => navigate(`/movie/detail/${ele._id}`)}
               >
                 CHI TIẾT
               </button>
               <button className="btn-more-infor"
-                onClick={() => navigate(`/movie/selectT/${ele.maPhim}`)}
+                onClick={() => navigate(`/movie/selectT/${ele._id}`)}
               >
                 ĐẶT VÉ
               </button>
@@ -58,13 +64,48 @@ export default function MovieList() {
             <img
               style={{ height: 350, objectFit: "cover" }}
               className="card-img-top"
-              src={ele.hinhAnh}
+              src={ele.banner}
               alt="movie"
             />
-            <div className="card-body text-center" style={{ height: "100px", backgroundColor: "#efebdb" }}>
-              <h3 className="card-title" >{ele.tenPhim}</h3>
-              <h4 className="card-title" >Ngày khởi chiếu | {moment(ele.ngayKhoiChieu).format('DD/MM/YYYY')}</h4>
-            </div>
+            <div 
+  className="card-body d-flex flex-column justify-content-center align-items-center" 
+  style={{ 
+    height: "120px", // Tăng nhẹ chiều cao để thông thoáng
+    backgroundColor: "#fdfaf0", // Màu kem nhã nhặn hơn
+    padding: "10px",
+    borderBottomLeftRadius: "8px",
+    borderBottomRightRadius: "8px"
+  }}
+>
+  <h3 
+    className="card-title" 
+    style={{ 
+      fontSize: "22px", 
+      fontWeight: "bold", 
+      color: "#333",
+      marginBottom: "18px",
+      display: "-webkit-box",
+      WebkitLineClamp: 2, // Giới hạn 2 dòng nếu tên phim quá dài
+      WebkitBoxOrient: "vertical",
+      overflow: "hidden",
+      lineHeight: "1.2"
+    }}
+  >
+    {ele.tenPhim}
+  </h3>
+  
+  <h4 
+    className="card-title" 
+    style={{ 
+      fontSize: "16px", 
+      color: "#666", 
+      fontWeight: "400",
+      margin: 0 
+    }}
+  >
+    <span style={{ color: "#999" }}>Khởi chiếu:</span> {moment(ele.releaseDate).format('DD/MM/YYYY')}
+  </h4>
+</div>
           </div>
         </div>
       );

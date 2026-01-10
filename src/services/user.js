@@ -18,24 +18,22 @@ const registerApi = (data) => {
 };
 
 const userListApi = ()=> {
-
   return request({
-    url: `/QuanLyNguoiDung/LayDanhSachNguoiDung`,
+    url: `/admin/user/all`,
     method: 'GET',
 })
 };
 
 const userDetailApi = (tk) =>{
   return request({
-      url: `/QuanLyNguoiDung/LayThongTinNguoiDung?taiKhoan=${tk}`,
-      method: 'POST',
-      data: tk,
+      url: `admin/user/${tk}`,
+      method: 'GET',      
   })
 };
 
 const addUserApi = (data) => {
   return request({
-    url: '/QuanLyNguoiDung/ThemNguoiDung',
+    url: '/admin/user/add',
     method: 'POST',
     data,
   });
@@ -43,14 +41,14 @@ const addUserApi = (data) => {
 
 const updateUserApi = (data) => {
   return request({
-    url: '/QuanLyNguoiDung/CapNhatThongTinNguoiDung',
-    method: 'POST',
+    url: '/admin/user/user-edit',
+    method: 'PUT',
     data,
   });
 }
   const deleteUserApi = (tk) => {
     return request({
-      url: `/QuanLyNguoiDung/XoaNguoiDung?TaiKhoan=${tk}`,
+      url: `admin/user/delete/${tk}`,
       method: 'DELETE',
     });
   }

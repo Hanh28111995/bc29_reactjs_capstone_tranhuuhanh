@@ -1,24 +1,20 @@
 import { useAsync } from "hooks/useAsync";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchMovieDetailAPI } from "services/movie";
 import moment from "moment";
 import "./index.scss";
 
 
-export default function Detail() {
-  const param = useParams();
+export default function Detail(props) {
+
   const navigate = useNavigate();
 
-  const { state: movieDetail = [] } = useAsync({
-    dependencies: [],
-    service: () => fetchMovieDetailAPI(param.movieId),
-  })
+
 
   // useEffect(() => {
   //   let Star = [];
   //   if(movieDetail){
-    
+
   //   for (let i = 0; i < Math.ceil(movieDetail.danhGia / 2); i++) {
   //     Star.push(<i key={"y" + i} className="fa-regular fa-star"></i>);
   //   }
@@ -29,16 +25,17 @@ export default function Detail() {
   // }
   // }, [])
 
-  const starcount = () =>{
+  const starcount = () => {
     let Star = [];
-      if(movieDetail){
-      
-      for (let i = 0; i < Math.ceil(movieDetail.danhGia / 2); i++) {
+    if (props.movie) {
+
+      for (let i = 0; i < Math.ceil(props.movie.rating / 2); i++) {
         Star.push(<i key={"y" + i} className="fa-regular fa-star"></i>);
       }
-      for (let i = 0; i < (5 - Math.ceil(movieDetail.danhGia / 2)); i++) {
+      for (let i = 0; i < (5 - Math.ceil(props.movie.rating / 2)); i++) {
         Star.push(<i key={"n" + i} className="fa-solid fa-star"></i>);
-      }}
+      }
+    }
     return Star;
   }
 
@@ -51,26 +48,26 @@ export default function Detail() {
             <div className="col-4">
               <img
                 className="w-100 mb-2"
-                src={movieDetail.hinhAnh}
-                style={{ height: '300px',objectFit:'cover' }}
+                src={props.movie.banner}
+                style={{ height: '300px', objectFit: 'cover' }}
                 alt=''
               />
-              <button className="btn-more-infor mx-0 my-0 w-100" style={{ height: '35px' }} onClick={() => navigate(`/movie/selectT/${movieDetail.maPhim}`)}>
+              <button className="btn-more-infor mx-0 my-0 w-100" style={{ height: '35px' }} onClick={() => navigate(`/movie/selectT/${props.movie._id}`)}>
                 ĐẶT VÉ
-                </button>
+              </button>
             </div>
             <div className="col-8">
-              <h2 style={{ fontWeight: 'bold' }}>{movieDetail.tenPhim}</h2>
+              <h2 style={{ fontWeight: 'bold' }}>{props.movie.title}</h2>
               <p><span> Đánh giá  : </span> {starcount()} </p>
-              <p><span>Ngày phát hành :</span> {moment(movieDetail.ngayKhoiChieu).format('DD/MM/YYYY')}</p>
-              <p><span>Nhà sản xuất :</span></p>
-              <p><span>Thể loại : </span></p>
+              <p><span>Ngày phát hành :</span> {moment(props.movie.releaseDate).format('DD/MM/YYYY')}</p>
+              <p><span>Đạo diễn :</span> {props.movie.director}</p>
+              <p><span>Thể loại : </span>{props.movie.genre}</p>
               <p><span>Đối tượng : </span></p>
             </div>
           </div>
           <div className="row mt-3 px-3">
             <p > <span>Tóm tắt :</span><br />
-              {movieDetail.moTa}
+              {props.movie.describe}
             </p>
           </div>
         </div>

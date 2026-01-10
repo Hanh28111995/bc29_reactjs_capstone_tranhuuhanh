@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { fetchMovieShowTimesAPI } from "services/cinema";
 import { formatDate, formatDate1, formatDate2, formatDate3 } from "../../utils/common";
 import { useAsync } from "hooks/useAsync";
 import { useSelector } from "react-redux";
 import useCalendar from "hooks/useCalendar";
+import { fetchMovieShowTimesAPI } from "services/cinema";
+
 import "./index.scss";
 
 export default function ShowTime() {
   const params = useParams();
   const userState = useSelector((state) => state.userReducer);
   const { todayFormatted } = useCalendar();
-  const { state: showTimes = [] } = useAsync({
-    dependencies: [],
-    service: () => fetchMovieShowTimesAPI(params.movieId),
-  })
+  // const { state: showTimes = [] } = useAsync({
+  //   dependencies: [],
+  //   service: () => fetchMovieShowTimesAPI(params.movieId),
+  // })
+  const showTimes = [];
   let store_date = (userState.date || todayFormatted).replaceAll('-', '/');
   // console.log(store_date)
 
@@ -73,7 +75,7 @@ export default function ShowTime() {
                       // if (formatDate3(ele.ngayChieuGioChieu) === store_date) {
                       return (
                         <Link to={`/booking/${ele.maLichChieu}`} className="col-3 pb-2 box_select w-100" key={ele.maLichChieu} >
-                            {formatDate(ele.ngayChieuGioChieu)}
+                          {formatDate(ele.ngayChieuGioChieu)}
                         </Link>
                       )
                       // };

@@ -1,6 +1,11 @@
 import React, { lazy } from "react";
 import { useRoutes, Navigate } from "react-router-dom";
 import PageNotFound from "pages/PageNotFound/PageNotFound";
+import SeatTypeTable from "pages/theater-management/SeatTypesTable";
+import BranchesTable from "pages/theater-management/BranchesTable";
+import ShowTimesManagement from "pages/theater-management/ShowTimesManagement";
+import TheatersManagement from "pages/theater-management/TheaterManagement";
+import CreateTheater from "pages/CreateTheater/CreateTheater";
 
 const Login = lazy(() => import("pages/login/Login"));
 const Register = lazy(() => import("pages/register/Register"));
@@ -11,11 +16,9 @@ const NoAuthGuards = lazy(() => import("guards/no-auth.guards"));
 const AdminLayout = lazy(() => import("../layouts/AdminLayout"));
 const MovieManagement = lazy(() => import("pages/movie-management/MovieManagement"));
 const UserManagement = lazy(() => import("pages/user-management/UserManagement"));
-const CreateMovie = lazy(() => import("pages/CreateMovie/CreateMovie"));
 const CreateUser = lazy(() => import("pages/CreateUser/CreateUser"));
 const EditShowTime = lazy(() => import("pages/EditShowTime/EditShowTime"));
-const EditUser = lazy(() => import("pages/EditUser/EditUser"));
-const UpdateMovie = lazy(() => import("pages/UpdateMovie/UpdateMovie"));
+const UpdateMovie = lazy(() => import("pages/EditMovie/UpdateMovie"));
 
 const Home = lazy(() => import("pages/home/Home"));
 const HomeLayout = lazy(() => import("../layouts/HomeLayout"));
@@ -94,23 +97,51 @@ export default function Router() {
               element: <UserManagement />,
             },
             {
+              path: '/admin/seat-types',
+              element: <SeatTypeTable />,
+            },
+            {
+              path: '/admin/branches',
+              element: <BranchesTable />,
+            },
+            {
+              path: '/admin/theater-management',
+              element: <TheatersManagement />,
+            },
+            {
+              path: '/admin/showtimes',
+              element: <ShowTimesManagement />,
+            },
+            {
               path: '/admin/movie-management/create',
-              element: <CreateMovie />,
+              element: <UpdateMovie />,
             },
             {
               path: '/admin/user-management/create',
               element: <CreateUser />,
             },
             {
+              path: '/admin/showtimes/create',
+              element: <EditShowTime />,
+            },
+            {
+              path: '/admin/theater-management/create',
+              element: <CreateTheater />,
+            },
+            {
               path: '/admin/movie-management/:movieId/update',
               element: <UpdateMovie />,
             },
             {
-              path: '/admin/user-management/:tk/edit',
-              element: <EditUser />,
+              path: '/admin/theater-management/:theaterId/update',
+              element: <CreateTheater />,
             },
             {
-              path: '/admin/movie-management/:movieId/edit-showtime',
+              path: '/admin/user-management/:tk/edit',
+              element: <CreateUser />,
+            },
+            {
+              path: '/admin/showtimes/:id/update',
               element: <EditShowTime />,
             },
           ]

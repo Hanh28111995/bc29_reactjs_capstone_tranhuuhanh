@@ -10,8 +10,8 @@ export default function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [state, setState] = useState({
-    username: "hanhtran",
-    password: "123456",
+    username: "",
+    password: "",
   });
 
   const handleChange = (event) => {
@@ -45,7 +45,7 @@ export default function Login() {
         <label>Tài khoản</label>
         <input
           defaultValue={state.taiKhoan}
-          name="taiKhoan"
+          name="username"
           onChange={handleChange}
           type="text"
           className="form-control"
@@ -55,7 +55,7 @@ export default function Login() {
         <label>Mật khẩu</label>
         <input
           defaultValue={state.matKhau}
-          name="matKhau"
+          name="password"
           onChange={handleChange}
           type="password"
           className="form-control"

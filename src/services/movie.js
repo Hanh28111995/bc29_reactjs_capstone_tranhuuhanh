@@ -1,55 +1,47 @@
-import axios from "axios";
 import { request } from "../configs/axios";
-import {TOKEN_CYBERSOFT,BASE_URL} from '../constants/common';
 
 
-const fetchMoviebannerAPI = () => {
-    return request({
-        url: `/general/showBanners`,
-        method: 'GET',
-    })
-}
 
-const fetchMovieListAPI = () =>{
-   return request({
-        url: `/QuanLyPhim/LayDanhSachPhim`,
-        method: 'GET',
-    })
+const fetchMovieListAPI = () => {
+  return request({
+    url: `/admin/movie/allMovies`,
+    method: "GET",
+  });
 };
-const fetchMovieDetailAPI = (movieId) =>{
-    return request({
-        url: `/QuanLyPhim/LayThongTinPhim?MaPhim=${movieId}`,
-        method: 'GET',
-    })
-}
+const fetchMovieDetailAPI = (movieId) => {
+  return request({
+    url: `/admin/movie/${movieId}`,
+    method: "GET",
+  });
+};
 
 const addMovieUploadImage = (data) => {
-    return request({
-      url: '/QuanLyPhim/ThemPhimUploadHinh',
-      method: 'POST',
-      data,
-    });
-  };
-  
-  const updateMovieUploadImage = (data) => {
-    return request({
-      url: '/QuanLyPhim/CapNhatPhimUpload',
-      method: 'POST',
-      data,
-    });
-  }
-  const deleteMovieAPI = (movieId) => {
-    return request({
-      url: `/QuanLyPhim/XP?MaPhim=${movieId}`,
-      method: 'DELETE',
-    });
-  }
+  return request({
+    url: "/admin/movie/add",
+    method: "POST",
+    data,
+  });
+};
 
-  const bannerMovieApi = () => {
-    return request({
-      url: '/QuanLyPhim/LayDanhSachBanner',
-      method: 'GET',
-  })
-  }
+const updateMovieUploadImage = (data) => {
+  return request({
+    url: "/admin/movie/update",
+    method: "PUT",
+    data,
+  });
+};
+const deleteMovieAPI = (movieId) => {
+  return request({
+    url: `/admin/movie/delete/${movieId}`,
+    method: "DELETE",
+  });
+};
 
-export {fetchMovieListAPI, fetchMovieDetailAPI, addMovieUploadImage, updateMovieUploadImage, deleteMovieAPI, bannerMovieApi, fetchMoviebannerAPI };
+
+export {
+  fetchMovieListAPI,
+  fetchMovieDetailAPI,
+  addMovieUploadImage,
+  updateMovieUploadImage,
+  deleteMovieAPI,
+};

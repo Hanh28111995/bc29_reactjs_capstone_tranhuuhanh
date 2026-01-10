@@ -1,14 +1,13 @@
 import { Row, Col } from 'antd';
 import React, { useEffect } from "react";
 import { Carousel as CarouselAntd } from "antd";
-import "antd/dist/antd.css";
 import { useAsync } from "hooks/useAsync";
 import {
   LeftOutlined,
   RightOutlined,
 } from "@ant-design/icons";
 import "./index.scss";
-import { fetchMoviebannerAPI } from 'services/movie';
+import { fetchMoviebannerAPI } from 'services/general';
 
 const contentStyle = {
   objectFit: "fill",

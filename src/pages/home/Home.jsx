@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className='homePage'>
       <Carousel />
-      {/* <MovieList /> */}
+       <MovieList /> 
     </div>
   )
 }

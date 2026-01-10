@@ -1,6 +1,7 @@
 import {
   DesktopOutlined,
   UserOutlined,
+  DatabaseOutlined
 } from "@ant-design/icons";
 import { useLocation, } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Image } from "antd";
@@ -22,7 +23,13 @@ function getItem(label, key, icon, children, type) {
 const items = [
   getItem('Movie management', '/admin/movie-management', <DesktopOutlined />),
   getItem('User management', '/admin/user-management', <UserOutlined />),
-]
+  getItem('Theater management', 'theater', <DatabaseOutlined />, [
+    getItem('Seat Types', '/admin/seat-types'),
+    getItem('Branches', '/admin/branches'),
+    getItem('Theaters', '/admin/theater-management'),
+    getItem('Showtimes', '/admin/showtimes'),
+  ]),
+];
 
 function AdminLayout() {
   const navigate = useNavigate();
@@ -31,8 +38,17 @@ function AdminLayout() {
   const MenuClick = (value) => {
     navigate(value.key);
   }
-  const breadcrumb = pathname.split('/');
-  // console.log(breadcrumb)
+  const breadcrumb = pathname.split('/').map(segment => {
+    if (!segment) return ''; // Xử lý trường hợp chuỗi rỗng
+
+    // 1. Loại bỏ ký tự đặc biệt (giữ lại chữ và số), thay bằng khoảng trắng
+    // Regex /[^a-zA-Z0-9]/g sẽ tìm tất cả ký tự KHÔNG phải chữ hoặc số
+    let cleanSegment = segment.replace(/[^a-zA-Z0-9]/g, ' ');
+
+    // 2. Viết hoa chữ cái đầu tiên của chuỗi
+    return cleanSegment.charAt(0).toUpperCase() + cleanSegment.slice(1);
+  });
+
 
   return (
     <Layout
@@ -52,7 +68,11 @@ function AdminLayout() {
           theme="dark"
           // inlineCollapsed={collapsed}
           items={items}
-          selectedKeys={[(pathname.includes('/admin/user-management') ? ('/admin/user-management') : ('/admin/movie-management') )]}
+          selectedKeys={[
+            items.find(item => pathname.includes(item.key))?.key ||
+            items.flatMap(i => i.children || []).find(child => pathname.includes(child.key))?.key ||
+            pathname
+          ]}
           onClick={MenuClick}
         />
       </Sider>
