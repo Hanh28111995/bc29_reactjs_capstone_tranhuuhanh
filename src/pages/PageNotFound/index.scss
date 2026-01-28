@@ -1,199 +1,109 @@
+/* Page 404 - Rem Optimized (1rem = 10px) */
+
 .bg404 {
   color: #444;
   background-image: url('../../../public/404_img/blueprint.png');
   height: 100vh;
 }
 
-div#da-wrapper,
-div#da-wrapper.fluid {
-  width: 100%;
-}
-
 div#da-wrapper {
+  width: 100%;
   height: auto;
   min-height: 100%;
   position: relative;
-  min-width: 320px;
+  min-width: 32rem; /* 320px */
 }
 
 div#da-content {
   clear: both;
-  padding-bottom: 58px;
+  padding-bottom: 5.8rem; /* 58px */
 }
 
-div#da-wrapper .da-container,
-div#da-wrapper.fluid .da-container {
+div#da-wrapper .da-container {
   width: 96%;
   margin: auto;
 }
 
 div#da-error-wrapper {
-  width: 320px;
-  padding: 30px 0;
+  width: 32rem; /* 320px */
+  padding: 3rem 0; /* 30px */
   margin: auto;
   position: relative;
 }
 
-div#da-wrapper .fa-chevron-right {
-  position: absolute;
-  left: 0;
-  animation: arrowRight 1s linear 0s infinite;
-}
-
-div#da-wrapper .fa-chevron-left {
-  position: absolute;
-  right: 0;
-  animation: arrowLeft 1s linear 0s infinite;
-}
-div#da-wrapper .da-hompage{
-  position: relative;
-}
-div#da-wrapper .da-hompage h5{
-  font-size: 15px;
+/* Typography */
+div#da-wrapper .da-hompage h5 {
+  font-size: 1.5rem; /* 15px */
   color: #444;
-}
-
-div#da-error-wrapper #da-error-pin {
-  width: 38px;
-  height: 38px;
-  display: block;
-  margin: auto;
-  margin-bottom: -27px;
-  z-index: 10;
-  position: relative;
-  background: url('../../../public/404_img/error-pin.png') no-repeat center center;
-}
-
-div#da-error-wrapper #da-error-code {
-  width: 100%;
-  height: 282px;
-  padding: 127px 16px 0 16px;
-  position: relative;
-  margin: auto;
-  margin-bottom: 20px;
-  z-index: 5;
-  line-height: 1;
-  font-size: 32px;
-  text-align: center;
-  background: url('../../../public/404_img/error-hanger.png') no-repeat center center;
-  -webkit-transform-origin: center top;
-  -moz-transform-origin: center top;
-  transform-origin: center top;
-  -webkit-animation: error-swing infinite 2s ease-in-out alternate;
-  -moz-animation: error-swing infinite 2s ease-in-out alternate;
-  animation: error-swing infinite 2s ease-in-out alternate;
-}
-
-div#da-error-wrapper #da-error-code span {
-  font-size: 96px;
-  display: block;
 }
 
 div#da-error-wrapper .da-error-heading {
   color: #e15656;
   text-align: center;
-  font-size: 18px;
+  font-size: 1.8rem; /* 18px */
   font-family: Georgia, "Times New Roman", Times, serif;
 }
 
-@-webkit-keyframes error-swing {
-  0% {
-    -webkit-transform: rotate(1deg);
-  }
-
-  100% {
-    -webkit-transform: rotate(-2deg);
-  }
+/* Error Pin (Cái ghim) */
+div#da-error-wrapper #da-error-pin {
+  width: 3.8rem; /* 38px */
+  height: 3.8rem;
+  display: block;
+  margin: 0 auto -2.7rem auto; /* margin-bottom: -27px */
+  z-index: 10;
+  position: relative;
+  background: url('../../../public/404_img/error-pin.png') no-repeat center center;
+  background-size: contain;
 }
 
-@-moz-keyframes error-swing {
-  0% {
-    -moz-transform: rotate(1deg);
-  }
-
-  100% {
-    -moz-transform: rotate(-2deg);
-  }
+/* Error Code Hanging Board (Biển treo số 404) */
+div#da-error-wrapper #da-error-code {
+  width: 100%;
+  height: 28.2rem; /* 282px */
+  padding: 12.7rem 1.6rem 0 1.6rem; /* 127px 16px 0 16px */
+  position: relative;
+  margin: auto;
+  margin-bottom: 2rem; /* 20px */
+  z-index: 5;
+  line-height: 1;
+  font-size: 3.2rem; /* 32px */
+  text-align: center;
+  background: url('../../../public/404_img/error-hanger.png') no-repeat center center;
+  background-size: 100% 100%;
+  transform-origin: center top;
+  animation: error-swing 2s ease-in-out infinite alternate;
 }
 
+div#da-error-wrapper #da-error-code span {
+  font-size: 9.6rem; /* 96px */
+  display: block;
+}
+
+/* Arrows Animation */
+div#da-wrapper .fa-chevron-right {
+  position: absolute;
+  left: 0;
+  animation: arrowRight 1s linear infinite;
+}
+
+div#da-wrapper .fa-chevron-left {
+  position: absolute;
+  right: 0;
+  animation: arrowLeft 1s linear infinite;
+}
+
+/* KEYFRAMES (Đã gộp gọn và dùng rem cho transform) */
 @keyframes error-swing {
-  0% {
-    transform: rotate(1deg);
-  }
-
-  100% {
-    transform: rotate(-2deg);
-  }
-}
-
-@-webkit-keyframes arrowRight {
-  0% {
-    opacity: 1;
-    -webkit-transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-    -webkit-transform: translateX(20px);
-  }
-}
-
-@-moz-keyframes arrowRight {
-  0% {
-    opacity: 1;
-    -moz-transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-    -moz-transform: translateX(20px);
-  }
+  0% { transform: rotate(1deg); }
+  100% { transform: rotate(-2deg); }
 }
 
 @keyframes arrowRight {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-}
-
-@-webkit-keyframes arrowLeft {
-  0% {
-    opacity: 1;
-    -webkit-transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-    -webkit-transform: translateX(-20px);
-  }
-}
-
-@-moz-keyframes arrowLeft {
-  0% {
-    opacity: 1;
-    -moz-transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-    -moz-transform: translateX(-20px);
-  }
+  0% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(2rem); } /* 20px */
 }
 
 @keyframes arrowLeft {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
+  0% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-2rem); } /* -20px */
 }

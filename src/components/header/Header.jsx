@@ -8,6 +8,7 @@ import { userDetailApi } from "services/user";
 import "./index.scss";
 import { useEffect } from "react";
 import { useState } from "react";
+import { logoutAPI } from "services/user";
 
 
 
@@ -17,16 +18,22 @@ export default function Header() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const handleLogout = () => {
-    localStorage.removeItem(USER_INFO_KEY);
-    dispatch(setUserInfoAction(null));
-    navigate('/');
-  }
+  const handleLogout = async () => {
+    try {
+      await logoutAPI();
+    } catch (error) {
+      console.error("Lỗi logout server:", error);
+    } finally {
+      localStorage.removeItem(USER_INFO_KEY);
+      dispatch(setUserInfoAction(null));
+      navigate('/');
+    }
+  };
 
   const { state: userDetail = [] } = useAsync({
-    service: () => userDetailApi(userState.userInfor.taiKhoan),
+    service: () => userDetailApi(userState.userInfor?.user_inf?.id),
     dependencies: [userState.userInfor],
-    codintion: userState.userInfor,
+    codintion: !!userState.userInfor?.user_inf?.id,
   });
 
   const [render, setRender] = useState([]);
@@ -34,7 +41,7 @@ export default function Header() {
 
   useEffect(() => {
     // console.log(userState.userInfor? 'true': 'false')
-    if (userDetail.length !== 0) {
+    if (userDetail?.thongTinDatVe) {
       let render_card1 =
         userDetail.thongTinDatVe?.map(ele => {
           return [
@@ -127,7 +134,7 @@ export default function Header() {
                   <tr>
                     <td style={{ textAlign: 'right', fontWeight: 700 }} colSpan={6}>Total price:
                       <span>{
-                        ' '+sumTotal(render).toLocaleString('it-IT', { style: 'currency', currency: 'VND' })
+                        ' ' + sumTotal(render).toLocaleString('it-IT', { style: 'currency', currency: 'VND' })
                       }
                       </span>
                     </td>
@@ -210,7 +217,7 @@ export default function Header() {
                 >
                   Đăng xuất
                 </button>
-                <p className="my-0">Xin chào! {userState.userInfor.hoTen} </p>
+                <p className="my-0">Xin chào! {userState.userInfor?.user_inf?.username} </p>
               </div>
             </div>
           )}

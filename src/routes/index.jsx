@@ -6,6 +6,7 @@ import BranchesTable from "pages/theater-management/BranchesTable";
 import ShowTimesManagement from "pages/theater-management/ShowTimesManagement";
 import TheatersManagement from "pages/theater-management/TheaterManagement";
 import CreateTheater from "pages/CreateTheater/CreateTheater";
+import Payment from "pages/payment/Payment";
 
 const Login = lazy(() => import("pages/login/Login"));
 const Register = lazy(() => import("pages/register/Register"));
@@ -54,8 +55,12 @@ export default function Router() {
           element: <AuthGuards />,
           children: [
             {
-              path: "/booking/:maLichChieu",
+              path: "/booking/:id",
               element: <Booking />,
+            },
+            {
+              path: "/booking/payment/:id",
+              element: <Payment />,
             },
           ],
         },

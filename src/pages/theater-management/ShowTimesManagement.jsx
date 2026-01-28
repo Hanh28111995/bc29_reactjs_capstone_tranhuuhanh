@@ -31,7 +31,7 @@ export default function ShowtimeManagement() {
         const key = keyword.toLowerCase().trim();
 
         return data.filter(ele =>
-            (ele.movie?.title?.toLowerCase().includes(key)) ||
+            (ele.id_movie?.title?.toLowerCase().includes(key)) ||
             (ele.theater?.name?.toLowerCase().includes(key))
         );
     }, [data, keyword]);
@@ -49,12 +49,12 @@ export default function ShowtimeManagement() {
     const columns = [
         {
             title: 'Phim',
-            dataIndex: ['movie', 'title'],
+            dataIndex: ['id_movie', 'title'],
             key: 'movieTitle',
             render: (text, record) => (
                 <Space direction="vertical" size={0}>
                     <b style={{ color: '#1677ff' }}>{text}</b>
-                    <small style={{ color: '#8c8c8c' }}>ID: {record.movie?._id?.slice(-6)}</small>
+                    {/* <small style={{ color: '#8c8c8c' }}>ID: {record.movie?._id?.slice(-6)}</small> */}
                 </Space>
             ),
         },

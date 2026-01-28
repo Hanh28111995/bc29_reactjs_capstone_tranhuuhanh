@@ -1,31 +1,77 @@
-* {
+/* 1. THIẾT LẬP GỐC (ROOT) */
+html {
+  /* 16px * 62.5% = 10px. Công thức: Số px / 10 = số rem */
+  font-size: 62.5%;
+  box-sizing: border-box;
+}
+html {
+  font-size: 10px;
+} /* 1rem = 10px */
+
+@media screen and (max-width: 768px) {
+  html {
+    font-size: 8px;
+  } /* 1rem lúc này chỉ còn 8px, toàn bộ Card sẽ thu nhỏ lại 20% */
+}
+@media screen and (max-width: 375px) {
+  html {
+    font-size: 1px;
+  } /* 1rem lúc này chỉ còn 8px, toàn bộ Card sẽ thu nhỏ lại 20% */
+}
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
-  font-family: 'Arial', 'Helvetica', 'sans-serif';
+  box-sizing: inherit;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  /* Đưa font chữ cơ bản về lại 1.4rem (14px) hoặc 1.6rem (16px) */
+  font-size: 1.4rem;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
+/* 2. LAYOUT CHUNG */
 .logo {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 65px;
+  height: 6.5rem; /* 65px */
 }
 
-.ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+.container-fluid {
+  padding-left: 5% !important;
+  padding-right: 5% !important;
+}
+
+/* 3. TYPOGRAPHY */
+h3 {
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1.8rem; /* 18px */
+  font-weight: bold;
+}
+
+h4 {
+  font-size: 1.2rem; /* 12px */
+}
+
+/* 4. ANT DESIGN CUSTOM (Sửa màu sắc & hiệu ứng) */
+.ant-radio-group-solid
+  .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
   color: #cdc197 !important;
   background: #231f20 !important;
   border-color: #231f20 !important;
@@ -39,54 +85,60 @@ code {
   box-shadow: none !important;
 }
 
+.movie-list-row .ant-col-16 {
+  max-width: 70%;
+}
+.homeCarousel .ant-col-16 {
+  max-width: 70%;
+}
+
+/* 5. COMPONENTS */
 .btn-more-infor {
   width: 60%;
-  height: 50px;
-  bottom: 20px;
-  border: 1px solid #c0b687;
+  height: 5rem; /* 50px */
+  border: 0.1rem solid #c0b687;
   color: #c0b687;
   font-weight: bold;
   background-color: rgba(46, 46, 46, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 10px;
-  font-size: 12px;
-  border-radius: 5px;
-  margin: 5px;
+  font-size: 1.2rem; /* 12px */
+  border-radius: 0.5rem; /* 5px */
+  margin: 0.5rem; /* 5px */
   outline: none !important;
+  transition: background-color 0.3s;
 }
 
 .btn-more-infor:hover {
   background-color: rgba(46, 46, 46, 1);
 }
 
-h3 {
-  white-space: pre;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 18px;
-  font-weight: bold ;
+/* Section Tiêu đề Carousel */
+.TitleCarousel {
+  background: #231f20;
+  height: 4rem; /* 40px */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: aliceblue;
+  font-weight: normal;
 }
 
-h4 {
-  font-size: 12px ;
+.TitleCarousel p {
+  margin-bottom: 0;
 }
 
-.container-fluid {
-  padding-left: 5% !important;
-  padding-right: 5% !important;
-}
-
+/* Movie Card & Overlay */
 .overlay {
   background-color: rgba(46, 46, 46, 0.7);
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 350px;
-  padding: 25px;
-  transition: all .5s;
+  height: 35rem; /* 350px */
+  padding: 2.5rem; /* 25px */
+  transition: all 0.5s;
   opacity: 0;
   display: flex;
   flex-direction: column;
@@ -98,9 +150,9 @@ h4 {
   background-color: transparent;
   position: absolute;
   top: 40%;
-  transform: translateY(-40%);
   left: 0;
   width: 100%;
+  transform: translateY(-40%);
   display: none;
   flex-direction: column;
   align-items: center;
@@ -114,37 +166,23 @@ h4 {
   display: flex;
 }
 
-@media screen and (max-width: 1023px) {
+/* 6. RESPONSIVE */
+@media screen and (max-width: 102.3rem) {
+  /* 1023px */
+  html {
+    /* Thu nhỏ tỷ lệ font toàn trang trên tablet/mobile */
+    font-size: 55%;
+  }
+
   .card .overlay {
     background-color: transparent;
   }
 
   .btn-cover {
-    left: 0;
     top: auto;
-    bottom: 100px;
+    bottom: 10rem; /* 100px */
     transform: translateY(0);
     display: flex;
     flex-direction: row;
   }
-}
-
-.TitleCarousel {
-  background: #231f20;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  color: aliceblue;
-  font-weight: normal;
-  margin-bottom: 0;
-  align-items: center;
-
-}
-
-.TitleCarousel p {
-  margin-bottom: 0;
-}
-
-.ant-col-16 {
-  max-width: 70%;
 }

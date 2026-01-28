@@ -4,21 +4,16 @@
   }
 
   .ant-carousel {
-    .slick-next {
-      &::before {
-        content: '';
-      }
-    }
-
+    .slick-next,
     .slick-prev {
       &::before {
-        content: '';
+        content: "";
       }
     }
   }
 
   .table {
-    margin-bottom: 0px;
+    margin-bottom: 0;
 
     td {
       cursor: pointer;
@@ -36,44 +31,38 @@
 
       &::after {
         background-color: rgba(46, 46, 46, 0.8) !important;
+        left: 50% !important;
+        bottom: 0.5rem; /* 5px */
       }
     }
 
-    .active {
+    .active,
+    .inactive {
       color: #fff;
       position: relative;
       z-index: 2;
 
       &::after {
-        content: '';
+        content: "";
         position: absolute;
-        background-color: burlywood;
         border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        left: 50%;
-        bottom: 8px;
+        width: 3rem; /* 30px */
+        height: 3rem; /* 30px */
+        left: 50% !important;
+        bottom: 0.5rem; /* 8px */
         transform: translateX(-50%) !important;
         z-index: -1;
       }
     }
 
+    .active::after {
+      background-color: burlywood;
+    }
+
     .inactive {
       color: black;
-      position: relative;
-      z-index: 2;
-
       &::after {
-        content: '';
-        position: absolute;
         background-color: transparent;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        left: 50%;
-        bottom: 8px;
-        transform: translateX(-50%);
-        z-index: -1;
       }
     }
   }
@@ -82,42 +71,38 @@
     font-weight: bold;
 
     em {
-      font-size: 34px;
-      margin: 0 15px 0 0;
-      border-bottom: 2px solid #231f20;
-      font-family: 'Linux Libertine';
+      font-size: 3.4rem; /* 34px */
+      margin: 0 1.5rem 0 0; /* 15px */
+      border-bottom: 0.2rem solid #231f20; /* 2px */
+      font-family: "Linux Libertine";
       color: #231f20;
       font-weight: bold;
       font-style: normal;
+      display: inline-block; // Đảm bảo border-bottom hiển thị đúng
     }
   }
 
+  /* Responsive Mobile */
   @media only screen and (max-width: 500px) {
-    min-width: 300px;
+    /* 500px */
+    min-width: 30rem; /* 300px */
     width: 100%;
-    table {
 
+    table {
       th,
       td {
-        padding: 0.2rem;
+        padding: 0.2rem; /* 2px */
       }
 
-      .inactive, .active {
+      .inactive,
+      .active {
         &::after {
-          content: '';
-          position: absolute;
-          border-radius: 50%;
-          width: 25px !important;
-          height: 25px !important;
-          left: 50%;
-          bottom: 2px !important;
-          transform: translateX(-50%);
-          z-index: -1;
+          width: 2.5rem !important; /* 25px */
+          height: 2.5rem !important; /* 25px */
+          bottom: 0.2rem !important; /* 2px */
         }
       }
     }
-
-
   }
 }
 
@@ -131,23 +116,39 @@
   }
 
   .box_select {
-    border-radius: 10px;
-    border: 1px burlywood solid;
-    margin-right: 5px;
-    margin-bottom: 5px;
+    display: inline-block; // Đảm bảo padding và margin hoạt động tốt trên thẻ a
+    border-radius: 1rem; /* 10px */
+    border: 0.1rem burlywood solid; /* 1px */
+    margin-right: 0.5rem; /* 5px */
+    margin-bottom: 0.5rem; /* 5px */
     text-align: center;
-    padding-top: 7px;
+    padding: 0.7rem 1rem 0; /* padding-top 7px, thêm padding ngang để cân đối */
+    height: 3.5rem; /* 35px - Tùy chỉnh cho khớp với nút Đặt vé */
+    text-decoration: none;
+    transition: background-color 0.2s;
 
     &:hover {
       background-color: #dad2b4;
     }
-
-    text-decoration: none;
   }
+}
+@media only screen and (max-width: 375px) {
+  .Calendar {
+    margin-top: 3rem;
 
-  @media only screen and (max-width: 500px) {
-    a {
-      font-size: 0.8rem;
+    .ant-row .ant-col {
+      max-width: 100% !important;
+      .ant-carousel .slick-slider .slick-arrow {
+        display: none !important;        
+      }
+      th, tr{
+        font-size: 1rem;
+      }
     }
   }
+  .Calendar table .inactive::after, .Calendar table .active::after {
+        width: 2rem !important;
+        height: 2rem !important;
+        bottom: 0.2rem !important;
+    }
 }

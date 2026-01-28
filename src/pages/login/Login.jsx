@@ -25,22 +25,18 @@ export default function Login() {
     event.preventDefault();
     try {
       const result = await loginAPI(state);
-      localStorage.setItem(USER_INFO_KEY, JSON.stringify(result.data.content));
-      dispatch(setUserInfoAction(result.data.content));
-      notification.success({
-        description: ` Log in success`,
-      })
+      const userData = result.data.content;
+      localStorage.setItem(USER_INFO_KEY, JSON.stringify(userData));
+      dispatch(setUserInfoAction(userData));
+      notification.success({ description: "Đăng nhập thành công!" });
       navigate("/");
-      // window.location.reload()
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "Đăng nhập thất bại";
+      notification.error({ description: errorMsg });
     }
-    catch (err) {
-      notification.warning({
-        description: `${err.response.data.content}`,
-      });
-    }
-  }
+  };
   return (
-    <form className="w-25 mx-auto my-5" onSubmit={handleSubmit} style={{ caretColor: 'black' }}>
+    <form className="mx-auto my-5" onSubmit={handleSubmit} style={{ caretColor: 'black' }}>
       <div className="form-group">
         <label>Tài khoản</label>
         <input

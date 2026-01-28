@@ -1,118 +1,120 @@
-import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import Chair from "modules/chair/Chair";
-import { bookingTicketAPI, fetchRoomListAPI } from "services/booking";
 import "./index.scss";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
+import { fetchShowtimesCusAPI } from "services/customer";
+import SeatsRendering from "modules/seatsRendering/seatsRendering";
+import { useSelector } from "react-redux";
+import { notification } from "antd/lib";
+import moment from "moment";
 
 export default function Booking() {
   const [danhSachGhe, setdanhSachGhe] = useState([]);
-  // const [roomList, setRoomList] = useState({});
   const params = useParams();
   const navigate = useNavigate();
+  const userState = useSelector((state) => state.userReducer);
+  const [RowCol, setRowCol] = useState([]);
 
-  // useEffect(() => {
-  //   fetchRoomList();
-  // }, []);
-
-  // const fetchRoomList = async () => {
-  //   const result = await fetchRoomListAPI(params.maLichChieu);
-  //   setRoomList(result.data.content);
-  //   console.log(result);
-  // };
-
-  const { state: roomList = [] } = useAsync({
-    dependencies: [],
-    service: () => fetchRoomListAPI(params.maLichChieu),
+  const { state: data = [] } = useAsync({
+    service: () => fetchShowtimesCusAPI(params.id),
+    codintion: !!userState.userInfor?.user_inf?.id,
+    dependencies: [params.id && userState.userInfor?.user_inf?.role]
   });
 
-  const handleSelect = (selectChair) => {
-    const data = [...danhSachGhe];
-    const idx = data.findIndex((ele) => ele.tenGhe === selectChair.tenGhe);
-    if (idx !== -1) {
-      data.splice(idx, 1);
-    } else {
-      data.push(selectChair);
+  useEffect(() => {
+    if (data?.seats && data.seats.length > 0) {
+      const seats = data.seats;
+      let maxRowNumber = 0;
+      let maxCol = 0;
+
+      seats.forEach(seat => {
+        const rowPart = seat.seatNumber.match(/[A-Z]+/)[0];
+        const rowNum = rowPart.charCodeAt(0) - 64;
+        const colPart = parseInt(seat.seatNumber.match(/\d+/)[0]);
+
+        if (rowNum > maxRowNumber) maxRowNumber = rowNum;
+        if (colPart > maxCol) maxCol = colPart;
+      });
+      setRowCol([maxRowNumber, maxCol]);
     }
-    setdanhSachGhe(data);
+  }, [data]);
+
+  const handleSelect = (type, selectChair) => {
+    setdanhSachGhe((prev) => {
+      const idx = prev.findIndex((ele) => ele.seatNumber === selectChair.seatNumber);
+      if (type === "deselect") return prev.filter((ele) => ele.seatNumber !== selectChair.seatNumber);
+      if (type === "select") {
+        if (idx !== -1) return prev;
+        return [...prev, selectChair];
+      }
+      return prev;
+    });
   };
 
   const handleSubmitTicket = async () => {
-    const danhsachVe = danhSachGhe.map((ele) => {
-      return {
-        maGhe: ele.maGhe,
-        giaVe: ele.giaVe,
-      };
+    if (danhSachGhe.length === 0) return notification.warning({ message: "Vui lòng chọn ghế!" });
+    navigate(`/booking/payment/${params.id}`, {
+      state: {
+        bookingData: danhSachGhe,
+        movieInfor: data?.id_movie,
+        theater: data?.theater,
+        time: moment(data?.startTime).format('DD/MM/YYYY HH:mm')
+      }
     });
-    const submitData = {
-      maLichChieu: params.maLichChieu,
-      danhsachVe,
-    };
-    await bookingTicketAPI(submitData);
-    alert("ĐẶT VÉ THÀNH CÔNG.");
-    navigate("/");
   };
 
-  return roomList?.thongTinPhim ? (
+  return (
     <div className="container-fluid bookingPage">
-      <div className="row w-100 mx-auto my-5">
-        <div className="col-3 mb-4">
-          <img
-            className="img-fluid"
-            src={roomList.thongTinPhim.hinhAnh}
-            alt=""
-          />
-          <h2 className="my-3 " style={{ fontSize: "16px", fontWeight: "bold" }}>Tên phim: <br />{roomList.thongTinPhim.tenPhim}</h2>
-          <p>
-            Ghế:
-            {danhSachGhe.map((ele) => (
-              <span key={ele.tenGhe} className="badge badge-success">
-                {ele.tenGhe}
-              </span>
-            ))}
-          </p>
-          <p>
-            Tổng tiền:
-            {danhSachGhe
-              .reduce((previousValue, currentValue) => {
-                previousValue += currentValue.giaVe;
-                return previousValue;
-              }, 0)
-              .toLocaleString()}
-          </p>
-          <button className="btn btn-info mb-3" onClick={handleSubmitTicket}>
-            ĐẶT VÉ
+      <div className="booking-wrapper">
+        {/* Sidebar Thông tin */}
+        <div className="booking-sidebar">
+          <div className="poster-container">
+            <img className="movie-banner" src={data?.id_movie?.banner} alt={data?.id_movie?.title} />
+          </div>
+
+          <div className="info-item">
+            <label>Tên phim:</label>
+            <p className="highlight">{data?.id_movie?.title}</p>
+          </div>
+
+          <div className="info-item">
+            <label>Tên rạp:</label>
+            <p className="highlight">
+              {data?.theater?.branch} <br />
+              <span>Phòng {data?.theater?.name}</span>
+            </p>
+          </div>
+
+          <div className="info-item">
+            <label>Thời gian:</label>
+            <p className="highlight">{moment(data?.startTime).format('DD/MM/YYYY HH:mm')}</p>
+          </div>
+
+          <div className="info-summary">
+            <p className="selected-seats">
+              Ghế đã chọn: <span>{danhSachGhe.map(el => el.seatNumber).join(", ") || "Chưa chọn"}</span>
+            </p>
+            <p className="total-price">
+              Tổng tiền: <b>{danhSachGhe.reduce((total, el) => total + el.seatType.price, 0).toLocaleString()} VNĐ</b>
+            </p>
+          </div>
+
+          <button className="btn-submit-booking" onClick={handleSubmitTicket}>
+            ĐẶT VÉ
           </button>
         </div>
-        <div className="col-9 text-center my-auto mb-4">
-          <ul>
-            <li><span style={{ backgroundColor: 'burlywood' }}> &ensp;&ensp;</span>&ensp;Ghế VIP</li>
-            <li><span style={{ backgroundColor: '#dad2b4' }}> &ensp;&ensp;</span>&ensp;Ghế trống</li>
-            <li><span style={{ backgroundColor: '#856307' }}> &ensp;&ensp;</span>&ensp;Ghế đã đặt</li>
-            <li><span style={{ backgroundColor: 'mediumaquamarine' }}> &ensp;&ensp;</span>&ensp;Ghế được chọn</li>
-          </ul>
-          <div className="screen mx-auto ">
-            <h2 className="wthree">Screen this way</h2>
-          </div>
-          <div className="d-screen">
-            {roomList.danhSachGhe.map((ele, idx) => {
-              return (
-                <React.Fragment key={ele.tenGhe}>
-                  {((idx + 1) === 1) && <span>&emsp;</span>}
-                  <Chair item={ele} idx={idx + 1} handleSelect={handleSelect} />
-                  {(idx + 1) % 16 === 0 && <br />}
-                  {(((idx + 1) % 8) === 0) && <span>&emsp;</span>}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        </div>
 
+        {/* Khu vực chọn ghế */}
+        <div className="booking-seats-area">
+          <div className="screen-divider">Màn hình</div>
+          <SeatsRendering
+            data={data?.seats || []}
+            mode={userState.userInfor?.user_inf.role}
+            onAction={handleSelect}
+            selectedSeats={danhSachGhe}
+          />
+        </div>
       </div>
     </div>
-  ) : (
-    ""
   );
 }
-
-

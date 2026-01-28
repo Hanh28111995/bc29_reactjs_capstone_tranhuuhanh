@@ -1,14 +1,70 @@
 .homeCarousel {
   .ant-carousel {
+    .slick-list {
+      height: 100%;
+      .slick-slide {
+        height: 100%;
+      }
+    }
     .slick-next {
       &::before {
-        content: '';
+        content: "";
       }
     }
 
     .slick-prev {
       &::before {
-        content: '';
+        content: "";
+      }
+    }
+  }
+}
+.homeCarousel {
+  .carousel-container {
+    // Ép chiều cao cho toàn bộ các lớp lót của Ant Carousel
+    .ant-carousel {
+      .slick-slider,
+      .slick-list,
+      .slick-track {
+        height: 60rem !important;
+      }
+
+      .slick-slide {
+        height: 60rem !important;
+
+        // Đây chính là thẻ div "vô hình" đang chặn height: 100% của bạn
+        & > div {
+          height: 100% !important;
+          display: flex !important; // Giúp các lớp bên trong đồng bộ
+        }
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .homeCarousel {
+    .ant-col-16 {
+      max-width: 100% !important;
+    }
+    .carousel-container {
+      // Ép chiều cao cho toàn bộ các lớp lót của Ant Carousel
+      .ant-carousel {
+        .slick-slider,
+        .slick-list,
+        .slick-track {
+          height: 30rem !important;
+        }
+
+        .slick-slide {
+          height: 30rem !important;
+
+          // Đây chính là thẻ div "vô hình" đang chặn height: 100% của bạn
+          & > div {
+            height: 100% !important;
+            display: flex !important; // Giúp các lớp bên trong đồng bộ
+          }
+        }
       }
     }
   }

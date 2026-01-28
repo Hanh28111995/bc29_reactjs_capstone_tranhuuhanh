@@ -19,6 +19,8 @@ import { fetchTheaterListAPI } from "services/theater";
 import { updateShowTime } from "services/showtime";
 import { addNewShowTime } from "services/showtime";
 import { getShowTimeDetail } from "services/showtime";
+import SeatsRendering from "modules/seatsRendering/seatsRendering";
+import { useSelector } from "react-redux";
 
 // Import các service cần thiết
 
@@ -34,7 +36,7 @@ export default function ShowtimeForm() {
   const [form] = Form.useForm();
   const params = useParams();
   const { notification } = App.useApp();
-
+  const userState = useSelector((state) => state.userReducer);
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
   const [selectedCinema, setSelectedCinema] = useState(null);
@@ -45,7 +47,7 @@ export default function ShowtimeForm() {
 
   // 2. Lấy chi tiết suất chiếu nếu là chế độ Update
   const { state: showtimeDetail, loading } = useAsync({
-    service: () => {      
+    service: () => {
       return getShowTimeDetail(params.id); // Thay bằng hàm lấy chi tiết
     },
     dependencies: [params.id],
@@ -78,7 +80,7 @@ export default function ShowtimeForm() {
         const dataForForm = {
           ...showtimeDetail,
           cinemaName: cinemaName, // Thêm tên rạp vào form để Select Rạp hiển thị được
-          movie: showtimeDetail.movie?._id || showtimeDetail.movie,
+          movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
           theater: showtimeDetail.theater?._id || showtimeDetail.theater,
           startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime) : null,
         };
@@ -126,7 +128,7 @@ export default function ShowtimeForm() {
         // Convert dayjs object sang ISO string cho MongoDB
         startTime: values.startTime ? values.startTime.toISOString() : null,
       };
-
+      console.log(payload)
       if (params.id) {
         // Chế độ UPDATE (gửi kèm ID trong body như bạn yêu cầu ở API)
         await updateShowTime({ id: params.id, ...payload });
@@ -137,7 +139,7 @@ export default function ShowtimeForm() {
         notification.success({ message: "Thêm suất chiếu mới thành công!" });
       }
 
-      navigate("/admin/showtimes");
+      // navigate("/admin/showtimes");
     } catch (error) {
       notification.error({
         message: "Thao tác thất bại",
@@ -249,6 +251,13 @@ export default function ShowtimeForm() {
             )}
           </div>
         </Row>
+
+        <SeatsRendering
+          data={showtimeDetail?.seats || []}
+          mode={userState.userInfor?.user_inf.role}
+          onAction
+          selectedSeats={[]}
+        />
 
         <Form.Item style={{ marginTop: 24 }}>
           <Button

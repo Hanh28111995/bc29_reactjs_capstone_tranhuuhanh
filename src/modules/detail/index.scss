@@ -1,45 +1,138 @@
+/* Chuyển đổi dựa trên Root Font-size: 10px (62.5%) */
+
 .num {
-    display: inline-block;
-    vertical-align: bottom;
-    padding-right: 10px;
-    font-family: 'linlivertine';
-    color: #231f20;
-    font-size: 28px;
-    font-style: italic;
-    font-weight: bold;
-    line-height: 24px;
-    padding-bottom: 2px;
+  display: inline-block;
+  vertical-align: bottom;
+  padding-right: 1rem; /* 10px */
+  font-family: "linlivertine";
+  color: #231f20;
+  font-size: 2.8rem; /* 28px */
+  font-style: italic;
+  font-weight: bold;
+  line-height: 2.4rem; /* 24px */
+  padding-bottom: 0.2rem; /* 2px */
 }
 
 .col-8 {
-    h2 {
-        margin-bottom: 25px !important;
-    }
+  h2 {
+    /* Dùng rem giúp khoảng cách tiêu đề đồng bộ với font chữ */
+    margin-bottom: 2.5rem !important; /* 25px */
+  }
 
-    p span {
-        font-weight: bold;
-    }
+  p span {
+    font-weight: bold;
+  }
 }
 
 .icon_play {
-    position: absolute;
-    top: 50% ;
-    left: 50%;
-    transform: translateX(-50%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Sửa lỗi: Cần cả X và Y để căn giữa tuyệt đối */
+  transform: translate(-50%, -50%);
 
-    &:hover {
-        cursor: pointer;
-    }
+  &:hover {
+    cursor: pointer;
+  }
 }
 
+/* Ant Design Modal Custom */
 .ant-modal-content {
-    background-color: black !important;
+  background-color: black !important;
 }
 
 .ant-modal-footer {
-    display: none !important;
+  display: none !important;
 }
 
 .ant-modal-close {
-    color: white !important;
+  color: white !important;
+  /* Bạn có thể thêm font-size nếu nút đóng quá nhỏ */
+  font-size: 1.6rem;
+}
+// Giả định chuẩn 1rem = 16px
+.movie-detail-container {
+  margin-top: 1rem; // 16px
+  margin-left: auto;
+  margin-right: auto;
+
+  .movie-poster-wrapper {
+    .movie-banner {
+      width: 100%;
+      height: 18.75rem; // 300px / 16
+      object-fit: cover;
+      margin-bottom: 0.5rem; // 8px (tương đương mb-2)
+    }
+
+    .btn-booking {
+      width: 100%;
+      height: 2.1875rem; // 35px / 16
+      margin: 0;
+      background-color: #e50914;
+      color: white;
+      border: none;
+      font-weight: bold;
+      font-size: 0.875rem; // ~14px (thường dùng cho nút nhỏ)
+      transition: opacity 0.3s ease;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .movie-info {
+    h2 {
+      font-weight: bold;
+      font-size: 1.5rem; // 24px
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+
+      span {
+        font-weight: 600;
+        color: #555;
+        margin-right: 0.25rem; // 4px
+      }
+
+      .fa-star {
+        color: #f39c12;
+        font-size: 0.875rem; // Điều chỉnh kích thước sao nếu cần
+      }
+    }
+  }
+
+  .movie-summary {
+    margin-top: 1rem;
+    padding: 0 1rem;
+
+    p {
+      line-height: 1.6; // Giúp đoạn văn tóm tắt dễ đọc hơn
+      font-size: 1rem;
+    }
+
+    span {
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 0.25rem;
+      font-size: 1.5rem;
+    }
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .trailerPage .ant-row .ant-col {
+    position: relative;
+    img:first-child {
+      height: 30rem !important;
+    }
+    .icon_play {
+      height: 7rem !important;
+      left: 50% !important;
+      top: 50% !important;
+    }
+  }
 }

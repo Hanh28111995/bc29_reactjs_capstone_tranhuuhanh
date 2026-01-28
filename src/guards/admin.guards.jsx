@@ -1,27 +1,33 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
-import {notification} from 'antd';
+import { notification } from 'antd';
 import { MaLoaiNguoiDung } from "../enums/common";
 
 export default function AdminGuards() {
-  const userState = useSelector((state) => state.userReducer);
+  const { userInfor } = useSelector((state) => state.userReducer);
   const navigate = useNavigate();
-  useEffect(() => {    
-    if (!userState.userInfor) {
-      return navigate("/login");
+
+  useEffect(() => {
+    if (!userInfor) {
+      navigate("/login");
+      return;
     }
-    if (
-      userState.userInfor?.user_inf &&
-      userState.userInfor?.user_inf.role !== MaLoaiNguoiDung.QuanTri
-    ) 
-    {
+
+
+    const userRole = userInfor.user_inf?.role;
+
+    if (userRole !== MaLoaiNguoiDung.QuanTri) {
       notification.warning({
-        message: "Khach hang ko the truy cap vao trang Admin",
+        message: "Cảnh báo",
+        description: "Khách hàng không thể truy cập vào trang Admin",
       });
-      return navigate("/");
+      navigate("/");
     }
-    
-  }, []);
+
+
+  }, [userInfor, navigate]);
+
+
   return <Outlet />;
 }

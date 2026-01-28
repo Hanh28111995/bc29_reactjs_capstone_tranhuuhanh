@@ -1,14 +1,38 @@
+/* HomePage Styles - Rem Optimized (1rem = 10px) */
+
 .homePage {
   width: 100%;
+
   .ant-row {
     background-color: #dad2b4;
   }
-  .ant-radio-button-wrapper{
-    width: 150px;
-    span
-    {
-      font-size: 14px;
-      font-weight: 300;
+
+  .ant-radio-button-wrapper {
+    /* 150px -> 15rem */
+    width: 15rem; 
+    
+    /* Đảm bảo text căn giữa tốt hơn khi dùng rem */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    span {
+      /* 14px -> 1.4rem */
+      font-size: 1.4rem; 
+      /* 300 thường là Light, đảm bảo font hỗ trợ weight này */
+      font-weight: 300; 
+    }
+  }
+}
+
+/* Mẹo: Nếu trên mobile 150px là quá rộng, bạn có thể thêm: */
+@media screen and (max-width: 50rem) {
+  .homePage {
+    .ant-radio-button-wrapper {
+      width: 12rem; /* Thu nhỏ nút lại một chút trên mobile */
+      span {
+        font-size: 1.2rem;
+      }
     }
   }
 }

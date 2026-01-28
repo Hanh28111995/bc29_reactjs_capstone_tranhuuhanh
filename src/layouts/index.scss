@@ -1,33 +1,64 @@
-.wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    width: 100%;
-    min-width: 576px;
-}
+/* Lưu ý: Đảm bảo file index.css/html của bạn đã có font-size: 62.5% */
 
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  /* 576px -> 57.6rem */
+  form {
+    min-width: 30%;
+  }
+}
+.ant-layout:nth-child(1) {
+  .ant-layout-content {
+    padding-left: 70px ;
+  }
+}
+/* Ant Design Overrides */
 .ant-layout,
 .ant-layout.ant-layout-has-sider {
-    width: auto !important;
+  width: auto !important;
 }
 
 .ant-layout-sider-trigger {
-    position: absolute !important;
+  position: absolute !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  transition: inherit;
 }
 
+/* RESPONSIVE */
+
+/* Tablet & Mobile nhỏ dần (500px -> 50rem) */
+// @media screen and (max-width: 50rem) {
+//     .wrapper {
+//         min-width: 40rem; /* 400px */
+
+//         /* Sửa lại selector cho Slick Slider */
+//         .slick-list .slick-slide {
+//             img {
+//                 height: 40rem !important; /* 400px */
+//                 object-fit: cover; // Thêm để ảnh không bị méo khi ép chiều cao
+//             }
+//         }
+//     }
+// }
+
+/* Mobile cực nhỏ (375px -> 37.5rem) */
 @media screen and (max-width: 500px) {
-    .wrapper {
-        min-width: 400px;
-
-        .slick-list .slick-slide {
-            img {
-                height: 400px !important;
-            }
-        }
+  .wrapper form {
+    min-width: 70%;
+  }
+  .ant-layout {
+    .ant-layout-content {
+      padding-left: 40px !important;
     }
-}
-@media screen and (max-width: 375px) {
-    .wrapper {
-        min-width: 280px
+    .ant-layout-sider-collapsed {
+      width: 50px !important;
+      min-width: 50px !important;
+      max-width: 50px !important;
     }
+  }
 }

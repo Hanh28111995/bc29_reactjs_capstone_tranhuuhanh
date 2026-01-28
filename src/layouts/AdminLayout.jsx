@@ -28,6 +28,7 @@ const items = [
     getItem('Branches', '/admin/branches'),
     getItem('Theaters', '/admin/theater-management'),
     getItem('Showtimes', '/admin/showtimes'),
+    getItem('Tickets', '/admin/tickets'),
   ]),
 ];
 
@@ -56,7 +57,19 @@ function AdminLayout() {
         minHeight: '100vh',
       }}
     >
-      <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+      <Sider collapsible
+        collapsed={!collapsed}
+        onMouseEnter={() => setCollapsed(true)} // Mở khi di chuột vào
+        onMouseLeave={() => setCollapsed(false)}  // Đóng khi di chuột ra
+        onCollapse={(value) => setCollapsed(value)}
+        style={{
+          position: 'absolute', // Chìa khóa để nằm đè lên
+          zIndex: 100,         // Đảm bảo nằm trên bảng
+          height: '100vh',
+          left: 0,
+          transition: 'all 0.2s', // Hiệu ứng trượt mượt mà
+        }}
+      >
         <div className="logo" >
           <a href="/">
             <Image src="https://cybersoft.edu.vn/wp-content/uploads/2021/03/logo-cyber-nav.svg" width={100} preview={false} />
@@ -85,21 +98,22 @@ function AdminLayout() {
         />
         <Content
           style={{
-            margin: '0 16px',
+            margin: '0 16px',            
           }}
         >
-          <Breadcrumb
+          {/* <Breadcrumb
             style={{
               margin: '16px 0',
+              paddingLeft: '50px',
             }}
           >
             <Breadcrumb.Item>{breadcrumb[1]}</Breadcrumb.Item>
             <Breadcrumb.Item>{breadcrumb[2]}</Breadcrumb.Item>
-          </Breadcrumb>
+          </Breadcrumb> */}
           <div
             className="site-layout-background"
             style={{
-              padding: 24,
+              paddingTop: 24,
               minHeight: 360,
             }}
           >

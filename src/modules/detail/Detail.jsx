@@ -1,73 +1,63 @@
-import { useAsync } from "hooks/useAsync";
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import "./index.scss";
 
-
 export default function Detail(props) {
-
   const navigate = useNavigate();
-
-
-
-  // useEffect(() => {
-  //   let Star = [];
-  //   if(movieDetail){
-
-  //   for (let i = 0; i < Math.ceil(movieDetail.danhGia / 2); i++) {
-  //     Star.push(<i key={"y" + i} className="fa-regular fa-star"></i>);
-  //   }
-  //   for (let i = 0; i < (5 - Math.ceil(movieDetail.danhGia / 2)); i++) {
-  //     Star.push(<i key={"n" + i} className="fa-solid fa-star"></i>);
-  //   }
-  //   setOption1(Star);
-  // }
-  // }, [])
 
   const starcount = () => {
     let Star = [];
     if (props.movie) {
-
-      for (let i = 0; i < Math.ceil(props.movie.rating / 2); i++) {
-        Star.push(<i key={"y" + i} className="fa-regular fa-star"></i>);
+      const ratingCount = Math.ceil(props.movie.rating / 2);
+      for (let i = 0; i < ratingCount; i++) {
+        Star.push(<i key={"y" + i} className="fa-solid fa-star"></i>); // Đã đổi sang solid cho sao có màu
       }
-      for (let i = 0; i < (5 - Math.ceil(props.movie.rating / 2)); i++) {
-        Star.push(<i key={"n" + i} className="fa-solid fa-star"></i>);
+      for (let i = 0; i < (5 - ratingCount); i++) {
+        Star.push(<i key={"n" + i} className="fa-regular fa-star"></i>);
       }
     }
     return Star;
   }
 
-  return (
-    <div className="container" >
-      <div className="row mt-3 mx-auto ">
-        <div className="col-12">
+  // Tránh lỗi khi props.movie chưa kịp load
+  if (!props.movie) return <div>Loading...</div>;
 
+  return (
+    <div className="container movie-detail-container">
+      <div className="row mx-auto">
+        <div className="col-12">
           <div className="row">
-            <div className="col-4">
+            {/* Cột trái: Ảnh và Nút */}
+            <div className="col-6 col-md-5 col-lg-4 movie-poster-wrapper">
               <img
-                className="w-100 mb-2"
+                className="movie-banner"
                 src={props.movie.banner}
-                style={{ height: '300px', objectFit: 'cover' }}
-                alt=''
+                alt={props.movie.title}
               />
-              <button className="btn-more-infor mx-0 my-0 w-100" style={{ height: '35px' }} onClick={() => navigate(`/movie/selectT/${props.movie._id}`)}>
-                ĐẶT VÉ
+              <button
+                className="btn-booking"
+                onClick={() => navigate(`/movie/selectT/${props.movie._id}`)}
+              >
+                ĐẶT VÉ
               </button>
             </div>
-            <div className="col-8">
-              <h2 style={{ fontWeight: 'bold' }}>{props.movie.title}</h2>
-              <p><span> Đánh giá  : </span> {starcount()} </p>
-              <p><span>Ngày phát hành :</span> {moment(props.movie.releaseDate).format('DD/MM/YYYY')}</p>
-              <p><span>Đạo diễn :</span> {props.movie.director}</p>
-              <p><span>Thể loại : </span>{props.movie.genre}</p>
-              <p><span>Đối tượng : </span></p>
+
+            {/* Cột phải: Thông tin */}
+            <div className="col-6 col-md-7 col-lg-8 movie-info">
+              <h2>{props.movie.title}</h2>
+              <p><span>Đánh giá:</span> {starcount()}</p>
+              <p><span>Ngày phát hành:</span> {moment(props.movie.releaseDate).format('DD/MM/YYYY')}</p>
+              <p><span>Đạo diễn:</span> {props.movie.director}</p>
+              <p><span>Thể loại:</span> {props.movie.genre}</p>
+              <p><span>Đối tượng:</span> </p>
             </div>
           </div>
-          <div className="row mt-3 px-3">
-            <p > <span>Tóm tắt :</span><br />
-              {props.movie.describe}
+
+          {/* Dòng dưới: Tóm tắt */}
+          <div className="row movie-summary">
+            <p>
+              <span>Tóm tắt:</span><br />
+              <p>{props.movie.describe}</p>
             </p>
           </div>
         </div>

@@ -1,98 +1,201 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, Button, List, Card, Row, Col, Tag } from 'antd';
+import { Tabs, Button, List, Card, Row, Col, Tag, Empty, Space } from 'antd';
 import moment from 'moment';
+import { fetchShowtimesAPI, fetchBranchesAPI } from 'services/general';
+import { useAsync } from 'hooks/useAsync';
+import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-const CinemaBooking = ({ dataSource = [] }) => {
-  // 1. Khởi tạo state là chuỗi rỗng để tránh lỗi "reading undefined"
-  const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedCinema, setSelectedCinema] = useState(null);
+export default function CinemaBooking(props) {
 
-  // 2. Tự động chọn vùng miền đầu tiên khi có dữ liệu từ API
-  useEffect(() => {
-    if (dataSource.length > 0) {
-      setSelectedRegion(dataSource[0]._id);
-    }
-  }, [dataSource]);
+  const param = useParams();
+  const [selectedRegionName, setSelectedRegionName] = useState(null);
+  const [selectCity, setSelectCity] = useState(null);
+  const [selectedCinemaName, setSelectedCinemaName] = useState(null);
+  const [branches, setBranches] = useState([]);
 
-  // 3. Logic tìm vùng miền đang chọn - Dùng trực tiếp item._id
-  const activeRegionData = dataSource.find(item => item._id === selectedRegion);
+
+  const activeRegionData = props.dataSource?.find(region => region.vungMien === selectedRegionName);
+
+  // 1. Khai báo hook useAsync trước
+  const { state: dataShowTimes = [], loading: loadingShowtimes } = useAsync({
+    dependencies: [selectedCinemaName, props.date, param.movieId, selectedRegionName],
+    condition: !!(selectedCinemaName && props.date && param.movieId && selectedRegionName),
+    service: () => fetchShowtimesAPI({
+      branch: selectedCinemaName,
+      date: props.date,
+      idMovie: param.movieId,
+      location: selectedRegionName,
+    }),
+  });
+
+  // 2. Sau đó mới định nghĩa các biến phụ thuộc vào dataShowTimes  
+  const spans = { col1: 6, col2: 6, col3: 6 };
+
 
   return (
-    <Card style={{ backgroundColor: '#fff', borderRadius: '8px' }}>
-      <Row gutter={24}>
-        {/* CỘT BÊN TRÁI: RẠP */}
-        <Col span={12} style={{ borderRight: '1px solid #f0f0f0' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Rạp</h2>
+    <Card style={{ borderRadius: '8px', minHeight: '600px', border: '1px solid #f0f0f0', overflow: 'hidden' }}>
+      <Row gutter={24} wrap={false} style={{ display: 'flex' }}>
+
+        {/* CỘT 1, 2, 3 giữ nguyên */}
+        <Col span={spans.col1}>
+          <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Khu vực</h2>
           <Tabs
             tabPosition="left"
-            activeKey={selectedRegion}
-            onChange={(key) => setSelectedRegion(key)}
-            items={dataSource.map((item) => ({
-              key: item._id, // Key bây giờ là chuỗi ID trực tiếp
-              label: `${item.vungMien} (${item.cumRap.length})`,
-              children: (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '10px' }}>
-                  {item.cumRap.map((rap, index) => (
-                    <Button
-                      key={index}
-                      type={selectedCinema === rap ? 'primary' : 'default'}
-                      onClick={() => setSelectedCinema(rap)}
-                      style={{
-                        height: 'auto',
-                        padding: '8px 16px',
-                        backgroundColor: selectedCinema === rap ? '#1890ff' : '#eee',
-                        border: 'none',
-                        color: selectedCinema === rap ? '#fff' : '#333'
-                      }}
-                    >
-                      {rap}
-                    </Button>
-                  ))}
-                </div>
-              ),
+            activeKey={selectedRegionName}
+            onChange={(name) => {
+              setSelectedRegionName(name);
+              setSelectCity(null);
+              setBranches([]);
+              setSelectedCinemaName(null);
+            }}
+            items={props.dataSource.map((item) => ({
+              key: item.vungMien,
+              label: item.vungMien,
             }))}
           />
         </Col>
 
-        {/* CỘT BÊN PHẢI: PHIM */}
-        <Col span={12}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Phim</h2>
+        <Col span={spans.col2} style={{ borderLeft: '1px solid #f0f0f0' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px', textAlign: 'center' }}>Thành phố</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {activeRegionData ? (
+              activeRegionData.cumRap?.map((city, index) => (
+                <Button
+                  key={index}
+                  type={selectCity === city ? 'primary' : 'default'}
+                  onClick={async () => {
+                    setSelectCity(city);
+                    setSelectedCinemaName(null);
+                    try {
+                      const res = await fetchBranchesAPI({ location: city });
+                      const data = res.data?.content || res.data || [];
+                      setBranches(data);
+                    } catch (err) { setBranches([]); }
+                  }}
+                >
+                  {city}
+                </Button>
+              ))
+            ) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chọn vùng" />}
           </div>
-
-          <List
-            dataSource={[
-              { id: 1, title: 'THIÊN ĐƯỜNG MÁU', age: '16' },
-              { id: 2, title: 'AVATAR: LỬA VÀ TRO TÀN', age: '13' },
-              { id: 3, title: 'TOM & JERRY: CHIẾC LA BÀN KỲ BÍ', age: 'P' },
-            ]}
-            renderItem={(item) => (
-              <List.Item
-                style={{ cursor: 'pointer', padding: '12px', borderBottom: '1px solid #f0f0f0' }}
-                onClick={() => console.log("Chọn phim:", item.title)}
-              >
-                <Tag color={item.age === 'P' ? 'green' : 'magenta'}>{item.age}</Tag>
-                <span style={{ fontWeight: 'bold' }}>{item.title}</span>
-              </List.Item>
-            )}
-          />
         </Col>
-      </Row>
 
-      {/* FOOTER */}
-      <div style={{
-        marginTop: '20px',
-        padding: '15px',
-        backgroundColor: '#d6cfb5',
-        display: 'flex',
-        gap: '20px',
-        alignItems: 'center'
-      }}>
-        <span>Ngày: <b>{moment().format('DD/MM/YYYY')}</b></span>
-        <span>Rạp: {selectedCinema ? <Tag color="blue">{selectedCinema}</Tag> : "Chưa chọn"}</span>
-      </div>
+        <Col span={spans.col3} style={{ borderLeft: '1px solid #f0f0f0' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px', textAlign: 'center' }}>Chi nhánh</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {selectCity ? (
+              branches.map((item, index) => (
+                <Button
+                  key={index}
+                  type={selectedCinemaName === item.branch ? 'primary' : 'default'}
+                  onClick={() => setSelectedCinemaName(item.branch)}
+                >
+                  {item.branch}
+                </Button>
+              ))
+            ) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chọn TP" />}
+          </div>
+        </Col>
+
+        
+        <Col          
+          flex={selectedCinemaName ? "1" : "0 0 80px"}
+          style={{
+            borderLeft: '1px solid #f0f0f0',
+            transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)', // Hiệu ứng mượt
+            backgroundColor: selectedCinemaName ? '#fff' : '#fafafa',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <h2 style={{
+            fontSize: '16px',
+            fontWeight: 'bold',
+            marginBottom: '16px',
+            textAlign: 'center',
+            opacity: selectedCinemaName ? 1 : 0,// Ẩn tiêu đề khi co lại            
+            display: selectedCinemaName ? 'block' : 'none',// Ẩn tiêu đề khi co lại            
+          }}>
+            Suất chiếu
+          </h2>
+
+          <Space>
+            <div style={{ padding: '0 10px' }}>
+              {selectedCinemaName ? (
+                <List
+                  grid={{ gutter: 12, column: 'auto' }} // Hiển thị dạng lưới, 3 cột mỗi hàng
+                  dataSource={dataShowTimes}
+                  locale={{ emptyText: <Empty description="Hôm nay đã hết suất chiếu" /> }}
+                  renderItem={(item) => {
+                    const isPast = moment(item.startTime).isBefore(moment()); // Kiểm tra giờ đã qua chưa
+
+                    return (
+                      <List.Item style={{ marginBottom: '12px' }}>
+                        <Button
+                          block
+                          disabled={isPast}
+                          style={{
+                            height: 'auto',
+                            padding: '8px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            borderRadius: '6px',
+                            borderColor: isPast ? '#f0f0f0' : '#d9d9d9',
+                            boxShadow: '0 2px 0 rgba(0,0,0,0.02)'
+                          }}
+                          onClick={() => {
+                            console.log("Chọn suất chiếu:", item._id);
+                            // Điều hướng sang trang chọn ghế tại đây
+                          }}
+                        >
+                          {/* Giờ chiếu to, đậm */}
+                          <span style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            color: isPast ? '#bfbfbf' : '#1890ff'
+                          }}>
+                            {moment(item.startTime).format('HH:mm')}
+                          </span>
+
+                          {/* Thông tin phụ nhỏ bên dưới (Ngày hoặc Loại phòng) */}
+                          <span style={{ fontSize: '10px', color: '#999' }}>
+                            {moment(item.startTime).format('DD/MM')}
+                          </span>
+                        </Button>
+                      </List.Item>
+                    );
+                  }}
+                />
+              ) : (
+                <div style={{
+                  writingMode: 'vertical-rl',
+                  color: '#ddd',
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  margin: '20px auto',
+                }}>
+                  <h2 style={{
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    marginBottom: '16px',
+                    textAlign: 'center',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                  }}>
+                    Suất chiếu
+                  </h2>
+                </div>
+              )}
+            </div>
+          </Space>
+        </Col>
+
+      </Row>
     </Card>
   );
 };
 
-export default CinemaBooking;

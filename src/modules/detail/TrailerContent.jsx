@@ -39,8 +39,7 @@ export default function TrailerContent(props) {
                 <p>TRAILER</p>
             </div>
             <div className="ant-row ant-row-center" style={{ backgroundColor: '#dad2b4', justifyItems: 'center' }}>
-                <div className="ant-col ant-col-16 text-center">
-                    <img src={option1} alt="" />
+                <div className="ant-col ant-col-16 text-center">                    
                     <img
                         src={`https://i2.ytimg.com/vi/${option1}/maxresdefault.jpg`}
                         onError={(e) => {
