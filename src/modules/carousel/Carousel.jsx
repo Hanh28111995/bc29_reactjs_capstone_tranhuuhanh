@@ -75,7 +75,7 @@ export default function Carousel() {
           width: "100%",
           height: "100%",
           objectFit: "cover", // Đổi sang cover để không bị hở khoảng trắng
-          objectPosition: "center"
+          objectPosition: "left center"
         }}
       />
     </div>
