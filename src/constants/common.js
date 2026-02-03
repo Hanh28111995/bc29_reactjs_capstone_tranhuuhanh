@@ -1,5 +1,5 @@
 export const TOKEN_CYBERSOFT='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3AiOiJCb290Y2FtcCBTw6FuZyAwNCIsIkhldEhhblN0cmluZyI6IjA1LzAzLzIwMjMiLCJIZXRIYW5UaW1lIjoiMTY3Nzk3NDQwMDAwMCIsIm5iZiI6MTY1NDEwMjgwMCwiZXhwIjoxNjc4MTIyMDAwfQ.FunqYipkHrCbBATBzuJXyjGpZZxDekx1oY2qxW3_yfw'
-export const BASE_URL = 'https://localhost:5000/api';
+export const BASE_URL = 'https://node-js-movie.vercel.app/api';
 export const USER_INFO_KEY = "USER_INFO_KEY";
 export const HOUR = ["09:00:00", "12:00:00", "15:00:00", "18:00:00", "21:00:00"];
 function removeVietnameseTones(str) {

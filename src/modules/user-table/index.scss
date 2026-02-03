@@ -1,27 +1,26 @@
-// Định nghĩa biến để dễ quản lý
 $mobile-breakpoint: 500px;
 
-.movie-table-container {
+.user-table-container {
   width: 100%;
-  min-width: 0; // Quan trọng để flex child không bị tràn
+  min-width: 0;
   box-sizing: border-box;
-  padding: 1.25rem; // 20px
+  padding: 1.25rem;
 
-  .table-header-actions {
-    margin-bottom: 1rem;
+  @media screen and (max-width: $mobile-breakpoint) {
+    padding: 0.5rem;
+  }
+  .table-header {
     display: flex;
-    justify-content: space-between;
-
-    gap: 1rem;
     flex-direction: column;
-
-    .search-input {
-      max-width: 100%;
-      flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    .search-box {
+      width: 100%;
       margin-bottom: 0.5rem;
     }
-
-    .add-btn {
+    .add-user-btn {
       width: 25rem;
       height: 3rem;
       font-size: 1.5rem;
@@ -36,74 +35,92 @@ $mobile-breakpoint: 500px;
         }
       }
     }
+  }
+  // Header chứa Search và Button
+  .table-header-actions {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    .search-input-wrapper {
+      max-width: 25rem;
+      flex: 1;
+      .ant-input-search {
+        .ant-input {
+          font-size: 1.1rem;
+        }
+      }
+    }
+
+    .add-user-btn {
+      width: 15rem; // Cố định theo rem như bạn muốn
+      height: 3rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+
+      @media (max-width: $mobile-breakpoint) {
+        width: 100%;
+        font-size: 0.9rem;
+        height: 2.5rem;
+      }
+    }
 
     @media (max-width: $mobile-breakpoint) {
-      flex-direction: column;
-      align-items: flex-start;
-
-      .search-input {
+      flex-direction: column-reverse;
+      .search-input-wrapper {
         max-width: 100%;
+        width: 100%;
       }
     }
   }
 
-  // Tùy chỉnh Ant Design Table
   .custom-table {
     width: 100%;
+
+    // Ép font to cho toàn bảng
     .ant-table-cell {
-      text-align: center;
-      .action-btns {
-        justify-content: center;
-      }
+      text-align: center !important;
+      padding: 0.8rem 0.5rem !important; // Căn lề hẹp
     }
-    // Style cho Header
+
     .ant-table-thead > tr > th {
-      font-size: 1.5rem;
+      font-size: 1.3rem; // Font to rõ ràng
       font-weight: bold;
-      padding: 0.75rem 0.5rem;
+      background-color: #fafafa;
 
       @media (max-width: $mobile-breakpoint) {
-        font-size: 0.75rem; // Thu nhỏ khi màn hình <= 500px
-        padding: 0.5rem 0.25rem;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.1rem !important;
       }
     }
 
-    // Style cho nội dung dòng
     .ant-table-tbody > tr > td {
       font-size: 1.2rem;
-      padding: 0.75rem 0.5rem;
+      white-space: nowrap;
 
       @media (max-width: $mobile-breakpoint) {
-        font-size: 0.7rem; // Thu nhỏ khi màn hình <= 500px
-        padding: 0.5rem 0.25rem;
+        font-size: 0.7rem;
+        padding: 0.4rem 0.1rem !important;
       }
     }
 
-    // Ép ảnh scale theo rem
-    .movie-banner {
-      width: 15rem;
-      height: auto;
-      border-radius: 0.2rem;
-      object-fit: cover;
-      margin: auto;
-      @media (max-width: $mobile-breakpoint) {
-        width: 2.5rem; // Thu nhỏ ảnh trên mobile
-      }
-    }
-
-    // Cấu hình nút thao tác
     .action-btns {
       display: flex;
-      gap: 0.2rem;
+      gap: 0.5rem;
+      justify-content: center;
 
       .ant-btn {
+        font-size: 1.3rem;
         @media (max-width: $mobile-breakpoint) {
-          font-size: 0.8rem;
+          font-size: 0.9rem;
           padding: 0 0.2rem;
         }
       }
     }
 
+    // Pagination đồng bộ rem
     .ant-pagination {
       margin-top: 1.5rem !important;
       font-size: 0.85rem; // rem cho text phân trang
@@ -131,8 +148,5 @@ $mobile-breakpoint: 500px;
         }
       }
     }
-  }
-  @media screen and (max-width: 500px) {
-    padding: 0;
   }
 }

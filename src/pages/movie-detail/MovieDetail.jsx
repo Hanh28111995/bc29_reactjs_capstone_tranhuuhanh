@@ -297,15 +297,7 @@ export default function MovieDetail() {
                     </div>
                 </div>
             </Card>
-
-            {/* Giao diện DESKTOP (Giữ nguyên cái cũ của bạn nhưng thêm d-none d-md-block) */}
-            <div className="desktop-booking-selection d-none d-md-block">
-                <Card>
-                    <Row gutter={24} wrap={false}>
-                        {/* Nội dung cũ của bạn giữ nguyên ở đây */}
-                    </Row>
-                </Card>
-            </div>
+            
 
             <Calendar onDateChange={(date) => setLocalDate(date)} />
         </div>

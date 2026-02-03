@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { Space, Table, Button, Input, notification, Popconfirm, Tag } from 'antd';
+import { Space, Table, Button, Input, notification, Popconfirm } from 'antd'; // Giữ nguyên các import của bạn
 import { EditOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import { useNavigate } from 'react-router-dom';
 import { useAsync } from "../../hooks/useAsync";
 import { userListApi, deleteUserApi } from 'services/user';
 import { removeVietnameseTones } from 'constants/common';
+import './index.scss'; // Link tới file scss mới
 
 const { Search } = Input;
 
@@ -12,42 +13,30 @@ export default function UserTable() {
   const navigate = useNavigate();
   const [toggle, setToggle] = useState(false);
   const [keyword, setKeyword] = useState("");
-
-  // 1. Khởi tạo Notification Hook của Antd 5
   const [api, contextHolder] = notification.useNotification();
 
-  // Lấy dữ liệu từ API
   const { state: data = [], loading } = useAsync({
     dependencies: [toggle],
     service: userListApi,
   });
 
-  // Logic lọc tìm kiếm (Memoized)
   const userlist = useMemo(() => {
     if (!keyword) return data;
-
     const key = removeVietnameseTones(keyword).toLowerCase().trim();
-
     return data.filter(ele =>
-      removeVietnameseTones(ele.username || "")
-        .toLowerCase()
-        .includes(key)
+      removeVietnameseTones(ele.username || "").toLowerCase().includes(key)
     );
   }, [data, keyword]);
 
-  // Logic xóa người dùng
   const handleDelete = async (id, username) => {
     try {
       await deleteUserApi(id);
-
-      // Sử dụng api từ hook
       api.success({
         message: 'Thành công',
         description: `Người dùng ${username} đã được xóa khỏi hệ thống.`,
         placement: 'topRight',
       });
-
-      setToggle(prev => !prev); // Trigger refetch dữ liệu
+      setToggle(prev => !prev);
     } catch (err) {
       api.error({
         message: 'Lỗi xóa người dùng',
@@ -58,9 +47,9 @@ export default function UserTable() {
 
   const columns = [
     {
-      title: 'STT',
+      title: 'No',
       key: 'index',
-      width: 70,
+      width: '5%',
       render: (_, __, index) => index + 1,
     },
     {
@@ -78,57 +67,49 @@ export default function UserTable() {
       title: 'Số Điện Thoại',
       dataIndex: 'userphone',
       key: 'userphone',
+      width: '15%',
     },
     {
       title: 'Hành động',
       key: 'action',
-      width: 150,
+      width: '10%',
       render: (_, record) => (
-        <Space size="middle">
+        <div className="action-btns">
           <Button
             type="text"
             icon={<EditOutlined style={{ color: '#1677ff' }} />}
             onClick={() => navigate(`/admin/user-management/${record._id}/edit`)}
           />
-
           <Popconfirm
-            title="Xác nhận xóa"
-            description={`Bạn có chắc muốn xóa tài khoản ${record.username}?`}
+            title="Xóa?"
             onConfirm={() => handleDelete(record._id, record.username)}
-            okText="Xóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
           >
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-            />
+            <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
-        </Space>
+        </div>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: '24px' }}>
-      {/* 2. Cần render contextHolder để thông báo hiển thị được */}
+    <div className="user-table-container"> {/* Thay style={{padding: '24px'}} */}
       {contextHolder}
 
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Space direction="vertical" style={{ width: 300 }}>
+      <div className="table-header"> {/* Thay thế div inline-style */}
+        <div className="search-box"> {/* Bọc Search để quản lý width rem */}
           <Search
             placeholder="Tìm kiếm tài khoản..."
             onSearch={setKeyword}
             onChange={(e) => setKeyword(e.target.value)}
-            allowClear
-            enterButton={<SearchOutlined />}
+            className="search-input"
+            size="middle"
           />
-        </Space>
+        </div>
 
         <Button
           type="primary"
           size="large"
+          className="add-user-btn" // Thêm class để chỉnh width rem
           onClick={() => navigate('/admin/user-management/create')}
         >
           + Thêm người dùng
@@ -136,13 +117,14 @@ export default function UserTable() {
       </div>
 
       <Table
-        rowKey="_id" // Đảm bảo trùng với field ID từ API (thường là _id hoặc id)
+        tableLayout='fixed'
+        className="custom-table" // Thêm class để style pagination và font
+        rowKey="_id"
         columns={columns}
         dataSource={userlist}
         loading={loading}
         pagination={{
           pageSize: 10,
-          showTotal: (total) => `Tổng cộng ${total} người dùng`,
         }}
         bordered
       />

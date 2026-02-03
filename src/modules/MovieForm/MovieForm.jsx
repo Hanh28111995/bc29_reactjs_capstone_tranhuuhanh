@@ -1,18 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
-  Button,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  Switch,
-  Image,
-  Select,
-  App,
-  Card,
-  Row,
-  Col,
-  Space
+  Button, DatePicker, Form, Input, InputNumber, Switch,
+  Image, Select, App, Card, Row, Col, Space
 } from "antd";
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
@@ -20,19 +9,12 @@ import { useAsync } from "hooks/useAsync";
 import { fetchMovieDetailAPI, addMovieUploadImage, updateMovieUploadImage } from "services/movie";
 import { GenreList } from "enums/common";
 import { ArrowLeftOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
+import "./index.scss";
 
-// 1. Định nghĩa giá trị mặc định cho trường hợp Thêm mới
 const DEFAULT_VALUES = {
-  title: "",
-  trailer: "",
-  describe: "",
-  releaseDate: null,
-  duration: 120,
-  director: "",
-  genre: [],
-  showing: true,
-  coming: false,
-  rating: 10,
+  title: "", trailer: "", describe: "", releaseDate: null,
+  duration: 120, director: "", genre: [], showing: true,
+  coming: false, rating: 10,
 };
 
 export default function MovieForm() {
@@ -46,17 +28,14 @@ export default function MovieForm() {
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
 
-  // Lấy chi tiết phim nếu có movieId trên URL
   const { state: movieDetail, loading } = useAsync({
     service: () => (params.movieId ? fetchMovieDetailAPI(params.movieId) : Promise.resolve(null)),
     dependencies: [params.movieId],
     condition: !!params.movieId && params.movieId !== "create",
   });
 
-  // 2. Đồng bộ dữ liệu Form dựa trên việc có hay không có movieId
   useEffect(() => {
-    if (params.movieId) {
-      // CHẾ ĐỘ CẬP NHẬT
+    if (params.movieId && params.movieId !== "create") {
       if (movieDetail) {
         const normalized = {
           ...movieDetail,
@@ -71,7 +50,6 @@ export default function MovieForm() {
         setIsChanged(false);
       }
     } else {
-      // CHẾ ĐỘ THÊM MỚI
       form.setFieldsValue(DEFAULT_VALUES);
       setOriginalData(null);
       setImg("");
@@ -80,46 +58,31 @@ export default function MovieForm() {
     }
   }, [movieDetail, params.movieId, form]);
 
-  // 3. Logic kiểm tra thay đổi để bật/tắt nút Save
   const onValuesChange = (_, allValues) => {
-    if (!params.movieId) {
-      // Thêm mới: Chỉ cần có nhập liệu bất kỳ là cho phép Save
-      const hasInput = Object.keys(allValues).some(key => {
-        const val = allValues[key];
-        return val !== DEFAULT_VALUES[key];
-      });
+    if (!params.movieId || params.movieId === "create") {
+      const hasInput = Object.keys(allValues).some(key => allValues[key] !== DEFAULT_VALUES[key]);
       setIsChanged(hasInput || !!file);
       return;
     }
-
-    // Cập nhật: So sánh giá trị hiện tại với dữ liệu gốc ban đầu
     const hasChanged = Object.keys(allValues).some(key => {
       const currentVal = allValues[key];
       const originalVal = originalData?.[key];
-
-      if (key === 'releaseDate') {
-        return !dayjs(currentVal).isSame(originalVal, 'day');
-      }
-      if (Array.isArray(currentVal)) {
-        return JSON.stringify(currentVal) !== JSON.stringify(originalVal);
-      }
+      if (key === 'releaseDate') return !dayjs(currentVal).isSame(originalVal, 'day');
+      if (Array.isArray(currentVal)) return JSON.stringify(currentVal) !== JSON.stringify(originalVal);
       return currentVal !== originalVal;
     });
-
     setIsChanged(hasChanged || !!file);
   };
 
   const handleSave = async (values) => {
     try {
       const formData = new FormData();
-
       const payload = {
         ...values,
         releaseDate: values.releaseDate ? values.releaseDate.format('YYYY-MM-DD') : null,
         genre: Array.isArray(values.genre) ? values.genre.join(', ') : values.genre,
       };
 
-      // Append data vào FormData, bỏ qua các giá trị null/undefined
       Object.keys(payload).forEach(key => {
         if (payload[key] !== null && payload[key] !== undefined) {
           formData.append(key, payload[key]);
@@ -127,29 +90,24 @@ export default function MovieForm() {
       });
 
       if (file) formData.append("File", file, file.name);
-      if (params.movieId) formData.append("id_movie", params.movieId);
+      if (params.movieId && params.movieId !== "create") formData.append("id_movie", params.movieId);
 
-      if (params.movieId) {
+      if (params.movieId && params.movieId !== "create") {
         await updateMovieUploadImage(formData);
-        notification.success({ message: "Cập nhật phim thành công!" });
+        notification.success({ message: "Cập nhật thành công!" });
       } else {
         await addMovieUploadImage(formData);
         notification.success({ message: "Thêm phim mới thành công!" });
       }
-
       navigate("/admin/movie-management");
     } catch (error) {
-      notification.error({
-        message: "Thao tác thất bại",
-        description: error.response?.data?.content || "Vui lòng kiểm tra lại dữ liệu",
-      });
+      notification.error({ message: "Lỗi", description: error.response?.data?.content });
     }
   };
 
   const handleChangeImage = (event) => {
     const fileUploaded = event.target.files[0];
     if (!fileUploaded) return;
-
     const reader = new FileReader();
     reader.readAsDataURL(fileUploaded);
     reader.onload = (e) => {
@@ -161,33 +119,25 @@ export default function MovieForm() {
 
   return (
     <Card
+      className="movie-form-card"
       loading={loading}
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
-          <span>{params.movieId ? "Chỉnh sửa phim" : "Thêm phim mới"}</span>
+          <span>{params.movieId && params.movieId !== "create" ? "Chỉnh sửa phim" : "Thêm phim mới"}</span>
         </Space>
       }
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSave}
-        onValuesChange={onValuesChange}
-        initialValues={DEFAULT_VALUES} // Set giá trị khởi tạo phòng khi render lần đầu
-      >
-        <Row gutter={24}>
-          <Col span={16}>
-            <Form.Item
-              label="Tên Phim"
-              name="title"
-              rules={[{ required: true, message: 'Vui lòng nhập tên phim' }]}
-            >
-              <Input placeholder="Nhập tên phim" />
+      <Form form={form} layout="vertical" onFinish={handleSave} onValuesChange={onValuesChange}>
+        <Row gutter={[24, 0]}>
+          {/* Cột trái: Thông tin chính - 65% trên desktop, 100% trên mobile */}
+          <Col xs={24} lg={16}>
+            <Form.Item label="Tên Phim" name="title" rules={[{ required: true }]}>
+              <Input placeholder="Nhập tên phim" size="large" />
             </Form.Item>
 
             <Form.Item label="Trailer URL" name="trailer" rules={[{ required: true }]}>
-              <Input placeholder="https://youtube.com/..." />
+              <Input placeholder="https://youtube.com/..." size="large" />
             </Form.Item>
 
             <Form.Item label="Mô tả" name="describe" rules={[{ required: true }]}>
@@ -195,55 +145,51 @@ export default function MovieForm() {
             </Form.Item>
 
             <Row gutter={16}>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item label="Ngày khởi chiếu" name="releaseDate" rules={[{ required: true }]}>
-                  <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+                  <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" size="large" />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item label="Thời lượng (phút)" name="duration" rules={[{ required: true }]}>
-                  <InputNumber style={{ width: '100%' }} min={1} />
+                  <InputNumber style={{ width: '100%' }} min={1} size="large" />
                 </Form.Item>
               </Col>
             </Row>
 
             <Form.Item label="Đạo diễn" name="director" rules={[{ required: true }]}>
-              <Input placeholder="Nhập tên đạo diễn" />
+              <Input placeholder="Tên đạo diễn" size="large" />
             </Form.Item>
 
             <Form.Item label="Thể loại" name="genre" rules={[{ required: true }]}>
-              <Select mode="multiple" options={GenreList} placeholder="Chọn thể loại" />
+              <Select mode="multiple" options={GenreList} placeholder="Chọn thể loại" size="large" />
             </Form.Item>
           </Col>
 
-          <Col span={8}>
+          {/* Cột phải: Hình ảnh & Trạng thái - 35% trên desktop, 100% trên mobile */}
+          <Col xs={24} lg={8}>
             <Form.Item label="Hình ảnh (Banner)">
-              <div style={{ marginBottom: 10 }}>
-                <input
-                  type="file"
-                  id="movie-img"
-                  hidden
-                  onChange={handleChangeImage}
-                  accept="image/*"
-                />
+              <div style={{ marginBottom: '0.625rem' }}>
+                <input type="file" id="movie-img" hidden onChange={handleChangeImage} accept="image/*" />
                 <Button
                   icon={<UploadOutlined />}
                   onClick={() => document.getElementById('movie-img').click()}
                   block
+                  size="large"
                 >
                   Chọn ảnh phim
                 </Button>
               </div>
-              <div style={{ textAlign: 'center', border: '1px dashed #d9d9d9', padding: '10px', borderRadius: '8px' }}>
+              <div className="image-preview-wrapper">
                 <Image
                   src={img}
+                  className="preview-img"
                   fallback="https://via.placeholder.com/200x300?text=No+Image"
-                  style={{ maxHeight: 300, objectFit: 'contain' }}
                 />
               </div>
             </Form.Item>
 
-            <Row>
+            <Row className="switch-group" gutter={16}>
               <Col span={12}>
                 <Form.Item label="Đang chiếu" name="showing" valuePropName="checked">
                   <Switch />
@@ -257,21 +203,21 @@ export default function MovieForm() {
             </Row>
 
             <Form.Item label="Đánh giá (1-10)" name="rating" rules={[{ required: true }]}>
-              <InputNumber min={0} max={10} step={0.1} style={{ width: '100%' }} />
+              <InputNumber min={0} max={10} step={0.1} style={{ width: '100%' }} size="large" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item style={{ marginTop: 20 }}>
+        <Form.Item>
           <Button
             type="primary"
             htmlType="submit"
-            size="large"
             icon={<SaveOutlined />}
             disabled={!isChanged}
             block
+            className="submit-btn"
           >
-            {params.movieId ? "CẬP NHẬT PHIM" : "TẠO PHIM MỚI"}
+            {params.movieId && params.movieId !== "create" ? "CẬP NHẬT PHIM" : "TẠO PHIM MỚI"}
           </Button>
         </Form.Item>
       </Form>

@@ -35,9 +35,11 @@ const items = [
 function AdminLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
-  const MenuClick = (value) => {
-    navigate(value.key);
+  const [collapsed, setCollapsed] = useState(true);
+  const MenuClick = (e) => {
+    e.domEvent.stopPropagation();
+    navigate(e.key);
+    setCollapsed(true);
   }
   const breadcrumb = pathname.split('/').map(segment => {
     if (!segment) return ''; // Xử lý trường hợp chuỗi rỗng
@@ -58,12 +60,14 @@ function AdminLayout() {
       }}
     >
       <Sider collapsible
-        collapsed={!collapsed}
-        onMouseEnter={() => setCollapsed(true)} // Mở khi di chuột vào
-        onMouseLeave={() => setCollapsed(false)}  // Đóng khi di chuột ra
+        collapsed={collapsed}
+        onClick={() => setCollapsed(false)}
+        onMouseEnter={() => setCollapsed(false)} 
+        onMouseLeave={() => setCollapsed(true)}  
         onCollapse={(value) => setCollapsed(value)}
+
         style={{
-          position: 'absolute', // Chìa khóa để nằm đè lên
+          position: 'fixed', // Chìa khóa để nằm đè lên
           zIndex: 100,         // Đảm bảo nằm trên bảng
           height: '100vh',
           left: 0,
@@ -79,7 +83,6 @@ function AdminLayout() {
           defaultSelectedKeys={['/admin/movie-management']}
           mode="inline"
           theme="dark"
-          // inlineCollapsed={collapsed}
           items={items}
           selectedKeys={[
             items.find(item => pathname.includes(item.key))?.key ||
@@ -97,19 +100,15 @@ function AdminLayout() {
           }}
         />
         <Content
+          onClick={() => setCollapsed(true)}
           style={{
-            margin: '0 16px',            
+            margin: '0 16px',
           }}
         >
-          {/* <Breadcrumb
-            style={{
-              margin: '16px 0',
-              paddingLeft: '50px',
-            }}
-          >
+          <Breadcrumb>
             <Breadcrumb.Item>{breadcrumb[1]}</Breadcrumb.Item>
             <Breadcrumb.Item>{breadcrumb[2]}</Breadcrumb.Item>
-          </Breadcrumb> */}
+          </Breadcrumb>
           <div
             className="site-layout-background"
             style={{

@@ -1,0 +1,237 @@
+$mobile-breakpoint: 500px;
+
+// Áp dụng cho cả 3 trang quản lý
+.seat-type-container,
+.branches-table-container,
+.theater-management-container,
+.showtime-management-container {
+  padding: 1.25rem;
+  .table-header {
+    display: flex;
+    flex-direction: column;
+    .add-btn {
+      margin-left: auto;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  @media (max-width: $mobile-breakpoint) {
+    padding: 0;
+    .ant-card-body {
+      padding: 0 !important;
+    }
+
+    // Tinh chỉnh riêng cho các nút thao tác trong bảng
+    .ant-table-content .action-btns,
+    .action-btns {
+      display: flex;
+      gap: 0.2rem;
+      justify-content: center;
+      width: 100%;
+
+      .ant-btn {
+        font-size: 0.9rem;
+        padding: 0 0.2rem;
+        width: 1.5rem;
+      }
+    }
+
+    .ant-pro-card {
+      padding-inline: 0rem;
+      padding: 0 1rem;
+      .ant-pro-card-body {
+        padding-inline: 0rem;
+        padding-block: 0;
+        .ant-tag {
+          display: none;
+        }
+        .ant-btn {
+          span:last-child {
+            font-size: 1rem;
+          }
+        }
+      }
+    }
+  }
+
+  // --- TOOLBAR / HEADER (Search & Add Button) ---
+  .table-header-toolbar,
+  .table-header {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    .search-box {
+      width: 100%;
+
+      .ant-input-search .ant-input,
+      .ant-input {
+        font-size: 1.1rem;
+      }
+      button {
+        font-size: 1.2rem; // Chỉnh lại 1.2rem cho cân đối với input
+      }
+      .ant-btn-icon {
+        font-size: 2rem;
+      }
+    }
+
+    // Nút Thêm hoặc Lưu ở trên đầu
+    .save-btn-top,
+    .add-btn {
+      height: 3rem;
+      padding: 0 1.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: $mobile-breakpoint) {
+      flex-direction: column;
+      padding: 0.5rem;
+      .search-box {
+        max-width: 100%;
+        width: 100%;
+        .ant-btn-icon {
+          font-size: 1.2rem;
+        }
+      }
+      .save-btn-top,
+      .add-btn {
+        width: 100%;
+        span {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+
+  // --- CẤU TRÚC BẢNG (Dùng chung cho cả Table thường và Editable) ---
+  .custom-editable-table,
+  .custom-table {
+    .ant-table-thead > tr > th {
+      font-size: 1.2rem;
+      background-color: #fafafa;
+      padding: 0.75rem 0.5rem !important;
+      font-weight: 700;
+    }
+
+    .ant-table-tbody > tr > td {
+      font-size: 1.1rem;
+      padding: 0.6rem 0.5rem !important;
+    }
+
+    // Input trong dòng đang edit
+    .ant-form-item {
+      margin-bottom: 0 !important;
+      .ant-input,
+      .ant-input-number,
+      .ant-input-textarea {
+        font-size: 1.1rem !important;
+        padding: 0.3rem 0.6rem;
+      }
+    }
+
+    @media (max-width: $mobile-breakpoint) {
+      .ant-table-thead > tr > th {
+        font-size: 0.75rem;
+      }
+      .ant-table-tbody > tr > td {
+        font-size: 0.7rem;
+        .ant-tag {
+          font-size: 0.7rem;
+        }
+      }
+    }
+  }
+
+  // Đặc thù cho SeatType
+  .color-input-custom {
+    width: 100%;
+    height: 2.2rem;
+    cursor: pointer;
+    border: 1px solid #d9d9d9;
+    border-radius: 0.25rem;
+  }
+
+  // --- NÚT SAVE ALL DƯỚI CÙNG ---
+  .save-all-wrapper {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    .btn-save-all {
+      height: 3.5rem;
+      width: 18rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+
+      @media (max-width: $mobile-breakpoint) {
+        width: calc(100% - 2rem);
+        height: 3rem;
+        font-size: 1rem;
+        margin: 0 1rem 1rem 1rem;
+      }
+    }
+  }
+
+  // Custom Pagination cho Table thường
+  .ant-pagination {
+    margin: 1.5rem 0.5rem !important;
+    align-items: center;
+    .ant-pagination-item {
+      @media (max-width: $mobile-breakpoint) {
+        height: 1.5rem;
+        line-height: 1.5rem;
+        min-width: 1.5rem;
+        align-items: center;
+        border-radius: 0.3rem;
+      }
+      a {
+        font-size: 1rem;
+        text-align: center;
+      }
+    }
+  }
+}
+
+// .search-box {
+//   // Wrapper ngoài cùng của Search
+//   .ant-input-group-wrapper {
+//     height: 3.2rem; // Chiều cao bạn muốn (ví dụ 3.2rem)
+//     display: block;
+
+//     .ant-input-wrapper {
+//       height: 100%;
+//       display: flex;
+//       align-items: stretch; // Ép các thành phần con cao bằng cha
+
+//       // 1. Chỉnh ô Input (Phần nhập liệu)
+//       .ant-input-affix-wrapper {
+//         height: 100% !important;
+//         font-size: 1.1rem;
+//         border-radius: 0.5rem 0 0 0.5rem; // Bo góc trái
+
+//         input {
+//           height: 100% !important;
+//         }
+//       }
+
+//       // 2. Chỉnh nút Search (Phần Addon)
+//       .ant-input-group-addon {
+//         height: 100%;
+//         vertical-align: top;
+
+//         button.ant-btn-primary.ant-input-search-button {
+//           height: 100% !important;
+//           width: 4.5rem;
+//           font-size: 1.5rem;
+//           display: flex;
+//           justify-content: center;
+//           align-items: center;
+//           border-radius: 0 0.5rem 0.5rem 0; // Bo góc phải
+//         }
+//       }
+//     }
+//   }
+// }

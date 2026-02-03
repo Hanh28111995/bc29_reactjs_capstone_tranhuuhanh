@@ -20,10 +20,10 @@ export default function UserForm() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const params = useParams();
-  
+
   // 1. Antd 5 Notification Hook
   const [api, contextHolder] = notification.useNotification();
-  
+
   const [isChanged, setIsChanged] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [originalData, setOriginalData] = useState({});
@@ -76,16 +76,16 @@ export default function UserForm() {
 
       // Đợi một chút rồi điều hướng về danh sách
       setTimeout(() => navigate("/admin/user-management"), 1000);
-      
+
     } catch (error) {
       const serverMessage = error.response?.data?.message || "Có lỗi xảy ra";
-      
+
       if (error.response?.status === 400 || error.response?.status === 409) {
         api.error({
           message: "Lỗi dữ liệu",
           description: serverMessage,
         });
-        
+
         // Hiển thị lỗi ngay tại field tương ứng nếu server trả về field name trong message
         const fieldName = serverMessage.toLowerCase().includes("email") ? "email" : "username";
         form.setFields([{ name: fieldName, errors: [serverMessage] }]);
@@ -117,9 +117,9 @@ export default function UserForm() {
         onValuesChange={onValuesChange}
         initialValues={{ role: "customer" }}
       >
-        <Form.Item 
-          label="Tài Khoản" 
-          name="username" 
+        <Form.Item
+          label="Tài Khoản"
+          name="username"
           rules={[{ required: true, message: "Tài khoản không được để trống" }]}
         >
           <Input placeholder="Nhập tên tài khoản" disabled={!!userDetail} />
@@ -151,22 +151,43 @@ export default function UserForm() {
             )}
           </Form.Item>
         ) : (
-          <Form.Item 
-            label="Mật khẩu" 
-            name="password" 
+          <Form.Item
+            label="Mật khẩu"
+            name="password"
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
           >
             <Input.Password placeholder="Nhập mật khẩu" />
           </Form.Item>
         )}
 
-        <Form.Item label="Số điện thoại" name="userphone">
-          <Input placeholder="Ví dụ: 090..." />
+        <Form.Item
+          label="Số điện thoại"
+          name="userphone"
+          rules={[
+            {
+              required: true,
+              message: 'Vui lòng nhập số điện thoại'
+            },
+            {
+              pattern: /^[0-9]+$/,
+              message: 'Số điện thoại chỉ được chứa các ký tự số',
+            },
+            {
+              min: 9,
+              message: 'Số điện thoại phải có ít nhất 9 ký tự',
+            },
+            {
+              max: 12,
+              message: 'Số điện thoại không được vượt quá 12 ký tự',
+            }
+          ]}
+        >
+          <Input placeholder="Ví dụ: 090..." maxLength={12} />
         </Form.Item>
 
-        <Form.Item 
-          label="Email" 
-          name="email" 
+        <Form.Item
+          label="Email"
+          name="email"
           rules={[
             { required: true, message: "Vui lòng nhập email" },
             { type: 'email', message: 'Email không đúng định dạng' }

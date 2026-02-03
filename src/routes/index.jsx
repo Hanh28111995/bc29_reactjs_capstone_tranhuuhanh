@@ -7,6 +7,7 @@ import ShowTimesManagement from "pages/theater-management/ShowTimesManagement";
 import TheatersManagement from "pages/theater-management/TheaterManagement";
 import CreateTheater from "pages/CreateTheater/CreateTheater";
 import Payment from "pages/payment/Payment";
+import TicketManagement from "pages/ticket-management/TicketManagement";
 
 const Login = lazy(() => import("pages/login/Login"));
 const Register = lazy(() => import("pages/register/Register"));
@@ -116,6 +117,10 @@ export default function Router() {
             {
               path: '/admin/showtimes',
               element: <ShowTimesManagement />,
+            },
+            {
+              path: '/admin/tickets',
+              element: < TicketManagement />,
             },
             {
               path: '/admin/movie-management/create',

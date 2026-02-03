@@ -7,9 +7,11 @@ import {
     DeleteOutlined,
     PlusOutlined,
     CalendarOutlined,
+    SearchOutlined
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
 import { getAllShowTimes, deleteOneShowTime } from 'services/showtime';
+import './index.scss'; // Import file SCSS chung
 
 const { Search } = Input;
 
@@ -19,13 +21,11 @@ export default function ShowtimeManagement() {
     const [keyword, setKeyword] = useState("");
     const { notification } = App.useApp();
 
-    // 1. Lấy dữ liệu suất chiếu từ backend
     const { state: data = [], loading } = useAsync({
         dependencies: [toggle],
         service: getAllShowTimes,
     });
 
-    // 2. Bộ lọc tìm kiếm theo tên phim hoặc tên phòng chiếu
     const showtimeList = useMemo(() => {
         if (!keyword) return data;
         const key = keyword.toLowerCase().trim();
@@ -51,42 +51,42 @@ export default function ShowtimeManagement() {
             title: 'Phim',
             dataIndex: ['id_movie', 'title'],
             key: 'movieTitle',
-            render: (text, record) => (
-                <Space direction="vertical" size={0}>
-                    <b style={{ color: '#1677ff' }}>{text}</b>
-                    {/* <small style={{ color: '#8c8c8c' }}>ID: {record.movie?._id?.slice(-6)}</small> */}
-                </Space>
+            width: '25%',
+            render: (text) => (
+                <p style={{color:'blue', fontWeight:'bold'}}>
+                    {text}
+                </p>
             ),
         },
         {
             title: 'Phòng Chiếu',
             dataIndex: ['theater', 'name'],
-            key: 'theaterName',
-            render: (text) => <Tag color="volcano">{text}</Tag>,
+            key: 'theaterName',            
+            render: (text) => <Tag color="volcano" className="branch-tag">{text}</Tag>,
         },
         {
-            title: 'Thời gian bắt đầu',
+            title: 'Thời gian',
             dataIndex: 'startTime',
             key: 'startTime',
+            width: '15%',
             sorter: (a, b) => dayjs(a.startTime).unix() - dayjs(b.startTime).unix(),
             render: (date) => (
                 <Space>
-                    <CalendarOutlined />
+                    {/* <CalendarOutlined /> */}
                     {dayjs(date).format('DD/MM/YYYY - HH:mm')}
                 </Space>
             ),
         },
         {
-            title: 'Trạng thái ghế',
+            title: 'Ghế',
             key: 'seatsStatus',
+            width: '10%',
             render: (_, record) => {
                 const total = record.seats?.length || 0;
                 const booked = record.seats?.filter(s => s.isBooked).length || 0;
                 return (
                     <Tooltip title={`Đã đặt ${booked}/${total} ghế`}>
-                        <Space direction="vertical" size={0} style={{ width: '100%' }}>
-                            <span>{booked}/{total} Ghế</span>
-                        </Space>
+                        <span style={{ whiteSpace: 'nowrap' }}>{booked} / {total}</span>
                     </Tooltip>
                 );
             },
@@ -94,17 +94,14 @@ export default function ShowtimeManagement() {
         {
             title: 'Thao tác',
             key: 'action',
-            width: 'auto',
+            width: "15%",
             render: (_, record) => (
-                <Space size="middle">
-                    <Tooltip title="Chỉnh sửa suất chiếu">
-                        <Button
-                            type="text"
-                            icon={<EditOutlined style={{ color: '#1677ff' }} />}
-                            onClick={() => navigate(`/admin/showtimes/${record._id}/update`)}
-                        />
-                    </Tooltip>
-
+                <Space size="small" className="action-btns">
+                    <Button
+                        type="text"
+                        icon={<EditOutlined style={{ color: '#1677ff' }} />}
+                        onClick={() => navigate(`/admin/showtimes/${record._id}/update`)}
+                    />
                     <Popconfirm
                         title="Xóa suất chiếu?"
                         onConfirm={() => handleDelete(record._id)}
@@ -120,44 +117,49 @@ export default function ShowtimeManagement() {
     ];
 
     return (
-        <Card
-            title={
-                <Space>
-                    <CalendarOutlined />
-                    <span>Quản lý lịch chiếu phim</span>
-                </Space>
-            }
-        >
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-                <Search
-                    placeholder="Tìm theo tên phim hoặc phòng chiếu..."
-                    onSearch={setKeyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    allowClear
-                    enterButton
-                    style={{ width: 400 }}
+        <div className="showtime-management-container">
+            <Card
+                title={
+                    <Space>
+                        <CalendarOutlined />
+                        <span>Quản lý lịch chiếu phim</span>
+                    </Space>
+                }
+            >
+                <div className="table-header">
+                    <Search
+                        className="search-box"
+                        placeholder="Tìm theo tên phim hoặc phòng chiếu..."
+                        onSearch={setKeyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                        allowClear
+                        enterButton={<Button icon={<SearchOutlined />}></Button>}
+                        size="large"
+                    />
+
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        className="add-btn"
+                        onClick={() => navigate('/admin/showtimes/create')}
+                    >
+                        THÊM SUẤT CHIẾU
+                    </Button>
+                </div>
+
+                <Table
+                    tableLayout='fixed'
+                    className="custom-table"
+                    rowKey="_id"
+                    columns={columns}
+                    dataSource={showtimeList}
+                    loading={loading}
+                    bordered
+                    pagination={{
+                        pageSize: 8,
+                    }}
                 />
-
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => navigate('/admin/showtimes/create')}
-                >
-                    TẠO SUẤT CHIẾU MỚI
-                </Button>
-            </div>
-
-            <Table
-                rowKey="_id"
-                columns={columns}
-                dataSource={showtimeList}
-                loading={loading}
-                bordered
-                pagination={{
-                    pageSize: 8,
-                    showTotal: (total) => `Tổng cộng ${total} suất chiếu`,
-                }}
-            />
-        </Card>
+            </Card>
+        </div>
     );
 }

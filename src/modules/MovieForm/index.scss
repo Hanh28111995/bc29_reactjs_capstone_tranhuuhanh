@@ -1,0 +1,146 @@
+// 1. Khai báo biến
+$mobile-breakpoint: 500px;
+$primary-color: #1677ff;
+$font-large: 1.25rem; // Khoảng 20px
+$font-medium: 1.1rem; // Khoảng 17.6px
+$font-small: 0.9rem; // Khoảng 14.4px
+
+.movie-form-card {
+  width: 100%;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+
+  // Style cho tiêu đề Card
+  .ant-card-head {
+    min-height: 4rem;
+    border-bottom: 1px solid #f0f0f0;
+
+    .ant-card-head-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1a1a;
+
+      @media (max-width: $mobile-breakpoint) {
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .ant-form {
+    // 2. Tối ưu khoảng cách Form Item
+    .ant-form-item {
+      margin-bottom: 0.85rem !important; // Khoảng cách giữa các hàng input
+
+      // Tối ưu nhãn (Label)
+      .ant-form-item-label {
+        padding: 0 0 0.2rem !important; // Đưa label sát lại input
+
+        label {
+          font-size: 1.15rem; // Font label lớn rõ ràng
+          font-weight: 600;
+          color: #4a4a4a;
+          height: auto;
+
+          &.ant-form-item-required::before {
+            font-size: 1.1rem;
+          }
+        }
+      }
+
+      // 3. Font size cho các ô nhập liệu
+      .ant-input,
+      .ant-input-number,
+      .ant-picker,
+      .ant-select-selector,
+      .ant-input-textarea {
+        font-size: $font-medium !important;
+        border-radius: 0.35rem;
+        padding: 0.5rem 0.75rem;
+        background-color: #fff;
+
+        input {
+          font-size: $font-medium !important;
+        }
+
+        @media (max-width: $mobile-breakpoint) {
+          font-size: 0.95rem !important;
+          padding: 0.4rem 0.6rem;
+        }
+      }
+
+      // Đặc thù cho ô Số (InputNumber)
+      .ant-input-number {
+        width: 100%;
+        .ant-input-number-input {
+          height: auto;
+        }
+      }
+    }
+
+    // 4. Nhóm Switch và Rating
+    .switch-group {
+      margin-top: 0.5rem;
+
+      .ant-form-item-label label {
+        font-size: 1rem;
+      }
+
+      @media (max-width: $mobile-breakpoint) {
+        margin-top: 0;
+      }
+    }
+  }
+
+  // 5. Khu vực hình ảnh Banner
+  .image-preview-wrapper {
+    margin-top: 0.25rem;
+    padding: 0.75rem;
+    border: 2px dashed #ececec;
+    border-radius: 0.5rem;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: $primary-color;
+    }
+
+    .preview-img {
+      max-height: 22rem; // Đủ lớn để check banner
+      width: 100%;
+      object-fit: contain;
+      border-radius: 0.25rem;
+
+      @media (max-width: $mobile-breakpoint) {
+        max-height: 12rem;
+      }
+    }
+  }
+
+  // 6. Nút bấm Submit cuối trang
+  .submit-btn {
+    margin-top: 1.5rem;
+    height: 3.8rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.5rem rgba($primary-color, 0.2);
+
+    @media (max-width: $mobile-breakpoint) {
+      height: 3.2rem;
+      font-size: 1.1rem;
+      margin-top: 1rem;
+    }
+  }
+}
+
+// 7. Reset cho màn hình cực nhỏ (Phone dọc)
+@media screen and (max-width: $mobile-breakpoint) {
+  .movie-form-card {
+    padding: 0;
+    .ant-card-body {
+      padding: 1rem; // Thu hẹp padding của card body
+    }
+  }
+}
