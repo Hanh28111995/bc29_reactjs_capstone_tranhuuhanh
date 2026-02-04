@@ -18,7 +18,7 @@ export default function AdminGuards() {
       navigate("/login");
       return
     }
-  }, [userInfor, navigate]);
+  }, []);
 
 
   return <Outlet />;
