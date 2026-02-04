@@ -9,23 +9,15 @@ export default function AdminGuards() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!userInfor) {
-      navigate("/login");
-      return;
-    }
-
-
     const userRole = userInfor.user_inf?.role;
-
     if (userRole !== MaLoaiNguoiDung.QuanTri) {
       notification.warning({
         message: "Cảnh báo",
         description: "Khách hàng không thể truy cập vào trang Admin",
       });
-      navigate("/");
+      navigate("/login");
+      return
     }
-
-
   }, [userInfor, navigate]);
 
 
