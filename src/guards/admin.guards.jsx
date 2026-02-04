@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
 import { notification } from 'antd';
 import { MaLoaiNguoiDung } from "../enums/common";
+import { LoadingContext } from "contexts/loading.context";
 
 export default function AdminGuards() {
   const [loadingState, setLoadingState] = useContext(LoadingContext);

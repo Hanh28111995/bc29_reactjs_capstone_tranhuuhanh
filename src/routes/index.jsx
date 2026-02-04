@@ -87,11 +87,11 @@ export default function Router() {
       element: <AdminLayout />,
       children: [
         {
-          path: '/admin',
+          path: '/admin/',
           element: <AdminGuards />,
           children: [
             {
-              path: '/admin',
+              path: '/admin/',
               element: <Navigate to='/admin/movie-management' />,
             },
             {
