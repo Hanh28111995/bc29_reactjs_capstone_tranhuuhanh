@@ -42,7 +42,7 @@ export default function Register() {
             if (name === 'username') message = `${title} không chứa kí tự đặc biệt.`;
             else if (name === 'email') message = `${title} không hợp lệ.`;
             else if (name === 'userphone') message = `${title} gồm các số từ 0-9.`;
-            else message = `${title} không đúng định dạng.`;
+            else if (name === 'password') message = `${title} Ít nhất 1 chữ hoa, 1 chữ thường, 1 số, 1 ký tự đặc biệt.`;
         }
 
         setState({
@@ -68,7 +68,7 @@ export default function Register() {
 
         // Nếu FORM HỢP LỆ
         setValid({ isValid: true });
-        try {            
+        try {
             const result = await registerApi(state.values);
 
             notification.success({ description: `Register success` });
@@ -77,7 +77,7 @@ export default function Register() {
             notification.warning({
                 description: `${err.response?.data?.content || "Đăng ký thất bại"}`,
             });
-    } 
+        }
     };
 
     const formRef = createRef();
@@ -105,14 +105,15 @@ export default function Register() {
             <div className='form-group'>
                 <label>Mật khẩu</label>
                 <input
-                    title='Password'
+                    title='Mật khẩu' // Nên để tiếng Việt để thông báo khớp với ngôn ngữ hiển thị
                     value={password}
                     required
                     name='password'
                     onChange={handleChange}
-                    type='text'
+                    type='password' // Đổi thành password để ẩn ký tự
                     className='form-control'
-                    pattern='/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{0,}$/'
+                    // Regex bên dưới: Ít nhất 1 chữ hoa, 1 chữ thường, 1 số, 1 ký tự đặc biệt
+                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{6,12}"
                     minLength={6}
                     maxLength={12}
                 />
