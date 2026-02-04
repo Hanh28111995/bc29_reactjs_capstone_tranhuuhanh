@@ -72,7 +72,7 @@ export default function Carousel() {
         src={item}
         alt={`banner-${index}`}
         style={{
-          width: "100%",
+          width: "auto",
           height: "100%",
           objectFit: "cover", // Đổi sang cover để không bị hở khoảng trắng
           objectPosition: "left center"

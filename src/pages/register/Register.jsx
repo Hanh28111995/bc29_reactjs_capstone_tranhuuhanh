@@ -5,19 +5,17 @@ import { useNavigate } from "react-router-dom"
 import { registerApi } from 'services/user'
 
 const DEFAULT_VALUES = {
-    taiKhoan: "",
-    matKhau: "",
+    username: "",
+    password: "",
     email: "",
-    soDT: "",
-    hoTen: "",
-    maLoaiNguoiDung: "KhachHang",
+    userphone: "",    
+    role: "customer",
 }
 const DEFAULT_ERRORS = {
-    taiKhoan: "",
-    matKhau: "",
+    username: "",
+    password: "",
     email: "",
-    soDT: "",
-    hoTen: "",
+    userphone: "",    
 }
 export default function Register() {
     const navigate = useNavigate();
@@ -35,16 +33,13 @@ export default function Register() {
             const regex = new RegExp(pattern);
             if (!regex.test(value)) {
                 console.log(name);
-                if (name === 'taiKhoan') {
+                if (name === 'username') {
                     message = `${title} không chứa kí tự đặc biệt.`;
-                }
-                if (name === 'hoTen') {
-                    message = `${title} không chứa number và kí tự đặc biệt.`;
-                }
+                }                
                 if (name === 'email') {
                     message = `${title} không hợp lệ.`;
                 } 
-                if (name === 'soDT') {
+                if (name === 'userphone') {
                     message = `${title} gồm các số từ 0-9.`;
                 } 
             }
@@ -117,7 +112,7 @@ export default function Register() {
     }
 
     const formRef = createRef();
-    const { taiKhoan, matKhau, hoTen, email, soDT } = state.values;
+    const { username, password,  email, userphone } = state.values;
     return (
         <form ref={formRef} noValidate className='w-25 mx-auto my-5'
             onSubmit={handleSubmit} style={{ caretColor: 'black' }}
@@ -125,26 +120,26 @@ export default function Register() {
             <div className='form-group'>
                 <label>Tài khoản</label>
                 <input
-                    title='Tài khoản'
-                    value={taiKhoan}
+                    title='Username'
+                    value={username}
                     required
-                    name='taiKhoan'
+                    name='username'
                     onChange={handleChange}
                     type='text'
                     className='form-control'
                     pattern='^[0-9A-Za-z]+$'
                 />
-                {state.errors.taiKhoan && (
-                    <span className='text-danger'>{state.errors.taiKhoan}</span>
+                {state.errors.username && (
+                    <span className='text-danger'>{state.errors.username}</span>
                 )}
             </div>
             <div className='form-group'>
                 <label>Mật khẩu</label>
                 <input
-                    title='Mật khẩu'
-                    value={matKhau}
+                    title='Password'
+                    value={password}
                     required
-                    name='matKhau'
+                    name='password'
                     onChange={handleChange}
                     type='text'
                     className='form-control'
@@ -152,26 +147,11 @@ export default function Register() {
                     minLength={6}
                     maxLength={12}
                 />
-                {state.errors.matKhau && (
-                    <span className='text-danger'>{state.errors.matKhau}</span>
+                {state.errors.password && (
+                    <span className='text-danger'>{state.errors.password}</span>
                 )}
             </div>
-            <div className='form-group'>
-                <label>Họ tên</label>
-                <input
-                    title='Họ tên'
-                    value={hoTen}
-                    required
-                    name='hoTen'
-                    onChange={handleChange}
-                    type='text'
-                    className='form-control'
-                    pattern= "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s\W|_]+$"
-                />
-                {state.errors.hoTen && (
-                    <span className='text-danger'>{state.errors.hoTen}</span>
-                )}
-            </div>
+            
             <div className='form-group'>
                 <label>Email</label>
                 <input
@@ -189,12 +169,12 @@ export default function Register() {
                 )}
             </div>
             <div className='form-group'>
-                <label>Số điện thoại</label>
+                <label>Phone Number</label>
                 <input
-                    title='Số ĐT'
-                    value={soDT}
+                    title='Userphone'
+                    value={userphone}
                     required
-                    name='soDT'
+                    name='userphone'
                     onChange={handleChange}
                     type='text'
                     className='form-control'
@@ -202,8 +182,8 @@ export default function Register() {
                     minLength={8}
                     maxLength={10}
                 />
-                {state.errors.soDT && (
-                    <span className='text-danger'>{state.errors.soDT}</span>
+                {state.errors.userphone && (
+                    <span className='text-danger'>{state.errors.userphone}</span>
                 )}
             </div>
 
