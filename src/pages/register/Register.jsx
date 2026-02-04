@@ -75,7 +75,7 @@ export default function Register() {
             navigate("/login");
         } catch (err) {
             notification.warning({
-                description: `${err.response?.data?.content || "Đăng ký thất bại"}`,
+                description: `${err.response?.data?.message || "Đăng ký thất bại"}`,
             });
         }
     };
