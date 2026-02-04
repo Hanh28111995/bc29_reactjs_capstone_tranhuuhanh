@@ -68,8 +68,7 @@ export default function Register() {
 
         // Nếu FORM HỢP LỆ
         setValid({ isValid: true });
-        try {
-            setLoadingState({ isLoading: true }); // Bật spinner
+        try {            
             const result = await registerApi(state.values);
 
             notification.success({ description: `Register success` });
@@ -78,9 +77,7 @@ export default function Register() {
             notification.warning({
                 description: `${err.response?.data?.content || "Đăng ký thất bại"}`,
             });
-        } finally {
-            setLoadingState({ isLoading: false }); // Tắt spinner dù thành công hay thất bại
-        }
+    } 
     };
 
     const formRef = createRef();
