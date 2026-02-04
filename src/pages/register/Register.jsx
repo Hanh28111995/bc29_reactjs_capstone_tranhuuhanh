@@ -8,14 +8,14 @@ const DEFAULT_VALUES = {
     username: "",
     password: "",
     email: "",
-    userphone: "",    
+    userphone: "",
     role: "customer",
 }
 const DEFAULT_ERRORS = {
     username: "",
     password: "",
     email: "",
-    userphone: "",    
+    userphone: "",
 }
 export default function Register() {
     const navigate = useNavigate();
@@ -26,93 +26,65 @@ export default function Register() {
     });
 
     const handleChange = (event) => {
-        const { name, title, minLength, maxLength, pattern, value, validity: { valueMissing, patternMismatch, tooLong, tooShort }, } = event.target;
+        const { name, title, minLength, maxLength, pattern, value, validity } = event.target;
         let message = '';
 
-        if (pattern) {
-            const regex = new RegExp(pattern);
-            if (!regex.test(value)) {
-                console.log(name);
-                if (name === 'username') {
-                    message = `${title} không chứa kí tự đặc biệt.`;
-                }                
-                if (name === 'email') {
-                    message = `${title} không hợp lệ.`;
-                } 
-                if (name === 'userphone') {
-                    message = `${title} gồm các số từ 0-9.`;
-                } 
-            }
+        // 1. Kiểm tra trống
+        if (validity.valueMissing) {
+            message = `Vui lòng nhập ${title}`;
+        }
+        // 2. Kiểm tra độ dài
+        else if (validity.tooShort || validity.tooLong) {
+            message = `${title} phải từ ${minLength} đến ${maxLength} kí tự.`;
+        }
+        // 3. Kiểm tra định dạng (Pattern)
+        else if (pattern && !new RegExp(pattern).test(value)) {
+            if (name === 'username') message = `${title} không chứa kí tự đặc biệt.`;
+            else if (name === 'email') message = `${title} không hợp lệ.`;
+            else if (name === 'userphone') message = `${title} gồm các số từ 0-9.`;
+            else message = `${title} không đúng định dạng.`;
         }
 
-        // if (patternMismatch) {
-        //     message = `Vui lòng nhập ${title} `;
-        // }
-
-        if (tooShort || tooLong) {
-            message = `${title} từ ${minLength} - ${maxLength} kí tự .`;
-        }
-
-        if (valueMissing) {
-            message = `Vui lòng nhập ${title} `;
-        }
         setState({
-            values: {
-                ...state.values,
-                [name]: value,
-            },
-            errors: {
-                ...state.errors,
-                [name]: message,
-            }
+            values: { ...state.values, [name]: value },
+            errors: { ...state.errors, [name]: message }
         });
-        if (formRef.current?.checkValidity()) {
-            setValid({
-                isValid: false
-            })
-        }
     };
-
-
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        if (event.target.checkValidity()) {
-            setValid({
-                isValid: true
-            })
-        }
-        else{
-            setValid({
-                isValid: false
-            })
-        }
-        console.log(valid.isValid)
-        if (valid.isValid) {
-            notification.error({
-                description: ` Vui lòng nhập đầy đủ thông tin`,
-            })
-        }
-        else {
-            try {
-                const result = await registerApi(state.values);
-                console.log(result.data)
 
-                notification.success({
-                    description: ` Register success`,
-                })
-                navigate("/");
-            }
-            catch (err) {
-                notification.warning({
-                    description: `${err.response.data.content}`,
-                });
-            }
+        // Kiểm tra trực tiếp từ formRef hoặc event.target để lấy giá trị mới nhất
+        const isFormValid = event.target.checkValidity();
+
+        if (!isFormValid) {
+            // Nếu FORM KHÔNG HỢP LỆ
+            setValid({ isValid: false });
+            notification.error({
+                description: `Vui lòng nhập đầy đủ và chính xác thông tin`,
+            });
+            return; // Dừng lại không gọi API
         }
-    }
+
+        // Nếu FORM HỢP LỆ
+        setValid({ isValid: true });
+        try {
+            setLoadingState({ isLoading: true }); // Bật spinner
+            const result = await registerApi(state.values);
+
+            notification.success({ description: `Register success` });
+            navigate("/login");
+        } catch (err) {
+            notification.warning({
+                description: `${err.response?.data?.content || "Đăng ký thất bại"}`,
+            });
+        } finally {
+            setLoadingState({ isLoading: false }); // Tắt spinner dù thành công hay thất bại
+        }
+    };
 
     const formRef = createRef();
-    const { username, password,  email, userphone } = state.values;
+    const { username, password, email, userphone } = state.values;
     return (
         <form ref={formRef} noValidate className='w-25 mx-auto my-5'
             onSubmit={handleSubmit} style={{ caretColor: 'black' }}
@@ -151,7 +123,7 @@ export default function Register() {
                     <span className='text-danger'>{state.errors.password}</span>
                 )}
             </div>
-            
+
             <div className='form-group'>
                 <label>Email</label>
                 <input
