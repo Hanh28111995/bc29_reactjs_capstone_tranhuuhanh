@@ -11,18 +11,26 @@ export default function AdminGuards() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userRole = userInfor.user_inf?.role;
+    const userRole = userInfor?.user_inf?.role;
+
+    // Nếu không phải Admin
     if (userRole !== MaLoaiNguoiDung.QuanTri) {
+      // 1. Tắt spinner ngay lập tức
+      setLoadingState({ isLoading: false });
+
+      // 2. Thông báo và điều hướng
       notification.warning({
         message: "Cảnh báo",
-        description: "Khách hàng không thể truy cập vào trang Admin",
+        description: "Bạn không có quyền truy cập vào trang Admin",
       });
-      setLoadingState({ isLoading: false });
       navigate("/login");
-      return
     }
-  }, []);
+  }, [userInfor, navigate, setLoadingState]); // Thêm dependencies để tránh lỗi logic khi data thay đổi
 
+  // Nếu chưa có thông tin hoặc không phải admin, không trả về Outlet để tránh lộ UI Admin
+  if (userInfor?.user_inf?.role !== MaLoaiNguoiDung.QuanTri) {
+    return null;
+  }
 
   return <Outlet />;
 }
