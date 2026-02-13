@@ -53,16 +53,16 @@ import { fetchMoviebannerAPI } from 'services/general';
 // };
 
 export default function Carousel() {
-  const { state: banner = [] } = useAsync({
+  const { state: banner = [], loading } = useAsync({
     dependencies: [],
     service: () => fetchMoviebannerAPI(),
   });
 
   const bannerList = banner?.map((item, index) => (
-  <div key={index} style={{ height: "60rem" }}> {/* THÊM CHIỀU CAO Ở ĐÂY */}
+  <div key={index} style={{ height: "60rem" }}> 
     <div style={{
       width: "100%",        
-      height: "100%", // PHẢI CÓ 100%
+      height: "100%", 
       overflow: "hidden",
       display: "flex",
       alignItems: "center",
@@ -74,7 +74,7 @@ export default function Carousel() {
         style={{
           width: "auto",
           height: "100%",
-          objectFit: "cover", // Đổi sang cover để không bị hở khoảng trắng
+          objectFit: "cover", 
           objectPosition: "left center"
         }}
       />
@@ -89,8 +89,8 @@ export default function Carousel() {
       </div>
 
       <Row justify="center" >
-        <Col span={16} className="carousel-container">
-          {/* Quan trọng: Chiều cao ở đây phải khớp với bannerList */}
+        <Col span={16} className="carousel-container">          
+        <Spin loading = {loading}>
           <CarouselAntd
             arrows
             autoplay= {true}
@@ -101,6 +101,7 @@ export default function Carousel() {
           >
             {bannerList}
           </CarouselAntd>
+          </Spin>
         </Col>
       </Row>
       <div className="TitleCarousel"></div>
