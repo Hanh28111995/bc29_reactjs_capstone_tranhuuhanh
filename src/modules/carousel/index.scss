@@ -1,4 +1,7 @@
 .homeCarousel {
+  & > .ant-row {
+    background-color: none !important;
+  }
   .ant-carousel {
     .slick-list {
       height: 100%;

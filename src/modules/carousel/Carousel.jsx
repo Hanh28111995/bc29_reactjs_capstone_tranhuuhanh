@@ -7,45 +7,45 @@ import "./index.scss";
 import { fetchMoviebannerAPI } from 'services/general';
 
 // Sửa lại Arrow: Sử dụng rem và xóa các thuộc tính trùng lặp
-const SampleNextArrow = (props) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={className}
-      style={{
-        ...style,
-        color: 'black',
-        fontSize: '5rem', // 50px
-        right: '-1rem',   // -10px
-        zIndex: '2',
-        display: 'block'
-      }}
-      onClick={onClick}
-    >
-      <RightOutlined />
-    </div>
-  );
-};
+// const SampleNextArrow = (props) => {
+//   const { className, style, onClick } = props;
+//   return (
+//     <div
+//       className={className}
+//       style={{
+//         ...style,
+//         color: 'black',
+//         fontSize: '5rem', // 50px
+//         right: '-1rem',   // -10px
+//         zIndex: '2',
+//         display: 'block'
+//       }}
+//       onClick={onClick}
+//     >
+//       <RightOutlined />
+//     </div>
+//   );
+// };
 
-const SamplePrevArrow = (props) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={className}
-      style={{
-        ...style,
-        color: 'black',
-        fontSize: '5rem', // 50px
-        left: '-4rem',    // -40px
-        zIndex: '2',
-        display: 'block'
-      }}
-      onClick={onClick}
-    >
-      <LeftOutlined />
-    </div>
-  );
-};
+// const SamplePrevArrow = (props) => {
+//   const { className, style, onClick } = props;
+//   return (
+//     <div
+//       className={className}
+//       style={{
+//         ...style,
+//         color: 'black',
+//         fontSize: '5rem', // 50px
+//         left: '-4rem',    // -40px
+//         zIndex: '2',
+//         display: 'block'
+//       }}
+//       onClick={onClick}
+//     >
+//       <LeftOutlined />
+//     </div>
+//   );
+// };
 
 const settings = {
   nextArrow: <SampleNextArrow />,
