@@ -1,3 +1,5 @@
+@import "../../variable/variable";
+
 .homeCarousel {
   .TitleCarousel {
     background: #231f20;
@@ -19,7 +21,7 @@
         height: 100%;
       }
     }
-    .slick-arrow{      
+    .slick-arrow {
       z-index: 2;
       transform: scale(1.5);
       opacity: unset;
