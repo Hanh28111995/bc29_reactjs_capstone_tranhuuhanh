@@ -34,7 +34,7 @@ export default function TrailerContent(props) {
     }, [props])
 
     return (
-        <div className="py-5 ">
+        <div className="pb-5 ">
             <div className="TitleCarousel" style={{ marginBottom: 0 }}>
                 <p>TRAILER</p>
             </div>

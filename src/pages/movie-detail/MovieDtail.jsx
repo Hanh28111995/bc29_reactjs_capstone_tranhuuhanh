@@ -16,7 +16,7 @@ export default function MovieDtail() {
   })
 
   return (
-    <div className="trailerPage py-3" >
+    <div className="trailerPage pb-3" >
       <TrailerContent trailer={movieDetail.trailer} />
       <Detail movie={movieDetail} />
     </div>

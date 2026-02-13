@@ -131,6 +131,9 @@
   font-weight: 400;
   height: 4rem;
   justify-content: center;
+  p{
+    margin-bottom: 0;
+  }
 }
 @media screen and (max-width: 500px) {
   .trailerPage .ant-row .ant-col {
