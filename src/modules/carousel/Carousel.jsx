@@ -1,4 +1,4 @@
-import { Row, Col } from 'antd';
+import { Row, Col, Spin } from 'antd';
 import React from "react";
 import { Carousel as CarouselAntd } from "antd";
 import { useAsync } from "hooks/useAsync";
@@ -90,7 +90,7 @@ export default function Carousel() {
 
       <Row justify="center" >
         <Col span={16} className="carousel-container">          
-        <Spin loading = {loading}>
+        <Spin spinning = {loading}>
           <CarouselAntd
             arrows
             autoplay= {true}
