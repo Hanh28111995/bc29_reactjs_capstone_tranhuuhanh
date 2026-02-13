@@ -11,7 +11,7 @@ export default function Home() {
   const [loadingState] = useContext(LoadingContext);
 
   return (
-    <Spin spinning={loadingState.isLoading||true} size="large" tip="Đang xử lý...">
+    <Spin spinning={loadingState.isLoading} size="large">
       <div className='homePage'>
         <Carousel />
         <MovieList />
