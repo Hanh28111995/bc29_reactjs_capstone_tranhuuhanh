@@ -47,10 +47,10 @@ import { fetchMoviebannerAPI } from 'services/general';
 //   );
 // };
 
-const settings = {
-  nextArrow: <SampleNextArrow />,
-  prevArrow: <SamplePrevArrow />,  
-};
+// const settings = {
+//   nextArrow: <SampleNextArrow />,
+//   prevArrow: <SamplePrevArrow />,  
+// };
 
 export default function Carousel() {
   const { state: banner = [] } = useAsync({
@@ -88,7 +88,7 @@ export default function Carousel() {
         <p>PHIM HOT TẠI RẠP</p>
       </div>
 
-      <Row justify="center" style={{background:"none"}}>
+      <Row justify="center" >
         <Col span={16} className="carousel-container">
           {/* Quan trọng: Chiều cao ở đây phải khớp với bannerList */}
           <CarouselAntd
