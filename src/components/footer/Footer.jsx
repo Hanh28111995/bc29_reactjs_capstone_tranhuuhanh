@@ -17,17 +17,7 @@ export default function Footer() {
               <TwitterOutlined />
               <InstagramOutlined />
             </div>
-          </div>
-
-          <div className="footer-col">
-            <h4>Phim Đang Chiếu</h4>
-            <ul>
-              <li><a href="#">Green Book</a></li>
-              <li><a href="#">Ready Player One</a></li>
-              <li><a href="#">The Batman</a></li>
-              <li><a href="#">Spider-man: No Way Home</a></li>
-            </ul>
-          </div>
+          </div>          
 
           <div className="footer-col">
             <h4>Hệ Thống Rạp</h4>
