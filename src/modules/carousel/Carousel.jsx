@@ -2,10 +2,10 @@ import { Row, Col, Spin } from 'antd';
 import React from "react";
 import { Carousel as CarouselAntd } from "antd";
 import { useAsync } from "hooks/useAsync";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import "./index.scss";
 import { fetchMoviebannerAPI } from 'services/general';
 
+// import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 // Sửa lại Arrow: Sử dụng rem và xóa các thuộc tính trùng lặp
 // const SampleNextArrow = (props) => {
 //   const { className, style, onClick } = props;
@@ -55,32 +55,32 @@ import { fetchMoviebannerAPI } from 'services/general';
 export default function Carousel() {
   const { state: banner = [], loading } = useAsync({
     dependencies: [],
-    service: () => fetchMoviebannerAPI(),
+    service: fetchMoviebannerAPI,
   });
 
   const bannerList = banner?.map((item, index) => (
-  <div key={index} style={{ height: "60rem" }}> 
-    <div style={{
-      width: "100%",        
-      height: "100%", 
-      overflow: "hidden",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }}>
-      <img
-        src={item}
-        alt={`banner-${index}`}
-        style={{
-          width: "auto",
-          height: "100%",
-          objectFit: "cover", 
-          objectPosition: "left center"
-        }}
-      />
+    <div key={index} style={{ height: "60rem" }}>
+      <div style={{
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        <img
+          src={item}
+          alt={`banner-${index}`}
+          style={{
+            width: "auto",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "left center"
+          }}
+        />
+      </div>
     </div>
-  </div>
-));
+  ));
 
   return (
     <div className='homeCarousel'>
@@ -89,18 +89,18 @@ export default function Carousel() {
       </div>
 
       <Row justify="center" >
-        <Col span={16} className="carousel-container">          
-        <Spin spinning = {loading}>
-          <CarouselAntd
-            arrows
-            autoplay= {true}
-            autoplaySpeed={2500}
-            // {...settings}
-            style={{ height: "60rem", overflow: "hidden" }}
-            
-          >
-            {bannerList}
-          </CarouselAntd>
+        <Col span={16} className="carousel-container">
+          <Spin spinning={loading}>
+            <CarouselAntd
+              arrows
+              autoplay={true}
+              autoplaySpeed={2500}
+              // {...settings}
+              style={{ height: "60rem", overflow: "hidden" }}
+
+            >
+              {bannerList}
+            </CarouselAntd>
           </Spin>
         </Col>
       </Row>
