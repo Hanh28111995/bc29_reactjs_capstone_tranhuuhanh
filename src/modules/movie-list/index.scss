@@ -44,7 +44,7 @@
     position: relative;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent; // Xóa bóng mờ khi chạm trên điện thoại
-    @media (min-width: 1080px) {
+    @media (max-width: 1080px) {
       height: auto;
     }
 
