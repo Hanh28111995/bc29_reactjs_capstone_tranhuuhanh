@@ -95,7 +95,7 @@ export default function Carousel() {
             arrows
             autoplay= {false}
             autoplaySpeed={2500}
-            {...settings}
+            // {...settings}
             style={{ height: "60rem", overflow: "hidden" }}
             
           >
