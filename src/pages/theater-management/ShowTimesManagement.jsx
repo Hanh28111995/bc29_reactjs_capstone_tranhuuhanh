@@ -21,7 +21,7 @@ export default function ShowtimeManagement() {
     const [keyword, setKeyword] = useState("");
     const { notification } = App.useApp();
 
-    const { state: data = [],  } = useAsync({
+    const { state: data = [], loading } = useAsync({
         dependencies: [toggle],
         service: getAllShowTimes,
     });
