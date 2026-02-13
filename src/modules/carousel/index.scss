@@ -1,9 +1,30 @@
 .homeCarousel {
+  .TitleCarousel {
+    background: #231f20;
+    height: 4rem; /* 40px */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: aliceblue;
+    font-weight: normal;
+    p {
+      margin-bottom: 0;
+    }
+  }
+
   .ant-carousel {
     .slick-list {
       height: 100%;
       .slick-slide {
         height: 100%;
+      }
+    }
+    .slick-arrow{      
+      z-index: 2;
+      transform: scale(1.5);
+      opacity: unset;
+      &::before {
+        color: $color-dark-3;
       }
     }
     .slick-next {

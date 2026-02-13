@@ -114,20 +114,6 @@ h4 {
   background-color: rgba(46, 46, 46, 1);
 }
 
-/* Section Tiêu đề Carousel */
-.TitleCarousel {
-  background: #231f20;
-  height: 4rem; /* 40px */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: aliceblue;
-  font-weight: normal;
-}
-
-.TitleCarousel p {
-  margin-bottom: 0;
-}
 
 /* Movie Card & Overlay */
 .overlay {
