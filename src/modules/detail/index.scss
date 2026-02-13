@@ -122,7 +122,16 @@
     }
   }
 }
-
+.trailerPage .TitleCarousel {
+  text-align: center;
+  align-items: center;
+  background: #231f20;
+  color: #f0f8ff;
+  display: flex;
+  font-weight: 400;
+  height: 4rem;
+  justify-content: center;
+}
 @media screen and (max-width: 500px) {
   .trailerPage .ant-row .ant-col {
     position: relative;
