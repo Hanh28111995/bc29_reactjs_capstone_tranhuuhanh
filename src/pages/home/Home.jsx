@@ -3,6 +3,7 @@ import Carousel from 'modules/carousel/Carousel'
 import MovieList from 'modules/movie-list/MovieList'
 import './index.scss'
 import { Spin} from 'antd';
+import { LoadingContext } from 'contexts/loading.context';
 
 
 
