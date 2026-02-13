@@ -1,4 +1,4 @@
-import { Row, Col, Spin } from 'antd';
+import { Row, Col} from 'antd';
 import React from "react";
 import { Carousel as CarouselAntd } from "antd";
 import { useAsync } from "hooks/useAsync";
@@ -55,7 +55,7 @@ import { fetchMoviebannerAPI } from 'services/general';
 export default function Carousel() {
   const { state: banner = [], loading } = useAsync({
     dependencies: [],
-    service: fetchMoviebannerAPI,
+    service: () => fetchMoviebannerAPI(),
   });
 
   const bannerList = banner?.map((item, index) => (
@@ -90,7 +90,6 @@ export default function Carousel() {
 
       <Row justify="center" >
         <Col span={16} className="carousel-container">
-          <Spin spinning={loading}>
             <CarouselAntd
               arrows
               autoplay={true}
@@ -100,8 +99,7 @@ export default function Carousel() {
 
             >
               {bannerList}
-            </CarouselAntd>
-          </Spin>
+            </CarouselAntd>          
         </Col>
       </Row>
       <div className="TitleCarousel"></div>
