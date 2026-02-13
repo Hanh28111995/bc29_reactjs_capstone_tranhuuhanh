@@ -93,7 +93,7 @@ export default function Carousel() {
           {/* Quan trọng: Chiều cao ở đây phải khớp với bannerList */}
           <CarouselAntd
             arrows
-            autoplay= {false}
+            autoplay= {true}
             autoplaySpeed={2500}
             // {...settings}
             style={{ height: "60rem", overflow: "hidden" }}
