@@ -27,26 +27,21 @@ export default function Payment() {
         if (!paymentMethod) {
             return notification.warning({ message: "Vui lòng chọn phương thức thanh toán!" });
         }
+        confirm({
+            title: 'Xác nhận đặt vé?',
+            icon: <ExclamationCircleOutlined />,
+            okText: 'Xác nhận',
+            cancelText: 'Hủy',
+            onOk() {
+                processBooking();
+            },
+        });
 
-        if (paymentMethod === 'cash') {
-            confirm({
-                title: 'Xác nhận đặt vé?',
-                icon: <ExclamationCircleOutlined />,
-                content: 'Bạn sẽ thanh toán tiền mặt trực tiếp tại quầy vé trước suất chiếu 30 phút.',
-                okText: 'Xác nhận',
-                cancelText: 'Hủy',
-                onOk() {
-                    processBooking();
-                },
-            });
-        } else {
-            processBooking();
-        }
     };
 
     const processBooking = async () => {
         try {
-            await fetchTicketBookingAPI({
+            const result = await fetchTicketBookingAPI({
                 user_id: userState.userInfor?.user_inf?.id,
                 movie_id: movieInfor?._id,
                 showtime_id: params.id,
@@ -60,9 +55,14 @@ export default function Payment() {
                 paymentMethod: paymentMethod,
                 paymentStatus: 'Pending',
             });
+            notification.success({ message: "Đặt vé thành công!" });
+            setTimeout(() => navigate('/payment-result', {
+                state: {
+                    payUrl: payUrl,
+                    bookingId: result._id,
+                }
+            }), 2000);
 
-            notification.success({ message: "Đặt vé thành công! Vui lòng kiểm tra email." });
-            setTimeout(() => navigate('/'), 2000);
         } catch (error) {
             notification.error({ message: "Đặt vé thất bại. Vui lòng thử lại." });
         }
@@ -70,9 +70,9 @@ export default function Payment() {
 
     return (
         <div className="payment-page">
-            <Button 
-                className="btn-back" 
-                icon={<ArrowLeftOutlined />} 
+            <Button
+                className="btn-back"
+                icon={<ArrowLeftOutlined />}
                 onClick={() => navigate(-1)}
             >
                 Quay lại
@@ -87,11 +87,11 @@ export default function Payment() {
                         className="method-group"
                     >
                         <Space direction="vertical">
-                            <Radio.Button disabled value="card" className="payment-radio-btn">
-                                <CreditCardOutlined /> Thẻ ATM / Internet Banking (Bảo trì)
+                            <Radio.Button value="card" className="payment-radio-btn">
+                                <CreditCardOutlined /> Thẻ ATM / Internet Banking
                             </Radio.Button>
-                            <Radio.Button disabled value="momo" className="payment-radio-btn">
-                                <WalletOutlined /> Ví MoMo (Bảo trì)
+                            <Radio.Button value="momo" className="payment-radio-btn">
+                                <WalletOutlined /> Ví MoMo
                             </Radio.Button>
                             <Radio.Button value="cash" className="payment-radio-btn">
                                 <DollarOutlined /> Thanh toán tại quầy

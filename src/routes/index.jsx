@@ -8,6 +8,7 @@ import TheatersManagement from "pages/theater-management/TheaterManagement";
 import CreateTheater from "pages/CreateTheater/CreateTheater";
 import Payment from "pages/payment/Payment";
 import TicketManagement from "pages/ticket-management/TicketManagement";
+import PaymentResult from "pages/payment/PaymentResult";
 
 const Login = lazy(() => import("pages/login/Login"));
 const Register = lazy(() => import("pages/register/Register"));
@@ -62,6 +63,10 @@ export default function Router() {
             {
               path: "/booking/payment/:id",
               element: <Payment />,
+            },
+            {
+              path: "/booking/payment-result",
+              element: <PaymentResult />,
             },
           ],
         },
@@ -158,6 +163,11 @@ export default function Router() {
         }
       ]
     },
+    {
+      path: '/payment-result',
+      element: <PaymentResult />
+    }
+    ,
     {
       path: '*',
       element: <PageNotFound />
