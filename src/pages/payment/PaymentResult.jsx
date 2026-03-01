@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Spin, Button, Result } from 'antd';
-import Checkout from './checkout';
+import Checkout from './Checkout';
 import { fetchCheckPayment } from 'services/ticket';
 
 export default function PaymentResult() {
