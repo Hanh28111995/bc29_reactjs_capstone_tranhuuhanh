@@ -58,16 +58,17 @@ export default function Payment() {
                 paymentStatus: 'Pending',
             });
 
-            const keyword = result.paymentMethod.toLowerCase();
+            console.log(result.content)
+            const keyword = result.content.paymentMethod.toLowerCase();
             if (keyword != "cash") {
-                const response = await axios.post(`${BASE_URL}/payment/create_${keyword}`, result);
+                const response = await axios.post(`${BASE_URL}/payment/create_${keyword}`, result.content);
 
                 const payUrl = response.data.payUrl;
                 if (payUrl) notification.success({ message: "Đặt vé thành công!" });
                 setTimeout(() => navigate('/payment-result', {
                     state: {
                         payUrl: payUrl,
-                        bookingId: result._id,
+                        bookingId: result.content._id,
                     }
                 }), 2000);
             }
