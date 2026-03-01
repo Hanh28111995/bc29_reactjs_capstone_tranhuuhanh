@@ -58,7 +58,7 @@ export default function Payment() {
                 paymentStatus: 'Pending',
             });
 
-            console.log(result)
+            console.log(result.data.content._id);
             const keyword = result.content.paymentMethod.toLowerCase();
             if (keyword != "cash") {
                 const response = await axios.post(`${BASE_URL}/payment/create_${keyword}`, result.content);
