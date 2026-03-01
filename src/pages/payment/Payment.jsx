@@ -57,13 +57,13 @@ export default function Payment() {
                 paymentMethod: paymentMethod,
                 paymentStatus: 'Pending',
             });
-            notification.success({ message: "Đặt vé thành công!" });
+
             const keyword = result.paymentMethod.toLowerCase();
             if (keyword != "cash") {
                 const response = await axios.post(`${BASE_URL}/payment/create_${keyword}`, result);
 
                 const payUrl = response.data.payUrl;
-
+                if (payUrl) notification.success({ message: "Đặt vé thành công!" });
                 setTimeout(() => navigate('/payment-result', {
                     state: {
                         payUrl: payUrl,
