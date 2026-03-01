@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { fetchTicketBookingAPI } from 'services/customer';
 import "./index.scss"; // Import file scss mới
+import axios from 'axios';
+import { BASE_URL } from 'constants/common';
 
 const { Title, Text } = Typography;
 const { confirm } = Modal;
@@ -56,13 +58,19 @@ export default function Payment() {
                 paymentStatus: 'Pending',
             });
             notification.success({ message: "Đặt vé thành công!" });
-            setTimeout(() => navigate('/payment-result', {
-                state: {
-                    payUrl: payUrl,
-                    bookingId: result._id,
-                }
-            }), 2000);
+            const keyword = result.paymentMethod.toLowerCase();
+            if (keyword != "cash") {
+                const response = await axios.post(`${BASE_URL}/payment/create_${keyword}`, result);
 
+                const payUrl = response.data.payUrl;
+
+                setTimeout(() => navigate('/payment-result', {
+                    state: {
+                        payUrl: payUrl,
+                        bookingId: result._id,
+                    }
+                }), 2000);
+            }
         } catch (error) {
             notification.error({ message: "Đặt vé thất bại. Vui lòng thử lại." });
         }
