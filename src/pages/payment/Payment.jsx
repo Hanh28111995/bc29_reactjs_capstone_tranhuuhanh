@@ -41,21 +41,39 @@ export default function Payment() {
         });
 
     };
-
     const processBooking = async () => {
         try {
-            const result = await fetchTicketBookingAPI({ /* ...data... */ });
+            const result = await fetchTicketBookingAPI({
+                user_id: userState.userInfor?.user_inf?.id,
+                movie_id: movieInfor?._id,
+                showtime_id: params.id,
+                timeOfBooking: moment().format('YYYY-MM-DD HH:mm:ss'),
+                bookedSeat: bookingData.map(seat => ({
+                    seatNumber: seat.seatNumber,
+                    seatType: seat.seatType,
+                    price: seat.seatType.price,
+                    isBooked: true,
+                })),
+                paymentMethod: paymentMethod,
+                paymentStatus: 'Pending',
+            });
             const keyword = result.paymentMethod.toLowerCase();
 
             if (keyword === "momo") {
-
+                // Đảm bảo truyền đúng 'result' (có chứa _id) vào hàm này
                 const response = await fetchCreateMomoPayment(result);
-                
+
+                // Lưu ý: Thường response của axios sẽ là response.data
+                // Nếu helper 'request' của bạn đã trả về .data rồi thì giữ nguyên
                 const payUrl = response.data?.payUrl || response.payUrl;
 
                 if (payUrl) {
                     notification.success({ message: "Đang chuyển hướng đến MoMo..." });
-                 
+
+                    // Thay vì chuyển hướng sang trang trung gian, bạn có thể 
+                    // mở trực tiếp trang thanh toán MoMo:
+                    // window.location.href = payUrl;
+
                     setTimeout(() => navigate('/payment-result', {
                         state: {
                             payUrl: payUrl,
@@ -71,7 +89,6 @@ export default function Payment() {
             notification.error({ message: "Đặt vé thất bại. Vui lòng thử lại." });
         }
     };
-
     return (
         <div className="payment-page">
             <Button
