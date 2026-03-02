@@ -78,8 +78,7 @@ export default function Payment() {
                     notification.error({ message: "Không lấy được link thanh toán MoMo." });
                 }
             }
-        } catch (error) {
-            console.error(error);
+        } catch (error) {            
             notification.error({ message: "Đặt vé thất bại. Vui lòng thử lại." });
         }
     };
