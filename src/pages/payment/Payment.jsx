@@ -65,7 +65,7 @@ export default function Payment() {
 
                 // Lưu ý: Thường response của axios sẽ là response.data
                 // Nếu helper 'request' của bạn đã trả về .data rồi thì giữ nguyên
-                const payUrl = response.data?.payUrl || response.payUrl;
+                const payUrl = response?.data.payUrl || response?.payUrl;
 
                 if (payUrl) {
                     notification.success({ message: "Đang chuyển hướng đến MoMo..." });
