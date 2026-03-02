@@ -5,9 +5,10 @@ import { USER_INFO_KEY } from "../../constants/common";
 import { loginAPI } from "services/user";
 import { setUserInfoAction } from "../../store/actions/user.action";
 import { notification } from "antd";
+import { useAuth } from "contexts/auth.context";
 
 export default function Login() {
-  const navigate = useNavigate();
+  const { closeLogin } = useAuth(); 
   const dispatch = useDispatch();
   const [state, setState] = useState({
     username: "hanhtran",
@@ -29,7 +30,11 @@ export default function Login() {
       localStorage.setItem(USER_INFO_KEY, JSON.stringify(userData));
       dispatch(setUserInfoAction(userData));
       notification.success({ description: "Đăng nhập thành công!" });
-      navigate("/");
+      closeLogin(); 
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 500); 
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Đăng nhập thất bại";
       notification.error({ description: errorMsg });
