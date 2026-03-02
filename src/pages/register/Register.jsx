@@ -69,8 +69,7 @@ export default function Register() {
         // Nếu FORM HỢP LỆ
         setValid({ isValid: true });
         try {
-            const result = await registerApi(state.values);
-
+            await registerApi(state.values);
             notification.success({ description: `Register success` });
             navigate("/login");
         } catch (err) {

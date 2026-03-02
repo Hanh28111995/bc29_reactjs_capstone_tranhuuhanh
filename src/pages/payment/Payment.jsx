@@ -70,11 +70,10 @@ export default function Payment() {
                 });
             }
 
-            const ticket = result?.data.content;
-            console.log(ticket)
+            const ticket = result?.data.content;            
             const keyword = ticket.paymentMethod.toLowerCase();
             if (keyword === "cash") {
-                const updatePayment = await fetchCreateCashPayment(ticket)
+                await fetchCreateCashPayment(ticket)
                 setTimeout(() => navigate('/payment-result', {
                     state: {
                         payUrl: null,

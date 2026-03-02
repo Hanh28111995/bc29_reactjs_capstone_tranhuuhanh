@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, Button, List, Card, Row, Col, Tag, Empty, Spin, Select } from 'antd';
+import { Tabs, Button, List, Card, Row, Col,Empty, Spin, Select } from 'antd';
 import { useAsync } from 'hooks/useAsync';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchShowtimesAPI, fetchBranchesAPI } from 'services/general';

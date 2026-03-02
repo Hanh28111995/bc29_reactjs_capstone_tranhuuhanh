@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Space, Table, Input, Button, Image, App, Popconfirm } from 'antd';
+import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync } from "../../hooks/useAsync";
 import { fetchMovieListAPI, deleteMovieAPI } from "services/movie";

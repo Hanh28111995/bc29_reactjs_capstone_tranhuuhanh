@@ -1,76 +1,70 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Modal } from 'antd';
 import { QRCodeCanvas } from 'qrcode.react';
-import axios from 'axios'; // Đảm bảo đã install axios
 import { useNavigate } from 'react-router-dom';
 import { fetchCheckPayment } from 'services/ticket';
 
 export default function Checkout(props) {
-    // Lấy thêm props để quản lý việc đóng mở và định danh vé
-    const { payUrl, open, onCancel, bookingId } = props;
+    // Thêm setStatus từ props để cập nhật ngược lại cho PaymentResult
+    const { payUrl, open, onCancel, bookingId, setStatus } = props;
     const navigate = useNavigate();
 
     useEffect(() => {
         let pollingInterval;
 
-        // Chỉ bắt đầu Polling khi Modal đang mở và có bookingId
         if (open && bookingId) {
             pollingInterval = setInterval(async () => {
                 try {
-                    // Gọi API kiểm tra trạng thái vé từ Backend của bạn
                     const response = await fetchCheckPayment(bookingId);
-                    const { status } = response.data?.content.status;
 
-                    if (status === 'Paid' || status === 'Failed') {
-                        // 1. Dừng Polling ngay lập tức
+                    // Sửa lỗi truy cập: response.data.content.status (theo log của bạn)
+                    const currentStatus = response.data?.content?.status;
+
+                    // Nếu trạng thái đã thay đổi (thành công hoặc thất bại)
+                    if (currentStatus === 'Paid' || currentStatus === 'Failed') {
                         clearInterval(pollingInterval);
 
-                        // 2. Gọi hàm onCancel từ props để đóng Modal Antd
-                        onCancel();
+                        // Cập nhật trạng thái cho cha để trigger việc đóng Modal và hiện Result
+                        const finalStatus = currentStatus === 'Paid' ? 'success' : 'error';
+                        setStatus(finalStatus);
 
-                        // 3. Điều hướng sang trang kết quả kèm trạng thái
+                        // Điều hướng an toàn
                         navigate('/payment-result', {
                             state: {
-                                status: status === 'Paid' ? 'success' : 'failed',
+                                ...window.history.state?.usr,
+                                status: finalStatus,
                                 bookingId
-                            }
+                            },
+                            replace: true
                         });
                     }
                 } catch (error) {
-                    console.error("Lỗi kiểm tra trạng thái đơn hàng:", error);
+                    console.error("Lỗi Polling:", error);
                 }
-            }, 3000); // 3 giây kiểm tra một lần
+            }, 3000);
         }
 
         return () => {
             if (pollingInterval) clearInterval(pollingInterval);
         };
-    }, [open, bookingId, navigate, onCancel]);
+    }, [open, bookingId, navigate, setStatus]);
 
     return (
         <Modal
             open={open}
             onCancel={onCancel}
             footer={null}
-            destroyOnClose // Đảm bảo reset lại state khi đóng
+            destroyOnClose
             centered
+            maskClosable={false}
         >
-            <div className="checkout-container" style={{ textAlign: 'center', padding: '40px' }}>
-                <h3 style={{ marginBottom: '20px' }}>Thanh toán đơn hàng</h3>
-
-                <div style={{ background: '#fff', padding: '20px', display: 'inline-block', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                    {/* Sử dụng payUrl để tạo mã QR */}
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+                <h3 style={{ marginBottom: '20px' }}>Quét mã QR để thanh toán</h3>
+                <div style={{ background: '#fff', padding: '20px', display: 'inline-block', borderRadius: '10px', border: '1px solid #f0f0f0' }}>
                     <QRCodeCanvas value={payUrl} size={256} />
                 </div>
-
-                <p style={{ marginTop: '20px' }}>Quét mã QR bằng ứng dụng Ngân hàng hoặc Ví điện tử</p>
-
-                <div style={{ marginTop: '20px' }}>
-                    <span>Hoặc </span>
-                    <a href={payUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#1890ff', textDecoration: 'underline' }}>
-                        Thanh toán trực tiếp qua cổng thanh toán
-                    </a>
-                </div>
+                <p style={{ marginTop: '20px' }}>Hệ thống sẽ tự động cập nhật khi bạn hoàn tất giao dịch.</p>
+                <a href={payUrl} target="_blank" rel="noopener noreferrer">Thanh toán trực tiếp qua ví</a>
             </div>
         </Modal>
     );

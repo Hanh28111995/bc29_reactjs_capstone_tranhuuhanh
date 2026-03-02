@@ -5,8 +5,6 @@ import { Row, Col, Carousel as CarouselAntd } from 'antd';
 import { isEqual } from 'constants/common';
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import "./index.scss";
-import moment from 'moment';
-
 
 // Giữ nguyên các component Arrow (SampleNextArrow, SamplePrevArrow)
 const SampleNextArrow = props => {
