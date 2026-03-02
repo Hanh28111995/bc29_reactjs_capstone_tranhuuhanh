@@ -46,6 +46,8 @@ export default function PaymentResult() {
 
     return (
         <>
+
+            <p>{location.state?.payUrl} {status}</p>
             {/* Logic hiển thị Checkout / Cash Modal */}
             {location.state?.method?.toLowerCase() !== 'cash' ? (
                 <Checkout
