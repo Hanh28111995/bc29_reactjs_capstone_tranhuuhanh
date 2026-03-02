@@ -61,14 +61,14 @@ export default function Payment() {
             const keyword = result.paymentMethod.toLowerCase();
             console.log(keyword);
             if (keyword == "momo") {
-                const response = await fetchCreateMomoPayment(response.data?.content);
-                const payUrl = response.data?.content.payUrl;
+                const response = await fetchCreateMomoPayment(result);
+                const payUrl = response.payUrl;
                 console.log(payUrl);
                 if (payUrl) notification.success({ message: "Đặt vé thành công!" });
                 setTimeout(() => navigate('/payment-result', {
                     state: {
                         payUrl: payUrl,
-                        bookingId: result.data?.content._id,
+                        bookingId: result._id,
                     }
                 }), 2000);
             }
