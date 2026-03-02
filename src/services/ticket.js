@@ -15,6 +15,15 @@ const fetchCreateMomoPayment = (data) => {
     data: data,
   });
 };
+
+const fetchCreateVnpayPayment = (data) => {
+  return request({
+    url: `/payment/create_vnpay`,
+    method: "POST",
+    data: data,
+  });
+};
+
 const fetchCreateCashPayment = (data) => {
   return request({
     url: `/payment/cash`,
@@ -26,5 +35,6 @@ const fetchCreateCashPayment = (data) => {
 export {
   fetchCheckPayment,
   fetchCreateMomoPayment,
-  fetchCreateCashPayment
+  fetchCreateCashPayment,
+  fetchCreateVnpayPayment,
 };

@@ -7,6 +7,7 @@ import moment from 'moment';
 import { fetchTicketBookingAPI } from 'services/customer';
 import { fetchCreateMomoPayment, fetchCreateCashPayment } from 'services/ticket';
 import "./index.scss"; // Import file scss mới
+import { fetchCreateVnpayPayment } from 'services/ticket';
 
 const { Title, Text } = Typography;
 const { confirm } = Modal;
@@ -87,6 +88,19 @@ export default function Payment() {
                 const getCode = await fetchCreateMomoPayment(ticket);
                 const payUrl = getCode?.data.content.payUrl;
                 notification.success({ message: "Đang chuyển hướng đến MoMo..." });
+                setTimeout(() => navigate('/payment-result', {
+                    state: {
+                        payUrl: payUrl,
+                        bookingId: ticket._id,
+                        method: ticket.paymentMethod
+                    }
+                }), 2000);
+            }
+
+            if (keyword === "card") {
+                const getCode = await fetchCreateVnpayPayment(ticket);
+                const payUrl = getCode?.data.content.payUrl;
+                notification.success({ message: "Đang chuyển hướng đến VNpay..." });
                 setTimeout(() => navigate('/payment-result', {
                     state: {
                         payUrl: payUrl,

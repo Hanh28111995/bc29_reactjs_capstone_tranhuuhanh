@@ -33,7 +33,7 @@ export default function PaymentResult() {
                 const currentStatus = res.data.data.status;
 
                 if (currentStatus === 'Paid') {
-                    setStatus('success'); // Gán status sẽ làm Modal tự đóng
+                    setStatus('success'); 
                 } else if (currentStatus === 'Failed') {
                     setStatus('error');
                 }
@@ -62,7 +62,7 @@ export default function PaymentResult() {
                 : (<Modal
                     title="Xác nhận thanh toán"
                     open={CashModal}
-                    onOk={() => setCashModal(false)}
+                    onOk={() => { setCashModal(false); setStatus('success') }}
                     onCancel={async () => { await fetchCancelBookingAPI(userState.userInfor?.user_inf.role, bookingId, userState.userInfor?.user_inf.id); navigate(-2) }}
                     okText="YES"
                     cancelText="NO"
