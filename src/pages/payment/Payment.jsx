@@ -8,6 +8,7 @@ import { fetchTicketBookingAPI } from 'services/customer';
 import "./index.scss"; // Import file scss mới
 import axios from 'axios';
 import { BASE_URL } from 'constants/common';
+import { fetchCreateMomoPayment } from 'services/ticket';
 
 const { Title, Text } = Typography;
 const { confirm } = Modal;
@@ -59,8 +60,8 @@ export default function Payment() {
             });
             const keyword = result.data?.content.paymentMethod.toLowerCase();
             console.log(keyword);
-            if (keyword != "cash") {
-                const response = await axios.post(`${BASE_URL}/payment/create_${keyword}`, result.data?.content);
+            if (keyword == "momo") {
+                const response = await fetchCreateMomoPayment(response.data?.content);
                 const payUrl = response.data?.content.payUrl;
                 console.log(payUrl);
                 if (payUrl) notification.success({ message: "Đặt vé thành công!" });

@@ -7,6 +7,16 @@ const fetchCheckPayment = (id) => {
     method: "GET",
   });
 };
+
+const fetchCreateMomoPayment = (data) => {
+  return request({
+    url: `/payment/create_momo`,
+    method: "POST",
+    data: data,
+  });
+};
+
 export {
-  fetchCheckPayment
+  fetchCheckPayment,
+  fetchCreateMomoPayment
 };
