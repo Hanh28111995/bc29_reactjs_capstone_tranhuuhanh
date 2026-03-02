@@ -3,7 +3,7 @@ import { request } from "../configs/axios";
 
 const fetchCheckPayment = (id) => {
   return request({
-    url: `/admin/payment/check-status/${id}`,
+    url: `/payment/check-status/${id}`,
     method: "GET",
   });
 };

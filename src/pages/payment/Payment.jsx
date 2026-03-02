@@ -58,7 +58,7 @@ export default function Payment() {
                 paymentMethod: paymentMethod,
                 paymentStatus: 'Pending',
             });
-            const keyword = result.data?.content.paymentMethod.toLowerCase();
+            const keyword = result.paymentMethod.toLowerCase();
             console.log(keyword);
             if (keyword == "momo") {
                 const response = await fetchCreateMomoPayment(response.data?.content);
