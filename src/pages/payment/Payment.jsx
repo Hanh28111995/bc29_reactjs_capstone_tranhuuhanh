@@ -99,7 +99,7 @@ export default function Payment() {
 
             if (keyword === "card") {
                 const getCode = await fetchCreateVnpayPayment(ticket);
-                const payUrl = getCode?.data.content.payUrl;
+                const payUrl = getCode?.data.content.paymentUrl;
                 notification.success({ message: "Đang chuyển hướng đến VNpay..." });
                 setTimeout(() => navigate('/payment-result', {
                     state: {
