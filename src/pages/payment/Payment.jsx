@@ -79,7 +79,7 @@ export default function Payment() {
                 }
             }
         } catch (error) {
-            console.error("Booking Error:", error);
+            console.error(error);
             notification.error({ message: "Đặt vé thất bại. Vui lòng thử lại." });
         }
     };
