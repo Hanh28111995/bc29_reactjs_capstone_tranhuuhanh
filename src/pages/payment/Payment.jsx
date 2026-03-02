@@ -57,7 +57,7 @@ export default function Payment() {
                 paymentMethod: paymentMethod,
                 paymentStatus: 'Pending',
             });
-            const keyword = result.paymentMethod.toLowerCase();
+            const keyword = result?.paymentMethod.toLowerCase();
 
             if (keyword === "momo") {
                 // Đảm bảo truyền đúng 'result' (có chứa _id) vào hàm này
