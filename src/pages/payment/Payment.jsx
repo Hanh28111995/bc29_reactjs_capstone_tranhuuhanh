@@ -41,7 +41,7 @@ export default function Payment() {
     };
     const processBooking = async () => {
         try {
-            const result = await fetchTicketBookingAPI({
+            const result = await fetchTicketBookingAPI(userState.userInfor?.user_inf.role, {
                 user_id: userState.userInfor?.user_inf?.id,
                 movie_id: movieInfor?._id,
                 showtime_id: params.id,
@@ -57,7 +57,7 @@ export default function Payment() {
             });
 
             const ticket = result?.data.content;
-            const keyword = ticket.paymentMethod.toLowerCase();           
+            const keyword = ticket.paymentMethod.toLowerCase();
             if (keyword === "cash") {
                 const updatePayment = await fetchCreateCashPayment(ticket)
             }

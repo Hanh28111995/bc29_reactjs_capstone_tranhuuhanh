@@ -16,7 +16,7 @@ export default function Booking() {
   const [RowCol, setRowCol] = useState([]);
 
   const { state: data = [] } = useAsync({
-    service: () => fetchShowtimesCusAPI(params.id),
+    service: () => fetchShowtimesCusAPI(userState.userInfor?.user_inf.role, params.id),
     codintion: !!userState.userInfor?.user_inf?.id,
     dependencies: [params.id && userState.userInfor?.user_inf?.role]
   });

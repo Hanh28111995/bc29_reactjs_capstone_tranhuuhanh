@@ -1,15 +1,17 @@
 import { request } from "../configs/axios";
 
-const fetchShowtimesCusAPI = (id) => {
+const fetchShowtimesCusAPI = (role, id) => {
+    
   return request({
-    url: `/customer/ticket/showtimeDetail/${id}`, // ID nằm trên URL
+    url: `/${userRole}/showtime/showtimeDetail/${id}`, 
     method: "GET",
   });
 };
 
-const fetchTicketBookingAPI = (data) => {
+const fetchTicketBookingAPI = (role, data) => {  
+
   return request({
-    url: "/customer/ticket/booking",
+    url: `/${userRole}/ticket/booking`,
     method: "POST",
     data,
   });
