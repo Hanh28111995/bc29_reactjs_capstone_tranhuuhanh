@@ -1,7 +1,7 @@
-import { useAuth } from "contexts/auth.context";
-import { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { Outlet } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useAuth } from 'contexts/auth.context';
 
 export default function AuthGuards() {
   const userState = useSelector((state) => state.userReducer);
@@ -9,13 +9,10 @@ export default function AuthGuards() {
 
   useEffect(() => {
     if (!userState.userInfor) {
-      openLogin();
+      openLogin()
     }
-  }, [userState.userInfor, openLogin]);
-
-  if (!userState.userInfor) {
-    return null;
-  }
-
-  return <Outlet />;
+  }, []);
+  return (
+    <Outlet />
+  )
 }

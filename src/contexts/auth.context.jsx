@@ -1,3 +1,4 @@
+import LoginModal from 'pages/login/LoginModal';
 import React, { createContext, useState, useContext } from 'react';
 
 const AuthContext = createContext();
@@ -11,6 +12,7 @@ export const AuthProvider = ({ children }) => {
     return (
         <AuthContext.Provider value={{ isLoginModalOpen, openLogin, closeLogin }}>
             {children}
+            <LoginModal />
         </AuthContext.Provider>
     );
 };
