@@ -18,15 +18,13 @@ root.render(
     <ConfigProvider
       locale={viVN}
       theme={{
-        token: {
-          // Bạn có thể chỉnh màu chủ đạo tại đây
+        token: {          
           colorPrimary: "#1677ff",
           borderRadius: 6,
         },
       }}
     >
       <ProConfigProvider>
-        {/* Bọc AntdApp ở đây giúp dùng notification/message dạng static thoải mái */}
         <AntdApp>
           <App />
         </AntdApp>

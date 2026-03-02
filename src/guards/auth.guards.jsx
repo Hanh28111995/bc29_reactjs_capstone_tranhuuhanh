@@ -1,18 +1,17 @@
-import React, { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useAuth } from 'contexts/auth.context';
-
 export default function AuthGuards() {
   const userState = useSelector((state) => state.userReducer);
   const { openLogin } = useAuth();
 
   useEffect(() => {
     if (!userState.userInfor) {
-      openLogin()
+      openLogin();
     }
-  }, []);
-  return (
-    <Outlet />
-  )
+  }, [userState.userInfor, openLogin]);
+
+  // Nếu chưa đăng nhập, không trả về Outlet để tránh render trang bảo mật
+  if (!userState.userInfor) {
+    return null; // Hoặc một trang Loading/thông báo
+  }
+
+  return <Outlet />;
 }
