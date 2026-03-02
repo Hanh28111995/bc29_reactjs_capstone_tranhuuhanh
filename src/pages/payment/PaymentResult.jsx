@@ -52,8 +52,8 @@ export default function PaymentResult() {
                     bookingId={bookingId}
                     setStatus={setStatus} // Truyền hàm để con báo cáo trạng thái cho cha
                     // MODAL CHỈ MỞ KHI: Có URL và status vẫn đang là null (chưa Paid/Failed)
-                    open={!!location.state?.payUrl }
-                    onCancel={() => navigate('/')}
+                    open={!!location.state?.payUrl && !status}
+                    onCancel={() => navigate(0)}
                 />
             ) : (
                 <Modal
@@ -74,7 +74,6 @@ export default function PaymentResult() {
 
             {/* Hiển thị kết quả cuối cùng */}
             <div className="payment-result-container" style={{ padding: '50px' }}>
-                <p>{location.state?.payUrl} {status}</p>
                 {status === 'success' && (
                     <Result
                         status="success"
