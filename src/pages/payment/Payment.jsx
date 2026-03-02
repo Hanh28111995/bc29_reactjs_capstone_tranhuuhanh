@@ -70,6 +70,7 @@ export default function Payment() {
             }
 
             const ticket = result?.data.content;
+            console.log(ticket)
             const keyword = ticket.paymentMethod.toLowerCase();
             if (keyword === "cash") {
                 const updatePayment = await fetchCreateCashPayment(ticket)
