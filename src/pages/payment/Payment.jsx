@@ -44,35 +44,30 @@ export default function Payment() {
 
     const processBooking = async () => {
         try {
-            const result = await fetchTicketBookingAPI({
-                user_id: userState.userInfor?.user_inf?.id,
-                movie_id: movieInfor?._id,
-                showtime_id: params.id,
-                timeOfBooking: moment().format('YYYY-MM-DD HH:mm:ss'),
-                bookedSeat: bookingData.map(seat => ({
-                    seatNumber: seat.seatNumber,
-                    seatType: seat.seatType,
-                    price: seat.seatType.price,
-                    isBooked: true,
-                })),
-                paymentMethod: paymentMethod,
-                paymentStatus: 'Pending',
-            });
+            const result = await fetchTicketBookingAPI({ /* ...data... */ });
             const keyword = result.paymentMethod.toLowerCase();
-            console.log(keyword);
-            if (keyword == "momo") {
+
+            if (keyword === "momo") {
+
                 const response = await fetchCreateMomoPayment(result);
-                const payUrl = response.payUrl;
-                console.log(payUrl);
-                if (payUrl) notification.success({ message: "Đặt vé thành công!" });
-                setTimeout(() => navigate('/payment-result', {
-                    state: {
-                        payUrl: payUrl,
-                        bookingId: result._id,
-                    }
-                }), 2000);
+                
+                const payUrl = response.data?.payUrl || response.payUrl;
+
+                if (payUrl) {
+                    notification.success({ message: "Đang chuyển hướng đến MoMo..." });
+                 
+                    setTimeout(() => navigate('/payment-result', {
+                        state: {
+                            payUrl: payUrl,
+                            bookingId: result._id,
+                        }
+                    }), 2000);
+                } else {
+                    notification.error({ message: "Không lấy được link thanh toán MoMo." });
+                }
             }
         } catch (error) {
+            console.error("Booking Error:", error);
             notification.error({ message: "Đặt vé thất bại. Vui lòng thử lại." });
         }
     };
