@@ -15,7 +15,7 @@ const fetchTicketBookingAPI = (role, data) => {
   });
 };
 
-const fetchCancelBookingAPI = (id) => {
+const fetchCancelBookingAPI = (role, id, data) => {
   return request({
     url: `/${role}/ticket/cancel/${id}`,
     method: "PUT",

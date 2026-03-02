@@ -4,8 +4,13 @@ import { Spin, Button, Result, Modal } from 'antd';
 import Checkout from './Checkout';
 import { fetchCheckPayment } from 'services/ticket';
 import { fetchCancelBookingAPI } from 'services/customer';
+import { useSelector } from 'react-redux';
+
+
+
 
 export default function PaymentResult() {
+    const userState = useSelector((state) => state.userReducer);
     const location = useLocation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -58,7 +63,7 @@ export default function PaymentResult() {
                     title="Xác nhận thanh toán"
                     open={CashModal}
                     onOk={() => setCashModal(false)}
-                    onCancel={async () => { await fetchCancelBookingAPI(bookingId); navigate(-2) }}
+                    onCancel={async () => { await fetchCancelBookingAPI(userState.userInfor?.user_inf.role, bookingId, userState.userInfor?.user_inf.id); navigate(-2) }}
                     okText="YES"
                     cancelText="NO"
                 >
