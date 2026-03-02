@@ -46,6 +46,8 @@ export default function PaymentResult() {
 
     return (
         <>
+            <p>{location.state?.payUrl} {status}</p>
+            {/* Logic hiển thị Checkout / Cash Modal */}
             {location.state?.method?.toLowerCase() !== 'cash' ? (
                 <Checkout
                     payUrl={location.state?.payUrl}
@@ -53,7 +55,7 @@ export default function PaymentResult() {
                     setStatus={setStatus} // Truyền hàm để con báo cáo trạng thái cho cha
                     // MODAL CHỈ MỞ KHI: Có URL và status vẫn đang là null (chưa Paid/Failed)
                     open={!!location.state?.payUrl && !status}
-                    onCancel={() => navigate(0)}
+                    onCancel={() => navigate('/')}
                 />
             ) : (
                 <Modal
