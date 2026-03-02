@@ -11,7 +11,7 @@ const getAllShowTimes = () => {
 
 const getShowTimeDetail = (id) => {
   return request({
-    url: `/admin/showtime/${id}`,
+    url: `/admin/showtime/showtimeDetail/${id}`,
     method: "GET",
   });
 };
