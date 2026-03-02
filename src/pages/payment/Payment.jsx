@@ -5,10 +5,8 @@ import { CreditCardOutlined, WalletOutlined, DollarOutlined, ArrowLeftOutlined, 
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { fetchTicketBookingAPI } from 'services/customer';
-import "./index.scss"; // Import file scss mới
-import axios from 'axios';
-import { BASE_URL } from 'constants/common';
 import { fetchCreateMomoPayment } from 'services/ticket';
+import "./index.scss"; // Import file scss mới
 
 const { Title, Text } = Typography;
 const { confirm } = Modal;
@@ -57,16 +55,16 @@ export default function Payment() {
                 paymentMethod: paymentMethod,
                 paymentStatus: 'Pending',
             });
-            console.log(result)
-            const keyword = result?.paymentMethod.toLowerCase();
+            const ticket = result?.data.content;
+            const keyword = ticket.paymentMethod.toLowerCase();
 
             if (keyword === "momo") {
                 // Đảm bảo truyền đúng 'result' (có chứa _id) vào hàm này
-                const response = await fetchCreateMomoPayment(result);
+                const getCode = await fetchCreateMomoPayment(ticket);
 
                 // Lưu ý: Thường response của axios sẽ là response.data
                 // Nếu helper 'request' của bạn đã trả về .data rồi thì giữ nguyên
-                const payUrl = response?.data.payUrl || response?.payUrl;
+                const payUrl = getCode?.data.content.payUrl;
 
                 if (payUrl) {
                     notification.success({ message: "Đang chuyển hướng đến MoMo..." });
@@ -78,7 +76,7 @@ export default function Payment() {
                     setTimeout(() => navigate('/payment-result', {
                         state: {
                             payUrl: payUrl,
-                            bookingId: result._id,
+                            bookingId: ticket._id,
                         }
                     }), 2000);
                 } else {
