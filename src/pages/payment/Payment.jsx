@@ -55,23 +55,37 @@ export default function Payment() {
                 paymentMethod: paymentMethod,
                 paymentStatus: 'Pending',
             });
+
             const ticket = result?.data.content;
             const keyword = ticket.paymentMethod.toLowerCase();
+            if (keyword === "cash") {
 
-            if (keyword === "momo") {
-                // Đảm bảo truyền đúng 'result' (có chứa _id) vào hàm này
                 const getCode = await fetchCreateMomoPayment(ticket);
 
-                // Lưu ý: Thường response của axios sẽ là response.data
-                // Nếu helper 'request' của bạn đã trả về .data rồi thì giữ nguyên
-                const payUrl = getCode?.data.content.payUrl;
+
 
                 if (payUrl) {
                     notification.success({ message: "Đang chuyển hướng đến MoMo..." });
 
-                    // Thay vì chuyển hướng sang trang trung gian, bạn có thể 
-                    // mở trực tiếp trang thanh toán MoMo:
-                    // window.location.href = payUrl;
+                    setTimeout(() => navigate('/payment-result', {
+                        state: {
+                            payUrl: payUrl,
+                            bookingId: ticket._id,
+                        }
+                    }), 2000);
+                } else {
+                    notification.error({ message: "Không lấy được link thanh toán MoMo." });
+                }
+            }
+            if (keyword === "cash") {
+                const updatePayment = await fetchCreateCashPayment(ticket)
+            }
+
+            if (keyword === "momo") {
+                const getCode = await fetchCreateMomoPayment(ticket);
+                const payUrl = getCode?.data.content.payUrl;
+                if (payUrl) {
+                    notification.success({ message: "Đang chuyển hướng đến MoMo..." });
 
                     setTimeout(() => navigate('/payment-result', {
                         state: {

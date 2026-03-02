@@ -15,8 +15,16 @@ const fetchCreateMomoPayment = (data) => {
     data: data,
   });
 };
+const fetchCreateCashPayment = (data) => {
+  return request({
+    url: `/payment/cash`,
+    method: "POST",
+    data: data,
+  });
+};
 
 export {
   fetchCheckPayment,
-  fetchCreateMomoPayment
+  fetchCreateMomoPayment,
+  fetchCreateCashPayment
 };
