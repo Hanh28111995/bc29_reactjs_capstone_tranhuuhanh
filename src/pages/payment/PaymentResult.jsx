@@ -3,12 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Spin, Button, Result } from 'antd';
 import Checkout from './Checkout';
 import { fetchCheckPayment } from 'services/ticket';
+import { fetchCancelBookingAPI } from 'services/customer';
 
 export default function PaymentResult() {
     const location = useLocation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState(null); // 'success' hoặc 'error'
+    const [CashModal, setCashModal] = useState(true);
 
     // Lấy bookingId linh hoạt từ state hoặc URL
     const bookingId = location.state?.bookingId;
@@ -45,13 +47,25 @@ export default function PaymentResult() {
 
     return (
         <>
-            {/* Modal chỉ hiện khi CÓ payUrl trong state và CHƯA có status */}
-            <Checkout
-                payUrl={location.state?.payUrl}
-                bookingId={bookingId}
-                open={!!location.state?.payUrl && !status && !loading}
-                onCancel={() => navigate('/')}
-            />
+            {(location.state?.method.toLowerCase() !== 'cash') ?
+                (< Checkout
+                    payUrl={location.state?.payUrl}
+                    bookingId={bookingId}
+                    open={!!location.state?.payUrl && !status && !loading}
+                    onCancel={() => navigate('/')}
+                />)
+                : (<Modal
+                    title="Xác nhận thanh toán"
+                    open={CashModal}
+                    onOk={() => setCashModal(false)}
+                    onCancel={async () => { await fetchCancelBookingAPI(bookingId); navigate(-2) }}
+                    okText="YES"
+                    cancelText="NO"
+                >
+                    <p>Bạn đã chọn thanh toán bằng tiền mặt tại rạp.</p>
+                    <p>Vui lòng xác nhận bạn sẽ đến nhận vé đúng giờ!</p>
+                </Modal>
+                )}
 
             <div className="payment-result-container" style={{ padding: '50px' }}>
                 {status === 'success' && (

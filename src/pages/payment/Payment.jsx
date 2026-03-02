@@ -55,7 +55,7 @@ export default function Payment() {
                 paymentMethod: paymentMethod,
                 paymentStatus: 'Pending',
             });
-            
+
             if (result?.data?.success) {
                 notification.success({
                     message: 'Thành công',
@@ -73,23 +73,26 @@ export default function Payment() {
             const keyword = ticket.paymentMethod.toLowerCase();
             if (keyword === "cash") {
                 const updatePayment = await fetchCreateCashPayment(ticket)
+                setTimeout(() => navigate('/payment-result', {
+                    state: {
+                        payUrl: null,
+                        bookingId: ticket._id,
+                        method: ticket.paymentMethod
+                    }
+                }), 2000);
             }
 
             if (keyword === "momo") {
                 const getCode = await fetchCreateMomoPayment(ticket);
                 const payUrl = getCode?.data.content.payUrl;
-                if (payUrl) {
-                    notification.success({ message: "Đang chuyển hướng đến MoMo..." });
-
-                    setTimeout(() => navigate('/payment-result', {
-                        state: {
-                            payUrl: payUrl,
-                            bookingId: ticket._id,
-                        }
-                    }), 2000);
-                } else {
-                    notification.error({ message: "Không lấy được link thanh toán MoMo." });
-                }
+                notification.success({ message: "Đang chuyển hướng đến MoMo..." });
+                setTimeout(() => navigate('/payment-result', {
+                    state: {
+                        payUrl: payUrl,
+                        bookingId: ticket._id,
+                        method: ticket.paymentMethod
+                    }
+                }), 2000);
             }
         } catch (error) {
             console.error("Qúa trình bị gián đoạn.", error);
