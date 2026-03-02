@@ -45,8 +45,7 @@ export default function PaymentResult() {
     if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}><Spin size="large" tip="Đang xác thực..." /></div>;
 
     return (
-        <>
-            <p>{location.state?.payUrl} {status}</p>
+        <>            
             {/* Logic hiển thị Checkout / Cash Modal */}
             {location.state?.method?.toLowerCase() !== 'cash' ? (
                 <Checkout
