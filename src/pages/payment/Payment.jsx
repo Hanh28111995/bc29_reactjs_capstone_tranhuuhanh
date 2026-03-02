@@ -55,6 +55,19 @@ export default function Payment() {
                 paymentMethod: paymentMethod,
                 paymentStatus: 'Pending',
             });
+            
+            if (result?.data?.success) {
+                notification.success({
+                    message: 'Thành công',
+                    description: 'Đặt vé thành công!',
+                });
+            } else {
+                const errorMsg = result?.data?.message;
+                notification.error({
+                    message: 'Đặt vé thất bại',
+                    description: Array.isArray(errorMsg) ? errorMsg.join(" | ") : errorMsg || 'Lỗi không xác định từ hệ thống',
+                });
+            }
 
             const ticket = result?.data.content;
             const keyword = ticket.paymentMethod.toLowerCase();
@@ -78,8 +91,8 @@ export default function Payment() {
                     notification.error({ message: "Không lấy được link thanh toán MoMo." });
                 }
             }
-        } catch (error) {            
-            notification.error({ message: "Đặt vé thất bại. Vui lòng thử lại." });
+        } catch (error) {
+            console.error("Qúa trình bị gián đoạn.", error);
         }
     };
     return (
