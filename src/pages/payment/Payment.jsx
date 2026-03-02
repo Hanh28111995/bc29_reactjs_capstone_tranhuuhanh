@@ -5,7 +5,7 @@ import { CreditCardOutlined, WalletOutlined, DollarOutlined, ArrowLeftOutlined, 
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { fetchTicketBookingAPI } from 'services/customer';
-import { fetchCreateMomoPayment } from 'services/ticket';
+import { fetchCreateMomoPayment, fetchCreateCashPayment } from 'services/ticket';
 import "./index.scss"; // Import file scss mới
 
 const { Title, Text } = Typography;
@@ -57,26 +57,7 @@ export default function Payment() {
             });
 
             const ticket = result?.data.content;
-            const keyword = ticket.paymentMethod.toLowerCase();
-            if (keyword === "cash") {
-
-                const getCode = await fetchCreateMomoPayment(ticket);
-
-
-
-                if (payUrl) {
-                    notification.success({ message: "Đang chuyển hướng đến MoMo..." });
-
-                    setTimeout(() => navigate('/payment-result', {
-                        state: {
-                            payUrl: payUrl,
-                            bookingId: ticket._id,
-                        }
-                    }), 2000);
-                } else {
-                    notification.error({ message: "Không lấy được link thanh toán MoMo." });
-                }
-            }
+            const keyword = ticket.paymentMethod.toLowerCase();           
             if (keyword === "cash") {
                 const updatePayment = await fetchCreateCashPayment(ticket)
             }
