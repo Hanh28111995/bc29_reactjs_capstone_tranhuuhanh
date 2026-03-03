@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Spin, Button, Result, Modal } from 'antd';
 import Checkout from './Checkout';
 import { fetchCheckPayment } from 'services/ticket';
@@ -13,6 +13,9 @@ export default function PaymentResult() {
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState(null); // 'success' hoặc 'error'
     const [cashModal, setCashModal] = useState(true);
+    const [searchParams] = useSearchParams();
+
+    const success = searchParams.get('status');
 
     const bookingId = location.state?.bookingId;
 
@@ -45,7 +48,7 @@ export default function PaymentResult() {
     if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}><Spin size="large" tip="Đang xác thực..." /></div>;
 
     return (
-        <>            
+        <>
             {/* Logic hiển thị Checkout / Cash Modal */}
             {location.state?.method?.toLowerCase() !== 'cash' ? (
                 <Checkout
@@ -75,7 +78,7 @@ export default function PaymentResult() {
 
             {/* Hiển thị kết quả cuối cùng */}
             <div className="payment-result-container" style={{ padding: '50px' }}>
-                {status === 'success' && (
+                {success === 'success' && (
                     <Result
                         status="success"
                         title="Thanh Toán Thành Công!"
@@ -87,7 +90,7 @@ export default function PaymentResult() {
                     />
                 )}
 
-                {status === 'error' && (
+                {success !== 'success' && (
                     <Result
                         status="error"
                         title="Thanh Toán Thất Bại"

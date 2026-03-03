@@ -64,10 +64,6 @@ export default function Router() {
               path: "/booking/payment/:id",
               element: <Payment />,
             },
-            {
-              path: "/booking/payment-result",
-              element: <PaymentResult />,
-            },
           ],
         },
 
