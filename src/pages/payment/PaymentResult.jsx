@@ -15,7 +15,7 @@ export default function PaymentResult() {
     const [cashModal, setCashModal] = useState(true);
     const [searchParams] = useSearchParams();
 
-    const success = searchParams.get('status');
+    const success = searchParams.get('status') || null;
 
     const bookingId = location.state?.bookingId;
 
@@ -43,7 +43,7 @@ export default function PaymentResult() {
         };
 
         verifyPayment();
-    }, [bookingId]);
+    }, [bookingId], success);
 
     if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}><Spin size="large" tip="Đang xác thực..." /></div>;
 
