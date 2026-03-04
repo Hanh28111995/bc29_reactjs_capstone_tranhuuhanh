@@ -51,14 +51,15 @@ export default function PaymentResult() {
         <>
             {/* Logic hiển thị Checkout / Cash Modal */}
             {location.state?.method?.toLowerCase() !== 'cash' ? (
-                <Checkout
-                    payUrl={location.state?.payUrl}
-                    bookingId={bookingId}
-                    setStatus={setStatus} // Truyền hàm để con báo cáo trạng thái cho cha
-                    // MODAL CHỈ MỞ KHI: Có URL và status vẫn đang là null (chưa Paid/Failed)
-                    open={!!location.state?.payUrl && !status}
-                    onCancel={() => navigate('/')}
-                />
+                // <Checkout
+                //     payUrl={location.state?.payUrl}
+                //     bookingId={bookingId}
+                //     setStatus={setStatus} // Truyền hàm để con báo cáo trạng thái cho cha
+                //     // MODAL CHỈ MỞ KHI: Có URL và status vẫn đang là null (chưa Paid/Failed)
+                //     open={!!location.state?.payUrl && !status}
+                //     onCancel={() => navigate('/')}
+                // />
+                <></>
             ) : (
                 <Modal
                     title="Xác nhận thanh toán"

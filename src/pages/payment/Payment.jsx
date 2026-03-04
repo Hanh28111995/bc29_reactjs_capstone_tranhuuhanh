@@ -70,7 +70,7 @@ export default function Payment() {
                 });
             }
 
-            const ticket = result?.data.content;            
+            const ticket = result?.data.content;
             const keyword = ticket.paymentMethod.toLowerCase();
             if (keyword === "cash") {
                 await fetchCreateCashPayment(ticket)
@@ -87,26 +87,14 @@ export default function Payment() {
                 const getCode = await fetchCreateMomoPayment(ticket);
                 const payUrl = getCode?.data.content.payUrl;
                 notification.success({ message: "Đang chuyển hướng đến MoMo..." });
-                setTimeout(() => navigate('/payment-result', {
-                    state: {
-                        payUrl: payUrl,
-                        bookingId: ticket._id,
-                        method: ticket.paymentMethod
-                    }
-                }), 2000);
+                setTimeout(() => navigate(`${payUrl}`), 2000);
             }
 
             if (keyword === "card") {
                 const getCode = await fetchCreateVnpayPayment(ticket);
                 const payUrl = getCode?.data.content.paymentUrl;
                 notification.success({ message: "Đang chuyển hướng đến VNpay..." });
-                setTimeout(() => navigate('/payment-result', {
-                    state: {
-                        payUrl: payUrl,
-                        bookingId: ticket._id,
-                        method: ticket.paymentMethod
-                    }
-                }), 2000);
+                setTimeout(() => navigate(`${payUrl}`), 2000);
             }
         } catch (error) {
             console.error("Qúa trình bị gián đoạn.", error);
@@ -132,7 +120,7 @@ export default function Payment() {
                     >
                         <Space direction="vertical">
                             <Radio.Button value="card" className="payment-radio-btn">
-                                <CreditCardOutlined /> Thẻ ATM / Internet Banking
+                                <CreditCardOutlined /> Internet Banking - VNpay
                             </Radio.Button>
                             <Radio.Button value="momo" className="payment-radio-btn">
                                 <WalletOutlined /> Ví MoMo
