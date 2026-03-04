@@ -87,14 +87,14 @@ export default function Payment() {
                 const getCode = await fetchCreateMomoPayment(ticket);
                 const payUrl = getCode?.data.content.payUrl;
                 notification.success({ message: "Đang chuyển hướng đến MoMo..." });
-                setTimeout(() => navigate(`${payUrl}`), 2000);
+                setTimeout(() => window.open(payUrl, '_blank'), 2000);
             }
 
             if (keyword === "card") {
                 const getCode = await fetchCreateVnpayPayment(ticket);
                 const payUrl = getCode?.data.content.paymentUrl;
                 notification.success({ message: "Đang chuyển hướng đến VNpay..." });
-                setTimeout(() => navigate(`${payUrl}`), 2000);
+                setTimeout(() => window.open(payUrl, '_blank'), 2000);
             }
         } catch (error) {
             console.error("Qúa trình bị gián đoạn.", error);
