@@ -9,12 +9,12 @@ function MovieTheater() {
 
     // 1. Chỉ gọi lấy danh sách Locations khi load trang
     const { state: locations = [],  } = useAsync({
-            dependencies: [toggle],
+            dependencies: [],
             service: fetchLocationListAPI,
         });
 
         const { state: allCinemas = [],  } = useAsync({
-            dependencies: [toggle],
+            dependencies: [],
             service: fetchBranchesAPI
         });
 
