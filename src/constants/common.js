@@ -1,7 +1,14 @@
-export const TOKEN_CYBERSOFT='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3AiOiJCb290Y2FtcCBTw6FuZyAwNCIsIkhldEhhblN0cmluZyI6IjA1LzAzLzIwMjMiLCJIZXRIYW5UaW1lIjoiMTY3Nzk3NDQwMDAwMCIsIm5iZiI6MTY1NDEwMjgwMCwiZXhwIjoxNjc4MTIyMDAwfQ.FunqYipkHrCbBATBzuJXyjGpZZxDekx1oY2qxW3_yfw'
-export const BASE_URL = 'https://node-js-movie.vercel.app/api';
+export const TOKEN_CYBERSOFT =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3AiOiJCb290Y2FtcCBTw6FuZyAwNCIsIkhldEhhblN0cmluZyI6IjA1LzAzLzIwMjMiLCJIZXRIYW5UaW1lIjoiMTY3Nzk3NDQwMDAwMCIsIm5iZiI6MTY1NDEwMjgwMCwiZXhwIjoxNjc4MTIyMDAwfQ.FunqYipkHrCbBATBzuJXyjGpZZxDekx1oY2qxW3_yfw";
+export const BASE_URL = "https://node-js-movie.vercel.app/api";
 export const USER_INFO_KEY = "USER_INFO_KEY";
-export const HOUR = ["09:00:00", "12:00:00", "15:00:00", "18:00:00", "21:00:00"];
+export const HOUR = [
+  "09:00:00",
+  "12:00:00",
+  "15:00:00",
+  "18:00:00",
+  "21:00:00",
+];
 function removeVietnameseTones(str) {
   str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
   str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
@@ -27,18 +34,43 @@ function removeVietnameseTones(str) {
   str = str.trim();
   // Remove punctuations
   // Bỏ dấu câu, kí tự đặc biệt
-  str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, " ");
+  str = str.replace(
+    /!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g,
+    " ",
+  );
   return str;
 }
 
 const isEqual = (obj1, obj2) => {
   const objKey1 = Object.keys(obj1);
   const objKey2 = Object.keys(obj2);
-  if (objKey1.length !== objKey2.length) { return false }
-  for (let ojbKey of objKey1) {
-    if (obj1[ojbKey] !== obj2[ojbKey]) { return false }
+  if (objKey1.length !== objKey2.length) {
+    return false;
   }
-  return true
-}
+  for (let ojbKey of objKey1) {
+    if (obj1[ojbKey] !== obj2[ojbKey]) {
+      return false;
+    }
+  }
+  return true;
+};
 
-export { removeVietnameseTones, isEqual }; 
+const getDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Bán kính Trái Đất tính bằng km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+
+  return distance; // Kết quả là số km (ví dụ: 1.25)
+};
+
+export { removeVietnameseTones, isEqual, getDistance };

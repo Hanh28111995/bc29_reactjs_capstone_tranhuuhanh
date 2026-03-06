@@ -1,15 +1,14 @@
 import { useAsync } from 'hooks/useAsync';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchBranchesAPI, fetchLocationListAPI } from '../../services/general';
 import "./index.scss";
+import { getDistance } from 'constants/common';
 
 function MovieTheater() {
     const [selectedVungMien, setSelectedVungMien] = useState(null);
     const [selectedDistrict, setSelectedDistrict] = useState("");
     // State lưu chi tiết vị trí để hiển thị hoặc dùng cho việc khác nếu cần
     const [myLocation, setMyLocation] = useState({
-        road: "",
-        suburb: "", // Phường
         district: "", // Quận
         city: "" // Thành phố
     });
@@ -25,6 +24,84 @@ function MovieTheater() {
         service: fetchBranchesAPI
     });
 
+    useEffect(() => {
+        // 1. Kiểm tra trình duyệt hỗ trợ
+        if (!navigator.geolocation) return;
+        const autoLocate = async () => {
+            if (locations.length === 0) return;
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+                    );
+                    const data = await res.json();
+
+                    let addrCity = data.address.city || data.address.state || "";
+                    // let addrDis = data.address.city_district || data.address.suburb || "";
+
+                    // 1. Chuẩn hóa tên Thành phố để khớp với Database (vungMien: "TP.HCM")
+                    if (addrCity.includes("Ho Chi Minh")) {
+                        addrCity = "TP.HCM";
+                    }
+
+                    // 2. Tìm Vùng Miền trong list locations
+                    const foundVung = locations.find(item => item.vungMien === addrCity);
+
+                    if (foundVung) {
+                        // Gán Vùng Miền cho Select 1
+                        setSelectedVungMien(foundVung);
+                        // Lấy tất cả rạp thuộc Vùng Miền này
+                        const cinemasInCity = allCinemas.filter(cinema =>
+                            cinema.address.includes(addrCity)
+                        );
+
+                        if (cinemasInCity.length > 0) {
+                            // Tìm rạp có khoảng cách ngắn nhất tới User
+                            let closestCinema = cinemasInCity[0];
+                            let minDistance = getDistance(
+                                latitude, longitude,
+                                cinemasInCity[0].coordinates[0],
+                                cinemasInCity[0].coordinates[1]
+                            );
+
+                            cinemasInCity.forEach(cinema => {
+                                const dist = getDistance(
+                                    latitude, longitude,
+                                    cinema.coordinates[0],
+                                    cinema.coordinates[1]
+                                );
+                                if (dist < minDistance) {
+                                    minDistance = dist;
+                                    closestCinema = cinema;
+                                }
+                            });
+
+                            // Từ rạp gần nhất, ta trích xuất tên Quận từ địa chỉ của rạp đó
+                            // Ví dụ địa chỉ rạp: "... Quận 1, TP.HCM"
+                            const foundDistInList = foundVung.cumRap.find(distName =>
+                                closestCinema.address.includes(distName)
+                            );
+
+                            // 3. Điền vào ô Select thứ 2 dựa trên kết quả tính toán vật lý
+                            if (foundDistInList) {
+                                setSelectedDistrict(foundDistInList);
+                            } else {
+                                // Fallback nếu không trích xuất được quận từ rạp gần nhất
+                                setSelectedDistrict(foundVung.cumRap[0]);
+                            }
+                        }
+                    }
+                }
+                catch (error) {
+                    console.error("Lỗi xử lý định vị:", error);
+                }
+            });
+        };
+
+        autoLocate();
+    }, [locations]); // Dependency là locations để chạy ngay khi có dữ liệu tỉnh thành
+
     // Hàm xử lý định vị và tự động điền
     const handleGetLocation = () => {
         if (!navigator.geolocation) return alert("Trình duyệt không hỗ trợ định vị!");
@@ -33,7 +110,7 @@ function MovieTheater() {
         navigator.geolocation.getCurrentPosition(async (position) => {
             try {
                 const { latitude, longitude } = position.coords;
-                
+
                 // Gọi API lấy địa chỉ từ tọa độ
                 const res = await fetch(
                     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
@@ -52,15 +129,15 @@ function MovieTheater() {
 
                 // 2. Logic tự động điền vào 2 ô Select
                 // Tìm vùng miền khớp (ưu tiên TP.HCM hoặc Hà Nội...)
-                const foundVung = locations.find(loc => 
+                const foundVung = locations.find(loc =>
                     locationInfo.city.includes(loc.vungMien.replace("TP.", "").trim())
                 );
 
                 if (foundVung) {
                     setSelectedVungMien(foundVung);
                     // Sau khi tìm thấy vùng, tìm quận khớp trong mảng cumRap
-                    const foundDist = foundVung.cumRap.find(d => 
-                        locationInfo.district.includes(d.replace("Quận", "").trim()) || 
+                    const foundDist = foundVung.cumRap.find(d =>
+                        locationInfo.district.includes(d.replace("Quận", "").trim()) ||
                         d.includes(locationInfo.district)
                     );
                     if (foundDist) {
@@ -88,26 +165,17 @@ function MovieTheater() {
         <div className="container px-0">
             {/* Hàng Filter gồm Nút bấm và 2 Select */}
             <div className='d-flex gap-3 my-4 align-items-center'>
-                
-                {/* Nút định vị */}
-                <button 
-                    className={`btn ${isLocating ? 'btn-secondary' : 'btn-danger'} d-flex align-items-center gap-2`}
-                    onClick={handleGetLocation}
-                    disabled={isLocating}
-                    style={{ whiteSpace: 'nowrap', minHeight: '38px' }}
-                >
-                    <i className={`fas ${isLocating ? 'fa-sync fa-spin' : 'fa-map-marker-alt'}`}></i>
-                    {isLocating ? 'Đang xác định...' : 'Vị trí của tôi'}
-                </button>
+
+
 
                 {/* Select Vùng Miền */}
-                <select 
+                <select
                     className="form-select"
                     value={selectedVungMien?._id || ""}
                     onChange={(e) => {
                         const vung = locations.find(item => item._id === e.target.value);
                         setSelectedVungMien(vung);
-                        setSelectedDistrict(""); 
+                        setSelectedDistrict("");
                     }}
                 >
                     <option value="">Chọn Tỉnh thành</option>
@@ -117,7 +185,7 @@ function MovieTheater() {
                 </select>
 
                 {/* Select Quận Huyện */}
-                <select 
+                <select
                     className="form-select"
                     disabled={!selectedVungMien}
                     value={selectedDistrict}
@@ -128,6 +196,17 @@ function MovieTheater() {
                         <option key={index} value={dist}>{dist}</option>
                     ))}
                 </select>
+
+                {/* Nút định vị */}
+                <button
+                    className={`btn ${isLocating ? 'btn-secondary' : 'btn-danger'} d-flex align-items-center gap-2`}
+                    onClick={handleGetLocation}
+                    disabled={isLocating}
+                    style={{ whiteSpace: 'nowrap', minHeight: '38px' }}
+                >
+                    <i className={`fas ${isLocating ? 'fa-sync fa-spin' : 'fa-map-marker-alt'}`}></i>
+                    {isLocating ? 'Đang xác định...' : 'Vị trí của tôi'}
+                </button>
             </div>
 
             {/* Thông báo vị trí hiện tại (Optional) */}
@@ -143,7 +222,7 @@ function MovieTheater() {
                     filteredCinemas.map(cinema => (
                         <div key={cinema._id} className="col-md-6 mb-3">
                             <div className="card p-3 shadow-sm">
-                                <h5 className="text-primary">{cinema.cinemaName}</h5>
+                                <h5 className="text-primary">{cinema.branch}</h5>
                                 <p className="small text-muted mb-0"><i className="fas fa-map-pin me-2"></i>{cinema.address}</p>
                             </div>
                         </div>
