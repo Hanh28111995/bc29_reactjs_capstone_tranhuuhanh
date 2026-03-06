@@ -47,7 +47,7 @@ function MovieTheater() {
 
                     // 2. Tìm Vùng Miền trong list locations
                     const foundVung = locations.find(item => item.vungMien === addrCity);
-
+                    console.log(foundVung)
                     if (foundVung) {
                         // Gán Vùng Miền cho Select 1
                         setSelectedVungMien(foundVung);
@@ -82,7 +82,7 @@ function MovieTheater() {
                             const foundDistInList = foundVung.cumRap.find(distName =>
                                 closestCinema.address.includes(distName)
                             );
-
+                            console.log(foundDistInList, foundVung)
                             // 3. Điền vào ô Select thứ 2 dựa trên kết quả tính toán vật lý
                             if (foundDistInList) {
                                 setSelectedDistrict(foundDistInList);
