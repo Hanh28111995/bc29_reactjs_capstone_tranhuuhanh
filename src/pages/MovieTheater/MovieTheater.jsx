@@ -56,9 +56,6 @@ function MovieTheater() {
                         const cinemasInCity = allCinemas.filter(cinema =>
                             cinema.address.includes(addrCity)
                         );
-
-                        console.log(cinemasInCity)
-
                         if (cinemasInCity.length > 0) {
                             // Tìm rạp có khoảng cách ngắn nhất tới User
                             let closestCinema = cinemasInCity[0];
@@ -81,6 +78,7 @@ function MovieTheater() {
                                 }
                             });
 
+                            console.log(closestCinema)
                             // Từ rạp gần nhất, ta trích xuất tên Quận từ địa chỉ của rạp đó
                             // Ví dụ địa chỉ rạp: "... Quận 1, TP.HCM"
                             const foundDistInList = foundVung.cumRap.find(distName =>
