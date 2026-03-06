@@ -1,8 +1,10 @@
 import { useAsync } from 'hooks/useAsync';
 import React, { useEffect, useState } from 'react';
 import { fetchBranchesAPI, fetchLocationListAPI } from '../../services/general';
-import "./index.scss";
+import { Button } from 'antd';
+import { AimOutlined, SyncOutlined } from '@ant-design/icons';
 import { getDistance } from 'constants/common';
+import "./index.scss";
 
 function MovieTheater() {
     const [selectedVungMien, setSelectedVungMien] = useState(null);
@@ -200,15 +202,25 @@ function MovieTheater() {
                 </select>
 
                 {/* Nút định vị */}
-                <button
-                    className={`btn ${isLocating ? 'btn-secondary' : 'btn-danger'} d-flex align-items-center gap-2`}
+                <Button
+                    type="default"
+                    shape="round" // Bo tròn để giống phong cách Google Maps
+                    icon={isLocating ? <SyncOutlined spin /> : <AimOutlined />}
                     onClick={handleGetLocation}
+                    loading={isLocating}
                     disabled={isLocating}
-                    style={{ whiteSpace: 'nowrap', minHeight: '38px' }}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        fontWeight: '500',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)', // Đổ bóng nhẹ chuẩn Google
+                        border: '1px solid #dadce0', // Màu viền nhẹ
+                        color: '#1a73e8', // Màu xanh đặc trưng của Google
+                        height: '40px',
+                    }}
                 >
-                    <i className={`fas ${isLocating ? 'fa-sync fa-spin' : 'fa-map-marker-alt'}`}></i>
                     {isLocating ? 'Đang xác định...' : 'Vị trí của tôi'}
-                </button>
+                </Button>
             </div>
 
             {/* Thông báo vị trí hiện tại (Optional) */}
