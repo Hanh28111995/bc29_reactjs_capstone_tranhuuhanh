@@ -46,8 +46,7 @@ function MovieTheater() {
                     }
 
                     // 2. Tìm Vùng Miền trong list locations
-                    const foundVung = locations.find(item => item.vungMien === addrCity);
-                    console.log(foundVung)
+                    const foundVung = locations.find(item => item.vungMien === addrCity);                    
                     if (foundVung) {
                         // Gán Vùng Miền cho Select 1
                         setSelectedVungMien(foundVung);
@@ -56,13 +55,15 @@ function MovieTheater() {
                             cinema.address.includes(addrCity)
                         );
 
+                        console.log(cinemasInCity)
+
                         if (cinemasInCity.length > 0) {
                             // Tìm rạp có khoảng cách ngắn nhất tới User
                             let closestCinema = cinemasInCity[0];
                             let minDistance = getDistance(
                                 latitude, longitude,
-                                cinemasInCity[0].coordinates[0],
-                                cinemasInCity[0].coordinates[1]
+                                cinemasInCity[0]?.coordinates[0],
+                                cinemasInCity[0]?.coordinates[1]
                             );
 
                             cinemasInCity.forEach(cinema => {
