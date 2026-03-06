@@ -67,10 +67,11 @@ function MovieTheater() {
                             );
 
                             cinemasInCity.forEach(cinema => {
+                                coords = JSON.parse(cinema.coordinates)
                                 const dist = getDistance(
                                     latitude, longitude,
-                                    cinema.coordinates[0],
-                                    cinema.coordinates[1]
+                                    coords[0],
+                                    coords[1]
                                 );
                                 if (dist < minDistance) {
                                     minDistance = dist;
@@ -102,7 +103,7 @@ function MovieTheater() {
         };
 
         autoLocate();
-    }, [locations]); // Dependency là locations để chạy ngay khi có dữ liệu tỉnh thành
+    }, [locations]);
 
     // Hàm xử lý định vị và tự động điền
     const handleGetLocation = () => {
