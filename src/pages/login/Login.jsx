@@ -70,7 +70,7 @@ export default function Login() {
         title="Đăng nhập" 
         description="Đăng nhập để trải nghiệm đặt vé xem phim nhanh chóng và nhận nhiều ưu đãi."
       />
-      <form onSubmit={handleSubmit} style={{ caretColor: 'black' }} className="col-10 col-md-6">
+      <form onSubmit={handleSubmit} style={{ caretColor: 'black' }} >
         <div className="form-group">
           <label>Tài khoản</label>
           <input
