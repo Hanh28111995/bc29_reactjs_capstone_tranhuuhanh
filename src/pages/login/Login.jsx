@@ -65,12 +65,12 @@ export default function Login() {
   };
 
   return (
-    <div className="mx-auto my-5">
+    <div className="mx-auto my-5 d-flex flex-column col-10 col-md-4">
       <SEO 
         title="Đăng nhập" 
         description="Đăng nhập để trải nghiệm đặt vé xem phim nhanh chóng và nhận nhiều ưu đãi."
       />
-      <form onSubmit={handleSubmit} style={{ caretColor: 'black' }}>
+      <form onSubmit={handleSubmit} style={{ caretColor: 'black' }} className="col-10 col-md-6">
         <div className="form-group">
           <label>Tài khoản</label>
           <input
