@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Spin, Button, Result, Modal } from 'antd';
-import Checkout from './Checkout';
 import { fetchCheckPayment } from 'services/ticket';
 import { fetchCancelBookingAPI } from 'services/customer';
 import { useSelector } from 'react-redux';

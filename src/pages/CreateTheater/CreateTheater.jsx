@@ -1,4 +1,3 @@
-import MovieForm from 'modules/MovieForm/MovieForm';
 import TheaterForm from 'modules/TheaterForm/TheaterForm';
 import React from 'react';
 

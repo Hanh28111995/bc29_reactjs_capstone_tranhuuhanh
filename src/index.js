@@ -11,26 +11,29 @@ import { store } from "./store/store";
 import { ConfigProvider, App as AntdApp } from "antd";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import viVN from "antd/locale/vi_VN";
+import { HelmetProvider } from "react-helmet-async";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <Provider store={store}>
-    <ConfigProvider
-      locale={viVN}
-      theme={{
-        token: {          
-          colorPrimary: "#1677ff",
-          borderRadius: 6,
-        },
-      }}
-    >
-      <ProConfigProvider>
-        <AntdApp>
-          <App />
-        </AntdApp>
-      </ProConfigProvider>
-    </ConfigProvider>
-  </Provider>
+  <HelmetProvider>
+    <Provider store={store}>
+      <ConfigProvider
+        locale={viVN}
+        theme={{
+          token: {          
+            colorPrimary: "#1677ff",
+            borderRadius: 6,
+          },
+        }}
+      >
+        <ProConfigProvider>
+          <AntdApp>
+            <App />
+          </AntdApp>
+        </ProConfigProvider>
+      </ConfigProvider>
+    </Provider>
+  </HelmetProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

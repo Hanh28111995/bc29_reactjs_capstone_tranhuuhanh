@@ -1,4 +1,3 @@
-import { GROUP_ID } from "constants/common";
 import { request } from "../configs/axios";
 
 const getAllSeatTypesApi = () => {

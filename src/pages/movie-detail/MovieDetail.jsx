@@ -3,10 +3,12 @@ import { Tabs, Button, List, Card, Row, Col,Empty, Spin, Select } from 'antd';
 import { useAsync } from 'hooks/useAsync';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchShowtimesAPI, fetchBranchesAPI } from 'services/general';
+import { fetchMovieDetailAPI } from 'services/movie';
 import Calendar from 'modules/showTime/Calendar';
 import moment from 'moment';
 import { fetchLocationListAPI } from 'services/general';
 import './index.scss';
+import SEO from 'components/SEO';
 
 export default function MovieDetail() {
     const navigate = useNavigate()
@@ -16,6 +18,7 @@ export default function MovieDetail() {
     const [selectedCinemaName, setSelectedCinemaName] = useState(null);
     const [branches, setBranches] = useState([]);
     const [localDate, setLocalDate] = useState(null);
+    const [movieDetail, setMovieDetail] = useState(null);
 
 
     const { state: areasList = [] } = useAsync({ service: fetchLocationListAPI });
@@ -25,6 +28,20 @@ export default function MovieDetail() {
 
     const [dataShowTimes, setDataShowTimes] = useState([]);
     const [loadingInternal, setLoadingInternal] = useState(false);
+
+    useEffect(() => {
+        const fetchMovie = async () => {
+            if (param.movieId) {
+                try {
+                    const res = await fetchMovieDetailAPI(param.movieId);
+                    setMovieDetail(res.data?.content || res.data || null);
+                } catch (err) {
+                    console.error("Lỗi lấy chi tiết phim:", err);
+                }
+            }
+        };
+        fetchMovie();
+    }, [param.movieId]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -52,6 +69,11 @@ export default function MovieDetail() {
 
     return (
         <div className="detailPage py-3 container" style={{ flex: '1' }}>
+            <SEO 
+                title={movieDetail?.tenPhim || "Chi tiết phim"} 
+                description={movieDetail?.moTa || "Xem lịch chiếu và đặt vé cho bộ phim này."}
+                image={movieDetail?.hinhAnh}
+            />
             {/* <CinemaBooking dataSource={data} /> */}
             <Card style={{ borderRadius: '8px', minHeight: '600px', border: '1px solid #f0f0f0', overflow: 'hidden' }} className="forPC">
 

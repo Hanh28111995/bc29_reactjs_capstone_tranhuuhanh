@@ -1,7 +1,5 @@
 import { request } from "../configs/axios";
 
-
-
 const fetchMovieListAPI = () => {
   return request({
     url: `/admin/movie/allMovies`,

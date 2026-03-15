@@ -1,7 +1,5 @@
 import { request } from "../configs/axios";
 
-
-
 const getAllShowTimes = () => {
   return request({
     url: '/admin/showtime/all',

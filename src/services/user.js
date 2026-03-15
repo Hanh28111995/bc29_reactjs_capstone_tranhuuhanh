@@ -1,4 +1,3 @@
-import { TOKEN_CYBERSOFT, BASE_URL } from "../constants/common";
 import { request } from "../configs/axios";
 
 const loginAPI = (data) => {
@@ -61,6 +60,14 @@ const deleteUserApi = (tk) => {
   });
 };
 
+const loginGoogleAPI = (firebaseToken) => {
+  return request({
+    url: `/auth/google-login`, // Endpoint này tùy thuộc vào Backend của bạn
+    method: "POST",
+    data: { token: firebaseToken },
+  });
+};
+
 export {
   loginAPI,
   logoutAPI,
@@ -70,4 +77,5 @@ export {
   addUserApi,
   updateUserApi,
   deleteUserApi,
+  loginGoogleAPI,
 };
