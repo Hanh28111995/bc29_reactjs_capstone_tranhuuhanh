@@ -53,7 +53,7 @@ import { fetchMoviebannerAPI } from 'services/general';
 // };
 
 export default function Carousel() {
-  const { state: banner = [], loading } = useAsync({
+  const { state: banner = [] } = useAsync({
     dependencies: [],
     service: () => fetchMoviebannerAPI(),
   });
@@ -69,8 +69,8 @@ export default function Carousel() {
         justifyContent: "center"
       }}>
         <img
-          src={item}
-          alt={`banner-${index}`}
+          src={item.banner?.replace(/ /g, "%20")}
+          alt={item.title || `banner-${index}`}
           style={{
             width: "auto",
             height: "100%",

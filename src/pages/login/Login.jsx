@@ -49,18 +49,36 @@ export default function Login() {
 
   const handleGoogleLogin = async () => {
     try {
+      console.log("Bắt đầu đăng nhập Google...");
       const result = await signInWithPopup(auth, googleProvider);
-      // Lấy ID Token từ Firebase để gửi lên backend verify
-      const idToken = await result.user.getIdToken();
+      console.log("Firebase Login thành công, lấy token...");
       
+      const idToken = await result.user.getIdToken();
+      console.log("Token ID:", idToken);
+      
+      console.log("Gửi token về backend...");
       const response = await loginGoogleAPI(idToken);
       const userData = response.data.content;
       
       notification.success({ description: "Đăng nhập bằng Google thành công!" });
       handleLoginSuccess(userData);
     } catch (error) {
-      console.error("Google Login Error:", error);
-      notification.error({ description: "Đăng nhập bằng Google thất bại!" });
+      console.error("Chi tiết lỗi Google Login:", error);
+      
+      let errorMsg = "Đăng nhập bằng Google thất bại!";
+      
+      if (error.code === "auth/popup-closed-by-user") {
+        errorMsg = "Bạn đã đóng cửa sổ đăng nhập.";
+      } else if (error.code === "auth/popup-blocked") {
+        errorMsg = "Trình duyệt đã chặn cửa sổ đăng nhập. Hãy cho phép popup.";
+      } else if (error.response) {
+        // Lỗi từ phía Backend
+        errorMsg = `Backend Error (${error.response.status}): ${error.response.data?.message || "Lỗi xác thực token"}`;
+      } else {
+        errorMsg = error.message;
+      }
+      
+      notification.error({ description: errorMsg });
     }
   };
 
@@ -74,7 +92,7 @@ export default function Login() {
         <div className="form-group">
           <label>Tài khoản</label>
           <input
-            defaultValue={state.taiKhoan}
+            defaultValue={state.username}
             name="username"
             onChange={handleChange}
             type="text"
@@ -84,7 +102,7 @@ export default function Login() {
         <div className="form-group">
           <label>Mật khẩu</label>
           <input
-            defaultValue={state.matKhau}
+            defaultValue={state.password}
             name="password"
             onChange={handleChange}
             type="password"
