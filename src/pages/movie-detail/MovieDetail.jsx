@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, Button, List, Card, Row, Col,Empty, Spin, Select } from 'antd';
+import { Button, List, Card, Row, Col,Empty, Spin, Select } from 'antd';
 import { useAsync } from 'hooks/useAsync';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchShowtimesAPI, fetchBranchesAPI, fetchMovieDetailAPI } from 'services/general';
@@ -136,25 +136,30 @@ export default function MovieDetail() {
                 <Row gutter={24} wrap={false} style={{ display: 'flex' }}>
                     <Col span={spans.col1}>
                         <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Khu vực</h2>
-                        <Tabs
-                            tabPosition="left"
-                            activeKey={selectedRegionName}
-                            onChange={async (name) => {
-                                setSelectedRegionName(name);
-                                setBranches([]);
-                                setSelectedCinemaName(null);
-                                const regionData = areasList?.find((region) => region.vungMien === name);
-                                const firstCity = regionData?.cumRap?.[0] || null;
-                                setSelectCity(firstCity);
-                                if (firstCity) {
-                                    await loadBranchesByLocation(firstCity);
-                                }
-                            }}
-                            items={areasList.map((item) => ({
-                                key: item.vungMien,
-                                label: item.vungMien,
-                            }))}
-                        />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {areasList?.length > 0 ? (
+                                areasList.map((item, index) => (
+                                    <Button
+                                        key={item._id || item.vungMien || index}
+                                        type={selectedRegionName === item.vungMien ? 'primary' : 'default'}
+                                        onClick={async () => {
+                                            setSelectedRegionName(item.vungMien);
+                                            setBranches([]);
+                                            setSelectedCinemaName(null);
+                                            const firstCity = item?.cumRap?.[0] || null;
+                                            setSelectCity(firstCity);
+                                            if (firstCity) {
+                                                await loadBranchesByLocation(firstCity);
+                                            }
+                                        }}
+                                    >
+                                        {item.vungMien}
+                                    </Button>
+                                ))
+                            ) : (
+                                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu" />
+                            )}
+                        </div>
                     </Col>
 
                     <Col span={spans.col2} style={{ borderLeft: '0px solid #f0f0f0' }}>
