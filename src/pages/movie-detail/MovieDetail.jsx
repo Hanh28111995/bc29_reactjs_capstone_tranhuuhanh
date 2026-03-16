@@ -28,6 +28,24 @@ export default function MovieDetail() {
     const [dataShowTimes, setDataShowTimes] = useState([]);
     const [loadingInternal, setLoadingInternal] = useState(false);
 
+    const normalizeDateForApi = (dateStr) => {
+        if (!dateStr) return dateStr;
+        const m = String(dateStr).match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+        if (!m) return dateStr;
+        const [, d, mo, y] = m;
+        return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    };
+
+    const loadBranchesByLocation = async (location) => {
+        try {
+            const res = await fetchBranchesAPI({ location });
+            const data = res.data?.content || res.data?.data || res.data || [];
+            setBranches(Array.isArray(data) ? data : []);
+        } catch (err) {
+            setBranches([]);
+        }
+    };
+
     useEffect(() => {
         const fetchMovie = async () => {
             if (param.movieId) {
@@ -49,7 +67,7 @@ export default function MovieDetail() {
                 try {
                     const res = await fetchShowtimesAPI({
                         branch: selectedCinemaName,
-                        date: localDate,
+                        date: normalizeDateForApi(localDate),
                         idMovie: param.movieId,
                         location: selectedRegionName,
                     });
@@ -82,11 +100,16 @@ export default function MovieDetail() {
                         <Tabs
                             tabPosition="left"
                             activeKey={selectedRegionName}
-                            onChange={(name) => {
+                            onChange={async (name) => {
                                 setSelectedRegionName(name);
-                                setSelectCity(null);
                                 setBranches([]);
                                 setSelectedCinemaName(null);
+                                const regionData = areasList?.find((region) => region.vungMien === name);
+                                const firstCity = regionData?.cumRap?.[0] || null;
+                                setSelectCity(firstCity);
+                                if (firstCity) {
+                                    await loadBranchesByLocation(firstCity);
+                                }
                             }}
                             items={areasList.map((item) => ({
                                 key: item.vungMien,
@@ -106,11 +129,7 @@ export default function MovieDetail() {
                                         onClick={async () => {
                                             setSelectCity(city);
                                             setSelectedCinemaName(null);
-                                            try {
-                                                const res = await fetchBranchesAPI({ location: city });
-                                                const data = res.data?.content || res.data || [];
-                                                setBranches(data);
-                                            } catch (err) { setBranches([]); }
+                                            await loadBranchesByLocation(city);
                                         }}
                                     >
                                         {city}
@@ -248,9 +267,14 @@ export default function MovieDetail() {
                             value={selectedRegionName}
                             onChange={(name) => {
                                 setSelectedRegionName(name);
-                                setSelectCity(null);
                                 setBranches([]);
                                 setSelectedCinemaName(null);
+                                const regionData = areasList?.find((region) => region.vungMien === name);
+                                const firstCity = regionData?.cumRap?.[0] || null;
+                                setSelectCity(firstCity);
+                                if (firstCity) {
+                                    loadBranchesByLocation(firstCity);
+                                }
                             }}
                             options={areasList.map(item => ({ label: item.vungMien, value: item.vungMien }))}
                         />
@@ -267,11 +291,7 @@ export default function MovieDetail() {
                             onChange={async (city) => {
                                 setSelectCity(city);
                                 setSelectedCinemaName(null);
-                                try {
-                                    const res = await fetchBranchesAPI({ location: city });
-                                    const data = res.data?.content || res.data || [];
-                                    setBranches(data);
-                                } catch (err) { setBranches([]); }
+                                await loadBranchesByLocation(city);
                             }}
                             options={activeRegionData?.cumRap?.map(city => ({ label: city, value: city }))}
                         />
