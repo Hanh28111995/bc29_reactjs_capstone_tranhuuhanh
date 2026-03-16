@@ -6,7 +6,8 @@ import {
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
-import { fetchMovieDetailAPI, addMovieUploadImage, updateMovieUploadImage } from "services/movie";
+import { addMovieUploadImage, updateMovieUploadImage } from "services/movie";
+import { fetchMovieDetailAPI } from "services/general";
 import { GenreList } from "enums/common";
 import { ArrowLeftOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
 import "./index.scss";
