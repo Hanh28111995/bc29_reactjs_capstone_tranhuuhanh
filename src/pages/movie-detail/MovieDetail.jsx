@@ -8,6 +8,7 @@ import moment from 'moment';
 import { fetchLocationListAPI } from 'services/general';
 import './index.scss';
 import SEO from 'components/SEO';
+import { useGeoLocationSelect } from 'hooks/useGeoLocationSelect';
 
 export default function MovieDetail() {
     const navigate = useNavigate()
@@ -45,6 +46,44 @@ export default function MovieDetail() {
             setBranches([]);
         }
     };
+
+    const { decision } = useGeoLocationSelect({
+        locations: areasList,
+        askOnMount: true,
+        onSelect: ({ regionName, district }) => {
+            setSelectedRegionName(regionName || null);
+            setSelectCity(district || null);
+            setBranches([]);
+            setSelectedCinemaName(null);
+            if (district) {
+                loadBranchesByLocation(district);
+            }
+        },
+        title: "Chia sẻ vị trí",
+        content: "Bạn có muốn chia sẻ vị trí để tự động chọn khu vực không?",
+    });
+
+    useEffect(() => {
+        if (decision !== "denied") return;
+        if (!selectedRegionName && Array.isArray(areasList) && areasList.length > 0) {
+            const preferredRegion =
+                areasList.find((r) => r?.vungMien === "TP.HCM") ||
+                areasList.find((r) => String(r?.vungMien || "").toLowerCase().includes("hcm")) ||
+                areasList[0];
+            const firstRegion = preferredRegion;
+            const regionName = firstRegion?.vungMien || null;
+            const firstCity = firstRegion?.cumRap?.[0] || null;
+
+            setSelectedRegionName(regionName);
+            setSelectCity(firstCity);
+            setBranches([]);
+            setSelectedCinemaName(null);
+
+            if (firstCity) {
+                loadBranchesByLocation(firstCity);
+            }
+        }
+    }, [areasList, selectedRegionName, decision]);
 
     useEffect(() => {
         const fetchMovie = async () => {
