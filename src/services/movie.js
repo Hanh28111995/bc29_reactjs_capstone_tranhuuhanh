@@ -6,12 +6,6 @@ const fetchMovieListAPI = () => {
     method: "GET",
   });
 };
-const fetchMovieDetailAPI = (movieId) => {
-  return request({
-    url: `/admin/movie/${movieId}`,
-    method: "GET",
-  });
-};
 
 const addMovieUploadImage = (data) => {
   return request({
@@ -38,7 +32,6 @@ const deleteMovieAPI = (movieId) => {
 
 export {
   fetchMovieListAPI,
-  fetchMovieDetailAPI,
   addMovieUploadImage,
   updateMovieUploadImage,
   deleteMovieAPI,
