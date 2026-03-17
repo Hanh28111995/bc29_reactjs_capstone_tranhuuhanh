@@ -41,7 +41,15 @@ export default function MovieDetail() {
         try {
             const res = await fetchBranchesAPI({ location });
             const data = res.data?.content || res.data?.data || res.data || [];
-            setBranches(Array.isArray(data) ? data : []);
+            const list = Array.isArray(data) ? data : [];
+            const unique = Array.from(
+                new Map(
+                    list
+                        .filter((x) => x?.branch)
+                        .map((x) => [String(x.branch).trim(), { branch: String(x.branch).trim() }]),
+                ).values(),
+            );
+            setBranches(unique);
         } catch (err) {
             setBranches([]);
         }
