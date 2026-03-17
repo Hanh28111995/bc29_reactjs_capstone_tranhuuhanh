@@ -40,21 +40,6 @@ const findDistrict = ({ region, addressDistrict, cinemas, coords, city }) => {
   const districts = region?.cumRap;
   if (!Array.isArray(districts) || districts.length === 0) return "";
 
-  const d = String(addressDistrict || "");
-  if (d) {
-    const dNorm = stripDistrictPrefix(d);
-    const match = districts.find((x) => {
-      const xStr = String(x || "");
-      const xNorm = stripDistrictPrefix(xStr);
-      return (
-        d.includes(xStr) ||
-        xStr.includes(d) ||
-        (dNorm && (dNorm.includes(xNorm) || xNorm.includes(dNorm)))
-      );
-    });
-    if (match) return match;
-  }
-
   if (coords && Array.isArray(cinemas) && cinemas.length > 0) {
     const cityName = normalizeCityName(city);
     const cinemasInCity = cinemas.filter((c) =>
@@ -67,7 +52,12 @@ const findDistrict = ({ region, addressDistrict, cinemas, coords, city }) => {
         try {
           const raw = cinema?.coordinates;
           if (!raw) return;
-          const [lat2, lon2] = JSON.parse(raw);
+          let coordsArr = raw;
+          if (typeof raw === "string") {
+            coordsArr = JSON.parse(raw);
+          }
+          if (!Array.isArray(coordsArr) || coordsArr.length < 2) return;
+          const [lat2, lon2] = coordsArr;
           const dist = getDistance(coords.latitude, coords.longitude, lat2, lon2);
           if (dist < min) {
             min = dist;
@@ -86,12 +76,28 @@ const findDistrict = ({ region, addressDistrict, cinemas, coords, city }) => {
     }
   }
 
+  const d = String(addressDistrict || "");
+  if (d) {
+    const dNorm = stripDistrictPrefix(d);
+    const match = districts.find((x) => {
+      const xStr = String(x || "");
+      const xNorm = stripDistrictPrefix(xStr);
+      return (
+        d.includes(xStr) ||
+        xStr.includes(d) ||
+        (dNorm && (dNorm.includes(xNorm) || xNorm.includes(dNorm)))
+      );
+    });
+    if (match) return match;
+  }
+
   return districts[0] || "";
 };
 
 export const useGeoLocationSelect = ({
   locations,
   cinemas,
+  cinemasProvider,
   askOnMount = true,
   onSelect,
   title = "Chia sẻ vị trí",
@@ -129,10 +135,22 @@ export const useGeoLocationSelect = ({
 
       const region = findRegion(locations, city);
       if (region) {
+        let cinemasList = cinemas;
+        if (
+          typeof cinemasProvider === "function" &&
+          (!Array.isArray(cinemasList) || cinemasList.length === 0)
+        ) {
+          try {
+            cinemasList = await cinemasProvider();
+          } catch (e) {
+            cinemasList = cinemas;
+          }
+        }
+
         const selectedDistrict = findDistrict({
           region,
           addressDistrict: district,
-          cinemas,
+          cinemas: cinemasList,
           coords,
           city,
         });
@@ -152,7 +170,7 @@ export const useGeoLocationSelect = ({
     } finally {
       setIsLocating(false);
     }
-  }, [cinemas, locations, onSelect]);
+  }, [cinemas, cinemasProvider, locations, onSelect]);
 
   useEffect(() => {
     if (!askOnMount || askedRef.current) return;
@@ -171,4 +189,3 @@ export const useGeoLocationSelect = ({
 
   return { decision, isLocating, locate };
 };
-

@@ -49,6 +49,11 @@ export default function MovieDetail() {
 
     const { decision } = useGeoLocationSelect({
         locations: areasList,
+        cinemasProvider: async () => {
+            const res = await fetchBranchesAPI();
+            const data = res.data?.content || res.data?.data || res.data || [];
+            return Array.isArray(data) ? data : [];
+        },
         askOnMount: true,
         onSelect: ({ regionName, district }) => {
             setSelectedRegionName(regionName || null);
