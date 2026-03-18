@@ -85,7 +85,7 @@ export default function ShowtimeForm() {
         const cinemaId = showtimeDetail.theater?.cinema?._id || showtimeDetail.theater?.cinema;
 
         const dataForForm = {
-          movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
+          id_movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
           cinema: cinemaId, 
           theater: showtimeDetail.theater?._id || showtimeDetail.theater,
           startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime) : null,
@@ -129,7 +129,7 @@ export default function ShowtimeForm() {
       // 1. Chỉ lấy những field Backend cần
       // Nếu BE của bạn nhận 'movie', ta giữ nguyên. Nếu nhận 'id_movie', hãy đổi key bên dưới.
       const payload = {
-        movie: values.movie,
+        id_movie: values.movie,
         theater: values.theater,
         startTime: values.startTime ? values.startTime.toISOString() : null,
       };
