@@ -57,8 +57,16 @@ export default function ShowtimeForm() {
 
 
   const cinemaList = useMemo(() => {
-    const cinemas = theaters.map(t => t.cinema?.name || t.branch); // Tùy vào cấu trúc data của bạn
-    return [...new Set(cinemas)].filter(Boolean);
+    const uniqueCinemas = new Map();
+    theaters.forEach(t => {
+      if (t.cinema?._id && !uniqueCinemas.has(t.cinema._id)) {
+        uniqueCinemas.set(t.cinema._id, {
+          _id: t.cinema._id,
+          name: t.cinema.name
+        });
+      }
+    });
+    return Array.from(uniqueCinemas.values());
   }, [theaters]);
 
   // Lọc danh sách phòng chiếu dựa trên cụm rạp đã chọn
@@ -71,31 +79,26 @@ export default function ShowtimeForm() {
 
   // 3. Đồng bộ dữ liệu lên Form
   useEffect(() => {
-    // 1. Trường hợp CHỈNH SỬA (có params.id)
     if (params.id && params.id !== "undefined") {
       if (showtimeDetail) {
-        // Lấy tên rạp từ theater để hiển thị Select Cụm rạp
-        const cinemaName = showtimeDetail.theater?.branch || showtimeDetail.theater?.cinema?.name;
+        // Lấy ID của cinema từ object theater
+        const cinemaId = showtimeDetail.theater?.cinema?._id || showtimeDetail.theater?.cinema;
 
         const dataForForm = {
-          ...showtimeDetail,
-          cinemaName: cinemaName, // Thêm tên rạp vào form để Select Rạp hiển thị được
           movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
+          cinemaId: cinemaId, // Dùng ID để đồng bộ với Select cụm rạp
           theater: showtimeDetail.theater?._id || showtimeDetail.theater,
           startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime) : null,
         };
 
         form.setFieldsValue(dataForForm);
         setOriginalData(dataForForm);
-        setSelectedCinema(cinemaName); // Cần cái này để lọc ra danh sách phòng thuộc rạp đó
+        setSelectedCinema(cinemaId); // Quan trọng để hiện danh sách phòng chiếu
         setIsChanged(false);
       }
-    }
-    // 2. Trường hợp THÊM MỚI
-    else {
-      form.setFieldsValue(DEFAULT_VALUES);
-      setOriginalData(null);
-      setSelectedCinema(null); // Reset rạp đã chọn
+    } else {
+      form.resetFields();
+      setSelectedCinema(null);
       setIsChanged(false);
     }
   }, [showtimeDetail, params.id, form]);
@@ -123,23 +126,25 @@ export default function ShowtimeForm() {
 
   const handleSave = async (values) => {
     try {
+      // 1. Chỉ lấy những field Backend cần
+      // Nếu BE của bạn nhận 'movie', ta giữ nguyên. Nếu nhận 'id_movie', hãy đổi key bên dưới.
       const payload = {
-        ...values,
-        // Convert dayjs object sang ISO string cho MongoDB
+        movie: values.movie,
+        theater: values.theater,
         startTime: values.startTime ? values.startTime.toISOString() : null,
       };
-      console.log(payload)
-      if (params.id) {
-        // Chế độ UPDATE (gửi kèm ID trong body như bạn yêu cầu ở API)
+
+      if (params.id && params.id !== "undefined") {
+        // Chế độ UPDATE
         await updateShowTime({ id: params.id, ...payload });
         notification.success({ message: "Cập nhật suất chiếu thành công!" });
       } else {
-        // Chế độ CREATE: Backend sẽ tự clone seats từ theater ID này
+        // Chế độ CREATE
         await addNewShowTime(payload);
         notification.success({ message: "Thêm suất chiếu mới thành công!" });
       }
 
-      // navigate("/admin/showtimes");
+      navigate("/admin/showtimes"); // Điều hướng về danh sách sau khi xong
     } catch (error) {
       notification.error({
         message: "Thao tác thất bại",
@@ -204,16 +209,34 @@ export default function ShowtimeForm() {
             {/* SELECT 1: CỤM RẠP */}
             <Form.Item
               label="Chọn Cụm Rạp"
-              name="cinemaName" // Trường này có thể không cần gửi về backend, chỉ dùng để lọc
+              name="cinemaId" // Chỉ dùng để lọc ở FE
               rules={[{ required: true, message: 'Vui lòng chọn cụm rạp' }]}
             >
               <Select
                 placeholder="Chọn cụm rạp..."
                 onChange={(value) => {
                   setSelectedCinema(value);
-                  form.setFieldValue('theater', undefined); // Reset phòng chiếu khi đổi cụm rạp
+                  form.setFieldValue('theater', undefined);
                 }}
-                options={cinemaList.map(c => ({ label: c, value: c }))}
+                // CinemaList lúc này nên chứa mảng object { _id, name }
+                options={cinemaList.map(c => ({ label: c.name, value: c._id }))}
+              />
+            </Form.Item>
+
+            {/* SELECT 2: PHÒNG CHIẾU */}
+            <Form.Item
+              label="Chọn Phòng Chiếu"
+              name="theater" // Field này sẽ được gửi lên BE
+              rules={[{ required: true, message: 'Vui lòng chọn phòng chiếu' }]}
+            >
+              <Select
+                placeholder={selectedCinema ? "Chọn phòng..." : "Vui lòng chọn cụm rạp trước"}
+                // Disable nếu có ghế đã đặt để tránh lỗi logic
+                disabled={!selectedCinema || (params.id && showtimeDetail?.seats?.some(s => s.isBooked))}
+                options={filteredTheaters.map(t => ({
+                  label: t.name,
+                  value: t._id
+                }))}
               />
             </Form.Item>
           </Col>
