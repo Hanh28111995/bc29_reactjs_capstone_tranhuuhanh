@@ -1,10 +1,13 @@
 import { EditableProTable } from '@ant-design/pro-components';
-import { Button, App, Card, Input } from 'antd';
+import { Button, App, Card, Input, Popconfirm } from 'antd';
 import { useAsync } from '../../hooks/useAsync';
 import React, { useState, useEffect, useMemo } from 'react';
-import { getAllBranches, deleteOneBranchApi, updateBranhesApi, addOneBranchApi } from 'services/branches';
+import { getAllBranches,  } from 'services/branches';
 import { DeleteOutlined, EditOutlined, SaveOutlined, SearchOutlined } from '@ant-design/icons';
-import './index.scss'; // Dùng chung file SCSS
+import './index.scss'; 
+import { deleteOneBranchApi } from 'services/branches';
+import { addOneBranchApi } from 'services/branches';
+import { updateBranhesApi } from 'services/branches';
 
 const { Search } = Input;
 
@@ -15,6 +18,7 @@ export default function BranchesTable() {
     const [dataSource, setDataSource] = useState([]);
     const [searchText, setSearchText] = useState("");
     const [deleteIds, setDeleteIds] = useState([]);
+    const [updatedIds, setUpdatedIds] = useState([]); // State theo dõi các ID đã sửa
     const [toggle, setToggle] = useState(false);
 
     const { state: data = [], loading } = useAsync({
@@ -26,6 +30,7 @@ export default function BranchesTable() {
         if (data) setDataSource(data);
     }, [data]);
 
+    // Lọc dữ liệu hiển thị dựa trên ô tìm kiếm
     const displayData = useMemo(() => {
         if (!searchText) return dataSource;
         const lowerSearch = searchText.toLowerCase();
@@ -38,8 +43,20 @@ export default function BranchesTable() {
 
     const handleDelete = (record) => {
         const isNew = record._id?.toString().startsWith('new_');
-        if (!isNew) setDeleteIds((prev) => [...prev, record._id]);
+        if (!isNew) {
+            setDeleteIds((prev) => [...new Set([...prev, record._id])]);
+        }
         setDataSource(dataSource.filter((item) => item._id !== record._id));
+        message.info("Đã xóa tạm thời. Nhấn LƯU TẤT CẢ để áp dụng.");
+    };
+
+    // Khi nhấn nút "Lưu" trên từng dòng
+    const handleRowSave = async (key) => {
+        const isNew = key?.toString().startsWith('new_');
+        if (!isNew) {
+            setUpdatedIds((prev) => [...new Set([...prev, key])]);
+        }
+        message.info("Đã ghi nhận thay đổi dòng. Nhấn LƯU TẤT CẢ để cập nhật server.");
     };
 
     const columns = [
@@ -65,57 +82,77 @@ export default function BranchesTable() {
             valueType: 'option',
             width: '15%',
             render: (text, record, _, action) => [
-                <div className='action-btns'>
+                <div className='action-btns' key="actions">
                     <Button
                         key="edit"
                         type="text"
                         icon={<EditOutlined style={{ color: '#1677ff' }} />}
                         onClick={() => action?.startEditable?.(record._id)}
-                    />,
-                    <Button
-                        key="delete"
-                        type="text"
-                        icon={<DeleteOutlined style={{ color: "red" }} />}
-                        onClick={() => handleDelete(record)}
                     />
+                    <Popconfirm
+                        key="delete-confirm"
+                        title="Xóa tạm thời chi nhánh này?"
+                        onConfirm={() => handleDelete(record)}
+                    >
+                        <Button
+                            type="text"
+                            icon={<DeleteOutlined style={{ color: "red" }} />}
+                        />
+                    </Popconfirm>
                 </div>
             ],
         },
     ];
 
     const handleSaveAll = async () => {
+        // Kiểm tra xem còn dòng nào đang ở trạng thái Edit (chưa nhấn Lưu/Hủy trên dòng)
         if (editableKeys.length > 0) {
-            return message.warning("Vui lòng hoàn tất chỉnh sửa trên dòng trước!");
+            return message.warning("Vui lòng nhấn 'Lưu' hoặc 'Hủy' trên các dòng đang sửa trước!");
         }
+
         try {
             const promises = [];
-            const updateData = dataSource.filter(item => item._id && !item._id.toString().startsWith('new_'));
-            const newData = dataSource.filter(item => item._id && item._id.toString().startsWith('new_'));
 
-            if (deleteIds.length > 0) deleteIds.forEach(id => promises.push(deleteOneBranchApi(id)));
-            if (updateData.length > 0) promises.push(updateBranhesApi(updateData));
-            if (newData.length > 0) {
-                newData.forEach(item => {
+            // 1. Xử lý Xóa
+            deleteIds.forEach(id => promises.push(deleteOneBranchApi(id)));
+
+            // 2. Xử lý Thêm mới
+            dataSource
+                .filter(item => item._id?.toString().startsWith('new_'))
+                .forEach(item => {
                     const { _id, ...payload } = item;
                     promises.push(addOneBranchApi(payload));
                 });
-            }
 
-            if (promises.length === 0 && deleteIds.length === 0) return message.warning("Không có thay đổi!");
+            // 3. Xử lý Cập nhật (Chỉ cập nhật những dòng nằm trong updatedIds)
+            updatedIds.forEach(id => {
+                const item = dataSource.find(d => d._id === id);
+                // Nếu item vẫn tồn tại (chưa bị xóa trong lúc chưa save all)
+                if (item && !deleteIds.includes(id)) {
+                    promises.push(updateBranhesApi(item)); 
+                    // Lưu ý: Nếu updateBranhesApi của bạn nhận Array, hãy gom lại rồi push 1 lần.
+                    // Ở đây tôi đang giả định updateBranhesApi nhận 1 object giống SeatType.
+                }
+            });
+
+            if (promises.length === 0) return message.warning("Không có thay đổi nào để lưu!");
 
             await Promise.all(promises);
-            notification.success({ message: 'Thành công', description: 'Đã cập nhật hệ thống!' });
+            notification.success({ message: 'Thành công', description: 'Hệ thống chi nhánh đã được cập nhật.' });
+            
+            // Reset các trạng thái
             setDeleteIds([]);
-            setToggle(prev => !prev);
+            setUpdatedIds([]);
+            setToggle(prev => !prev); // Reload data từ API
         } catch (error) {
-            notification.error({ message: 'Lỗi', description: 'Lưu thất bại.' });
+            notification.error({ message: 'Lỗi', description: 'Lưu thất bại. Vui lòng kiểm tra lại.' });
         }
     };
 
     return (
-        <div className="branches-table-container"> {/* Class bao ngoài để nhận SCSS shared */}
+        <div className="branches-table-container">
             <Card title="Quản lý chi nhánh rạp">
-                <div className="table-header-toolbar"> {/* Thanh tìm kiếm và nút Save */}
+                <div className="table-header-toolbar">
                     <div className="search-box">
                         <Search
                             placeholder="Tìm kiếm rạp, chi nhánh hoặc địa chỉ..."
@@ -129,7 +166,7 @@ export default function BranchesTable() {
                 </div>
 
                 <EditableProTable
-                    className="custom-editable-table" // Class dùng chung
+                    className="custom-editable-table"
                     rowKey="_id"
                     loading={loading}
                     columns={columns}
@@ -140,43 +177,32 @@ export default function BranchesTable() {
                         creatorButtonText: "Thêm chi nhánh mới",
                         record: () => ({
                             _id: `new_${Date.now()}`,
-                            cinemaName: searchText || '',
+                            cinemaName: '',
                         }),
                     }}
                     editable={{
                         type: 'multiple',
                         editableKeys,
+                        onChange: setEditableRowKeys,
+                        onSave: handleRowSave, // Kích hoạt khi nhấn nút Lưu trên dòng
                         saveText: 'Lưu',
                         cancelText: 'Hủy',
                         actionRender: (row, config, defaultDoms) => [
                             defaultDoms.save,
                             defaultDoms.cancel,
                         ],
-                        onChange: setEditableRowKeys,
-                        onCancel: async (key) => {
-                            if (key?.toString().startsWith('new_')) {
-                                setTimeout(() => {
-                                    setDataSource((prev) => prev.filter((item) => item._id !== key));
-                                }, 0);
-                            }
-                        },
-                        onValuesChange: (record, recordList) => setDataSource(recordList),
                     }}
                     search={false}
                     options={false}
-                    // pagination={{
-                    //     pageSize: 10,                        
-                    //     showSizeChanger: false,
-                    //     showTotal: false
-                    // }}
                 />
-                <div className='save-all-wrapper'>
+
+                <div className='save-all-wrapper' style={{ marginTop: 24, textAlign: 'right' }}>
                     <Button
                         type="primary"
-                        className="btn-save-all"
+                        size="large"
                         icon={<SaveOutlined />}
                         onClick={handleSaveAll}
-                        disabled={loading}
+                        disabled={loading || (deleteIds.length === 0 && updatedIds.length === 0 && !dataSource.some(item => item._id?.toString().startsWith('new_')))}
                     >
                         LƯU TẤT CẢ THAY ĐỔI
                     </Button>
