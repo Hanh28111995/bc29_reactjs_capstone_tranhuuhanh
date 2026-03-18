@@ -16,139 +16,117 @@ import { useAsync } from "hooks/useAsync";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { fetchMovieListAPI } from "services/movie";
 import { fetchTheaterListAPI } from "services/theater";
-import { updateShowTime } from "services/showtime";
-import { addNewShowTime } from "services/showtime";
-import { getShowTimeDetail } from "services/showtime";
+import { updateShowTime, addNewShowTime, getShowTimeDetail } from "services/showtime";
 import SeatsRendering from "modules/seatsRendering/seatsRendering";
 import { useSelector } from "react-redux";
-
-// Import các service cần thiết
-
 
 const DEFAULT_VALUES = {
   movie: undefined,
   theater: undefined,
   startTime: null,
+  cinemaId: undefined,
 };
 
 export default function ShowtimeForm() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const params = useParams();
+  const { id } = useParams();
   const { notification } = App.useApp();
   const userState = useSelector((state) => state.userReducer);
+  
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
   const [selectedCinema, setSelectedCinema] = useState(null);
 
-  // 1. Lấy danh sách phim và phòng chiếu để hiển thị trong Select
+  // 1. Lấy dữ liệu danh mục
   const { state: movies = [] } = useAsync({ service: fetchMovieListAPI });
   const { state: theaters = [] } = useAsync({ service: fetchTheaterListAPI });
 
-  // 2. Lấy chi tiết suất chiếu nếu là chế độ Update
+  // 2. Lấy chi tiết khi Edit
   const { state: showtimeDetail, loading } = useAsync({
-    service: () => {
-      return getShowTimeDetail(params.id); // Thay bằng hàm lấy chi tiết
-    },
-    dependencies: [params.id],
-    condition: !!params.id && params.id !== "undefined",
+    service: () => getShowTimeDetail(id),
+    dependencies: [id],
+    condition: !!id && id !== "undefined",
   });
 
-
-
+  // 3. Logic xử lý danh sách Cụm rạp (Unique Cinemas)
   const cinemaList = useMemo(() => {
     const uniqueCinemas = new Map();
     theaters.forEach(t => {
-      if (t.cinema?._id && !uniqueCinemas.has(t.cinema._id)) {
-        uniqueCinemas.set(t.cinema._id, {
-          _id: t.cinema._id,
-          name: t.cinema.name
+      const c = t.cinema;
+      if (c?._id && !uniqueCinemas.has(c._id)) {
+        uniqueCinemas.set(c._id, {
+          _id: c._id,
+          name: c.name || "Cụm rạp không tên"
         });
       }
     });
     return Array.from(uniqueCinemas.values());
   }, [theaters]);
 
-  // Lọc danh sách phòng chiếu dựa trên cụm rạp đã chọn
+  // 4. Lọc phòng chiếu theo Cụm rạp đã chọn
   const filteredTheaters = useMemo(() => {
     if (!selectedCinema) return [];
-    return theaters.filter(t => (t.cinema?.name || t.branch) === selectedCinema);
+    return theaters.filter(t => (t.cinema?._id || t.cinema) === selectedCinema);
   }, [theaters, selectedCinema]);
 
-
-
-  // 3. Đồng bộ dữ liệu lên Form
+  // 5. Đồng bộ dữ liệu lên Form
   useEffect(() => {
-    if (params.id && params.id !== "undefined") {
-      if (showtimeDetail) {
-        // Lấy ID của cinema từ object theater
-        const cinemaId = showtimeDetail.theater?.cinema?._id || showtimeDetail.theater?.cinema;
+    if (id && id !== "undefined" && showtimeDetail) {
+      const cinemaId = showtimeDetail.theater?.cinema?._id || showtimeDetail.theater?.cinema;
+      
+      const dataForForm = {
+        movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
+        cinemaId: cinemaId, 
+        theater: showtimeDetail.theater?._id || showtimeDetail.theater,
+        startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime) : null,
+      };
 
-        const dataForForm = {
-          id_movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
-          cinema: cinemaId, 
-          theater: showtimeDetail.theater?._id || showtimeDetail.theater,
-          startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime) : null,
-        };
-
-        form.setFieldsValue(dataForForm);
-        setOriginalData(dataForForm);
-        setSelectedCinema(cinemaId); // Quan trọng để hiện danh sách phòng chiếu
-        setIsChanged(false);
-      }
+      form.setFieldsValue(dataForForm);
+      setOriginalData(dataForForm);
+      setSelectedCinema(cinemaId);
+      setIsChanged(false);
     } else {
-      form.resetFields();
+      form.setFieldsValue(DEFAULT_VALUES);
       setSelectedCinema(null);
       setIsChanged(false);
     }
-  }, [showtimeDetail, params.id, form]);
+  }, [showtimeDetail, id, form]);
 
-  // 4. Kiểm tra thay đổi
+  // 6. Kiểm tra thay đổi để enable nút Lưu
   const onValuesChange = (_, allValues) => {
-    if (!params.id) {
-      const hasInput = Object.keys(allValues).some(key => allValues[key] !== undefined);
-      setIsChanged(hasInput);
+    if (!id) {
+      setIsChanged(Object.values(allValues).some(v => v !== undefined && v !== null));
       return;
     }
-
     const hasChanged = Object.keys(allValues).some(key => {
-      const currentVal = allValues[key];
-      const originalVal = originalData?.[key];
-
-      if (key === 'startTime') {
-        return !dayjs(currentVal).isSame(originalVal);
-      }
-      return currentVal !== originalVal;
+      if (key === 'startTime') return !dayjs(allValues[key]).isSame(originalData?.[key]);
+      return allValues[key] !== originalData?.[key];
     });
-
     setIsChanged(hasChanged);
   };
 
+  // 7. Xử lý lưu dữ liệu
   const handleSave = async (values) => {
     try {
-      // 1. Chỉ lấy những field Backend cần
-      // Nếu BE của bạn nhận 'movie', ta giữ nguyên. Nếu nhận 'id_movie', hãy đổi key bên dưới.
       const payload = {
         id_movie: values.movie,
         theater: values.theater,
         startTime: values.startTime ? values.startTime.toISOString() : null,
       };
 
-      if (params.id && params.id !== "undefined") {
-        // Chế độ UPDATE
-        await updateShowTime({ id: params.id, ...payload });
-        notification.success({ message: "Cập nhật suất chiếu thành công!" });
+      if (id && id !== "undefined") {
+        await updateShowTime({ id, ...payload });
+        notification.success({ message: "Cập nhật thành công!" });
       } else {
-        // Chế độ CREATE
         await addNewShowTime(payload);
-        notification.success({ message: "Thêm suất chiếu mới thành công!" });
+        notification.success({ message: "Thêm mới thành short thành công!" });
       }
-
-      navigate("/admin/showtimes"); // Điều hướng về danh sách sau khi xong
+      navigate("/admin/showtimes");
     } catch (error) {
       notification.error({
-        message: "Thao tác thất bại",
-        description: error.response?.data?.message || "Vui lòng kiểm tra lại khung giờ chiếu",
+        message: "Lỗi",
+        description: error.response?.data?.message || "Không thể lưu suất chiếu",
       });
     }
   };
@@ -159,7 +137,7 @@ export default function ShowtimeForm() {
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
-          <span>{params.id ? "Chỉnh sửa suất chiếu" : "Tạo suất chiếu mới"}</span>
+          <span>{id ? "Chỉnh sửa suất chiếu" : "Tạo suất chiếu mới"}</span>
         </Space>
       }
     >
@@ -168,11 +146,9 @@ export default function ShowtimeForm() {
         layout="vertical"
         onFinish={handleSave}
         onValuesChange={onValuesChange}
-        initialValues={DEFAULT_VALUES}
       >
         <Row gutter={24}>
           <Col span={12}>
-            {/* CHỌN PHIM */}
             <Form.Item
               label="Chọn Phim"
               name="movie"
@@ -180,15 +156,13 @@ export default function ShowtimeForm() {
             >
               <Select
                 showSearch
-                placeholder="Tìm kiếm phim..."
+                placeholder="Tìm phim..."
                 optionFilterProp="children"
                 options={movies.map(m => ({ label: m.title, value: m._id }))}
               />
             </Form.Item>
           </Col>
-
           <Col span={12}>
-            {/* CHỌN THỜI GIAN CHIẾU */}
             <Form.Item
               label="Thời gian bắt đầu"
               name="startTime"
@@ -206,83 +180,46 @@ export default function ShowtimeForm() {
 
         <Row gutter={24}>
           <Col span={12}>
-            {/* SELECT 1: CỤM RẠP */}
             <Form.Item
-              label="Chọn Cụm Rạp"
-              name="cinemaId" // Chỉ dùng để lọc ở FE
-              rules={[{ required: true, message: 'Vui lòng chọn cụm rạp' }]}
+              label="Cụm Rạp"
+              name="cinemaId"
+              rules={[{ required: true, message: 'Vui lòng chọn rạp' }]}
             >
               <Select
                 placeholder="Chọn cụm rạp..."
-                onChange={(value) => {
-                  setSelectedCinema(value);
+                onChange={(val) => {
+                  setSelectedCinema(val);
                   form.setFieldValue('theater', undefined);
                 }}
-                // CinemaList lúc này nên chứa mảng object { _id, name }
                 options={cinemaList.map(c => ({ label: c.name, value: c._id }))}
               />
             </Form.Item>
-
-            {/* SELECT 2: PHÒNG CHIẾU */}
-            <Form.Item
-              label="Chọn Phòng Chiếu"
-              name="theater" // Field này sẽ được gửi lên BE
-              rules={[{ required: true, message: 'Vui lòng chọn phòng chiếu' }]}
-            >
-              <Select
-                placeholder={selectedCinema ? "Chọn phòng..." : "Vui lòng chọn cụm rạp trước"}
-                // Disable nếu có ghế đã đặt để tránh lỗi logic
-                disabled={!selectedCinema || (params.id && showtimeDetail?.seats?.some(s => s.isBooked))}
-                options={filteredTheaters.map(t => ({
-                  label: t.name,
-                  value: t._id
-                }))}
-              />
-            </Form.Item>
           </Col>
-
           <Col span={12}>
-            {/* SELECT 2: PHÒNG CHIẾU (Bị phụ thuộc) */}
             <Form.Item
-              label="Chọn Phòng Chiếu"
+              label="Phòng Chiếu"
               name="theater"
-              rules={[{ required: true, message: 'Vui lòng chọn phòng chiếu' }]}
+              rules={[{ required: true, message: 'Vui lòng chọn phòng' }]}
             >
               <Select
-                placeholder={selectedCinema ? "Chọn phòng..." : "Vui lòng chọn cụm rạp trước"}
-                disabled={!selectedCinema || (!!params.id && originalData?.seats?.some(s => s.isBooked))}
-                options={filteredTheaters.map(t => ({
-                  label: t.name,
-                  value: t._id
-                }))}
+                placeholder={selectedCinema ? "Chọn phòng..." : "Chọn rạp trước"}
+                disabled={!selectedCinema || (id && showtimeDetail?.seats?.some(s => s.isBooked))}
+                options={filteredTheaters.map(t => ({ label: t.name, value: t._id }))}
               />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={24}>
+        <div style={{ margin: "20px 0", padding: "15px", background: "#f5f5f5", borderRadius: "8px" }}>
+          <SeatsRendering
+            data={showtimeDetail?.seats || []}
+            mode={userState.userInfor?.user_inf.role}
+            onAction
+            selectedSeats={[]}
+          />
+        </div>
 
-          <div style={{ marginTop: 30 }}>
-            {params.id ? (
-              <p style={{ color: '#8c8c8c' }}>
-                * Lưu ý: Khi thay đổi phòng chiếu, sơ đồ ghế sẽ được làm mới hoàn toàn.
-              </p>
-            ) : (
-              <p style={{ color: '#8c8c8c' }}>
-                * Sơ đồ ghế sẽ được tự động đồng bộ từ phòng chiếu đã chọn.
-              </p>
-            )}
-          </div>
-        </Row>
-
-        <SeatsRendering
-          data={showtimeDetail?.seats || []}
-          mode={userState.userInfor?.user_inf.role}
-          onAction
-          selectedSeats={[]}
-        />
-
-        <Form.Item style={{ marginTop: 24 }}>
+        <Form.Item>
           <Button
             type="primary"
             htmlType="submit"
@@ -291,7 +228,7 @@ export default function ShowtimeForm() {
             disabled={!isChanged}
             block
           >
-            {params.id ? "CẬP NHẬT SUẤT CHIẾU" : "TẠO SUẤT CHIẾU"}
+            {id ? "CẬP NHẬT" : "TẠO MỚI"}
           </Button>
         </Form.Item>
       </Form>
