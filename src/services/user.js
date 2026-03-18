@@ -60,6 +60,14 @@ const deleteUserApi = (tk) => {
   });
 };
 
+const refreshTokenAPI = () => {
+  return request({
+    url: "/auth/refresh",
+    method: "POST",
+    withCredentials: true,
+  });
+};
+
 const loginGoogleAPI = (firebaseToken) => {
   return request({
     url: `/auth/google-login`, // Endpoint này tùy thuộc vào Backend của bạn
@@ -72,6 +80,7 @@ export {
   loginAPI,
   logoutAPI,
   registerApi,
+  refreshTokenAPI,
   userListApi,
   userDetailApi,
   addUserApi,

@@ -31,7 +31,7 @@ request.interceptors.response.use(
       try {
         // Dùng axios thuần, KHÔNG dùng request instance để tránh loop
         const res = await axios.post(
-          `${BASE_URL}/auth/refresh`,
+          `${BASE_URL}/auth/refresh-token`,
           {},
           { withCredentials: true }
         );
@@ -44,6 +44,9 @@ request.interceptors.response.use(
           userInfor.user_token = newToken;
           localStorage.setItem(USER_INFO_KEY, JSON.stringify(userInfor));
         }
+
+        // Xóa token cũ để request interceptor gắn token mới từ localStorage
+        delete originalRequest.headers.Authorization;
 
         // Retry request gốc - request interceptor sẽ tự gắn token mới
         return request(originalRequest);
