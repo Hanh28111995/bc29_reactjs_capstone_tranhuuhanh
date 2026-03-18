@@ -16,139 +16,115 @@ import { useAsync } from "hooks/useAsync";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { fetchMovieListAPI } from "services/movie";
 import { fetchTheaterListAPI } from "services/theater";
-import { updateShowTime } from "services/showtime";
-import { addNewShowTime } from "services/showtime";
-import { getShowTimeDetail } from "services/showtime";
+import { fetchCinemaListAPI } from "services/cinema"; // Gọi API lấy danh sách rạp
+import { updateShowTime, addNewShowTime, getShowTimeDetail } from "services/showtime";
 import SeatsRendering from "modules/seatsRendering/seatsRendering";
 import { useSelector } from "react-redux";
-
-// Import các service cần thiết
-
 
 const DEFAULT_VALUES = {
   movie: undefined,
   theater: undefined,
   startTime: null,
+  cinemaId: undefined,
 };
 
 export default function ShowtimeForm() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const params = useParams();
+  const { id } = useParams();
   const { notification } = App.useApp();
   const userState = useSelector((state) => state.userReducer);
+  
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
-  const [selectedCinema, setSelectedCinema] = useState(null);
+  const [selectedCinemaId, setSelectedCinemaId] = useState(null);
 
-  // 1. Lấy danh sách phim và phòng chiếu để hiển thị trong Select
+  // --- 1. GỌI API DỮ LIỆU DANH MỤC ---
   const { state: movies = [] } = useAsync({ service: fetchMovieListAPI });
   const { state: theaters = [] } = useAsync({ service: fetchTheaterListAPI });
+  const { state: cinemas = [] } = useAsync({ service: fetchCinemaListAPI });
 
-  // 2. Lấy chi tiết suất chiếu nếu là chế độ Update
+  // --- 2. LOGIC UPDATE: LẤY CHI TIẾT SUẤT CHIẾU ---
   const { state: showtimeDetail, loading } = useAsync({
-    service: () => {
-      return getShowTimeDetail(params.id); // Thay bằng hàm lấy chi tiết
-    },
-    dependencies: [params.id],
-    condition: !!params.id && params.id !== "undefined",
+    service: () => getShowTimeDetail(id),
+    dependencies: [id],
+    condition: !!id && id !== "undefined",
   });
 
-
-
-  const cinemaList = useMemo(() => {
-    const uniqueCinemas = new Map();
-    theaters.forEach(t => {
-      if (t.cinema?._id && !uniqueCinemas.has(t.cinema._id)) {
-        uniqueCinemas.set(t.cinema._id, {
-          _id: t.cinema._id,
-          name: t.cinema.name
-        });
-      }
-    });
-    return Array.from(uniqueCinemas.values());
-  }, [theaters]);
-
-  // Lọc danh sách phòng chiếu dựa trên cụm rạp đã chọn
+  // --- 3. LOGIC LỌC PHÒNG THEO RẠP ---
   const filteredTheaters = useMemo(() => {
-    if (!selectedCinema) return [];
-    return theaters.filter(t => (t.cinema?.name || t.branch) === selectedCinema);
-  }, [theaters, selectedCinema]);
+    if (!selectedCinemaId) return [];
+    return theaters.filter(t => {
+      const cId = t.cinema?._id || t.cinema;
+      return cId === selectedCinemaId;
+    });
+  }, [theaters, selectedCinemaId]);
 
-
-
-  // 3. Đồng bộ dữ liệu lên Form
+  // --- 4. ĐỒNG BỘ DỮ LIỆU (QUAN TRỌNG CHO NHÁNH UPDATE) ---
   useEffect(() => {
-    if (params.id && params.id !== "undefined") {
-      if (showtimeDetail) {
-        // Lấy ID của cinema từ object theater
-        const cinemaId = showtimeDetail.theater?.cinema?._id || showtimeDetail.theater?.cinema;
+    if (id && id !== "undefined" && showtimeDetail) {
+      // Lấy ID cinema từ theater trong showtimeDetail
+      const cinemaId = showtimeDetail.theater?.cinema?._id || showtimeDetail.theater?.cinema;
+      
+      const dataForForm = {
+        movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
+        cinemaId: cinemaId, 
+        theater: showtimeDetail.theater?._id || showtimeDetail.theater,
+        startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime) : null,
+      };
 
-        const dataForForm = {
-          movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
-          cinema: cinemaId, 
-          theater: showtimeDetail.theater?._id || showtimeDetail.theater,
-          startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime) : null,
-        };
-
-        form.setFieldsValue(dataForForm);
-        setOriginalData(dataForForm);
-        setSelectedCinema(cinemaId); // Quan trọng để hiện danh sách phòng chiếu
-        setIsChanged(false);
-      }
+      form.setFieldsValue(dataForForm);
+      setOriginalData(dataForForm); // Lưu lại bản gốc để so sánh isChanged
+      setSelectedCinemaId(cinemaId); // Kích hoạt filter để hiện đúng phòng chiếu cũ
+      setIsChanged(false);
     } else {
-      form.resetFields();
-      setSelectedCinema(null);
+      form.setFieldsValue(DEFAULT_VALUES);
+      setSelectedCinemaId(null);
       setIsChanged(false);
     }
-  }, [showtimeDetail, params.id, form]);
+  }, [showtimeDetail, id, form]);
 
-  // 4. Kiểm tra thay đổi
+  // --- 5. KIỂM TRA THAY ĐỔI DỮ LIỆU ---
   const onValuesChange = (_, allValues) => {
-    if (!params.id) {
-      const hasInput = Object.keys(allValues).some(key => allValues[key] !== undefined);
+    if (!id) {
+      const hasInput = !!allValues.movie || !!allValues.theater || !!allValues.startTime;
       setIsChanged(hasInput);
       return;
     }
 
+    // So sánh với originalData của nhánh Update
     const hasChanged = Object.keys(allValues).some(key => {
-      const currentVal = allValues[key];
-      const originalVal = originalData?.[key];
-
-      if (key === 'startTime') {
-        return !dayjs(currentVal).isSame(originalVal);
-      }
-      return currentVal !== originalVal;
+      const current = allValues[key];
+      const original = originalData?.[key];
+      if (key === 'startTime') return !dayjs(current).isSame(original);
+      return current !== original;
     });
-
     setIsChanged(hasChanged);
   };
 
+  // --- 6. LƯU DỮ LIỆU (CREATE & UPDATE) ---
   const handleSave = async (values) => {
     try {
-      // 1. Chỉ lấy những field Backend cần
-      // Nếu BE của bạn nhận 'movie', ta giữ nguyên. Nếu nhận 'id_movie', hãy đổi key bên dưới.
       const payload = {
-        movie: values.movie,
+        id_movie: values.movie,
         theater: values.theater,
         startTime: values.startTime ? values.startTime.toISOString() : null,
       };
 
-      if (params.id && params.id !== "undefined") {
-        // Chế độ UPDATE
-        await updateShowTime({ id: params.id, ...payload });
+      if (id && id !== "undefined") {
+        // Nhánh UPDATE
+        await updateShowTime({ id, ...payload });
         notification.success({ message: "Cập nhật suất chiếu thành công!" });
       } else {
-        // Chế độ CREATE
+        // Nhánh CREATE
         await addNewShowTime(payload);
         notification.success({ message: "Thêm suất chiếu mới thành công!" });
       }
-
-      navigate("/admin/showtimes"); // Điều hướng về danh sách sau khi xong
+      navigate("/admin/showtimes");
     } catch (error) {
       notification.error({
         message: "Thao tác thất bại",
-        description: error.response?.data?.message || "Vui lòng kiểm tra lại khung giờ chiếu",
+        description: error.response?.data?.message || "Vui lòng kiểm tra lại dữ liệu",
       });
     }
   };
@@ -159,7 +135,7 @@ export default function ShowtimeForm() {
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
-          <span>{params.id ? "Chỉnh sửa suất chiếu" : "Tạo suất chiếu mới"}</span>
+          <span>{id ? "Chỉnh sửa suất chiếu" : "Tạo suất chiếu mới"}</span>
         </Space>
       }
     >
@@ -172,28 +148,17 @@ export default function ShowtimeForm() {
       >
         <Row gutter={24}>
           <Col span={12}>
-            {/* CHỌN PHIM */}
-            <Form.Item
-              label="Chọn Phim"
-              name="movie"
-              rules={[{ required: true, message: 'Vui lòng chọn phim' }]}
-            >
+            <Form.Item label="Chọn Phim" name="movie" rules={[{ required: true, message: 'Vui lòng chọn phim' }]}>
               <Select
                 showSearch
-                placeholder="Tìm kiếm phim..."
+                placeholder="Tìm phim..."
                 optionFilterProp="children"
                 options={movies.map(m => ({ label: m.title, value: m._id }))}
               />
             </Form.Item>
           </Col>
-
           <Col span={12}>
-            {/* CHỌN THỜI GIAN CHIẾU */}
-            <Form.Item
-              label="Thời gian bắt đầu"
-              name="startTime"
-              rules={[{ required: true, message: 'Vui lòng chọn thời gian' }]}
-            >
+            <Form.Item label="Thời gian bắt đầu" name="startTime" rules={[{ required: true, message: 'Vui lòng chọn thời gian' }]}>
               <DatePicker
                 style={{ width: '100%' }}
                 showTime={{ format: 'HH:mm' }}
@@ -206,81 +171,37 @@ export default function ShowtimeForm() {
 
         <Row gutter={24}>
           <Col span={12}>
-            {/* SELECT 1: CỤM RẠP */}
-            <Form.Item
-              label="Chọn Cụm Rạp"
-              name="cinemaId" // Chỉ dùng để lọc ở FE
-              rules={[{ required: true, message: 'Vui lòng chọn cụm rạp' }]}
-            >
+            <Form.Item label="Chọn Cụm Rạp" name="cinemaId" rules={[{ required: true, message: 'Vui lòng chọn cụm rạp' }]}>
               <Select
                 placeholder="Chọn cụm rạp..."
-                onChange={(value) => {
-                  setSelectedCinema(value);
+                onChange={(val) => {
+                  setSelectedCinemaId(val);
                   form.setFieldValue('theater', undefined);
                 }}
-                // CinemaList lúc này nên chứa mảng object { _id, name }
-                options={cinemaList.map(c => ({ label: c.name, value: c._id }))}
-              />
-            </Form.Item>
-
-            {/* SELECT 2: PHÒNG CHIẾU */}
-            <Form.Item
-              label="Chọn Phòng Chiếu"
-              name="theater" // Field này sẽ được gửi lên BE
-              rules={[{ required: true, message: 'Vui lòng chọn phòng chiếu' }]}
-            >
-              <Select
-                placeholder={selectedCinema ? "Chọn phòng..." : "Vui lòng chọn cụm rạp trước"}
-                // Disable nếu có ghế đã đặt để tránh lỗi logic
-                disabled={!selectedCinema || (params.id && showtimeDetail?.seats?.some(s => s.isBooked))}
-                options={filteredTheaters.map(t => ({
-                  label: t.name,
-                  value: t._id
-                }))}
+                options={cinemas.map(c => ({ label: c.name, value: c._id }))}
               />
             </Form.Item>
           </Col>
-
           <Col span={12}>
-            {/* SELECT 2: PHÒNG CHIẾU (Bị phụ thuộc) */}
-            <Form.Item
-              label="Chọn Phòng Chiếu"
-              name="theater"
-              rules={[{ required: true, message: 'Vui lòng chọn phòng chiếu' }]}
-            >
+            <Form.Item label="Chọn Phòng Chiếu" name="theater" rules={[{ required: true, message: 'Vui lòng chọn phòng' }]}>
               <Select
-                placeholder={selectedCinema ? "Chọn phòng..." : "Vui lòng chọn cụm rạp trước"}
-                disabled={!selectedCinema || (!!params.id && originalData?.seats?.some(s => s.isBooked))}
-                options={filteredTheaters.map(t => ({
-                  label: t.name,
-                  value: t._id
-                }))}
+                placeholder={selectedCinemaId ? "Chọn phòng..." : "Vui lòng chọn cụm rạp trước"}
+                // Disable nếu đã có người đặt vé (chỉ áp dụng khi update)
+                disabled={!selectedCinemaId || (id && showtimeDetail?.seats?.some(s => s.isBooked))}
+                options={filteredTheaters.map(t => ({ label: t.name, value: t._id }))}
               />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={24}>
-
-          <div style={{ marginTop: 30 }}>
-            {params.id ? (
-              <p style={{ color: '#8c8c8c' }}>
-                * Lưu ý: Khi thay đổi phòng chiếu, sơ đồ ghế sẽ được làm mới hoàn toàn.
-              </p>
-            ) : (
-              <p style={{ color: '#8c8c8c' }}>
-                * Sơ đồ ghế sẽ được tự động đồng bộ từ phòng chiếu đã chọn.
-              </p>
-            )}
-          </div>
-        </Row>
-
-        <SeatsRendering
-          data={showtimeDetail?.seats || []}
-          mode={userState.userInfor?.user_inf.role}
-          onAction
-          selectedSeats={[]}
-        />
+        <div style={{ marginTop: 24 }}>
+          <SeatsRendering
+            data={showtimeDetail?.seats || []}
+            mode={userState.userInfor?.user_inf.role}
+            onAction
+            selectedSeats={[]}
+          />
+        </div>
 
         <Form.Item style={{ marginTop: 24 }}>
           <Button
@@ -291,7 +212,7 @@ export default function ShowtimeForm() {
             disabled={!isChanged}
             block
           >
-            {params.id ? "CẬP NHẬT SUẤT CHIẾU" : "TẠO SUẤT CHIẾU"}
+            {id ? "CẬP NHẬT SUẤT CHIẾU" : "TẠO SUẤT CHIẾU"}
           </Button>
         </Form.Item>
       </Form>
