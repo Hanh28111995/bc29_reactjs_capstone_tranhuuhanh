@@ -109,6 +109,7 @@ export default function ShowtimeForm() {
     try {
       const payload = {
         ...values,
+        id_movie: values.movie,
         startTime: values.startTime ? values.startTime.toISOString() : null,
       };
       console.log(payload);
