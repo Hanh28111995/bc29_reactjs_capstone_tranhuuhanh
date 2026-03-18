@@ -86,7 +86,7 @@ export default function ShowtimeForm() {
 
         const dataForForm = {
           movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
-          cinemaId: cinemaId, // Dùng ID để đồng bộ với Select cụm rạp
+          cinema: cinemaId, 
           theater: showtimeDetail.theater?._id || showtimeDetail.theater,
           startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime) : null,
         };
