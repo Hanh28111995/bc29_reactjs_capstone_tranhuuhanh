@@ -14,12 +14,14 @@ import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
-import { fetchMovieListAPI } from "services/movie";
-import { fetchTheaterListAPI } from "services/theater";
-import { fetchCinemaListAPI } from "services/cinema"; // Gọi API lấy danh sách rạp
+
+
 import { updateShowTime, addNewShowTime, getShowTimeDetail } from "services/showtime";
 import SeatsRendering from "modules/seatsRendering/seatsRendering";
 import { useSelector } from "react-redux";
+import { fetchMovieListAPI } from "services/movie";
+import { getAllBranches } from "services/branches";
+import { fetchTheaterListAPI } from "services/theater";
 
 const DEFAULT_VALUES = {
   movie: undefined,
@@ -42,7 +44,7 @@ export default function ShowtimeForm() {
   // --- 1. GỌI API DỮ LIỆU DANH MỤC ---
   const { state: movies = [] } = useAsync({ service: fetchMovieListAPI });
   const { state: theaters = [] } = useAsync({ service: fetchTheaterListAPI });
-  const { state: cinemas = [] } = useAsync({ service: fetchCinemaListAPI });
+  const { state: cinemas = [] } = useAsync({ service: getAllBranches });
 
   // --- 2. LOGIC UPDATE: LẤY CHI TIẾT SUẤT CHIẾU ---
   const { state: showtimeDetail, loading } = useAsync({
