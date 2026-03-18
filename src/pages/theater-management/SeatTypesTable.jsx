@@ -45,6 +45,14 @@ export default function SeatTypeTable() {
             title: 'Tên loại ghế',
             dataIndex: 'name',
             width: '15%',
+            valueType: 'select',
+            fieldProps: {
+                options: [
+                    { label: 'Standard', value: 'Standard' },
+                    { label: 'VIP', value: 'VIP' },
+                    { label: 'Double', value: 'Double' },
+                ],
+            },
             formItemProps: { rules: [{ required: true, message: 'Trống' }] },
         },
         {
