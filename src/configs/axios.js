@@ -47,7 +47,7 @@ request.interceptors.response.use(
       try {
         // Gọi API Refresh - KHÔNG dùng instance 'request' để tránh loop
         // withCredentials: true cực kỳ quan trọng để gửi Cookie chứa refreshToken
-        const res = await axios.post(`${BASE_URL}/auth/refresh-token`, {}, { 
+        const res = await axios.post(`${BASE_URL}/auth/refresh`, {}, { 
           withCredentials: true 
         });
 
