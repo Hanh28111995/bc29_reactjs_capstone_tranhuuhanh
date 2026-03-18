@@ -1,5 +1,6 @@
 import axios from "axios";
 import { BASE_URL, USER_INFO_KEY } from "../constants/common";
+import { refreshTokenAPI } from "services/user";
 
 // 1. Khởi tạo instance - KHÔNG set Authorization ở đây
 export const request = axios.create({
@@ -50,12 +51,7 @@ request.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await axios.post(
-          `${BASE_URL}/auth/refresh-token`,
-          {},
-          { withCredentials: true },
-        );
-
+        const res = await refreshTokenAPI();
         // Kiểm tra kỹ cấu trúc res.data của bạn ở đây
         const newToken =
           res.data?.content?.accessToken || res.data?.accessToken;
