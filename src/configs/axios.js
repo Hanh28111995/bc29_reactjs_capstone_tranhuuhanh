@@ -9,49 +9,74 @@ export const request = axios.create({
 
 // 2. Request Interceptor - luôn lấy token mới nhất từ localStorage
 request.interceptors.request.use((config) => {
-  const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
+  const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY));
   if (userInfor?.user_token) {
     config.headers.Authorization = `Bearer ${userInfor.user_token}`;
   }
   return config;
 });
 
-// 3. Response Interceptor
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+const subscribeTokenRefresh = (cb) => {
+  refreshSubscribers.push(cb);
+};
+
+const onRefreshed = (token) => {
+  refreshSubscribers.map((cb) => cb(token));
+  refreshSubscribers = [];
+};
+
 request.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const message = error.response?.data?.message?.toLowerCase() || "";
-    const isTokenExpired =
-      error.response?.status === 401 && message.includes("jwt expired");
+    // Nới lỏng kiểm tra message để tránh sót trường hợp
+    const isTokenExpired = error.response?.status === 401;
 
     if (isTokenExpired && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Nếu đang có một request refresh khác đang chạy, cho request này vào hàng đợi
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(request(originalRequest));
+          });
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
-        // Dùng axios thuần, KHÔNG dùng request instance để tránh loop
         const res = await axios.post(
           `${BASE_URL}/auth/refresh-token`,
           {},
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
-        const newToken = res.data.content.accessToken;
+        // Kiểm tra kỹ cấu trúc res.data của bạn ở đây
+        const newToken =
+          res.data?.content?.accessToken || res.data?.accessToken;
 
-        // Cập nhật localStorage
-        const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
-        if (userInfor) {
-          userInfor.user_token = newToken;
-          localStorage.setItem(USER_INFO_KEY, JSON.stringify(userInfor));
+        if (newToken) {
+          const userInfor = JSON.parse(
+            localStorage.getItem(USER_INFO_KEY) || "null",
+          );
+          if (userInfor) {
+            userInfor.user_token = newToken;
+            localStorage.setItem(USER_INFO_KEY, JSON.stringify(userInfor));
+          }
+
+          onRefreshed(newToken); // Thông báo cho các request đang đợi
+          isRefreshing = false;
+
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return request(originalRequest);
         }
-
-        // Xóa token cũ để request interceptor gắn token mới từ localStorage
-        delete originalRequest.headers.Authorization;
-
-        // Retry request gốc - request interceptor sẽ tự gắn token mới
-        return request(originalRequest);
       } catch (refreshError) {
-        console.error("Refresh failed:", refreshError.response?.status, refreshError.response?.data);
+        isRefreshing = false;
         localStorage.removeItem(USER_INFO_KEY);
         window.location.href = "/login";
         return Promise.reject(refreshError);
@@ -59,5 +84,5 @@ request.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
