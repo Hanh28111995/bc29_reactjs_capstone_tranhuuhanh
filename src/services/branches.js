@@ -7,10 +7,11 @@ const getAllBranches = () => {
   })
 };
 
-const updateBranhesApi = (id) => {
+const updateBranhesApi = (data) => {
   return request({
-    url: `/admin/branch/update/${id}`,
+    url: `/admin/branch/update`,
     method: 'PUT',    
+    data
   });
 }
 
