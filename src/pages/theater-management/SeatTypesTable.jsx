@@ -1,10 +1,10 @@
-import { EditableProTable, } from '@ant-design/pro-components';
+import { EditableProTable, ProCard, ProFormField } from '@ant-design/pro-components';
 import { Button, App, Popconfirm, Space, Tag, Card } from 'antd';
 import { useAsync } from '../../hooks/useAsync';
 import React, { useState, useEffect } from 'react';
 import { DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import { getAllSeatTypesApi, updateSeatTypeApi, addOneSeatTypeApi, deleteOneSeatTypeApi } from 'services/seatType';
-import './index.scss'; 
+import './index.scss'; // Link SCSS
 
 export default function SeatTypeTable() {
     const [editableKeys, setEditableRowKeys] = useState([]);
