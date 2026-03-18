@@ -1,4 +1,4 @@
-import { EditableProTable, ProCard, ProFormField } from '@ant-design/pro-components';
+import { EditableProTable } from '@ant-design/pro-components';
 import { Button, App, Popconfirm, Space, Tag, Card } from 'antd';
 import { useAsync } from '../../hooks/useAsync';
 import React, { useState, useEffect } from 'react';
@@ -11,6 +11,7 @@ export default function SeatTypeTable() {
     const [dataSource, setDataSource] = useState([]);
     const [toggle, setToggle] = useState(false);
     const [deleteIds, setDeleteIds] = useState([]);
+    const [updatedIds, setUpdatedIds] = useState([]);
     const { message, notification } = App.useApp();
 
     const { state: data = [], loading } = useAsync({
@@ -29,6 +30,14 @@ export default function SeatTypeTable() {
         }
         setDataSource(dataSource.filter((item) => item._id !== record._id));
         message.info("Đã xóa tạm thời. Nhấn LƯU TẤT CẢ để áp dụng.");
+    };
+
+    const handleRowSave = async (key) => {
+        const isNew = key?.toString().startsWith('new_');
+        if (!isNew) {
+            setUpdatedIds((prev) => [...new Set([...prev, key])]);
+        }
+        message.info("Đã lưu thay đổi. Nhấn LƯU TẤT CẢ để áp dụng.");
     };
 
     const columns = [
@@ -94,26 +103,31 @@ export default function SeatTypeTable() {
     const handleSaveAll = async () => {
         try {
             const promises = [];
-            if (deleteIds.length > 0) {
-                deleteIds.forEach(id => promises.push(deleteOneSeatTypeApi(id)));
-            }
-            const updateData = dataSource.filter(item => item._id && !item._id.toString().startsWith('new_'));
-            const newData = dataSource.filter(item => item._id && item._id.toString().startsWith('new_'));
 
-            if (updateData.length > 0) promises.push(updateSeatTypeApi(updateData));
-            if (newData.length > 0) {
-                newData.forEach(item => {
+            // Delete
+            deleteIds.forEach(id => promises.push(deleteOneSeatTypeApi(id)));
+
+            // Add mới (new_)
+            dataSource
+                .filter(item => item._id?.toString().startsWith('new_'))
+                .forEach(item => {
                     const { _id, ...rest } = item;
                     promises.push(addOneSeatTypeApi(rest));
                 });
-            }
+
+            // Update những item đã được sửa
+            updatedIds.forEach(id => {
+                const item = dataSource.find(d => d._id === id);
+                if (item) promises.push(updateSeatTypeApi(item));
+            });
 
             if (promises.length === 0) return message.warning("Không có thay đổi");
 
             await Promise.all(promises);
             notification.success({ message: "Thành công", description: "Dữ liệu đã được cập nhật." });
             setDeleteIds([]);
-            setToggle(!toggle);
+            setUpdatedIds([]);
+            setToggle(t => !t);
         } catch (error) {
             notification.error({ message: "Lỗi", description: "Vui lòng thử lại" });
         }
@@ -125,7 +139,7 @@ export default function SeatTypeTable() {
                 <EditableProTable
                     tableLayout='fixed'
                     className="custom-editable-table"
-                    rowKey="_id"                    
+                    rowKey="_id"
                     loading={loading}
                     columns={columns}
                     value={dataSource}
@@ -139,9 +153,9 @@ export default function SeatTypeTable() {
                         type: 'multiple',
                         editableKeys,
                         onChange: setEditableRowKeys,
+                        onSave: handleRowSave,
                         saveText: 'Lưu',
                         cancelText: 'Hủy',
-                        deleteText: 'Xóa',
                         actionRender: (row, config, defaultDoms) => [
                             defaultDoms.save,
                             defaultDoms.cancel,
@@ -160,10 +174,6 @@ export default function SeatTypeTable() {
                         LƯU TẤT CẢ THAY ĐỔI
                     </Button>
                 </div>
-
-                {/* <ProCard title="Dữ liệu JSON (Debug)" headerBordered collapsible defaultCollapsed style={{ marginTop: '1.25rem' }}>
-                    <ProFormField mode="read" valueType="jsonCode" text={JSON.stringify(dataSource, null, 2)} />
-                </ProCard> */}
             </Card>
         </div>
     );
