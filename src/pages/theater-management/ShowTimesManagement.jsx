@@ -29,8 +29,10 @@ export default function ShowtimeManagement() {
         try {
             const res = await service({ page: pagination.page, limit: pagination.limit });
             const content = res.data.content;
-            setData(Array.isArray(content) ? content : content.data || []);
-            setTotal(content.total || 0);
+            console.log('API content:', content);
+            const list = Array.isArray(content) ? content : Array.isArray(content?.data) ? content.data : [];
+            setData(list);
+            setTotal(content?.total || list.length || 0);
         } catch (err) {
             notification.error({ message: "Lỗi tải dữ liệu" });
         } finally {
@@ -151,30 +153,29 @@ export default function ShowtimeManagement() {
                         enterButton={<Button icon={<SearchOutlined />}></Button>}
                         size="large"
                     />
-                    <Button
-                        type="default"
-                        icon={<CalendarOutlined />}
-                        className="add-btn"
-                        onClick={() => fetchData(getShowTimeToday)}
-                    >
-                        SUẤT CHIẾU HÔM NAY
-                    </Button>
-                    <Button
-                        type="default"
-                        icon={<CalendarOutlined />}
-                        className="add-btn"
-                        onClick={() => fetchData(getShowTimeUpcoming)}
-                    >
-                        SUẤT CHIẾU SẮP ĐẾN
-                    </Button>
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        className="add-btn"
-                        onClick={() => navigate('/admin/showtimes/create')}
-                    >
-                        THÊM SUẤT CHIẾU
-                    </Button>
+                    <Space>
+                        <Button
+                            type="default"
+                            icon={<CalendarOutlined />}
+                            onClick={() => fetchData(getShowTimeToday)}
+                        >
+                            SUẤT CHIẾU HÔM NAY
+                        </Button>
+                        <Button
+                            type="default"
+                            icon={<CalendarOutlined />}
+                            onClick={() => fetchData(getShowTimeUpcoming)}
+                        >
+                            SUẤT CHIẾU SẮP ĐẾN
+                        </Button>
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => navigate('/admin/showtimes/create')}
+                        >
+                            THÊM SUẤT CHIẾU
+                        </Button>
+                    </Space>
                 </div>
 
                 <Table
