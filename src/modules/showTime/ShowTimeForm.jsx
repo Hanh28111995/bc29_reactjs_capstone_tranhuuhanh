@@ -11,16 +11,18 @@ import {
   Select,
 } from "antd";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc"; // 1. Import plugin UTC
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { fetchMovieListAPI } from "services/movie";
 import { fetchTheaterListAPI } from "services/theater";
-import { updateShowTime } from "services/showtime";
-import { addNewShowTime } from "services/showtime";
-import { getShowTimeDetail } from "services/showtime";
+import { updateShowTime, addNewShowTime, getShowTimeDetail } from "services/showtime";
 import SeatsRendering from "modules/seatsRendering/seatsRendering";
 import { useSelector } from "react-redux";
+
+// Kích hoạt plugin UTC cho dayjs
+dayjs.extend(utc);
 
 const DEFAULT_VALUES = {
   movie: undefined,
@@ -37,17 +39,43 @@ export default function ShowtimeForm() {
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
   const [selectedCinema, setSelectedCinema] = useState(null);
+  const [seats, setSeats] = useState([]);
 
   const { state: movies = [] } = useAsync({ service: fetchMovieListAPI });
   const { state: theaters = [] } = useAsync({ service: fetchTheaterListAPI });
 
   const { state: showtimeDetail, loading } = useAsync({
-    service: () => {
-      return getShowTimeDetail(params.id);
-    },
+    service: () => getShowTimeDetail(params.id),
     dependencies: [params.id],
     condition: !!params.id && params.id !== "undefined",
   });
+
+  // Xử lý dữ liệu khi đổ vào Form (Edit Mode)
+  useEffect(() => {
+    if (params.id && params.id !== "undefined" && showtimeDetail) {
+      const cinemaName = showtimeDetail.theater?.branch || showtimeDetail.theater?.cinema?.name;
+
+      const dataForForm = {
+        ...showtimeDetail,
+        cinemaName: cinemaName,
+        movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
+        theater: showtimeDetail.theater?._id || showtimeDetail.theater,
+        // 2. Sử dụng dayjs.utc() để hiển thị đúng giờ gốc từ DB
+        startTime: showtimeDetail.startTime ? dayjs.utc(showtimeDetail.startTime) : null,
+      };
+
+      form.setFieldsValue(dataForForm);
+      setOriginalData(dataForForm);
+      setSelectedCinema(cinemaName);
+      setSeats(showtimeDetail.seats || []);
+      setIsChanged(false);
+    } else {
+      form.setFieldsValue(DEFAULT_VALUES);
+      setSelectedCinema(null);
+      setSeats([]);
+      setIsChanged(false);
+    }
+  }, [showtimeDetail, params.id, form]);
 
   const cinemaList = useMemo(() => {
     const cinemas = theaters.map(t => t.cinema?.name || t.branch);
@@ -58,38 +86,6 @@ export default function ShowtimeForm() {
     if (!selectedCinema) return [];
     return theaters.filter(t => (t.cinema?.name || t.branch) === selectedCinema);
   }, [theaters, selectedCinema]);
-
-  useEffect(() => {
-    if (params.id && params.id !== "undefined") {
-      if (showtimeDetail) {
-        const cinemaName = showtimeDetail.theater?.branch || showtimeDetail.theater?.cinema?.name;
-
-        const dataForForm = {
-          ...showtimeDetail,
-          cinemaName: cinemaName,
-          movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
-          theater: showtimeDetail.theater?._id || showtimeDetail.theater,
-          startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime) : null,
-        };
-
-        form.setFieldsValue(dataForForm);
-        setOriginalData(dataForForm);
-        setSelectedCinema(cinemaName);
-        setIsChanged(false);
-      }
-    } else {
-      form.setFieldsValue(DEFAULT_VALUES);
-      setOriginalData(null);
-      setSelectedCinema(null);
-      setIsChanged(false);
-    }
-  }, [showtimeDetail, params.id, form]);
-
-  const [seats, setSeats] = useState([]);
-
-  useEffect(() => {
-    if (showtimeDetail?.seats) setSeats(showtimeDetail.seats);
-  }, [showtimeDetail]);
 
   const handleSeatAction = (type, updatedSeat) => {
     if (type !== 'admin') return;
@@ -105,44 +101,47 @@ export default function ShowtimeForm() {
 
   const onValuesChange = (_, allValues) => {
     if (!params.id) {
-      const hasInput = Object.keys(allValues).some(key => allValues[key] !== undefined);
-      setIsChanged(hasInput);
+      setIsChanged(true);
       return;
     }
-
+    // So sánh sự thay đổi để bật/tắt nút Lưu
     const hasChanged = Object.keys(allValues).some(key => {
-      const currentVal = allValues[key];
-      const originalVal = originalData?.[key];
-
       if (key === 'startTime') {
-        return !dayjs(currentVal).isSame(originalVal);
+        return !dayjs(allValues[key]).isSame(originalData?.startTime);
       }
-      return currentVal !== originalVal;
+      return allValues[key] !== originalData?.[key];
     });
-
     setIsChanged(hasChanged);
   };
 
   const handleSave = async (values) => {
     try {
+      // 3. Ép giờ về UTC chuẩn: Giữ nguyên con số trên UI và gán múi giờ Z
+      const utcStartTime = values.startTime 
+        ? values.startTime.utc(true).toISOString() 
+        : null;
+
       const payload = {
-        ...values,
         id_movie: values.movie,
-        startTime: values.startTime ? values.startTime.toISOString() : null,
-        seats,
+        theater: values.theater,
+        startTime: utcStartTime,
+        seats: seats,
       };
-      console.log(payload);
-      if (params.id) {
+
+      if (params.id && params.id !== "undefined") {
         await updateShowTime({ id: params.id, ...payload });
         notification.success({ message: "Cập nhật suất chiếu thành công!" });
       } else {
         await addNewShowTime(payload);
         notification.success({ message: "Thêm suất chiếu mới thành công!" });
       }
+      
+      setIsChanged(false);
+      navigate("/admin/showtimes"); // Chuyển hướng sau khi lưu thành công
     } catch (error) {
       notification.error({
         message: "Thao tác thất bại",
-        description: error.response?.data?.message || "Thao tác thất bại",
+        description: error.response?.data?.message || "Lỗi hệ thống (500)",
       });
     }
   };
@@ -182,7 +181,7 @@ export default function ShowtimeForm() {
 
           <Col span={12}>
             <Form.Item
-              label="Thời gian bắt đầu"
+              label="Thời gian bắt đầu (UTC)"
               name="startTime"
               rules={[{ required: true, message: 'Vui lòng chọn thời gian' }]}
             >
@@ -190,6 +189,7 @@ export default function ShowtimeForm() {
                 style={{ width: '100%' }}
                 showTime={{ format: 'HH:mm' }}
                 format="DD/MM/YYYY HH:mm"
+                // 4. Đảm bảo DatePicker hoạt động mượt với dữ liệu UTC
                 disabledDate={(current) => current && current < dayjs().startOf('day')}
               />
             </Form.Item>
@@ -222,28 +222,11 @@ export default function ShowtimeForm() {
             >
               <Select
                 placeholder={selectedCinema ? "Chọn phòng..." : "Vui lòng chọn cụm rạp trước"}
-                disabled={!selectedCinema || (!!params.id && originalData?.seats?.some(s => s.isBooked))}
-                options={filteredTheaters.map(t => ({
-                  label: t.name,
-                  value: t._id
-                }))}
+                disabled={!selectedCinema}
+                options={filteredTheaters.map(t => ({ label: t.name, value: t._id }))}
               />
             </Form.Item>
           </Col>
-        </Row>
-
-        <Row gutter={24}>
-          <div style={{ marginTop: 30 }}>
-            {params.id ? (
-              <p style={{ color: '#8c8c8c' }}>
-                * Lưu ý: Khi thay đổi phòng chiếu, sơ đồ ghế sẽ được làm mới hoàn toàn.
-              </p>
-            ) : (
-              <p style={{ color: '#8c8c8c' }}>
-                * Sơ đồ ghế sẽ được tự động đồng bộ từ phòng chiếu đã chọn.
-              </p>
-            )}
-          </div>
         </Row>
 
         <SeatsRendering
