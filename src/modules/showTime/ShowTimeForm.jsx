@@ -142,7 +142,7 @@ export default function ShowtimeForm() {
     } catch (error) {
       notification.error({
         message: "Thao tác thất bại",
-        description: error.response?.data?.message || "Vui lòng kiểm tra lại khung giờ chiếu",
+        description: error.response?.data?.message || "Thao tác thất bại",
       });
     }
   };

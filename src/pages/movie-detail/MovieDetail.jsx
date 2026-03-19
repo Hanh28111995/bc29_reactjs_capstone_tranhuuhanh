@@ -269,12 +269,12 @@ export default function MovieDetail() {
                                                             fontWeight: 'bold',
                                                             color: isPast ? '#bfbfbf' : '#1890ff'
                                                         }}>
-                                                            {moment(item.startTime).format('HH:mm')}
+                                                            {moment.utc(item.startTime).format('HH:mm')}
                                                         </span>
 
                                                         {/* Thông tin phụ nhỏ bên dưới (Ngày hoặc Loại phòng) */}
                                                         <span style={{ fontSize: '10px', color: '#999' }}>
-                                                            {moment(item.startTime).format('DD/MM')}
+                                                            {moment.utc(item.startTime).format('DD/MM')}
                                                         </span>
                                                     </Button>
                                                 </List.Item>
