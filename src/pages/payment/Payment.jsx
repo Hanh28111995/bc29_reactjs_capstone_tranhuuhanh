@@ -145,7 +145,7 @@ export default function Payment() {
                     <div className="total-section">
                         <Text strong className="total-label">Tổng cộng:</Text>
                         <Title level={5} className="total-amount">
-                            {bookingData.reduce((total, el) => total + el.seatType.price, 0).toLocaleString()} VNĐ
+                            {bookingData.reduce((total, el) => total + (el.price || 0), 0).toLocaleString()} VNĐ
                         </Title>
                     </div>
                     <Button
