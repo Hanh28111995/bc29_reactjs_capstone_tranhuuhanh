@@ -117,10 +117,10 @@ export default function ShowtimeForm() {
   const handleSave = async (values) => {
     try {
       // 3. Ép giờ về UTC chuẩn: Giữ nguyên con số trên UI và gán múi giờ Z
-      const utcStartTime = values.startTime 
-        ? values.startTime.utc(true).toISOString() 
-        : null;
-
+     const utcStartTime = values.startTime 
+      ? values.startTime.format("YYYY-MM-DDTHH:mm:ss") + ".000Z" 
+      : null;
+      
       const payload = {
         id_movie: values.movie,
         theater: values.theater,
