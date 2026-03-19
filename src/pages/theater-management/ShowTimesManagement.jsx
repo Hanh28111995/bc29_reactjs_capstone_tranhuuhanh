@@ -153,7 +153,7 @@ export default function ShowtimeManagement() {
                         enterButton={<Button icon={<SearchOutlined />}></Button>}
                         size="large"
                     />
-                    <Space className='d-flex flex-column'>
+                    <Space className='ml-auto'>
                         <Button
                             type="default"
                             icon={<CalendarOutlined />}
