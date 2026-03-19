@@ -60,8 +60,8 @@ export default function ShowtimeForm() {
         cinemaName: cinemaName,
         movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
         theater: showtimeDetail.theater?._id || showtimeDetail.theater,
-        // 2. Sử dụng dayjs.utc() để hiển thị đúng giờ gốc từ DB
-        startTime: showtimeDetail.startTime ? dayjs.utc(showtimeDetail.startTime) : null,
+        // Parse bỏ qua timezone suffix để giữ nguyên con số giờ từ DB
+        startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime.replace('Z', '').replace('+07:00', '')) : null,
       };
 
       form.setFieldsValue(dataForForm);
@@ -116,9 +116,9 @@ export default function ShowtimeForm() {
 
   const handleSave = async (values) => {
     try {
-      // 3. Ép giờ về UTC chuẩn: Giữ nguyên con số trên UI và gán múi giờ Z
+      // Gửi dạng ISO string không có timezone suffix để backend lưu nguyên con số
      const utcStartTime = values.startTime 
-      ? values.startTime.format("YYYY-MM-DDTHH:mm:ss") + ".000Z" 
+      ? values.startTime.format("YYYY-MM-DDTHH:mm:ss") 
       : null;
       
       const payload = {
@@ -187,9 +187,8 @@ export default function ShowtimeForm() {
             >
               <DatePicker
                 style={{ width: '100%' }}
-                showTime={{ format: 'HH:mm' }}
+                showTime={{ format: 'HH:mm', defaultValue: dayjs('00:00', 'HH:mm') }}
                 format="DD/MM/YYYY HH:mm"
-                // 4. Đảm bảo DatePicker hoạt động mượt với dữ liệu UTC
                 disabledDate={(current) => current && current < dayjs().startOf('day')}
               />
             </Form.Item>
