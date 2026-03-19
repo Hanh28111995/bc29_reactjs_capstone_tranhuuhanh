@@ -72,8 +72,7 @@ export default function ShowtimeManagement() {
             sorter: (a, b) => dayjs(a.startTime).unix() - dayjs(b.startTime).unix(),
             render: (date) => (
                 <Space>
-                    {/* <CalendarOutlined /> */}
-                    {dayjs(date).format('DD/MM/YYYY - HH:mm')}
+                    {dayjs(date?.replace('Z', '').replace('+07:00', '')).format('DD/MM/YYYY - HH:mm')}
                 </Space>
             ),
         },
