@@ -1,6 +1,5 @@
 import { Space, Table, Input, Button, App, Popconfirm, Card, Tag, Tooltip } from 'antd';
-import React, { useMemo, useState } from 'react';
-import { useAsync } from "../../hooks/useAsync";
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     EditOutlined,
@@ -10,8 +9,8 @@ import {
     SearchOutlined
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
-import { getAllShowTimes, deleteOneShowTime } from 'services/showtime';
-import './index.scss'; // Import file SCSS chung
+import { getShowTimeToday, getShowTimeUpcoming, getAllShowTimes, deleteOneShowTime } from 'services/showtime';
+import './index.scss';
 
 const { Search } = Input;
 
@@ -19,12 +18,29 @@ export default function ShowtimeManagement() {
     const navigate = useNavigate();
     const [toggle, setToggle] = useState(false);
     const [keyword, setKeyword] = useState("");
+    const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+    const [data, setData] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(false);
     const { notification } = App.useApp();
 
-    const { state: data = [], loading } = useAsync({
-        dependencies: [toggle],
-        service: getAllShowTimes,
-    });
+    const fetchData = async (service) => {
+        setLoading(true);
+        try {
+            const res = await service({ page: pagination.page, limit: pagination.limit });
+            const content = res.data.content;
+            setData(Array.isArray(content) ? content : content.data || []);
+            setTotal(content.total || 0);
+        } catch (err) {
+            notification.error({ message: "Lỗi tải dữ liệu" });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData(getAllShowTimes);
+    }, [toggle, pagination.page, pagination.limit]);
 
     const showtimeList = useMemo(() => {
         if (!keyword) return data;
@@ -53,7 +69,7 @@ export default function ShowtimeManagement() {
             key: 'movieTitle',
             width: '25%',
             render: (text) => (
-                <p style={{color:'blue', fontWeight:'bold'}}>
+                <p style={{ color: 'blue', fontWeight: 'bold' }}>
                     {text}
                 </p>
             ),
@@ -61,7 +77,7 @@ export default function ShowtimeManagement() {
         {
             title: 'Phòng Chiếu',
             dataIndex: ['theater', 'name'],
-            key: 'theaterName',            
+            key: 'theaterName',
             render: (text) => <Tag color="volcano" className="branch-tag">{text}</Tag>,
         },
         {
@@ -135,7 +151,22 @@ export default function ShowtimeManagement() {
                         enterButton={<Button icon={<SearchOutlined />}></Button>}
                         size="large"
                     />
-
+                    <Button
+                        type="default"
+                        icon={<CalendarOutlined />}
+                        className="add-btn"
+                        onClick={() => fetchData(getShowTimeToday)}
+                    >
+                        SUẤT CHIẾU HÔM NAY
+                    </Button>
+                    <Button
+                        type="default"
+                        icon={<CalendarOutlined />}
+                        className="add-btn"
+                        onClick={() => fetchData(getShowTimeUpcoming)}
+                    >
+                        SUẤT CHIẾU SẮP ĐẾN
+                    </Button>
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
@@ -155,7 +186,12 @@ export default function ShowtimeManagement() {
                     loading={loading}
                     bordered
                     pagination={{
-                        pageSize: 8,
+                        current: pagination.page,
+                        pageSize: pagination.limit,
+                        total,
+                        onChange: (page, limit) => setPagination({ page, limit }),
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50'],
                     }}
                 />
             </Card>
