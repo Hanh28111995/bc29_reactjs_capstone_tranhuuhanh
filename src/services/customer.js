@@ -9,7 +9,7 @@ const fetchShowtimesCusAPI = (role, id) => {
 
 const fetchTicketBookingAPI = (role, data) => {
   return request({
-    url: `/${(role != "admin") ? role : "staff"}/ticket/booking`,
+    url: `/${role}/bookingTicket`,
     method: "POST",
     data,
   });
@@ -17,10 +17,18 @@ const fetchTicketBookingAPI = (role, data) => {
 
 const fetchCancelBookingAPI = (role, id, data) => {
   return request({
-    url: `/${role}/ticket/cancel/${id}`,
+    url: `/${role}/cancelTicket`,
     method: "PUT",
     data,
   });
 };
 
-export { fetchShowtimesCusAPI, fetchTicketBookingAPI, fetchCancelBookingAPI };
+const searchCustomerAPI = (role, keyword) => {
+  return request({
+    url: `/admin/user/search`,
+    method: "GET",
+    params: { keyword },
+  });
+};
+
+export { fetchShowtimesCusAPI, fetchTicketBookingAPI, fetchCancelBookingAPI, searchCustomerAPI };
