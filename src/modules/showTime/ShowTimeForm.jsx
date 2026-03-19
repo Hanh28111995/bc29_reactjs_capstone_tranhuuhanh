@@ -85,6 +85,24 @@ export default function ShowtimeForm() {
     }
   }, [showtimeDetail, params.id, form]);
 
+  const [seats, setSeats] = useState([]);
+
+  useEffect(() => {
+    if (showtimeDetail?.seats) setSeats(showtimeDetail.seats);
+  }, [showtimeDetail]);
+
+  const handleSeatAction = (type, updatedSeat) => {
+    if (type !== 'admin') return;
+    setSeats(prev =>
+      prev.map(s =>
+        s._id === updatedSeat._id
+          ? { ...s, seatType: updatedSeat.seatTypeId, isBooked: updatedSeat.isBooked }
+          : s
+      )
+    );
+    setIsChanged(true);
+  };
+
   const onValuesChange = (_, allValues) => {
     if (!params.id) {
       const hasInput = Object.keys(allValues).some(key => allValues[key] !== undefined);
@@ -111,6 +129,7 @@ export default function ShowtimeForm() {
         ...values,
         id_movie: values.movie,
         startTime: values.startTime ? values.startTime.toISOString() : null,
+        seats,
       };
       console.log(payload);
       if (params.id) {
@@ -228,9 +247,9 @@ export default function ShowtimeForm() {
         </Row>
 
         <SeatsRendering
-          data={showtimeDetail?.seats || []}
+          data={seats}
           mode={userState.userInfor?.user_inf.role}
-          onAction
+          onAction={handleSeatAction}
           selectedSeats={[]}
         />
 
