@@ -40,6 +40,7 @@ export default function Booking() {
   }, [data]);
 
   const handleSelect = (type, selectChair) => {
+    console.log('selectChair:', selectChair);
     setdanhSachGhe((prev) => {
       const idx = prev.findIndex((ele) => ele.seatNumber === selectChair.seatNumber);
       if (type === "deselect") return prev.filter((ele) => ele.seatNumber !== selectChair.seatNumber);
