@@ -9,7 +9,7 @@ const fetchShowtimesCusAPI = (role, id) => {
 
 const fetchTicketBookingAPI = (role, data) => {
   return request({
-    url: `/${role}/ticket/booking`,
+    url: `/${(role != "admin") ? role : "staff"}/ticket/booking`,
     method: "POST",
     data,
   });
