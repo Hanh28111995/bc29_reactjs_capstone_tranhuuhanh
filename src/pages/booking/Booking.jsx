@@ -96,7 +96,7 @@ export default function Booking() {
               Ghế đã chọn: <span>{danhSachGhe.map(el => el.seatNumber).join(", ") || "Chưa chọn"}</span>
             </p>
             <p className="total-price">
-              Tổng tiền: <b>{danhSachGhe.reduce((total, el) => total + (el.seatType?.price || 0), 0).toLocaleString()} VNĐ</b>
+              Tổng tiền: <b>{danhSachGhe.reduce((total, el) => total + (el.price || 0), 0).toLocaleString()} VNĐ</b>
             </p>
           </div>
 
