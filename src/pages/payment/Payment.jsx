@@ -121,7 +121,7 @@ export default function Payment() {
                         className="method-group"
                     >
                         <Space direction="vertical">
-                            <Radio.Button value="card" className="payment-radio-btn">
+                            <Radio.Button value="internet banking" className="payment-radio-btn">
                                 <CreditCardOutlined /> Internet Banking - VNpay
                             </Radio.Button>
                             <Radio.Button value="momo" className="payment-radio-btn">
