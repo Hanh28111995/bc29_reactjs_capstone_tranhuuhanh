@@ -70,7 +70,7 @@ export default function Booking() {
         bookingData: danhSachGhe,
         movieInfor: data?.id_movie,
         theater: data?.theater,
-        time: data?.startTime.toISOString(),
+        time: data?.startTime,
         customerInfo: isStaff ? customerInfo : userState.userInfor?.user_inf,
       }
     });
