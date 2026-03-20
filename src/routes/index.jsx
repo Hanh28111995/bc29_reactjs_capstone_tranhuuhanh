@@ -9,8 +9,7 @@ import CreateTheater from "pages/CreateTheater/CreateTheater";
 import Payment from "pages/payment/Payment";
 import TicketManagement from "pages/ticket-management/TicketManagement";
 import PaymentResult from "pages/payment/PaymentResult";
-import StaffAuthGuards from "guards/staff.guards";
-import CustomerAuthGuards from "guards/customer.guards";
+import AuthGuards from "guards/auth.guards";
 
 const Login = lazy(() => import("pages/login/Login"));
 const Register = lazy(() => import("pages/register/Register"));
@@ -55,22 +54,7 @@ export default function Router() {
         },        
         {
           path: "/",
-          element: <CustomerAuthGuards />,
-          children: [
-            {
-              path: "/booking/:id",
-              element: <Booking />,
-            },
-            {
-              path: "/booking/payment/:id",
-              element: <Payment />,
-            },
-          ],
-        },
-
-        {
-          path: "/",
-          element: <StaffAuthGuards />,
+          element: <AuthGuards />,
           children: [
             {
               path: "/booking/:id",
