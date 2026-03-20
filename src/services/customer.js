@@ -8,8 +8,9 @@ const fetchShowtimesCusAPI = (role, id) => {
 };
 
 const fetchTicketBookingAPI = (role, data) => {
+  if (role == "admin") role = "staff";
   return request({
-    url: `/${role}/bookingTicket`,
+    url: `/${role}/ticket/bookingTicket`,
     method: "POST",
     data,
   });
@@ -31,4 +32,9 @@ const searchCustomerAPI = (role, keyword) => {
   });
 };
 
-export { fetchShowtimesCusAPI, fetchTicketBookingAPI, fetchCancelBookingAPI, searchCustomerAPI };
+export {
+  fetchShowtimesCusAPI,
+  fetchTicketBookingAPI,
+  fetchCancelBookingAPI,
+  searchCustomerAPI,
+};
