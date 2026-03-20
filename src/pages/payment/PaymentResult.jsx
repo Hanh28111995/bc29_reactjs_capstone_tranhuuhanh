@@ -65,20 +65,31 @@ export default function PaymentResult() {
                     open={cashModal}
                     onOk={() => { setCashModal(false); setStatus('success'); }}
                     onCancel={async () => {
-                        await fetchCancelBookingAPI(userState.userInfor?.user_inf.role, bookingId, userState.userInfor?.user_inf.id);
-                        navigate(-2);
+                        if (userState.userInfor?.user_inf?.role === 'customer') {
+                            await fetchCancelBookingAPI(userState.userInfor?.user_inf.role, bookingId, userState.userInfor?.user_inf.id);
+                            navigate(-2);
+                        } else {
+                            setCashModal(false);
+                            setStatus('error');
+                        }
                     }}
                     okText="YES"
                     cancelText="NO"
                 >
-                    <p>Bạn đã chọn thanh toán bằng tiền mặt tại rạp.</p>
-                    <p>Vui lòng xác nhận bạn sẽ đến nhận vé đúng giờ!</p>
+                    {userState.userInfor?.user_inf?.role === 'customer' ? (
+                        <>
+                            <p>Bạn đã chọn thanh toán bằng tiền mặt tại rạp.</p>
+                            <p>Vui lòng xác nhận bạn sẽ đến nhận vé đúng giờ!</p>
+                        </>
+                    ) : (
+                        <p>Xác nhận đã nhận tiền mặt?</p>
+                    )}
                 </Modal>
             )}
 
             {/* Hiển thị kết quả cuối cùng */}
             <div className="payment-result-container" style={{ padding: '50px' }}>
-                {success === 'success' && (
+                {(success === 'success' || status === 'success') && (
                     <Result
                         status="success"
                         title="Thanh Toán Thành Công!"
@@ -90,7 +101,7 @@ export default function PaymentResult() {
                     />
                 )}
 
-                {success !== 'success' && (
+                {(success !== 'success' && status === 'error') && (
                     <Result
                         status="error"
                         title="Thanh Toán Thất Bại"
