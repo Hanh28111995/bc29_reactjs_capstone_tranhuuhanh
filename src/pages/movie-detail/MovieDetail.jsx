@@ -242,7 +242,7 @@ export default function MovieDetail() {
                                         dataSource={dataShowTimes}
                                         locale={{ emptyText: <Empty description="Hôm nay đã hết suất chiếu" /> }}
                                         renderItem={(item) => {
-                                            const isPast = moment(y).isBefore(moment()); // Kiểm tra giờ đã qua chưa
+                                            const isPast = moment(item.startTime?.replace('Z', '')).isBefore(moment()); // Kiểm tra giờ đã qua chưa
 
                                             return (
                                                 <List.Item style={{ marginBottom: '12px' }}>
