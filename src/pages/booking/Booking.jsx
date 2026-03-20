@@ -69,7 +69,7 @@ export default function Booking() {
       state: {
         bookingData: danhSachGhe,
         movieInfor: data?.id_movie,
-        theater: data?.theater,
+        theater: data?.theater,        
         time: moment(data?.startTime).format('DD/MM/YYYY HH:mm'),
         customerInfo: isStaff ? customerInfo : userState.userInfor?.user_inf,
       }

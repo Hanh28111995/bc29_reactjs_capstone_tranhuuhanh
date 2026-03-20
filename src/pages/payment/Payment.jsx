@@ -44,10 +44,12 @@ export default function Payment() {
         try {
             const result = await fetchTicketBookingAPI(userState.userInfor?.user_inf.role, {
                 user_id: userState.userInfor?.user_inf?.id,
-                movie_id: movieInfor?._id,
+                id_movie: movieInfor?._id,
+                id_theater: theater?._id,
+                startTime: time,
                 showtime_id: params.id,
                 timeOfBooking: moment().format('YYYY-MM-DD HH:mm:ss'),
-                bookedSeat: bookingData.map(seat => ({
+                seatName: bookingData.map(seat => ({
                     seatNumber: seat.seatNumber,
                     seatType: seat.seatType,
                     price: seat.seatType.price,
