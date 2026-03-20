@@ -92,7 +92,7 @@ export default function Payment() {
                 setTimeout(() => window.open(payUrl, '_blank'), 2000);
             }
 
-            if (keyword === "card") {
+            if (keyword === "internet banking") {
                 const getCode = await fetchCreateVnpayPayment(ticket);
                 const payUrl = getCode?.data.content.paymentUrl;
                 notification.success({ message: "Đang chuyển hướng đến VNpay..." });
