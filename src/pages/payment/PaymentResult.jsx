@@ -42,7 +42,7 @@ export default function PaymentResult() {
         };
 
         verifyPayment();
-    }, [bookingId], success);
+    }, [bookingId], success, status);
 
     if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}><Spin size="large" tip="Đang xác thực..." /></div>;
 
