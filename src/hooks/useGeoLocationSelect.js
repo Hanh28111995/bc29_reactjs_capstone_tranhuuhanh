@@ -2,7 +2,20 @@ import { Modal } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getDistance } from "constants/common";
 
-const reverseGeocode = async ({ latitude, longitude }) => {
+const GEO_CACHE_KEY = 'GEO_LOCATION_CACHE';
+const GEO_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 tiếng
+
+const getCachedLocation = () => {
+  try {
+    const cached = JSON.parse(localStorage.getItem(GEO_CACHE_KEY));
+    if (cached && Date.now() - cached.timestamp < GEO_CACHE_TTL) return cached.data;
+  } catch {}
+  return null;
+};
+
+const setCachedLocation = (data) => {
+  localStorage.setItem(GEO_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+};
   const res = await fetch(
     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
   );
@@ -113,6 +126,14 @@ export const useGeoLocationSelect = ({
       throw new Error("Trình duyệt không hỗ trợ định vị");
     }
 
+    // Dùng cache nếu còn hạn
+    const cached = getCachedLocation();
+    if (cached) {
+      onSelect?.(cached);
+      setDecision("granted");
+      return cached;
+    }
+
     setIsLocating(true);
     try {
       const coords = await new Promise((resolve, reject) => {
@@ -161,6 +182,13 @@ export const useGeoLocationSelect = ({
           coords: { latitude: coords.latitude, longitude: coords.longitude },
           raw: { city, district, address: addr },
         });
+        setCachedLocation({
+          region,
+          regionName: region.vungMien,
+          district: selectedDistrict,
+          coords: { latitude: coords.latitude, longitude: coords.longitude },
+          raw: { city, district, address: addr },
+        });
         setDecision("granted");
         return { region, district: selectedDistrict, coords };
       }
@@ -177,6 +205,15 @@ export const useGeoLocationSelect = ({
     if (!Array.isArray(locations) || locations.length === 0) return;
 
     askedRef.current = true;
+
+    // Nếu có cache thì dùng luôn, không hỏi
+    const cached = getCachedLocation();
+    if (cached) {
+      onSelect?.(cached);
+      setDecision("granted");
+      return;
+    }
+
     Modal.confirm({
       title,
       content,
