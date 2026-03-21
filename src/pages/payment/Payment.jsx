@@ -52,7 +52,7 @@ export default function Payment() {
                 seatName: bookingData.map(seat => ({
                     seatNumber: seat.seatNumber,
                     seatType: seat.seatType,
-                    price: seat.seatType.price,
+                    price: seat.price,
                     isBooked: true,
                 })),
                 paymentMethod: paymentMethod,

@@ -71,7 +71,7 @@ export default function Booking() {
         movieInfor: data?.id_movie,
         theater: data?.theater,
         time: data?.startTime,
-        customerInfo: isStaff ? customerInfo : userState.userInfor?.user_inf,
+        customerInfo: isStaff ? customerInfo : userState.userInfor?.user_inf,        
       }
     });
   };
