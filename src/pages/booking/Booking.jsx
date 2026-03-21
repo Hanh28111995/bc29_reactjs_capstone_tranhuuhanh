@@ -5,7 +5,7 @@ import { useAsync } from "hooks/useAsync";
 import { fetchShowtimesCusAPI, searchCustomerAPI } from "services/customer";
 import SeatsRendering from "modules/seatsRendering/seatsRendering";
 import { useSelector } from "react-redux";
-import { notification, Modal, Input, Button, Spin } from "antd";
+import { notification, Modal, Input, Button, Spin, Space } from "antd";
 import { UserOutlined, SearchOutlined } from "@ant-design/icons";
 import moment from "moment";
 import { MaLoaiNguoiDung } from "enums/common";
@@ -63,7 +63,7 @@ export default function Booking() {
     setSearchResults([]);
   };
 
-  const handleSubmitTicket = async () => {
+  const handleSubmitTicket = async (mode = "buy") => {
     if (danhSachGhe.length === 0) return notification.warning({ message: "Vui lòng chọn ghế!" });
     navigate(`/booking/payment/${params.id}`, {
       state: {
@@ -71,7 +71,8 @@ export default function Booking() {
         movieInfor: data?.id_movie,
         theater: data?.theater,
         time: data?.startTime,
-        customerInfo: isStaff ? customerInfo : userState.userInfor?.user_inf,        
+        customerInfo: isStaff ? customerInfo : userState.userInfor?.user_inf,
+        mode, // "buy" | "reserve"
       }
     });
   };
@@ -136,9 +137,16 @@ export default function Booking() {
             )}
           </div>
 
-          <button className="btn-submit-booking" onClick={handleSubmitTicket}>
-            ĐẶT VÉ
-          </button>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <button className="btn-submit-booking" onClick={() => handleSubmitTicket("buy")}>
+              MUA VÉ
+            </button>
+            {!isStaff && (
+              <button className="btn-submit-booking btn-reserve" onClick={() => handleSubmitTicket("reserve")}>
+                ĐẶT VÉ
+              </button>
+            )}
+          </Space>
         </div>
 
         <div className="booking-seats-area">

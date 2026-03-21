@@ -31,9 +31,36 @@ const fetchCreateCashPayment = (data) => {
   });
 };
 
+const fetchAllTicketsAPI = (params) => {
+  return request({
+    url: `/admin/ticket/all`,
+    method: "GET",
+    params,
+  });
+};
+
+const deleteTicketAPI = (id) => {
+  return request({
+    url: `/admin/ticket/delete/${id}`,
+    method: "DELETE",
+  });
+};
+
+const updateTicketAPI = (id, data) => {
+  return request({
+    url: `/admin/ticket/update/${id}`,
+    method: "PUT",
+    data,
+  });
+};
+
+
 export {
   fetchCheckPayment,
   fetchCreateMomoPayment,
   fetchCreateCashPayment,
   fetchCreateVnpayPayment,
+  fetchAllTicketsAPI,
+  deleteTicketAPI,
+  updateTicketAPI,
 };

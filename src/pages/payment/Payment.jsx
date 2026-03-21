@@ -17,13 +17,54 @@ export default function Payment() {
     const params = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const { bookingData, movieInfor, theater, time } = location.state || {};
+    const { bookingData, movieInfor, theater, time, customerInfo, mode } = location.state || {};
 
     const [paymentMethod, setPaymentMethod] = useState(null);
 
     if (!bookingData) {
         return <div className="error-state">Không có dữ liệu đơn hàng</div>;
     }
+
+    // Chế độ ĐẶT VÉ — tạo vé Pending, không qua cổng thanh toán
+    const handleReserve = async () => {
+        confirm({
+            title: 'Xác nhận đặt vé?',
+            content: 'Vé sẽ được giữ chỗ, bạn thanh toán tại quầy khi đến rạp.',
+            icon: <ExclamationCircleOutlined />,
+            okText: 'Xác nhận',
+            cancelText: 'Hủy',
+            async onOk() {
+                try {
+                    const result = await fetchTicketBookingAPI(userState.userInfor?.user_inf.role, {
+                        user_id: customerInfo?.id || userState.userInfor?.user_inf?.id,
+                        id_movie: movieInfor?._id,
+                        id_theater: theater?._id,
+                        startTime: time,
+                        showtime_id: params.id,
+                        timeOfBooking: moment().format('YYYY-MM-DD HH:mm:ss'),
+                        seatName: bookingData.map(seat => ({
+                            seatNumber: seat.seatNumber,
+                            seatType: seat.seatType,
+                            price: seat.price,
+                            isBooked: true,
+                        })),
+                        paymentMethod: 'cash',
+                        paymentStatus: 'Pending',
+                    });
+                    const ticket = result?.data?.content;
+                    await fetchCreateCashPayment(ticket);
+                    navigate('/payment-result', {
+                        state: { payUrl: null, bookingId: ticket._id, method: 'cash' }
+                    });
+                } catch (error) {
+                    if (error?.response?.status === 409) {
+                        return notification.error({ message: "Ghế đã được đặt", description: "Vui lòng chọn ghế khác." });
+                    }
+                    notification.error({ message: "Đặt vé thất bại" });
+                }
+            },
+        });
+    };
 
     const handleFinishPayment = () => {
         if (!paymentMethod) {
@@ -113,26 +154,28 @@ export default function Payment() {
             </Button>
 
             <div className="payment-container">
-                {/* PHẦN CHỌN PHƯƠNG THỨC */}
-                <Card className="payment-methods" title="Chọn phương thức thanh toán">
-                    <Radio.Group
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        value={paymentMethod}
-                        className="method-group"
-                    >
-                        <Space direction="vertical">
-                            <Radio.Button value="internet banking" className="payment-radio-btn">
-                                <CreditCardOutlined /> Internet Banking - VNpay
-                            </Radio.Button>
-                            <Radio.Button value="momo" className="payment-radio-btn">
-                                <WalletOutlined /> Ví MoMo
-                            </Radio.Button>
-                            <Radio.Button value="cash" className="payment-radio-btn">
-                                <DollarOutlined /> Thanh toán tại quầy
-                            </Radio.Button>
-                        </Space>
-                    </Radio.Group>
-                </Card>
+                {/* PHẦN CHỌN PHƯƠNG THỨC — ẩn khi mode=reserve */}
+                {mode !== 'reserve' && (
+                    <Card className="payment-methods" title="Chọn phương thức thanh toán">
+                        <Radio.Group
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                            value={paymentMethod}
+                            className="method-group"
+                        >
+                            <Space direction="vertical">
+                                <Radio.Button value="internet banking" className="payment-radio-btn">
+                                    <CreditCardOutlined /> Internet Banking - VNpay
+                                </Radio.Button>
+                                <Radio.Button value="momo" className="payment-radio-btn">
+                                    <WalletOutlined /> Ví MoMo
+                                </Radio.Button>
+                                <Radio.Button value="cash" className="payment-radio-btn">
+                                    <DollarOutlined /> Thanh toán tại quầy
+                                </Radio.Button>
+                            </Space>
+                        </Radio.Group>
+                    </Card>
+                )}
 
                 {/* PHẦN THÔNG TIN ĐƠN HÀNG */}
                 <Card className="order-info" title="Thông tin đơn hàng">
@@ -150,15 +193,27 @@ export default function Payment() {
                             {bookingData.reduce((total, el) => total + (el.price || 0), 0).toLocaleString()} VNĐ
                         </Title>
                     </div>
-                    <Button
-                        type="primary"
-                        size="large"
-                        block
-                        className="btn-confirm"
-                        onClick={handleFinishPayment}
-                    >
-                        XÁC NHẬN THANH TOÁN
-                    </Button>
+                    {mode === 'reserve' ? (
+                        <Button
+                            type="default"
+                            size="large"
+                            block
+                            className="btn-confirm"
+                            onClick={handleReserve}
+                        >
+                            XÁC NHẬN ĐẶT VÉ
+                        </Button>
+                    ) : (
+                        <Button
+                            type="primary"
+                            size="large"
+                            block
+                            className="btn-confirm"
+                            onClick={handleFinishPayment}
+                        >
+                            XÁC NHẬN THANH TOÁN
+                        </Button>
+                    )}
                 </Card>
             </div>
         </div>

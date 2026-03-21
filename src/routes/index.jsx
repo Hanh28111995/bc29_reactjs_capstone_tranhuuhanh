@@ -8,6 +8,7 @@ import TheatersManagement from "pages/theater-management/TheaterManagement";
 import CreateTheater from "pages/CreateTheater/CreateTheater";
 import Payment from "pages/payment/Payment";
 import TicketManagement from "pages/ticket-management/TicketManagement";
+import EditTicket from "pages/EditTicket/EditTicket";
 import PaymentResult from "pages/payment/PaymentResult";
 import AuthGuards from "guards/auth.guards";
 
@@ -114,14 +115,18 @@ export default function Router() {
             {
               path: '/admin/theater-management',
               element: <TheatersManagement />,
-            },
+            },            
             {
               path: '/admin/showtimes',
               element: <ShowTimesManagement />,
             },
             {
-              path: '/admin/tickets',
+              path: '/admin/ticket-management',
               element: < TicketManagement />,
+            },
+            {
+              path: '/admin/ticket-management/edit/:ticketId',
+              element: <EditTicket />,
             },
             {
               path: '/admin/movie-management/create',
