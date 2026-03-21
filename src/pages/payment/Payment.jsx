@@ -139,7 +139,7 @@ export default function Payment() {
                     <Title level={4} className="order-title">{movieInfor?.title}</Title>
                     <p><b>Rạp:</b> {theater?.branch}</p>
                     <p><b>Phòng:</b> {theater?.name}</p>
-                    <p><b>Thời gian:</b> {time}</p>
+                    <p><b>Thời gian:</b> {moment.utc(time).format('DD/MM/YYYY HH:mm')}</p>
                     <Divider />
                     <p><b>Ghế:</b> {bookingData?.map(el => el.seatNumber).join(", ")}</p>
                     <p><b>Số lượng:</b> {bookingData.length} ghế</p>
