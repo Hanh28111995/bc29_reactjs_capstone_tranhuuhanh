@@ -87,7 +87,7 @@ export default function Payment() {
 
             if (keyword === "momo") {
                 const getCode = await fetchCreateMomoPayment(ticket);
-                const payUrl = getCode?.content.paymentUrl;
+                const payUrl = getCode?.data.content.paymentUrl;
                 console.log(payUrl)
                 notification.success({ message: "Đang chuyển hướng đến MoMo..." });
                 setTimeout(() => window.location.href = payUrl, 1000);
@@ -95,7 +95,7 @@ export default function Payment() {
 
             if (keyword === "internet banking") {
                 const getCode = await fetchCreateVnpayPayment(ticket);
-                const payUrl = getCode?.content.paymentUrl;
+                const payUrl = getCode?.data.content.paymentUrl;
                 console.log(payUrl)
                 notification.success({ message: "Đang chuyển hướng đến VNpay..." });
                 setTimeout(() => window.location.href = payUrl, 1000);
