@@ -70,6 +70,7 @@ export default function Payment() {
                     message: 'Đặt vé thất bại',
                     description: Array.isArray(errorMsg) ? errorMsg.join(" | ") : errorMsg || 'Lỗi không xác định từ hệ thống',
                 });
+                return; // Dừng lại, không xử lý payment
             }
 
             const ticket = result?.data.content;
@@ -87,16 +88,18 @@ export default function Payment() {
 
             if (keyword === "momo") {
                 const getCode = await fetchCreateMomoPayment(ticket);
-                const payUrl = getCode?.data.content.paymentUrl;
-                console.log(payUrl)
+                console.log('momo response:', getCode?.data);
+                const payUrl = getCode?.data?.content?.paymentUrl;
+                if (!payUrl) return notification.error({ message: "Không lấy được link thanh toán MoMo" });
                 notification.success({ message: "Đang chuyển hướng đến MoMo..." });
                 setTimeout(() => window.location.href = payUrl, 1000);
             }
 
             if (keyword === "internet banking") {
                 const getCode = await fetchCreateVnpayPayment(ticket);
-                const payUrl = getCode?.data.content.paymentUrl;
-                console.log(payUrl)
+                console.log('vnpay response:', getCode?.data);
+                const payUrl = getCode?.data?.content?.paymentUrl;
+                if (!payUrl) return notification.error({ message: "Không lấy được link thanh toán VNPay" });
                 notification.success({ message: "Đang chuyển hướng đến VNpay..." });
                 setTimeout(() => window.location.href = payUrl, 1000);
             }
