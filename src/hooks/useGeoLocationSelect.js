@@ -16,6 +16,8 @@ const getCachedLocation = () => {
 const setCachedLocation = (data) => {
   localStorage.setItem(GEO_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
 };
+
+const reverseGeocode = async ({ latitude, longitude }) => {
   const res = await fetch(
     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
   );
