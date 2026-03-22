@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Button, List, Card, Row, Col, Empty, Spin, Select, Carousel } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button, List, Card, Row, Col, Empty, Spin, Select } from 'antd';
 import { useAsync } from 'hooks/useAsync';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchShowtimesAPI, fetchBranchesAPI, fetchMovieDetailAPI, fetchMovieListAPI } from 'services/general';
@@ -9,6 +9,91 @@ import { fetchLocationListAPI } from 'services/general';
 import './index.scss';
 import SEO from 'components/SEO';
 import { useGeoLocationSelect } from 'hooks/useGeoLocationSelect';
+
+function MovieCarousel({ movies, currentId, onSelect }) {
+    const ref = useRef(null);
+    const isDragging = useRef(false);
+    const startX = useRef(0);
+    const scrollLeft = useRef(0);
+    const didDrag = useRef(false);
+
+    const onMouseDown = (e) => {
+        isDragging.current = true;
+        didDrag.current = false;
+        startX.current = e.pageX - ref.current.offsetLeft;
+        scrollLeft.current = ref.current.scrollLeft;
+        ref.current.style.cursor = 'grabbing';
+    };
+    const onMouseMove = (e) => {
+        if (!isDragging.current) return;
+        const x = e.pageX - ref.current.offsetLeft;
+        const walk = x - startX.current;
+        if (Math.abs(walk) > 5) didDrag.current = true;
+        ref.current.scrollLeft = scrollLeft.current - walk;
+    };
+    const onMouseUp = () => {
+        isDragging.current = false;
+        ref.current.style.cursor = 'grab';
+    };
+
+    return (
+        <div style={{ margin: '16px 0' }}>
+            <div
+                ref={ref}
+                onMouseDown={onMouseDown}
+                onMouseMove={onMouseMove}
+                onMouseUp={onMouseUp}
+                onMouseLeave={onMouseUp}
+                style={{
+                    display: 'flex',
+                    gap: 10,
+                    overflowX: 'auto',
+                    cursor: 'grab',
+                    paddingBottom: 8,
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    userSelect: 'none',
+                }}
+            >
+                {movies.map((m) => (
+                    <div
+                        key={m._id}
+                        onClick={() => { if (!didDrag.current) onSelect(m._id); }}
+                        style={{
+                            flexShrink: 0,
+                            width: 110,
+                            borderRadius: 8,
+                            overflow: 'hidden',
+                            border: m._id === currentId ? '2px solid #1677ff' : '2px solid transparent',
+                            transition: 'border 0.2s',
+                            cursor: 'pointer',
+                            background: '#f5f5f5',
+                        }}
+                    >
+                        <img
+                            src={m.banner}
+                            alt={m.title}
+                            draggable={false}
+                            style={{ width: '100%', height: 150, objectFit: 'contain', display: 'block' }}
+                        />
+                        <div style={{
+                            padding: '5px 6px',
+                            fontSize: 11,
+                            fontWeight: m._id === currentId ? 600 : 400,
+                            color: m._id === currentId ? '#1677ff' : '#333',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            background: '#fff',
+                        }}>
+                            {m.title}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export default function MovieDetail() {
     const navigate = useNavigate()
@@ -407,52 +492,11 @@ export default function MovieDetail() {
 
             {/* Carousel phim — đổi movie */}
             {movieList.length > 0 && (
-                <div style={{ margin: '16px 0' }}>
-                    <Carousel
-                        slidesToShow={Math.min(5, movieList.length)}
-                        slidesToScroll={2}
-                        dots={false}
-                        arrows
-                        infinite={false}
-                        responsive={[
-                            { breakpoint: 768, settings: { slidesToShow: 3 } },
-                            { breakpoint: 480, settings: { slidesToShow: 2 } },
-                        ]}
-                    >
-                        {movieList.map((m) => (
-                            <div key={m._id} style={{ padding: '0 6px' }}>
-                                <div
-                                    onClick={() => navigate(`/movie/selectT/${m._id}`)}
-                                    style={{
-                                        cursor: 'pointer',
-                                        borderRadius: 8,
-                                        overflow: 'hidden',
-                                        border: m._id === param.movieId ? '2px solid #1677ff' : '2px solid transparent',
-                                        transition: 'border 0.2s',
-                                    }}
-                                >
-                                    <img
-                                        src={m.banner}
-                                        alt={m.title}
-                                        style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block' }}
-                                    />
-                                    <div style={{
-                                        padding: '6px 8px',
-                                        fontSize: 12,
-                                        fontWeight: m._id === param.movieId ? 600 : 400,
-                                        color: m._id === param.movieId ? '#1677ff' : '#333',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        background: '#fff',
-                                    }}>
-                                        {m.title}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </Carousel>
-                </div>
+                <MovieCarousel
+                    movies={movieList}
+                    currentId={param.movieId}
+                    onSelect={(id) => navigate(`/movie/selectT/${id}`)}
+                />
             )}
 
             <Calendar onDateChange={(date) => setLocalDate(date)} />
