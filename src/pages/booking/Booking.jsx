@@ -100,7 +100,7 @@ export default function Booking() {
 
           <div className="info-item">
             <label>Thời gian:</label>
-            <p className="highlight">{moment.utc(data?.startTime).format('DD/MM/YYYY HH:mm')}</p>
+            <p className="highlight">{moment(data?.startTime?.replace('Z', '')).format('DD/MM/YYYY HH:mm')}</p>
           </div>
 
           <div className="info-summary">

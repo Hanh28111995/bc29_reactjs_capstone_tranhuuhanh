@@ -269,12 +269,12 @@ export default function MovieDetail() {
                                                             fontWeight: 'bold',
                                                             color: isPast ? '#bfbfbf' : '#1890ff'
                                                         }}>
-                                                            {moment.utc(item.startTime).format('HH:mm')}
+                                                            {moment(item.startTime?.replace('Z', '')).format('HH:mm')}
                                                         </span>
 
                                                         {/* Thông tin phụ nhỏ bên dưới (Ngày hoặc Loại phòng) */}
                                                         <span style={{ fontSize: '10px', color: '#999' }}>
-                                                            {moment.utc(item.startTime).format('DD/MM')}
+                                                            {moment(item.startTime?.replace('Z', '')).format('DD/MM')}
                                                         </span>
                                                     </Button>
                                                 </List.Item>
@@ -374,7 +374,7 @@ export default function MovieDetail() {
                             {selectedCinemaName ? (
                                 <div className="mobile-showtime-grid">
                                     {dataShowTimes.length > 0 ? dataShowTimes.map((item) => {
-                                        const isPast = moment(item.startTime).isBefore(moment());
+                                        const isPast = moment(item.startTime?.replace('Z', '')).isBefore(moment());
                                         return (
                                             <Button
                                                 key={item._id}
@@ -382,8 +382,8 @@ export default function MovieDetail() {
                                                 className="showtime-btn"
                                                 onClick={() => navigate(`/booking/${item._id}`)}
                                             >
-                                                <span className="time">{moment(item.startTime).format('HH:mm')}</span>
-                                                <span className="date">{moment(item.startTime).format('DD/MM')}</span>
+                                                <span className="time">{moment(item.startTime?.replace('Z', '')).format('HH:mm')}</span>
+                                                <span className="date">{moment(item.startTime?.replace('Z', '')).format('DD/MM')}</span>
                                             </Button>
                                         );
                                     }) : <Empty description="Hết suất chiếu" />}

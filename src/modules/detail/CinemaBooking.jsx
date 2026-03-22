@@ -128,7 +128,7 @@ export default function CinemaBooking(props) {
                   dataSource={dataShowTimes}
                   locale={{ emptyText: <Empty description="Hôm nay đã hết suất chiếu" /> }}
                   renderItem={(item) => {
-                    const isPast = moment(item.startTime).isBefore(moment()); // Kiểm tra giờ đã qua chưa
+                    const isPast = moment(item.startTime?.replace('Z', '')).isBefore(moment()); // Kiểm tra giờ đã qua chưa
 
                     return (
                       <List.Item style={{ marginBottom: '12px' }}>
@@ -156,12 +156,12 @@ export default function CinemaBooking(props) {
                             fontWeight: 'bold',
                             color: isPast ? '#bfbfbf' : '#1890ff'
                           }}>
-                            {moment(item.startTime).format('HH:mm')}
+                            {moment(item.startTime?.replace('Z', '')).format('HH:mm')}
                           </span>
 
                           {/* Thông tin phụ nhỏ bên dưới (Ngày hoặc Loại phòng) */}
                           <span style={{ fontSize: '10px', color: '#999' }}>
-                            {moment(item.startTime).format('DD/MM')}
+                            {moment(item.startTime?.replace('Z', '')).format('DD/MM')}
                           </span>
                         </Button>
                       </List.Item>

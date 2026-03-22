@@ -169,7 +169,7 @@ export default function Payment() {
                                 <Radio.Button value="momo" className="payment-radio-btn">
                                     <WalletOutlined /> Ví MoMo
                                 </Radio.Button>
-                                <Radio.Button value="cash" className="payment-radio-btn">
+                                <Radio.Button value="cash" className="payment-radio-btn" disabled={userState.userInfor?.user_inf.role ==='customer' ? true : false}>
                                     <DollarOutlined /> Thanh toán tại quầy
                                 </Radio.Button>
                             </Space>
@@ -182,7 +182,7 @@ export default function Payment() {
                     <Title level={4} className="order-title">{movieInfor?.title}</Title>
                     <p><b>Rạp:</b> {theater?.branch}</p>
                     <p><b>Phòng:</b> {theater?.name}</p>
-                    <p><b>Thời gian:</b> {moment.utc(time).format('DD/MM/YYYY HH:mm')}</p>
+                    <p><b>Thời gian:</b> {moment(time?.replace('Z', '')).format('DD/MM/YYYY HH:mm')}</p>
                     <Divider />
                     <p><b>Ghế:</b> {bookingData?.map(el => el.seatNumber).join(", ")}</p>
                     <p><b>Số lượng:</b> {bookingData.length} ghế</p>

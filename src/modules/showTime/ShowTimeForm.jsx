@@ -116,10 +116,10 @@ export default function ShowtimeForm() {
 
   const handleSave = async (values) => {
     try {
-      // Gửi dạng ISO string không có timezone suffix để backend lưu nguyên con số
-     const utcStartTime = values.startTime 
-      ? values.startTime.format("YYYY-MM-DDTHH:mm:ss") 
-      : null;
+      // Strip Z khi hiển thị (display as local), thêm Z khi gửi lên (store as UTC string)
+      const utcStartTime = values.startTime 
+        ? values.startTime.format("YYYY-MM-DDTHH:mm:ss.000") + "Z"
+        : null;
       
       const payload = {
         id_movie: values.movie,
@@ -181,7 +181,7 @@ export default function ShowtimeForm() {
 
           <Col span={12}>
             <Form.Item
-              label="Thời gian bắt đầu (UTC)"
+              label="Thời gian bắt đầu"
               name="startTime"
               rules={[{ required: true, message: 'Vui lòng chọn thời gian' }]}
             >
