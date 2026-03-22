@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Button, List, Card, Row, Col,Empty, Spin, Select } from 'antd';
+import { Button, List, Card, Row, Col, Empty, Spin, Select, Carousel } from 'antd';
 import { useAsync } from 'hooks/useAsync';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchShowtimesAPI, fetchBranchesAPI, fetchMovieDetailAPI } from 'services/general';
+import { fetchShowtimesAPI, fetchBranchesAPI, fetchMovieDetailAPI, fetchMovieListAPI } from 'services/general';
 import Calendar from 'modules/showTime/Calendar';
 import moment from 'moment';
 import { fetchLocationListAPI } from 'services/general';
@@ -19,6 +19,14 @@ export default function MovieDetail() {
     const [branches, setBranches] = useState([]);
     const [localDate, setLocalDate] = useState(null);
     const [movieDetail, setMovieDetail] = useState(null);
+    const [movieList, setMovieList] = useState([]);
+
+    useEffect(() => {
+        fetchMovieListAPI().then((res) => {
+            const list = res?.data?.content || res?.data || [];
+            setMovieList(Array.isArray(list) ? list : []);
+        });
+    }, []);
 
 
     const { state: areasList = [] } = useAsync({ service: fetchLocationListAPI });
@@ -396,6 +404,56 @@ export default function MovieDetail() {
                 </div>
             </Card>
             
+
+            {/* Carousel phim — đổi movie */}
+            {movieList.length > 0 && (
+                <div style={{ margin: '16px 0' }}>
+                    <Carousel
+                        slidesToShow={Math.min(5, movieList.length)}
+                        slidesToScroll={2}
+                        dots={false}
+                        arrows
+                        infinite={false}
+                        responsive={[
+                            { breakpoint: 768, settings: { slidesToShow: 3 } },
+                            { breakpoint: 480, settings: { slidesToShow: 2 } },
+                        ]}
+                    >
+                        {movieList.map((m) => (
+                            <div key={m._id} style={{ padding: '0 6px' }}>
+                                <div
+                                    onClick={() => navigate(`/movie/selectT/${m._id}`)}
+                                    style={{
+                                        cursor: 'pointer',
+                                        borderRadius: 8,
+                                        overflow: 'hidden',
+                                        border: m._id === param.movieId ? '2px solid #1677ff' : '2px solid transparent',
+                                        transition: 'border 0.2s',
+                                    }}
+                                >
+                                    <img
+                                        src={m.banner}
+                                        alt={m.title}
+                                        style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block' }}
+                                    />
+                                    <div style={{
+                                        padding: '6px 8px',
+                                        fontSize: 12,
+                                        fontWeight: m._id === param.movieId ? 600 : 400,
+                                        color: m._id === param.movieId ? '#1677ff' : '#333',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        background: '#fff',
+                                    }}>
+                                        {m.title}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </Carousel>
+                </div>
+            )}
 
             <Calendar onDateChange={(date) => setLocalDate(date)} />
         </div>

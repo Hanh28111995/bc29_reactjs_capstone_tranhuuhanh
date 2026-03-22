@@ -1,9 +1,11 @@
 import {
   DesktopOutlined,
   UserOutlined,
-  DatabaseOutlined
+  DatabaseOutlined,
+  SafetyCertificateOutlined,
+  ToolOutlined,
 } from "@ant-design/icons";
-import { useLocation, } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Image } from "antd";
 import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -20,6 +22,8 @@ function getItem(label, key, icon, children, type) {
     type,
   };
 }
+const PERM_KEY = '/admin/permissions';
+
 const items = [
   getItem('Movie management', '/admin/movie-management', <DesktopOutlined />),
   getItem('User management', '/admin/user-management', <UserOutlined />),
@@ -30,12 +34,17 @@ const items = [
     getItem('Showtimes', '/admin/showtimes'),
     getItem('Tickets', '/admin/ticket-management'),
   ]),
+  getItem('Permissions', '/admin/permissions', <SafetyCertificateOutlined />),
+  getItem('Tools', 'tools', <ToolOutlined />, [
+    getItem('Schedule Generator', '/admin/tools/schedule-generator'),
+  ]),
 ];
 
 function AdminLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(true);
+
   const MenuClick = (e) => {
     e.domEvent.stopPropagation();
     navigate(e.key);
@@ -95,9 +104,7 @@ function AdminLayout() {
       <Layout className="site-layout">
         <Header
           className="site-layout-background"
-          style={{
-            padding: 0,
-          }}
+          style={{ padding: 0 }}
         />
         <Content
           onClick={() => setCollapsed(true)}
