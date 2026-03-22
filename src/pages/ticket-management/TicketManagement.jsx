@@ -1,4 +1,4 @@
-import TicketTable from 'modules/ticketTable/ticketTable'
+import TicketTable from 'modules/ticketTable/TicketTable'
 import React from 'react'
 
 function TicketManagement() {
