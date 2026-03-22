@@ -3,7 +3,7 @@ import { request } from "../configs/axios";
 const getAllSeatTypesApi = () => {
 
   return request({
-    url: `/admin/seatType/allSeatTypes`,
+    url: `/general/seatTypes`,
     method: 'GET',
   })
 };
