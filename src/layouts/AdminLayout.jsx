@@ -28,7 +28,7 @@ const items = [
     getItem('Branches', '/admin/branches'),
     getItem('Theaters', '/admin/theater-management'),
     getItem('Showtimes', '/admin/showtimes'),
-    getItem('Tickets', '/admin/tickets'),
+    getItem('Tickets', '/admin/ticket-management'),
   ]),
 ];
 
