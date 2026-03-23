@@ -5,7 +5,7 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
 // Chỉ import CSS bootstrap, bỏ JS bundle (không cần trong React)
-import "bootstrap/dist/css/bootstrap-grid.min.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { ConfigProvider, App as AntdApp } from "antd";

@@ -24,6 +24,13 @@ export default defineConfig({
       routes: path.resolve(__dirname, "./src/routes"),
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        silenceDeprecations: ["import", "mixed-decls", "global-builtin", "color-functions"],
+      },
+    },
+  },
   build: {
     rollupOptions: {
       output: {
