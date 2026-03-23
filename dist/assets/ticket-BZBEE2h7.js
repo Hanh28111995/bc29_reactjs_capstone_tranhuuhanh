@@ -1,0 +1,1 @@
+import{n as e}from"./ticket-c-zv2ELm.js";export{e as fetchAllTicketsAPI};

@@ -1,7 +1,8 @@
 import { useAuth } from 'contexts/auth.context';
-import React from 'react';
-import Login from './Login';
-import { Modal } from 'antd';
+import React, { lazy, Suspense } from 'react';
+import { Modal, Spin } from 'antd';
+
+const Login = lazy(() => import('./Login'));
 
 export default function LoginModal() {
     const { isLoginModalOpen, closeLogin } = useAuth();
@@ -26,7 +27,9 @@ export default function LoginModal() {
 
                 {/* Phần chứa Form Login */}
                 <div className="p-8 bg-white">
-                    <Login />
+                    <Suspense fallback={<Spin />}>
+                        <Login />
+                    </Suspense>
                 </div>
             </div>
         </Modal>
