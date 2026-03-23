@@ -4,7 +4,7 @@ import { useAsync } from 'hooks/useAsync';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchShowtimesAPI, fetchBranchesAPI, fetchMovieDetailAPI, fetchMovieListAPI } from 'services/general';
 import Calendar from 'modules/showTime/Calendar';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { fetchLocationListAPI } from 'services/general';
 import './index.scss';
 import SEO from 'components/SEO';
@@ -335,7 +335,7 @@ export default function MovieDetail() {
                                         dataSource={dataShowTimes}
                                         locale={{ emptyText: <Empty description="Hôm nay đã hết suất chiếu" /> }}
                                         renderItem={(item) => {
-                                            const isPast = moment(item.startTime?.replace('Z', '')).isBefore(moment()); // Kiểm tra giờ đã qua chưa
+                                            const isPast = dayjs(item.startTime?.replace('Z', '')).isBefore(dayjs());
 
                                             return (
                                                 <List.Item style={{ marginBottom: '12px' }}>
@@ -362,12 +362,12 @@ export default function MovieDetail() {
                                                             fontWeight: 'bold',
                                                             color: isPast ? '#bfbfbf' : '#1890ff'
                                                         }}>
-                                                            {moment(item.startTime?.replace('Z', '')).format('HH:mm')}
+                                                            {dayjs(item.startTime?.replace('Z', '')).format('HH:mm')}
                                                         </span>
 
                                                         {/* Thông tin phụ nhỏ bên dưới (Ngày hoặc Loại phòng) */}
                                                         <span style={{ fontSize: '10px', color: '#999' }}>
-                                                            {moment(item.startTime?.replace('Z', '')).format('DD/MM')}
+                                                            {dayjs(item.startTime?.replace('Z', '')).format('DD/MM')}
                                                         </span>
                                                     </Button>
                                                 </List.Item>
@@ -467,7 +467,7 @@ export default function MovieDetail() {
                             {selectedCinemaName ? (
                                 <div className="mobile-showtime-grid">
                                     {dataShowTimes.length > 0 ? dataShowTimes.map((item) => {
-                                        const isPast = moment(item.startTime?.replace('Z', '')).isBefore(moment());
+                                        const isPast = dayjs(item.startTime?.replace('Z', '')).isBefore(dayjs());
                                         return (
                                             <Button
                                                 key={item._id}
@@ -475,8 +475,8 @@ export default function MovieDetail() {
                                                 className="showtime-btn"
                                                 onClick={() => navigate(`/booking/${item._id}`)}
                                             >
-                                                <span className="time">{moment(item.startTime?.replace('Z', '')).format('HH:mm')}</span>
-                                                <span className="date">{moment(item.startTime?.replace('Z', '')).format('DD/MM')}</span>
+                                                <span className="time">{dayjs(item.startTime?.replace('Z', '')).format('HH:mm')}</span>
+                                                <span className="date">{dayjs(item.startTime?.replace('Z', '')).format('DD/MM')}</span>
                                             </Button>
                                         );
                                     }) : <Empty description="Hết suất chiếu" />}

@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Card, Button, Radio, Divider, Typography, Space, Modal, notification } from 'antd';
 import { CreditCardOutlined, WalletOutlined, DollarOutlined, ArrowLeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { fetchTicketBookingAPI } from 'services/customer';
 import { fetchCreateMomoPayment, fetchCreateCashPayment } from 'services/ticket';
 import "./index.scss"; // Import file scss mới
@@ -41,7 +41,7 @@ export default function Payment() {
                         id_theater: theater?._id,
                         startTime: time,
                         showtime_id: params.id,
-                        timeOfBooking: moment().format('YYYY-MM-DD HH:mm:ss'),
+                        timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
                         seatName: bookingData.map(seat => ({
                             seatNumber: seat.seatNumber,
                             seatType: seat.seatType,
@@ -89,7 +89,7 @@ export default function Payment() {
                 id_theater: theater?._id,
                 startTime: time,
                 showtime_id: params.id,
-                timeOfBooking: moment().format('YYYY-MM-DD HH:mm:ss'),
+                timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
                 seatName: bookingData.map(seat => ({
                     seatNumber: seat.seatNumber,
                     seatType: seat.seatType,
@@ -182,7 +182,7 @@ export default function Payment() {
                     <Title level={4} className="order-title">{movieInfor?.title}</Title>
                     <p><b>Rạp:</b> {theater?.branch}</p>
                     <p><b>Phòng:</b> {theater?.name}</p>
-                    <p><b>Thời gian:</b> {moment(time?.replace('Z', '')).format('DD/MM/YYYY HH:mm')}</p>
+                    <p><b>Thời gian:</b> {dayjs(time?.replace('Z', '')).format('DD/MM/YYYY HH:mm')}</p>
                     <Divider />
                     <p><b>Ghế:</b> {bookingData?.map(el => el.seatNumber).join(", ")}</p>
                     <p><b>Số lượng:</b> {bookingData.length} ghế</p>

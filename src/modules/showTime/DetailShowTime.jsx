@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchMovieShowTimesAPI } from "services/cinema";
-import moment from "moment";
+import dayjs from "dayjs";
 import { formatDate } from "../../utils/common";
 import { useAsync } from "hooks/useAsync";
 

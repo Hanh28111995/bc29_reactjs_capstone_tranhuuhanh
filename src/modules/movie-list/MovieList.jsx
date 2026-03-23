@@ -58,7 +58,7 @@ export default function MovieList() {
           <div className="col-3" key={ele._id}>
             <div className="card movie-card">
               <div className="card-header-wrapper">
-                <img className="card-img-top" src={ele.banner} alt={ele.tenPhim} />
+                <img className="card-img-top" src={ele.banner} alt={ele.tenPhim} loading="lazy" />
 
                 {/* Lớp này sẽ hiện khi Hover (PC) hoặc Active (Touch) */}
                 <div className="overlay"></div>
@@ -76,7 +76,7 @@ export default function MovieList() {
               <div className="card-body-custom">
                 <h3 className="movie-title">{ele.tenPhim}</h3>
                 <h4 className="movie-release">
-                  <span>Khởi chiếu:</span> {moment(ele.releaseDate).format('DD/MM/YYYY')}
+                  <span>Khởi chiếu:</span> {dayjs(ele.releaseDate).format('DD/MM/YYYY')}
                 </h4>
               </div>
             </div>

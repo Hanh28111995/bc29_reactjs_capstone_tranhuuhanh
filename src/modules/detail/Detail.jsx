@@ -33,6 +33,7 @@ export default function Detail(props) {
                 className="movie-banner"
                 src={props.movie.banner}
                 alt={props.movie.title}
+                loading="lazy"
               />
               <button
                 className="btn-booking"
