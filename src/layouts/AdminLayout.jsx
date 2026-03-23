@@ -6,6 +6,7 @@ import {
 } from "@ant-design/icons";
 import { useLocation } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Image } from "antd";
+import { ProConfigProvider } from "@ant-design/pro-components";
 import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import "./index.scss";
@@ -61,6 +62,7 @@ function AdminLayout() {
 
 
   return (
+    <ProConfigProvider>
     <Layout
       style={{
         minHeight: '100vh',
@@ -133,6 +135,7 @@ function AdminLayout() {
         </Footer>
       </Layout>
     </Layout>
+    </ProConfigProvider>
   );
 }
 

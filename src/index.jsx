@@ -4,12 +4,10 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
-// Chỉ import CSS bootstrap, bỏ JS bundle (không cần trong React)
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { ConfigProvider, App as AntdApp } from "antd";
-import { ProConfigProvider } from "@ant-design/pro-components";
 import viVN from "antd/locale/vi_VN";
 import { HelmetProvider } from "react-helmet-async";
 
@@ -26,11 +24,9 @@ root.render(
           },
         }}
       >
-        <ProConfigProvider>
-          <AntdApp>
+        <AntdApp>
             <App />
           </AntdApp>
-        </ProConfigProvider>
       </ConfigProvider>
     </Provider>
   </HelmetProvider>
