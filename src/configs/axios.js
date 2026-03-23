@@ -6,16 +6,58 @@ export const request = axios.create({
   withCredentials: true,
 });
 
+// --- API Cache ---
+// Các URL prefix được cache (GET only, không cần real-time)
+const CACHEABLE_URLS = [
+  "/general/movie/all",
+  "/general/showBanners",
+  "/general/locations",
+  "/general/cinemaBranches",
+  "/general/movie/",
+];
+
+const apiCache = new Map(); // key: url+params -> { data, expiry }
+const CACHE_TTL = 5 * 60 * 1000; // 5 phút
+
+const getCacheKey = (config) => {
+  const params = config.params ? JSON.stringify(config.params) : "";
+  return `${config.url}__${params}`;
+};
+
+const isCacheable = (config) =>
+  config.method === "get" &&
+  CACHEABLE_URLS.some((prefix) => config.url?.startsWith(prefix));
+
 // Request Interceptor: Luôn gắn token mới nhất từ LocalStorage
 request.interceptors.request.use((config) => {
   const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
   if (userInfor?.user_token) {
     config.headers.Authorization = `Bearer ${userInfor.user_token}`;
   }
+
+  // Trả về cache nếu còn hạn
+  if (isCacheable(config)) {
+    const key = getCacheKey(config);
+    const cached = apiCache.get(key);
+    if (cached && cached.expiry > Date.now()) {
+      // Dùng adapter để trả về cached response ngay lập tức
+      config.adapter = () => Promise.resolve(cached.data);
+    }
+  }
+
   return config;
 });
 
-let isRefreshing = false;
+// Xóa cache thủ công khi cần (gọi sau khi mutate data)
+export const clearApiCache = (urlPrefix) => {
+  if (!urlPrefix) {
+    apiCache.clear();
+    return;
+  }
+  for (const key of apiCache.keys()) {
+    if (key.startsWith(urlPrefix)) apiCache.delete(key);
+  }
+};
 let refreshSubscribers = [];
 
 const onRefreshed = (token) => {
@@ -24,7 +66,15 @@ const onRefreshed = (token) => {
 };
 
 request.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Lưu vào cache nếu là GET cacheable
+    const config = response.config;
+    if (isCacheable(config)) {
+      const key = getCacheKey(config);
+      apiCache.set(key, { data: response, expiry: Date.now() + CACHE_TTL });
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
     // Kiểm tra mã 401 (Unauthorized)

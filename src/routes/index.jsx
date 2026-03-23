@@ -1,17 +1,18 @@
 import React, { lazy } from "react";
 import { useRoutes, Navigate } from "react-router-dom";
-import PageNotFound from "pages/PageNotFound/PageNotFound";
-import SeatTypeTable from "pages/theater-management/SeatTypesTable";
-import BranchesTable from "pages/theater-management/BranchesTable";
-import ShowTimesManagement from "pages/theater-management/ShowTimesManagement";
-import TheatersManagement from "pages/theater-management/TheaterManagement";
-import CreateTheater from "pages/CreateTheater/CreateTheater";
-import Payment from "pages/payment/Payment";
-import TicketManagement from "pages/ticket-management/TicketManagement";
-import EditTicket from "pages/EditTicket/EditTicket";
-import ScheduleGenerator from "pages/tools/ScheduleGenerator";
-import PaymentResult from "pages/payment/PaymentResult";
-import AuthGuards from "guards/auth.guards";
+
+const AuthGuards = lazy(() => import("guards/auth.guards"));
+const PageNotFound = lazy(() => import("pages/PageNotFound/PageNotFound"));
+const SeatTypeTable = lazy(() => import("pages/theater-management/SeatTypesTable"));
+const BranchesTable = lazy(() => import("pages/theater-management/BranchesTable"));
+const ShowTimesManagement = lazy(() => import("pages/theater-management/ShowTimesManagement"));
+const TheatersManagement = lazy(() => import("pages/theater-management/TheaterManagement"));
+const CreateTheater = lazy(() => import("pages/CreateTheater/CreateTheater"));
+const Payment = lazy(() => import("pages/payment/Payment"));
+const TicketManagement = lazy(() => import("pages/ticket-management/TicketManagement"));
+const EditTicket = lazy(() => import("pages/EditTicket/EditTicket"));
+const ScheduleGenerator = lazy(() => import("pages/tools/ScheduleGenerator"));
+const PaymentResult = lazy(() => import("pages/payment/PaymentResult"));
 
 const Login = lazy(() => import("pages/login/Login"));
 const Register = lazy(() => import("pages/register/Register"));

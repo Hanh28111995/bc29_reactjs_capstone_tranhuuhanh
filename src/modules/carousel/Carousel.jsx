@@ -71,6 +71,11 @@ export default function Carousel() {
         <img
           src={item.banner?.replace(/ /g, "%20")}
           alt={item.title || `banner-${index}`}
+          width={939}
+          height={528}
+          loading={index === 0 ? "eager" : "lazy"}
+          decoding="async"
+          fetchpriority={index === 0 ? "high" : "low"}
           style={{
             width: "auto",
             height: "100%",

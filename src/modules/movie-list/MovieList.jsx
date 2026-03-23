@@ -58,7 +58,7 @@ export default function MovieList() {
           <div className="col-3" key={ele._id}>
             <div className="card movie-card">
               <div className="card-header-wrapper">
-                <img className="card-img-top" src={ele.banner} alt={ele.tenPhim} loading="lazy" />
+                <img className="card-img-top" src={ele.banner} alt={ele.tenPhim} width={300} height={350} loading="lazy" decoding="async" />
 
                 {/* Lớp này sẽ hiện khi Hover (PC) hoặc Active (Touch) */}
                 <div className="overlay"></div>

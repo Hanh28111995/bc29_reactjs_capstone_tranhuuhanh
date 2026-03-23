@@ -73,7 +73,11 @@ function MovieCarousel({ movies, currentId, onSelect }) {
                         <img
                             src={m.banner}
                             alt={m.title}
+                            width={110}
+                            height={150}
                             draggable={false}
+                            loading="lazy"
+                            decoding="async"
                             style={{ width: '100%', height: 150, objectFit: 'contain', display: 'block' }}
                         />
                         <div style={{
