@@ -1,1 +1,0 @@
-var e=`SET_USER_INFO`,t=`SET_DATE`,n=t=>({type:e,payload:t});export{t as n,e as r,n as t};

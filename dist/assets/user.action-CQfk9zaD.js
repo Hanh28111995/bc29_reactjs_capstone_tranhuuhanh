@@ -1,0 +1,1 @@
+import{n as e}from"./index-BTD3ESGj.js";var t=t=>({type:e,payload:t});export{t};

@@ -1,0 +1,1 @@
+import{a as e}from"./rolldown-runtime-COnpUsM8.js";import{_t as t,yt as n}from"./antd-vendor-VcOgpbP6.js";import{a as r,s as i}from"./react-vendor-VxyyCeju.js";import{l as a}from"./index-BTD3ESGj.js";var o=e(n()),s=t();function c(){let e=a(e=>e.userReducer),t=i();return(0,o.useEffect)(()=>{e.userInfor&&t(`/`)},[]),(0,s.jsx)(r,{})}export{c as default};
