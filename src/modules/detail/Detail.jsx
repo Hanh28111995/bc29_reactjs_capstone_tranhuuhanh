@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import moment from "moment";
+import dayjs from "dayjs";
 import "./index.scss";
 
 export default function Detail(props) {
@@ -46,7 +46,7 @@ export default function Detail(props) {
             <div className="col-6 col-md-7 col-lg-8 movie-info">
               <h2>{props.movie.title}</h2>
               <p><span>Đánh giá:</span> {starcount()}</p>
-              <p><span>Ngày phát hành:</span> {moment(props.movie.releaseDate).format('DD/MM/YYYY')}</p>
+              <p><span>Ngày phát hành:</span> {dayjs(props.movie.releaseDate).format('DD/MM/YYYY')}</p>
               <p><span>Đạo diễn:</span> {props.movie.director}</p>
               <p><span>Thể loại:</span> {props.movie.genre}</p>
               <p><span>Đối tượng:</span> </p>

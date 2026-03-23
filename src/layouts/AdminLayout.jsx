@@ -2,7 +2,6 @@ import {
   DesktopOutlined,
   UserOutlined,
   DatabaseOutlined,
-  SafetyCertificateOutlined,
   ToolOutlined,
 } from "@ant-design/icons";
 import { useLocation } from 'react-router-dom';
@@ -34,7 +33,6 @@ const items = [
     getItem('Showtimes', '/admin/showtimes'),
     getItem('Tickets', '/admin/ticket-management'),
   ]),
-  getItem('Permissions', '/admin/permissions', <SafetyCertificateOutlined />),
   getItem('Tools', 'tools', <ToolOutlined />, [
     getItem('Schedule Generator', '/admin/tools/schedule-generator'),
   ]),

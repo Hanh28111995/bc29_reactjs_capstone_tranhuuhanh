@@ -9,7 +9,6 @@ import CreateTheater from "pages/CreateTheater/CreateTheater";
 import Payment from "pages/payment/Payment";
 import TicketManagement from "pages/ticket-management/TicketManagement";
 import EditTicket from "pages/EditTicket/EditTicket";
-import Permissions from "pages/permissions/Permissions";
 import ScheduleGenerator from "pages/tools/ScheduleGenerator";
 import PaymentResult from "pages/payment/PaymentResult";
 import AuthGuards from "guards/auth.guards";
@@ -129,10 +128,6 @@ export default function Router() {
             {
               path: '/admin/ticket-management/edit/:ticketId',
               element: <EditTicket />,
-            },
-            {
-              path: '/admin/permissions',
-              element: <Permissions />,
             },
             {
               path: '/admin/tools/schedule-generator',

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, Button, List, Card, Row, Col, Tag, Empty, Space } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { fetchShowtimesAPI, fetchBranchesAPI } from 'services/general';
 import { useAsync } from 'hooks/useAsync';
 import { useParams } from 'react-router-dom';
@@ -128,7 +128,7 @@ export default function CinemaBooking(props) {
                   dataSource={dataShowTimes}
                   locale={{ emptyText: <Empty description="Hôm nay đã hết suất chiếu" /> }}
                   renderItem={(item) => {
-                    const isPast = moment(item.startTime?.replace('Z', '')).isBefore(moment()); // Kiểm tra giờ đã qua chưa
+                    const isPast = dayjs(item.startTime?.replace('Z', '')).isBefore(dayjs());
 
                     return (
                       <List.Item style={{ marginBottom: '12px' }}>
@@ -156,12 +156,12 @@ export default function CinemaBooking(props) {
                             fontWeight: 'bold',
                             color: isPast ? '#bfbfbf' : '#1890ff'
                           }}>
-                            {moment(item.startTime?.replace('Z', '')).format('HH:mm')}
+                            {dayjs(item.startTime?.replace('Z', '')).format('HH:mm')}
                           </span>
 
                           {/* Thông tin phụ nhỏ bên dưới (Ngày hoặc Loại phòng) */}
                           <span style={{ fontSize: '10px', color: '#999' }}>
-                            {moment(item.startTime?.replace('Z', '')).format('DD/MM')}
+                            {dayjs(item.startTime?.replace('Z', '')).format('DD/MM')}
                           </span>
                         </Button>
                       </List.Item>

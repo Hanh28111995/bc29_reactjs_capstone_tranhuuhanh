@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadingContext } from "../../contexts/loading.context";
 import { useAsync } from "../../hooks/useAsync";
 import { Radio } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import { fetchMovieListAPI } from "services/general";
 import "./index.scss";
 
