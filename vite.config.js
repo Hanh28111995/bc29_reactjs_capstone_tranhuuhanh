@@ -34,11 +34,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "antd-vendor": ["antd"],
-          "pro-components": ["@ant-design/pro-components"],
-          firebase: ["firebase"],
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("firebase")) return "firebase";
+            if (id.includes("@ant-design/pro-components")) return "pro-components";
+            if (id.includes("antd") || id.includes("@ant-design")) return "antd-vendor";
+            if (id.includes("react-dom") || id.includes("react-router")) return "react-vendor";
+          }
         },
       },
     },
