@@ -1,0 +1,15 @@
+// ─── Custom Font Faces ────────────────────────────────────
+// Đặt file font (.woff2, .woff) vào src/assets/fonts/
+// Sau đó khai báo @font-face tại đây, ví dụ:
+//
+// @font-face {
+//   font-family: 'Space Grotesk';
+//   src: url('../fonts/SpaceGrotesk-Regular.woff2') format('woff2'),
+//        url('../fonts/SpaceGrotesk-Regular.woff') format('woff');
+//   font-weight: 400;
+//   font-style: normal;
+//   font-display: block;
+// }
+//
+// Sau khi thêm font, update $font-primary trong variables.scss
+// và import _fonts.scss vào index.css hoặc App.css

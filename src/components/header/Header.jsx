@@ -154,7 +154,7 @@ export default function Header() {
 
       <nav className="navbar navbar-expand-lg navbar-light py-3">
         <a className="navbar-brand" href="/">
-          <img src="https://cybersoft.edu.vn/wp-content/uploads/2017/03/MIN-OP1.png" alt="" style={{ height: '45px', marginLeft: '10%' }} />
+          <img src="/images/logo-nav.png" alt="Movie Cybersoft" width="120" height="45" style={{ height: '45px', marginLeft: '10%' }} />
         </a>
         <button
           className="navbar-toggler d-lg-none"

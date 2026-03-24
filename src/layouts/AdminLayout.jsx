@@ -85,7 +85,7 @@ function AdminLayout() {
       >
         <div className="logo" >
           <a href="/">
-            <Image src="https://cybersoft.edu.vn/wp-content/uploads/2021/03/logo-cyber-nav.svg" width={100} preview={false} />
+            <Image src="/images/logo-admin.svg" width={100} preview={false} />
           </a>
         </div>
         <Menu
