@@ -30,7 +30,7 @@ export default function ScheduleGenerator() {
 
   const [movies, setMovies] = useState([]);
   const [theaters, setTheaters] = useState([]);
-  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedMovies, setSelectedMovies] = useState([]);
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [selectedTheaters, setSelectedTheaters] = useState([]);
   const [scheduleTime, setScheduleTime] = useState(null);
@@ -54,8 +54,8 @@ export default function ScheduleGenerator() {
   }, []);
 
   const handleGenerate = async () => {
-    if (!selectedMovie)
-      return notification.warning({ message: "Vui lòng chọn phim" });
+    if (selectedMovies.length === 0)
+      return notification.warning({ message: "Vui lòng chọn ít nhất 1 phim" });
     if (selectedSlots.length === 0)
       return notification.warning({ message: "Vui lòng chọn ít nhất 1 khung giờ" });
     if (selectedTheaters.length === 0)
@@ -64,7 +64,7 @@ export default function ScheduleGenerator() {
       return notification.warning({ message: "Vui lòng chọn lịch lặp" });
 
     const payload = {
-      movie_id: selectedMovie,
+      movie_ids: selectedMovies,
       timeSlots: selectedSlots,
       theaters: selectedTheaters,
       scheduleTime,
@@ -94,22 +94,43 @@ export default function ScheduleGenerator() {
         {/* 1. Chọn phim */}
         <Col span={24}>
           <Title level={5}>1. Select Movie</Title>
-          <Text type="secondary">5 latest release movies</Text>
+          <Text type="secondary">Select up to 5 movies</Text>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
-            {movies.map((m) => (
-              <Tag
-                key={m._id}
-                color={selectedMovie === m._id ? "blue" : "default"}
-                style={{ cursor: "pointer", padding: "4px 12px", fontSize: 13 }}
-                onClick={() => setSelectedMovie(m._id)}
-              >
-                {m.title}
-                <span style={{ marginLeft: 6, color: "#aaa", fontSize: 11 }}>
-                  {dayjs(m.releaseDate).format("DD/MM/YYYY")}
-                </span>
-              </Tag>
-            ))}
+            {movies.map((m) => {
+              const isSelected = selectedMovies.includes(m._id);
+              const maxReached = selectedMovies.length >= 5;
+              return (
+                <Tag
+                  key={m._id}
+                  color={isSelected ? "blue" : "default"}
+                  style={{
+                    cursor: isSelected || !maxReached ? "pointer" : "not-allowed",
+                    opacity: !isSelected && maxReached ? 0.45 : 1,
+                    padding: "4px 12px",
+                    fontSize: 13,
+                  }}
+                  onClick={() => {
+                    if (isSelected) {
+                      setSelectedMovies((prev) => prev.filter((id) => id !== m._id));
+                    } else if (!maxReached) {
+                      setSelectedMovies((prev) => [...prev, m._id]);
+                    }
+                  }}
+                >
+                  {isSelected && <span style={{ marginRight: 4 }}>✓</span>}
+                  {m.title}
+                  <span style={{ marginLeft: 6, color: "#aaa", fontSize: 11 }}>
+                    {dayjs(m.releaseDate).format("DD/MM/YYYY")}
+                  </span>
+                </Tag>
+              );
+            })}
           </div>
+          {selectedMovies.length > 0 && (
+            <Text type="secondary" style={{ fontSize: 12, marginTop: 4, display: "block" }}>
+              {selectedMovies.length}/5 selected
+            </Text>
+          )}
         </Col>
 
         <Divider style={{ margin: 0 }} />
