@@ -19,7 +19,7 @@ const Register = lazy(() => import("pages/register/Register"));
 const AdminGuards = lazy(() => import("guards/admin.guards"));
 const NoAuthGuards = lazy(() => import("guards/no-auth.guards"));
 
-const AdminLayout = lazy(() => import("../layouts/AdminLayout"));
+import AdminLayout from "../layouts/AdminLayout";
 const MovieManagement = lazy(() => import("pages/movie-management/MovieManagement"));
 const UserManagement = lazy(() => import("pages/user-management/UserManagement"));
 const CreateUser = lazy(() => import("pages/CreateUser/CreateUser"));
@@ -27,7 +27,7 @@ const EditShowTime = lazy(() => import("pages/EditShowTime/EditShowTime"));
 const UpdateMovie = lazy(() => import("pages/EditMovie/UpdateMovie"));
 
 const Home = lazy(() => import("pages/home/Home"));
-const HomeLayout = lazy(() => import("../layouts/HomeLayout"));
+import HomeLayout from "../layouts/HomeLayout";
 const MovieDetail = lazy(() => import("pages/movie-detail/MovieDetail"));
 const MovieDtail = lazy(() => import("pages/movie-detail/MovieDtail"));
 const MovieTheater = lazy(() => import("pages/MovieTheater/MovieTheater"));
