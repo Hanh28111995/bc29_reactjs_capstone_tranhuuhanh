@@ -7,22 +7,15 @@ import {
 import { useLocation } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Image } from "antd";
 import { ProConfigProvider } from "@ant-design/pro-components";
-import React, { useMemo, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import "./index.scss";
 
 const { Header, Content, Footer, Sider } = Layout;
 
 function getItem(label, key, icon, children, type) {
-  return {
-    key,
-    icon,
-    children,
-    label,
-    type,
-  };
+  return { key, icon, children, label, type };
 }
-const PERM_KEY = '/admin/permissions';
 
 const items = [
   getItem('Movie management', '/admin/movie-management', <DesktopOutlined />),
@@ -39,10 +32,25 @@ const items = [
   ]),
 ];
 
-function AdminLayout() {
-  const navigate = useNavigate();
+// Tách riêng để chỉ component này rerender khi pathname thay đổi
+const AdminBreadcrumb = memo(() => {
   const { pathname } = useLocation();
-  const [collapsed, setCollapsed] = useState(true);
+  const breadcrumb = pathname.split('/').map(segment => {
+    if (!segment) return '';
+    return segment.replace(/[^a-zA-Z0-9]/g, ' ').replace(/^\w/, c => c.toUpperCase());
+  });
+  return (
+    <Breadcrumb>
+      <Breadcrumb.Item>{breadcrumb[1]}</Breadcrumb.Item>
+      <Breadcrumb.Item>{breadcrumb[2]}</Breadcrumb.Item>
+    </Breadcrumb>
+  );
+});
+
+// Tách riêng để chỉ component này rerender khi pathname thay đổi
+const AdminMenu = memo(({ collapsed, setCollapsed }) => {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const selectedKeys = useMemo(() => {
     const flat = items.flatMap(i => i.children ? i.children : [i]);
@@ -50,93 +58,71 @@ function AdminLayout() {
     return [match?.key || pathname];
   }, [pathname]);
 
-  const MenuClick = (e) => {
+  const handleClick = (e) => {
     e.domEvent.stopPropagation();
     navigate(e.key);
     setCollapsed(true);
-  }
-  const breadcrumb = pathname.split('/').map(segment => {
-    if (!segment) return ''; // Xử lý trường hợp chuỗi rỗng
+  };
 
-    // 1. Loại bỏ ký tự đặc biệt (giữ lại chữ và số), thay bằng khoảng trắng
-    // Regex /[^a-zA-Z0-9]/g sẽ tìm tất cả ký tự KHÔNG phải chữ hoặc số
-    let cleanSegment = segment.replace(/[^a-zA-Z0-9]/g, ' ');
+  return (
+    <Menu
+      defaultSelectedKeys={['/admin/movie-management']}
+      mode="inline"
+      theme="dark"
+      items={items}
+      selectedKeys={selectedKeys}
+      onClick={handleClick}
+    />
+  );
+});
 
-    // 2. Viết hoa chữ cái đầu tiên của chuỗi
-    return cleanSegment.charAt(0).toUpperCase() + cleanSegment.slice(1);
-  });
-
+function AdminLayout() {
+  const [collapsed, setCollapsed] = useState(true);
+  const handleCollapse = useCallback((value) => setCollapsed(value), []);
+  const handleMouseEnter = useCallback(() => setCollapsed(false), []);
+  const handleMouseLeave = useCallback(() => setCollapsed(true), []);
+  const handleSiderClick = useCallback(() => setCollapsed(false), []);
+  const handleContentClick = useCallback(() => setCollapsed(true), []);
+  const handleSetCollapsed = useCallback((v) => setCollapsed(v), []);
 
   return (
     <ProConfigProvider>
-    <Layout
-      style={{
-        minHeight: '100vh',
-      }}
-    >
-      <Sider collapsible
-        collapsed={collapsed}
-        onClick={() => setCollapsed(false)}
-        onMouseEnter={() => setCollapsed(false)} 
-        onMouseLeave={() => setCollapsed(true)}  
-        onCollapse={(value) => setCollapsed(value)}
-
-        style={{
-          position: 'fixed', // Chìa khóa để nằm đè lên
-          zIndex: 100,         // Đảm bảo nằm trên bảng
-          height: '100vh',
-          left: 0,
-          transition: 'all 0.2s', // Hiệu ứng trượt mượt mà
-        }}
-      >
-        <div className="logo" >
-          <a href="/">
-            <Image src="/images/logo-admin.svg" width={100} preview={false} />
-          </a>
-        </div>
-        <Menu
-          defaultSelectedKeys={['/admin/movie-management']}
-          mode="inline"
-          theme="dark"
-          items={items}
-          selectedKeys={selectedKeys}
-          onClick={MenuClick}
-        />
-      </Sider>
-      <Layout className="site-layout">
-        <Header
-          className="site-layout-background"
-          style={{ padding: 0 }}
-        />
-        <Content
-          onClick={() => setCollapsed(true)}
+      <Layout style={{ minHeight: '100vh' }}>
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onClick={handleSiderClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onCollapse={handleCollapse}
           style={{
-            margin: '0 16px',
+            position: 'fixed',
+            zIndex: 100,
+            height: '100vh',
+            left: 0,
+            transition: 'all 0.2s',
           }}
         >
-          <Breadcrumb>
-            <Breadcrumb.Item>{breadcrumb[1]}</Breadcrumb.Item>
-            <Breadcrumb.Item>{breadcrumb[2]}</Breadcrumb.Item>
-          </Breadcrumb>
-          <div
-            className="site-layout-background"
-            style={{
-              paddingTop: 24,
-              minHeight: 360,
-            }}
-          >
-            <Outlet />
+          <div className="logo">
+            <a href="/">
+              <Image src="/images/logo-admin.svg" width={100} preview={false} />
+            </a>
           </div>
-        </Content>
-        <Footer
-          style={{
-            textAlign: 'center',
-          }}
-        >
-          Ant Design ©2018 Created by Ant UED
-        </Footer>
+          <AdminMenu collapsed={collapsed} setCollapsed={handleSetCollapsed} />
+        </Sider>
+        <Layout className="site-layout">
+          <Header className="site-layout-background" style={{ padding: 0 }} />
+          <Content onClick={handleContentClick} style={{ margin: '0 16px' }}>
+            <AdminBreadcrumb />
+            <div className="site-layout-background" style={{ paddingTop: 24, minHeight: 360 }}>
+              <Outlet />
+            </div>
+          </Content>
+          <Footer style={{ textAlign: 'center' }}>
+            Ant Design ©2018 Created by Ant UED
+          </Footer>
+        </Layout>
       </Layout>
-    </Layout>
     </ProConfigProvider>
   );
 }

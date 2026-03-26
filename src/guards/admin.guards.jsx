@@ -7,12 +7,10 @@ import { LoadingContext } from "contexts/loading.context";
 
 export default function AdminGuards() {
   const [loadingState, setLoadingState] = useContext(LoadingContext);
-  const { userInfor } = useSelector((state) => state.userReducer);
+  const userRole = useSelector((state) => state.userReducer.userInfor?.user_inf?.role);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userRole = userInfor?.user_inf?.role;
-
     // Nếu không phải Admin
     if (userRole !== MaLoaiNguoiDung.QuanTri) {
       // 1. Tắt spinner ngay lập tức
@@ -25,10 +23,9 @@ export default function AdminGuards() {
       });
       navigate("/login");
     }
-  }, [userInfor, navigate, setLoadingState]); // Thêm dependencies để tránh lỗi logic khi data thay đổi
+  }, [userRole, navigate, setLoadingState]);
 
-  // Nếu chưa có thông tin hoặc không phải admin, không trả về Outlet để tránh lộ UI Admin
-  if (userInfor?.user_inf?.role !== MaLoaiNguoiDung.QuanTri) {
+  if (userRole !== MaLoaiNguoiDung.QuanTri) {
     return null;
   }
 
