@@ -38,11 +38,14 @@ export default function TheaterForm() {
     service: getAllBranches,
   });
 
-  const { state: theaterDetail, loading } = useAsync({
+  const { state: theaterDetailRaw, loading } = useAsync({
     service: () => fetchTheaterDetailAPI(params.theaterId),
     dependencies: [params.theaterId],
     condition: !!params.theaterId,
   });
+
+  // API trả về content: { theater: {...} }, useAsync trả về object đó
+  const theaterDetail = theaterDetailRaw?.theater ?? theaterDetailRaw;
 
   // Theo dõi cinemaName để filter branch
   const selectedCinema = Form.useWatch('cinemaName', form);

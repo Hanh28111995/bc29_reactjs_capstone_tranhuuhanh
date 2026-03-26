@@ -8,14 +8,14 @@ const asyncCache = new Map();
  * Luôn trả về result.data.content từ API response.
  * BE phải thống nhất trả về { content: array | object }
  */
-export const useAsync = ({ dependencies = [], service, codintion = true }) => {
+export const useAsync = ({ dependencies = [], service, codintion = true, condition = true }) => {
   const [loadingState, setLoadingState] = useContext(LoadingContext);
   const cacheKey = service?.name || service?.toString();
   const [state, setState] = useState(() => asyncCache.get(cacheKey));
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (codintion) {
+    if (codintion && condition) {
       fetchData();
     }
   }, dependencies);
