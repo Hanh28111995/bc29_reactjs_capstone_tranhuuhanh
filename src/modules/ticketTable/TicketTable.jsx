@@ -1,45 +1,56 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Table, Input, Button, App, Popconfirm, Tag, Select } from 'antd';
 import { fetchAllTicketsAPI, deleteTicketAPI } from 'services/ticket';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useAsync } from 'hooks/useAsync';
 import dayjs from 'dayjs';
 
 const { Search } = Input;
 
 export default function TicketTable() {
-  const [toggle, setToggle] = useState(false);
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState(undefined);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+  const [paginationMeta, setPaginationMeta] = useState({ total: 0, totalPages: 1 });
+  const [ticketList, setTicketList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const { notification } = App.useApp();
   const navigate = useNavigate();
 
-  const { state: rawData, loading } = useAsync({
-    dependencies: [toggle],
-    service: fetchAllTicketsAPI,
-  });
+  const fetchData = async (params = {}) => {
+    setLoading(true);
+    try {
+      const res = await fetchAllTicketsAPI({ page: pagination.page, limit: pagination.limit, ...params });
+      const content = res.data.content;
+      const data = Array.isArray(content) ? content : (content?.tickets ?? content?.data ?? []);
+      const meta = content?.pagination ?? {};
+      setTicketList(data);
+      setPaginationMeta({ total: meta.total ?? data.length, totalPages: meta.totalPages ?? 1 });
+    } catch {
+      notification.error({ message: "Lỗi", description: "Không thể tải danh sách vé." });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const data = Array.isArray(rawData) ? rawData : [];
+  useEffect(() => {
+    fetchData({ page: pagination.page, limit: pagination.limit, status: statusFilter, keyword });
+  }, [pagination, statusFilter]);
 
   const filtered = useMemo(() => {
-    let list = data;
-    if (statusFilter) list = list.filter(e => e.paymentStatus === statusFilter);
-    if (keyword) {
-      const key = keyword.toLowerCase().trim();
-      list = list.filter(e =>
-        e.transactionId?.toLowerCase().includes(key) ||
-        e.paymentMethod?.toLowerCase().includes(key)
-      );
-    }
-    return list;
-  }, [data, keyword, statusFilter]);
+    if (!keyword) return ticketList;
+    const key = keyword.toLowerCase().trim();
+    return ticketList.filter(e =>
+      e.transactionId?.toLowerCase().includes(key) ||
+      e.paymentMethod?.toLowerCase().includes(key)
+    );
+  }, [ticketList, keyword]);
 
   const handleDelete = async (id) => {
     try {
       await deleteTicketAPI(id);
       notification.success({ message: "Thành công", description: "Đã xóa vé!" });
-      setToggle(prev => !prev);
+      fetchData({ page: pagination.page, limit: pagination.limit, status: statusFilter, keyword });
     } catch {
       notification.error({ message: "Lỗi", description: "Không thể xóa." });
     }
@@ -141,7 +152,14 @@ export default function TicketTable() {
         dataSource={filtered}
         loading={loading}
         bordered
-        pagination={{ pageSize: 10, size: 'small' }}
+        pagination={{ 
+          pageSize: pagination.limit,
+          current: pagination.page,
+          total: paginationMeta.total,
+          size: 'small',
+          showTotal: (total) => `Tổng ${total} vé`,
+          onChange: (page, limit) => setPagination({ page, limit }),
+        }}
       />
     </div>
   );

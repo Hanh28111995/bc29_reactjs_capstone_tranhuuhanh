@@ -1,5 +1,5 @@
 import { Space, Table, Input, Button, App, Popconfirm, Card, Tag, Tooltip } from 'antd';
-import React, { useMemo, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     EditOutlined,
@@ -10,49 +10,53 @@ import {
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
 import { getShowTimeToday, getShowTimeUpcoming, getAllShowTimes, deleteOneShowTime } from 'services/showtime';
-import { useAsync } from 'hooks/useAsync';
 import './index.scss';
 
 const { Search } = Input;
 
 export default function ShowtimeManagement() {
     const navigate = useNavigate();
-    const [toggle, setToggle] = useState(false);
     const [keyword, setKeyword] = useState("");
-    const [overrideData, setOverrideData] = useState(null); // null = dùng useAsync
-    const [overrideLoading, setOverrideLoading] = useState(false);
+    const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+    const [paginationMeta, setPaginationMeta] = useState({ total: 0, totalPages: 1 });
+    const [showtimeList, setShowtimeList] = useState([]);
+    const [loading, setLoading] = useState(false);
     const { notification } = App.useApp();
 
-    const { state: rawData, loading: asyncLoading } = useAsync({
-        dependencies: [toggle],
-        service: getAllShowTimes,
-    });
+    const fetchData = async (params = {}) => {
+        setLoading(true);
+        try {
+            const res = await getAllShowTimes({ page: pagination.page, limit: pagination.limit, ...params });
+            const content = res.data.content;
+            const data = Array.isArray(content.showtimes) ? content.showtimes : (Array.isArray(content) ? content : []);
+            const meta = content.pagination ?? {};
+            setShowtimeList(data);
+            setPaginationMeta({ total: meta.total ?? data.length, totalPages: meta.totalPages ?? 1 });
+        } catch {
+            notification.error({ message: "Lỗi tải dữ liệu" });
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const loading = overrideLoading || asyncLoading;
-    const baseData = overrideData ?? (Array.isArray(rawData) ? rawData : []);
-
-    const showtimeList = useMemo(() => {
-        if (!keyword) return baseData;
-        const key = keyword.toLowerCase().trim();
-        return baseData.filter(ele =>
-            ele.id_movie?.title?.toLowerCase().includes(key) ||
-            ele.theater?.name?.toLowerCase().includes(key)
-        );
-    }, [baseData, keyword]);
+    useEffect(() => {
+        fetchData({ page: pagination.page, limit: pagination.limit });
+    }, [pagination]);
 
     const handleFilter = async (service) => {
-        setOverrideLoading(true);
+        setLoading(true);
         try {
             const res = await service();
             const content = res.data.content;
             const data = Array.isArray(content)
                 ? content
                 : Object.values(content ?? {}).find(v => Array.isArray(v)) ?? [];
-            setOverrideData(data);
+            setShowtimeList(data);
+            setPaginationMeta({ total: data.length, totalPages: 1 });
         } catch {
             notification.error({ message: "Lỗi tải dữ liệu" });
         } finally {
-            setOverrideLoading(false);
+            setLoading(false);
         }
     };
 
@@ -60,8 +64,7 @@ export default function ShowtimeManagement() {
         try {
             await deleteOneShowTime(id);
             notification.success({ message: "Xóa suất chiếu thành công" });
-            setOverrideData(null);
-            setToggle(prev => !prev);
+            fetchData({ page: pagination.page, limit: pagination.limit });
         } catch (error) {
             notification.error({ message: "Xóa thất bại", description: error.response?.data?.message });
         }
@@ -174,7 +177,7 @@ export default function ShowtimeManagement() {
                         <Button
                             type="default"
                             icon={<CalendarOutlined />}
-                            onClick={() => { setOverrideData(null); setToggle(p => !p); }}
+                            onClick={() => { setPagination({ page: 1, limit: pagination.limit }); }}
                         >
                             TẤT CẢ
                         </Button>
@@ -196,7 +199,15 @@ export default function ShowtimeManagement() {
                     dataSource={showtimeList}
                     loading={loading}
                     bordered
-                    pagination={{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '20', '50'] }}
+                    pagination={{ 
+                        current: pagination.page,
+                        pageSize: pagination.limit,
+                        total: paginationMeta.total,
+                        showTotal: (total) => `Tổng ${total} suất chiếu`,
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50'],
+                        onChange: (page, limit) => setPagination({ page, limit }),
+                    }}
                 />
             </Card>
         </div>

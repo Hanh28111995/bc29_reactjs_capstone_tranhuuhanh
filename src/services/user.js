@@ -24,10 +24,11 @@ const registerApi = (data) => {
   });
 };
 
-const userListApi = () => {
+const userListApi = (params) => {
   return request({
     url: `/admin/user/all`,
     method: "GET",
+    params,
   });
 };
 

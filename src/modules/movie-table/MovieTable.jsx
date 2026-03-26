@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useAsync } from "../../hooks/useAsync";
 import { fetchMovieListAPI, deleteMovieAPI } from "services/movie";
 import { formatDate3 } from "../../utils/common";
 import {
@@ -11,35 +10,52 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import { removeVietnameseTones } from 'constants/common';
-import './index.scss'; // Import file SCSS vừa tạo
+import './index.scss';
 
 const { Search } = Input;
 
 function MovieTable() {
   const navigate = useNavigate();
-  const [toggle, setToggle] = useState(false);
   const [keyword, setKeyword] = useState("");
+  const [pagination, setPagination] = useState({ page: 1, limit: 8 });
+  const [paginationMeta, setPaginationMeta] = useState({ total: 0, totalPages: 1 });
+  const [movieData, setMovieData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const { notification } = App.useApp();
 
-  const { state: rawData, loading } = useAsync({
-    dependencies: [toggle],
-    service: fetchMovieListAPI,
-  });
-  const data = Array.isArray(rawData) ? rawData : [];
+  const fetchData = async (params = {}) => {
+    setLoading(true);
+    try {
+      const res = await fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, ...params });
+      const content = res.data.content;
+      const data = Array.isArray(content) ? content : (content?.movies ?? content?.data ?? []);
+      const meta = content?.pagination ?? {};
+      setMovieData(data);
+      setPaginationMeta({ total: meta.total ?? data.length, totalPages: meta.totalPages ?? 1 });
+    } catch {
+      notification.error({ message: "Lỗi", description: "Không thể tải danh sách phim." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData({ page: pagination.page, limit: pagination.limit, keyword });
+  }, [pagination]);
 
   const movielist = useMemo(() => {
-    if (!keyword) return data;
+    if (!keyword) return movieData;
     const key = removeVietnameseTones(keyword).toLowerCase().trim();
-    return data.filter(ele =>
+    return movieData.filter(ele =>
       removeVietnameseTones(ele.tenPhim || ele.title || "").toLowerCase().includes(key)
     );
-  }, [data, keyword]);
+  }, [movieData, keyword]);
 
   const handleDelete = async (id) => {
     try {
       await deleteMovieAPI(id);
       notification.success({ message: "Thành công", description: "Đã xóa phim!" });
-      setToggle(prev => !prev);
+      fetchData({ page: pagination.page, limit: pagination.limit, keyword });
     } catch (err) {
       notification.error({ message: "Lỗi", description: "Không thể xóa." });
     }
@@ -113,7 +129,14 @@ function MovieTable() {
         dataSource={movielist}
         loading={loading}
         bordered
-        pagination={{ pageSize: 8, size: 'small' }}
+        pagination={{ 
+          current: pagination.page,
+          pageSize: pagination.limit,
+          total: paginationMeta.total,
+          size: 'small',
+          showTotal: (total) => `Tổng ${total} phim`,
+          onChange: (page, limit) => setPagination({ page, limit }),
+        }}
       />
     </div>
   );

@@ -1,9 +1,10 @@
 import { request } from "../configs/axios";
 
-const fetchMovieListAPI = () => {
+const fetchMovieListAPI = (params) => {
   return request({
     url: `/admin/movie/allMovies`,
     method: "GET",
+    params,
   });
 };
 

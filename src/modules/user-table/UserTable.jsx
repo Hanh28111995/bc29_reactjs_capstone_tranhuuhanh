@@ -1,33 +1,49 @@
-import React, { useMemo, useState } from 'react';
-import { Table, Button, Input, notification, Popconfirm } from 'antd'; // Giữ nguyên các import của bạn
+import React, { useMemo, useState, useEffect } from 'react';
+import { Table, Button, Input, notification, Popconfirm } from 'antd';
 import { EditOutlined, DeleteOutlined,} from "@ant-design/icons";
 import { useNavigate } from 'react-router-dom';
-import { useAsync } from "../../hooks/useAsync";
 import { userListApi, deleteUserApi } from 'services/user';
 import { removeVietnameseTones } from 'constants/common';
-import './index.scss'; // Link tới file scss mới
+import './index.scss';
 
 const { Search } = Input;
 
 export default function UserTable() {
   const navigate = useNavigate();
-  const [toggle, setToggle] = useState(false);
   const [keyword, setKeyword] = useState("");
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+  const [paginationMeta, setPaginationMeta] = useState({ total: 0, totalPages: 1 });
+  const [userList, setUserList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
-  const { state: rawData, loading } = useAsync({
-    dependencies: [toggle],
-    service: userListApi,
-  });
-  const data = Array.isArray(rawData) ? rawData : [];
+  const fetchData = async (params = {}) => {
+    setLoading(true);
+    try {
+      const res = await userListApi({ page: pagination.page, limit: pagination.limit, ...params });
+      const content = res.data.content;
+      const data = Array.isArray(content) ? content : (content?.users ?? content?.data ?? []);
+      const meta = content?.pagination ?? {};
+      setUserList(data);
+      setPaginationMeta({ total: meta.total ?? data.length, totalPages: meta.totalPages ?? 1 });
+    } catch {
+      api.error({ message: 'Lỗi', description: 'Không thể tải danh sách người dùng.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData({ page: pagination.page, limit: pagination.limit, keyword });
+  }, [pagination]);
 
   const userlist = useMemo(() => {
-    if (!keyword) return data;
+    if (!keyword) return userList;
     const key = removeVietnameseTones(keyword).toLowerCase().trim();
-    return data.filter(ele =>
+    return userList.filter(ele =>
       removeVietnameseTones(ele.username || "").toLowerCase().includes(key)
     );
-  }, [data, keyword]);
+  }, [userList, keyword]);
 
   const handleDelete = async (id, username) => {
     try {
@@ -37,7 +53,7 @@ export default function UserTable() {
         description: `Người dùng ${username} đã được xóa khỏi hệ thống.`,
         placement: 'topRight',
       });
-      setToggle(prev => !prev);
+      fetchData({ page: pagination.page, limit: pagination.limit, keyword });
     } catch (err) {
       api.error({
         message: 'Lỗi xóa người dùng',
@@ -119,13 +135,17 @@ export default function UserTable() {
 
       <Table
         tableLayout='fixed'
-        className="custom-table" // Thêm class để style pagination và font
+        className="custom-table"
         rowKey="_id"
         columns={columns}
         dataSource={userlist}
         loading={loading}
         pagination={{
-          pageSize: 10,
+          current: pagination.page,
+          pageSize: pagination.limit,
+          total: paginationMeta.total,
+          showTotal: (total) => `Tổng ${total} người dùng`,
+          onChange: (page, limit) => setPagination({ page, limit }),
         }}
         bordered
       />

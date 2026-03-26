@@ -133,6 +133,8 @@ export default function TheaterManagement() {
           bordered
           pagination={{
             pageSize: 10,
+            total: theaterList.length,
+            showTotal: (total) => `Tổng ${total} phòng chiếu`,
           }}
         />
       </Card>
