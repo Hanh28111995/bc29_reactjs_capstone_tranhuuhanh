@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import { /* Breadcrumb, */ Layout, Menu, Image } from "antd";
 import { ProConfigProvider } from "@ant-design/pro-components";
-import React, { memo, useCallback, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import "./index.scss";
 
@@ -47,7 +47,7 @@ const items = [
 // });
 
 // Tách riêng để chỉ component này rerender khi pathname thay đổi
-const AdminMenu = memo(({ setCollapsed }) => {
+const AdminMenu = memo(({ collapsed, setCollapsed }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -75,79 +75,52 @@ const AdminMenu = memo(({ setCollapsed }) => {
   );
 });
 
-// Tách Sider ra riêng để collapsed state không làm rerender Outlet
-const AdminSider = memo(({ onContentCollapse }) => {
+function AdminLayout() {
   const [collapsed, setCollapsed] = useState(true);
-
   const handleCollapse = useCallback((value) => setCollapsed(value), []);
   const handleMouseEnter = useCallback(() => setCollapsed(false), []);
   const handleMouseLeave = useCallback(() => setCollapsed(true), []);
   const handleSiderClick = useCallback(() => setCollapsed(false), []);
-
-  const handleSetCollapsed = useCallback((v) => {
-    setCollapsed(v);
-    onContentCollapse?.(v);
-  }, [onContentCollapse]);
-
-  return (
-    <Sider
-      collapsible
-      collapsed={collapsed}
-      onClick={handleSiderClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onCollapse={handleCollapse}
-      style={{
-        position: 'fixed',
-        zIndex: 100,
-        height: '100vh',
-        left: 0,
-        transition: 'all 0.2s',
-      }}
-    >
-      <div className="logo">
-        <a href="/">
-          <Image src="/images/logo-admin.svg" width={100} preview={false} />
-        </a>
-      </div>
-      <AdminMenu setCollapsed={handleSetCollapsed} />
-    </Sider>
-  );
-});
-
-// Content tách riêng để không rerender khi Sider collapsed thay đổi
-const AdminContent = memo(({ onCollapse }) => {
-  const handleContentClick = useCallback(() => onCollapse?.(true), [onCollapse]);
-
-  return (
-    <Layout className="site-layout">
-      <Header className="site-layout-background" style={{ padding: 0 }} />
-      <Content onClick={handleContentClick} style={{ margin: '0 16px' }}>
-        {/* <AdminBreadcrumb /> */}
-        <div className="site-layout-background" style={{ paddingTop: 24, minHeight: 360 }}>
-          <Outlet />
-        </div>
-      </Content>
-      <Footer style={{ textAlign: 'center' }}>
-        Ant Design ©2018 Created by Ant UED
-      </Footer>
-    </Layout>
-  );
-});
-
-function AdminLayout() {
-  // Dùng ref để truyền callback collapse xuống mà không gây rerender AdminLayout
-  const collapseRef = useRef(null);
-
-  const handleContentCollapse = useCallback((v) => {
-    collapseRef.current?.(v);
-  }, []);
+  const handleContentClick = useCallback(() => setCollapsed(true), []);
+  const handleSetCollapsed = useCallback((v) => setCollapsed(v), []);
 
   return (
     <ProConfigProvider>
       <Layout style={{ minHeight: '100vh' }}>
-        <AdminSider onContentCollapse={collapseRef} />
-        <AdminContent onCollapse={handleContentCollapse} />
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onClick={handleSiderClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onCollapse={handleCollapse}
+          style={{
+            position: 'fixed',
+            zIndex: 100,
+            height: '100vh',
+            left: 0,
+            transition: 'all 0.2s',
+          }}
+        >
+          <div className="logo">
+            <a href="/">
+              <Image src="/images/logo-admin.svg" width={100} preview={false} />
+            </a>
+          </div>
+          <AdminMenu collapsed={collapsed} setCollapsed={handleSetCollapsed} />
+        </Sider>
+        <Layout className="site-layout">
+          <Header className="site-layout-background" style={{ padding: 0 }} />
+          <Content onClick={handleContentClick} style={{ margin: '0 16px' }}>
+            {/* <AdminBreadcrumb /> */}
+            <div className="site-layout-background" style={{ paddingTop: 24, minHeight: 360 }}>
+              <Outlet />
+            </div>
+          </Content>
+          <Footer style={{ textAlign: 'center' }}>
+            Ant Design ©2018 Created by Ant UED
+          </Footer>
+        </Layout>
       </Layout>
     </ProConfigProvider>
   );
