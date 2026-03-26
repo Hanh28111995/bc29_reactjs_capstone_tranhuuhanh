@@ -37,20 +37,24 @@ export default function ScheduleGenerator() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchMovieListAPI().then((res) => {
-      const list = res?.data?.content || res?.data || [];
-      // 5 phim có releaseDate gần nhất
-      const sorted = [...list]
-        .filter((m) => m.releaseDate)
-        .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)))
-        .slice(0, 5);
-      setMovies(sorted);
-    });
+    fetchMovieListAPI()
+      .then((res) => {
+        const raw = res?.data?.content || res?.data || [];
+        const list = Array.isArray(raw) ? raw : [];
+        const sorted = [...list]
+          .filter((m) => m.releaseDate)
+          .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)))
+          .slice(0, 5);
+        setMovies(sorted);
+      })
+      .catch(() => setMovies([]));
 
-    fetchTheaterListAPI().then((res) => {
-      const list = res?.data?.content || res?.data || [];
-      setTheaters(list);
-    });
+    fetchTheaterListAPI()
+      .then((res) => {
+        const raw = res?.data?.content || res?.data || [];
+        setTheaters(Array.isArray(raw) ? raw : []);
+      })
+      .catch(() => setTheaters([]));
   }, []);
 
   const handleGenerate = async () => {
@@ -72,7 +76,12 @@ export default function ScheduleGenerator() {
 
     setLoading(true);
     try {
-      
+      await generateScheduleAPI(payload);
+      notification.success({ message: "Schedule generated successfully!" });
+    } catch (err) {
+      notification.error({ message: "Failed to generate schedule" });
+    } finally {
+      setLoading(false);
     }
   };
 

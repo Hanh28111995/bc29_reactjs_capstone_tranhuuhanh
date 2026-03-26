@@ -15,10 +15,11 @@ export default function UserTable() {
   const [keyword, setKeyword] = useState("");
   const [api, contextHolder] = notification.useNotification();
 
-  const { state: data = [], loading } = useAsync({
+  const { state: rawData, loading } = useAsync({
     dependencies: [toggle],
     service: userListApi,
   });
+  const data = Array.isArray(rawData) ? rawData : [];
 
   const userlist = useMemo(() => {
     if (!keyword) return data;
