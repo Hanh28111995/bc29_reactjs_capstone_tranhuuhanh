@@ -32,10 +32,11 @@ export default function SeatsRendering({ data, mode, onAction, selectedSeats }) 
         value: seat._id
     }));
 
-    // Nếu data chưa load xong, trả về object rỗng để tránh crash
-    if (!data || data.length === 0) return null;
+    // Guard: data phải là array hợp lệ
+    const seats = Array.isArray(data) ? data : [];
+    if (seats.length === 0) return null;
 
-    const rows = data?.reduce((acc, seat) => {
+    const rows = seats.reduce((acc, seat) => {
         const rowName = seat.seatNumber.charAt(0);
         if (!acc[rowName]) acc[rowName] = [];
         acc[rowName].push(seat);
