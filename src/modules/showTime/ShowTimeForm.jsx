@@ -17,6 +17,7 @@ import { useAsync } from "hooks/useAsync";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { fetchMovieListAPI } from "services/movie";
 import { fetchTheaterListAPI } from "services/theater";
+import { getAllBranches } from "services/branches";
 import { updateShowTime, addNewShowTime, getShowTimeDetail } from "services/showtime";
 import SeatsRendering from "modules/seatsRendering/seatsRendering";
 import { useSelector } from "react-redux";
@@ -25,7 +26,7 @@ dayjs.extend(utc);
 
 const DEFAULT_VALUES = {
   movie: undefined,
-  cinemaName: undefined,
+  cinema: undefined,
   theater: undefined,
   startTime: null,
 };
@@ -45,6 +46,12 @@ export default function ShowtimeForm() {
 
   const { state: movies = [] } = useAsync({ service: fetchMovieListAPI });
   const { state: theaters = [] } = useAsync({ service: fetchTheaterListAPI });
+  const { state: rawBranches } = useAsync({ service: getAllBranches });
+  const branches = useMemo(() => {
+    if (!rawBranches) return [];
+    if (Array.isArray(rawBranches)) return rawBranches;
+    return rawBranches?.branches ?? rawBranches?.branch ?? Object.values(rawBranches).find(Array.isArray) ?? [];
+  }, [rawBranches]);
 
   const { state: data, loading } = useAsync({
     service: () => getShowTimeDetail(params.id),
@@ -66,7 +73,7 @@ export default function ShowtimeForm() {
     const dataForForm = {
       movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
       theater: showtimeDetail.theater?._id || showtimeDetail.theater,
-      cinemaName: cinemaName,
+      cinema: showtimeDetail.cinema?._id || showtimeDetail.cinema,
       // Bỏ suffix timezone để giữ nguyên giờ hiển thị từ DB
       startTime: showtimeDetail.startTime
         ? dayjs(showtimeDetail.startTime.replace(/Z$/, "").replace(/\+07:00$/, ""))
@@ -75,22 +82,21 @@ export default function ShowtimeForm() {
 
     form.setFieldsValue(dataForForm);
     setOriginalData(dataForForm);
-    setSelectedCinema(cinemaName);
+    setSelectedCinema(showtimeDetail.cinema?._id || showtimeDetail.cinema);
     setSeats(showtimeDetail.seats || []);
     setIsChanged(false);
   }, [data, isEditMode, form]);
 
-  const cinemaList = useMemo(() => {
-    const cinemas = theaters.map((t) => t.cinemaName || t.cinema?.name || t.branch);
-    return [...new Set(cinemas)].filter(Boolean);
-  }, [theaters]);
+  const cinemaList = useMemo(() => branches, [branches]);
 
   const filteredTheaters = useMemo(() => {
     if (!selectedCinema) return [];
+    const selectedBranch = branches.find((b) => b._id === selectedCinema);
+    if (!selectedBranch) return [];
     return theaters.filter(
-      (t) => (t.cinemaName || t.cinema?.name || t.branch) === selectedCinema
+      (t) => (t.cinemaName || t.cinema?.name || t.branch) === selectedBranch.branch
     );
-  }, [theaters, selectedCinema]);
+  }, [theaters, branches, selectedCinema]);
 
   const handleSeatAction = (type, updatedSeat) => {
     if (type !== "admin") return;
@@ -126,6 +132,7 @@ export default function ShowtimeForm() {
 
       const payload = {
         id_movie: values.movie,
+        cinema: values.cinema,
         theater: values.theater,
         startTime: utcStartTime,
         seats: seats,
@@ -201,17 +208,19 @@ export default function ShowtimeForm() {
         <Row gutter={24}>
           <Col span={12}>
             <Form.Item
-              label="Chọn Cụm Rạp"
-              name="cinemaName"
-              rules={[{ required: true, message: "Vui lòng chọn cụm rạp" }]}
+              label="Chọn Rạp"
+              name="cinema"
+              rules={[{ required: true, message: "Vui lòng chọn rạp" }]}
             >
               <Select
-                placeholder="Chọn cụm rạp..."
+                showSearch
+                placeholder="Chọn rạp..."
+                optionFilterProp="label"
                 onChange={(value) => {
                   setSelectedCinema(value);
                   form.setFieldValue("theater", undefined);
                 }}
-                options={cinemaList.map((c) => ({ label: c, value: c }))}
+                options={cinemaList.map((b) => ({ label: `${b.cinemaName} - ${b.branch}`, value: b._id }))}
               />
             </Form.Item>
           </Col>
