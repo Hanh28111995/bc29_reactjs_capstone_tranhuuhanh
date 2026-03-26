@@ -1,34 +1,37 @@
 import { Spin } from "antd";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useRef, useState } from "react";
 import { WrapperSpin } from "./styled";
 
-const DEFAULT_VALUE = {
-  isLoading: false,
+const LoadingContext = createContext(null);
+
+// Spinner tách riêng, chỉ rerender khi isLoading thay đổi
+const GlobalSpinner = ({ spinRef }) => {
+  const [visible, setVisible] = useState(false);
+  spinRef.current = setVisible;
+  return visible ? (
+    <WrapperSpin viewHeight="100vh">
+      <Spin />
+    </WrapperSpin>
+  ) : null;
 };
 
-const LoadingContext = createContext(DEFAULT_VALUE);
-
 const LoadingProvider = (props) => {
-  const [state, setState] = useState(DEFAULT_VALUE);
-  // console.log(state);  
+  const spinRef = useRef(null);
 
-  useEffect(() => {
-    if (state.isLoading) {
-      document.querySelector("body").style.overflow = "hidden";
-    } else {
-      document.querySelector("body").style.overflow = "auto";
-    }
-  }, [state.isLoading]);
+  const setState = useCallback(({ isLoading }) => {
+    document.querySelector("body").style.overflow = isLoading ? "hidden" : "auto";
+    spinRef.current?.(isLoading);
+  }, []);
+
+  // value là [fakeState, setState] để tương thích với useAsync hiện tại
+  const value = useRef([{ isLoading: false }, setState]);
 
   return (
-    <LoadingContext.Provider value={[state, setState]}>
-      {state.isLoading && (
-        <WrapperSpin viewHeight="100vh">
-          <Spin />
-        </WrapperSpin>
-      )}
+    <LoadingContext.Provider value={value.current}>
+      <GlobalSpinner spinRef={spinRef} />
       {props.children}
     </LoadingContext.Provider>
   );
-}
+};
+
 export { LoadingProvider, LoadingContext };
