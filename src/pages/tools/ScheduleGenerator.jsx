@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Card, Row, Col, Checkbox, Button, App, Typography, Divider, Tag
 } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import { fetchMovieListAPI } from "services/movie";
 import { fetchTheaterListAPI } from "services/theater";
+import { createScheduleAPI, getScheduleListAPI, updateScheduleAPI } from "services/scheduleGenerator";
+import { useAsync } from "hooks/useAsync";
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
@@ -17,45 +19,29 @@ const SCHEDULE_OPTIONS = [
   { label: "Monthly", value: 3 },
 ];
 
-// TODO: replace with real API endpoint when BE is ready
-// POST /admin/tools/schedule-generator
-// payload: { movie_id, timeSlots, theaters, scheduleTime }
-const generateScheduleAPI = (data) => {
-  console.log("[ScheduleGenerator] payload →", JSON.stringify(data, null, 2));
-  return Promise.resolve({ success: true });
-};
-
 export default function ScheduleGenerator() {
   const { notification } = App.useApp();
 
-  const [movies, setMovies] = useState([]);
-  const [theaters, setTheaters] = useState([]);
   const [selectedMovies, setSelectedMovies] = useState([]);
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [selectedTheaters, setSelectedTheaters] = useState([]);
   const [scheduleTime, setScheduleTime] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchMovieListAPI()
-      .then((res) => {
-        const raw = res?.data?.content || res?.data || [];
-        const list = Array.isArray(raw) ? raw : [];
-        const sorted = [...list]
-          .filter((m) => m.releaseDate)
-          .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)))
-          .slice(0, 5);
-        setMovies(sorted);
-      })
-      .catch(() => setMovies([]));
+  const { state: rawMovies } = useAsync({ service: fetchMovieListAPI });
+  const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI });
+  const { state: scheduleData } = useAsync({ service: getScheduleListAPI });
 
-    fetchTheaterListAPI()
-      .then((res) => {
-        const raw = res?.data?.content || res?.data || [];
-        setTheaters(Array.isArray(raw) ? raw : []);
-      })
-      .catch(() => setTheaters([]));
-  }, []);
+  const movies = useMemo(() => {
+    const list = Array.isArray(rawMovies) ? rawMovies : [];
+    return [...list]
+      .filter((m) => m.releaseDate)
+      .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)))
+      .slice(0, 5);
+  }, [rawMovies]);
+
+  const theaters = Array.isArray(rawTheaters) ? rawTheaters : [];
+  const existingId = scheduleData?._id ?? null;
 
   const handleGenerate = async () => {
     if (selectedMovies.length === 0)
@@ -76,7 +62,11 @@ export default function ScheduleGenerator() {
 
     setLoading(true);
     try {
-      await generateScheduleAPI(payload);
+      if (existingId) {
+        await updateScheduleAPI(existingId, payload);
+      } else {
+        await createScheduleAPI(payload);
+      }
       notification.success({ message: "Schedule generated successfully!" });
     } catch (err) {
       notification.error({ message: "Failed to generate schedule" });
