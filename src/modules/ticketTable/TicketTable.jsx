@@ -22,13 +22,15 @@ export default function TicketTable() {
       const params = { page, limit: pageSize };
       if (status) params.paymentStatus = status;
       const res = await fetchAllTicketsAPI(params);
+      const content = res?.data?.content;
       // support both { data, total } and plain array
-      if (Array.isArray(res)) {
-        setData(res);
-        setPagination(prev => ({ ...prev, current: page, pageSize, total: res.length }));
+      if (Array.isArray(content)) {
+        setData(content);
+        setPagination(prev => ({ ...prev, current: page, pageSize, total: content.length }));
       } else {
-        setData(res.data ?? res.content ?? []);
-        setPagination(prev => ({ ...prev, current: page, pageSize, total: res.total ?? 0 }));
+        const list = Array.isArray(content?.data) ? content.data : [];
+        setData(list);
+        setPagination(prev => ({ ...prev, current: page, pageSize, total: content?.total ?? list.length }));
       }
     } catch {
       notification.error({ message: "Lỗi", description: "Không thể tải danh sách vé." });

@@ -7,7 +7,7 @@ import {
 import { useLocation } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Image } from "antd";
 import { ProConfigProvider } from "@ant-design/pro-components";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import "./index.scss";
 
@@ -43,6 +43,12 @@ function AdminLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(true);
+
+  const selectedKeys = useMemo(() => {
+    const flat = items.flatMap(i => i.children ? i.children : [i]);
+    const match = flat.find(i => pathname.startsWith(i.key));
+    return [match?.key || pathname];
+  }, [pathname]);
 
   const MenuClick = (e) => {
     e.domEvent.stopPropagation();
@@ -93,11 +99,7 @@ function AdminLayout() {
           mode="inline"
           theme="dark"
           items={items}
-          selectedKeys={[
-            items.find(item => pathname.includes(item.key))?.key ||
-            items.flatMap(i => i.children || []).find(child => pathname.includes(child.key))?.key ||
-            pathname
-          ]}
+          selectedKeys={selectedKeys}
           onClick={MenuClick}
         />
       </Sider>
