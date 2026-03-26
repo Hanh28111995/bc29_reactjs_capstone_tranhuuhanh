@@ -1,6 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import { LoadingContext } from "../contexts/loading.context";
 
+/**
+ * Luôn trả về result.data.content từ API response.
+ * BE phải thống nhất trả về { content: array | object }
+ */
 export const useAsync = ({ dependencies = [], service, codintion = true }) => {
   const [loadingState, setLoadingState] = useContext(LoadingContext);
   const [state, setState] = useState();
@@ -25,6 +29,6 @@ export const useAsync = ({ dependencies = [], service, codintion = true }) => {
       setLoading(false);
     }
   };
+
   return { state, loading };
 };
-

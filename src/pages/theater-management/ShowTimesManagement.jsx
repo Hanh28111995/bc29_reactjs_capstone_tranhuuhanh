@@ -1,5 +1,5 @@
 import { Space, Table, Input, Button, App, Popconfirm, Card, Tag, Tooltip } from 'antd';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     EditOutlined,
@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
 import { getShowTimeToday, getShowTimeUpcoming, getAllShowTimes, deleteOneShowTime } from 'services/showtime';
+import { useAsync } from 'hooks/useAsync';
 import './index.scss';
 
 const { Search } = Input;
@@ -18,46 +19,45 @@ export default function ShowtimeManagement() {
     const navigate = useNavigate();
     const [toggle, setToggle] = useState(false);
     const [keyword, setKeyword] = useState("");
-    const [pagination, setPagination] = useState({ page: 1, limit: 10 });
-    const [data, setData] = useState([]);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(false);
+    const [overrideData, setOverrideData] = useState(null); // null = dùng useAsync
+    const [overrideLoading, setOverrideLoading] = useState(false);
     const { notification } = App.useApp();
 
-    const fetchData = async (service) => {
-        setLoading(true);
-        try {
-            const res = await service({ page: pagination.page, limit: pagination.limit });
-            const content = res.data.content;
-            console.log('API content:', content);
-            const list = Array.isArray(content) ? content : Array.isArray(content?.data) ? content.data : [];
-            setData(list);
-            setTotal(content?.total || list.length || 0);
-        } catch (err) {
-            notification.error({ message: "Lỗi tải dữ liệu" });
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { state: rawData, loading: asyncLoading } = useAsync({
+        dependencies: [toggle],
+        service: getAllShowTimes,
+    });
 
-    useEffect(() => {
-        fetchData(getAllShowTimes);
-    }, [toggle, pagination.page, pagination.limit]);
+    const loading = overrideLoading || asyncLoading;
+    const baseData = overrideData ?? (Array.isArray(rawData) ? rawData : []);
 
     const showtimeList = useMemo(() => {
-        if (!keyword) return data;
+        if (!keyword) return baseData;
         const key = keyword.toLowerCase().trim();
-
-        return data.filter(ele =>
-            (ele.id_movie?.title?.toLowerCase().includes(key)) ||
-            (ele.theater?.name?.toLowerCase().includes(key))
+        return baseData.filter(ele =>
+            ele.id_movie?.title?.toLowerCase().includes(key) ||
+            ele.theater?.name?.toLowerCase().includes(key)
         );
-    }, [data, keyword]);
+    }, [baseData, keyword]);
+
+    const handleFilter = async (service) => {
+        setOverrideLoading(true);
+        try {
+            const res = await service();
+            const content = res.data.content;
+            setOverrideData(Array.isArray(content) ? content : []);
+        } catch {
+            notification.error({ message: "Lỗi tải dữ liệu" });
+        } finally {
+            setOverrideLoading(false);
+        }
+    };
 
     const handleDelete = async (id) => {
         try {
             await deleteOneShowTime(id);
             notification.success({ message: "Xóa suất chiếu thành công" });
+            setOverrideData(null);
             setToggle(prev => !prev);
         } catch (error) {
             notification.error({ message: "Xóa thất bại", description: error.response?.data?.message });
@@ -157,16 +157,23 @@ export default function ShowtimeManagement() {
                         <Button
                             type="default"
                             icon={<CalendarOutlined />}
-                            onClick={() => fetchData(getShowTimeToday)}
+                            onClick={() => handleFilter(getShowTimeToday)}
                         >
                             SUẤT CHIẾU HÔM NAY
                         </Button>
                         <Button
                             type="default"
                             icon={<CalendarOutlined />}
-                            onClick={() => fetchData(getShowTimeUpcoming)}
+                            onClick={() => handleFilter(getShowTimeUpcoming)}
                         >
                             SUẤT CHIẾU SẮP ĐẾN
+                        </Button>
+                        <Button
+                            type="default"
+                            icon={<CalendarOutlined />}
+                            onClick={() => { setOverrideData(null); setToggle(p => !p); }}
+                        >
+                            TẤT CẢ
                         </Button>
                         <Button
                             type="primary"
@@ -186,14 +193,7 @@ export default function ShowtimeManagement() {
                     dataSource={showtimeList}
                     loading={loading}
                     bordered
-                    pagination={{
-                        current: pagination.page,
-                        pageSize: pagination.limit,
-                        total,
-                        onChange: (page, limit) => setPagination({ page, limit }),
-                        showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50'],
-                    }}
+                    pagination={{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '20', '50'] }}
                 />
             </Card>
         </div>
