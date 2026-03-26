@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
-  Card, Row, Col, Checkbox, Button, App, Typography, Divider, Tag
+  Card, Row, Col, Checkbox, Button, App, Typography, Divider, Tag, Switch
 } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import { fetchMovieListAPI } from "services/movie";
@@ -26,6 +26,7 @@ export default function ScheduleGenerator() {
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [selectedTheaters, setSelectedTheaters] = useState([]);
   const [scheduleTime, setScheduleTime] = useState(null);
+  const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const { state: rawMovies } = useAsync({ service: fetchMovieListAPI });
@@ -58,12 +59,13 @@ export default function ScheduleGenerator() {
       timeSlots: selectedSlots,
       theaters: selectedTheaters,
       scheduleTime,
+      isActive,
     };
 
     setLoading(true);
     try {
       if (existingId) {
-        await updateScheduleAPI(existingId, payload);
+        await updateScheduleAPI(payload);
       } else {
         await createScheduleAPI(payload);
       }
@@ -192,6 +194,10 @@ export default function ScheduleGenerator() {
 
         {/* Submit */}
         <Col span={24}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <Switch checked={isActive} onChange={setIsActive} />
+            <span>Active</span>
+          </div>
           <Button
             type="primary"
             size="large"
