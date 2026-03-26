@@ -93,9 +93,7 @@ export default function ShowtimeForm() {
     if (!selectedCinema) return [];
     const selectedBranch = branches.find((b) => b._id === selectedCinema);
     if (!selectedBranch) return [];
-    return theaters.filter(
-      (t) => (t.cinemaName || t.cinema?.name || t.branch) === selectedBranch.branch
-    );
+    return theaters.filter((t) => t.branch === selectedBranch.branch);
   }, [theaters, branches, selectedCinema]);
 
   const handleSeatAction = (type, updatedSeat) => {
