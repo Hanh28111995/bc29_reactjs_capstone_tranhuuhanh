@@ -59,6 +59,7 @@ export const clearApiCache = (urlPrefix) => {
   }
 };
 let refreshSubscribers = [];
+let isRefreshing = false;
 
 const onRefreshed = (token) => {
   refreshSubscribers.map((cb) => cb(token));
