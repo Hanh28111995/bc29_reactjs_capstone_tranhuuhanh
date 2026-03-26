@@ -32,6 +32,9 @@ export default function SeatsRendering({ data, mode, onAction, selectedSeats }) 
         value: seat._id
     }));
 
+    // Nếu data chưa load xong, trả về object rỗng để tránh crash
+    if (!data || data.length === 0) return null;
+
     const rows = data?.reduce((acc, seat) => {
         const rowName = seat.seatNumber.charAt(0);
         if (!acc[rowName]) acc[rowName] = [];
@@ -77,7 +80,7 @@ export default function SeatsRendering({ data, mode, onAction, selectedSeats }) 
     };
 
     return (
-        <div className='seatRender' style={{ padding: '40px 20px', background: '#fff', borderRadius: '8px', border: '1px solid #f0f0f0' }}>
+        <div className='seatRender' style={{ padding: '40px 20px', background: '#1a1a2e', borderRadius: '8px', border: '1px solid #f0f0f0' }}>
             {/* Màn hình */}
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
                 <div style={{ width: '80%', height: '4px', background: '#333', margin: '0 auto 10px', borderRadius: '20px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />                
@@ -100,7 +103,7 @@ export default function SeatsRendering({ data, mode, onAction, selectedSeats }) 
                         gap: '6px',
                         width: '100%'
                     }}>
-                        <div style={{ color: '#8c8c8c', width: '30px', fontWeight: 'bold', fontSize: '14px', textAlign: 'center' }}>
+                        <div style={{ color: '#aaa', width: '30px', fontWeight: 'bold', fontSize: '14px', textAlign: 'center' }}>
                             {rowName}
                         </div>
 
@@ -109,12 +112,13 @@ export default function SeatsRendering({ data, mode, onAction, selectedSeats }) 
                             const isSelected = selectedSeats?.some(s => s.seatNumber === seat.seatNumber);
 
                             // 2. Logic xác định màu sắc (Thứ tự ưu tiên: Đang chọn > Đã đặt > Màu theo loại ghế)
-                            let seatColor = seat.seatType?.color || '#333';
+                            // seat.seatType có thể là object (có .color) hoặc string ID — fallback về seat.color
+                            let seatColor = seat.seatType?.color || seat.color || '#333';
                             if (seat.isBooked) {
-                                seatColor = '#8c8c8c'; // Màu xám đậm cho ghế đã đặt
+                                seatColor = '#8c8c8c';
                             }
                             if (isSelected) {
-                                seatColor = 'gray'; // Màu xám cho ghế đang chọn theo yêu cầu của bạn
+                                seatColor = '#1677ff'; // Xanh dương nổi bật khi đang chọn
                             }
 
                             return (
@@ -151,7 +155,7 @@ export default function SeatsRendering({ data, mode, onAction, selectedSeats }) 
 
                                         <text
                                             x="50" y="60"
-                                            fill={isSelected ? "white" : "black"} // Nếu chọn thì chữ trắng cho dễ nhìn
+                                            fill={isSelected || seat.isBooked ? "white" : "black"}
                                             fontSize="25"
                                             fontWeight="bold"
                                             textAnchor="middle"
@@ -168,13 +172,14 @@ export default function SeatsRendering({ data, mode, onAction, selectedSeats }) 
                 ))}
             </div>
 
-            {/* Legend: Chú thích màu sắc (Nên thêm để khách hàng dễ hiểu) */}
+            {/* Legend: Chú thích màu sắc */}
             <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                <Space><div style={{ width: 15, height: 15, background: '#d9d9d9', borderRadius: 2 }} /> <span style={{ fontSize: 12 }}>Đã đặt</span></Space>
+                <Space><div style={{ width: 15, height: 15, background: '#8c8c8c', borderRadius: 2 }} /> <span style={{ fontSize: 12, color: '#ccc' }}>Đã đặt</span></Space>
+                <Space><div style={{ width: 15, height: 15, background: '#1677ff', borderRadius: 2 }} /> <span style={{ fontSize: 12, color: '#ccc' }}>Đang chọn</span></Space>
                 {seatList.map(type => (
                     <Space key={type._id}>
-                        <div style={{ width: 15, height: 15, background: type.color || '#333', borderRadius: 2, border: 'black 1px solid' }} />
-                        <span style={{ fontSize: 12 }}>{type.name}</span>
+                        <div style={{ width: 15, height: 15, background: type.color || '#333', borderRadius: 2, border: '1px solid #555' }} />
+                        <span style={{ fontSize: 12, color: '#ccc' }}>{type.name}</span>
                     </Space>
                 ))}
             </div>

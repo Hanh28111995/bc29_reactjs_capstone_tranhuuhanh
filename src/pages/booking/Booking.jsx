@@ -1,5 +1,5 @@
 import "./index.scss";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
 import { fetchShowtimesCusAPI, searchCustomerAPI } from "services/customer";
@@ -50,7 +50,7 @@ export default function Booking() {
     if (!searchKeyword.trim()) return;
     setSearching(true);
     try {
-      const res = await searchCustomerAPI(searchKeyword);
+      const res = await searchCustomerAPI(role, searchKeyword);
       setSearchResults(res.data.content || []);
     } catch {
       notification.error({ message: "Tìm kiếm thất bại" });
@@ -154,12 +154,14 @@ export default function Booking() {
 
         <div className="booking-seats-area">
           <div className="screen-divider">Màn hình</div>
-          <SeatsRendering
-            data={data?.seats || []}
-            mode={role}
-            onAction={handleSelect}
-            selectedSeats={danhSachGhe}
-          />
+          <Spin spinning={dataLoading}>
+            <SeatsRendering
+              data={data?.seats || []}
+              mode={role}
+              onAction={handleSelect}
+              selectedSeats={danhSachGhe}
+            />
+          </Spin>
         </div>
       </div>
 
