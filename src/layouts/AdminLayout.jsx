@@ -4,11 +4,10 @@ import {
   DatabaseOutlined,
   ToolOutlined,
 } from "@ant-design/icons";
-// import { useLocation } from 'react-router-dom';
 import { /* Breadcrumb, */ Layout, Menu, Image } from "antd";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import React, { memo, useCallback, useMemo, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import "./index.scss";
 
 const { Header, Content, Footer, Sider } = Layout;
