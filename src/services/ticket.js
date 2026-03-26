@@ -39,6 +39,13 @@ const fetchAllTicketsAPI = (params) => {
   });
 };
 
+const fetchTicketByIdAPI = (id) => {
+  return request({
+    url: `/admin/ticket/${id}`,
+    method: "GET",
+  });
+};
+
 const deleteTicketAPI = (id) => {
   return request({
     url: `/admin/ticket/delete/${id}`,
@@ -61,6 +68,7 @@ export {
   fetchCreateCashPayment,
   fetchCreateVnpayPayment,
   fetchAllTicketsAPI,
+  fetchTicketByIdAPI,
   deleteTicketAPI,
   updateTicketAPI,
 };

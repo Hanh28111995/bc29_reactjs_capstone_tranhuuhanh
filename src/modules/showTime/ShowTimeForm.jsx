@@ -56,11 +56,12 @@ export default function ShowtimeForm() {
   useEffect(() => {
     if (!isEditMode || !data) return;
 
-    // API có thể trả về object trực tiếp hoặc bọc trong mảng
-    const showtimeDetail = Array.isArray(data) ? data[0] : data;
+    // API trả về content.showtime — useAsync unwrap content thành object { showtime: {...} }
+    const showtimeDetail = data?.showtime ?? (Array.isArray(data) ? data[0] : data);
     if (!showtimeDetail) return;
 
-    const cinemaName = showtimeDetail.theater?.cinema?.name || showtimeDetail.theater?.branch;
+    // cinema là object riêng biệt ở top-level, branch lấy từ cinema.branch hoặc theater.branch
+    const cinemaName = showtimeDetail.cinema?.cinemaName || showtimeDetail.theater?.cinemaName || showtimeDetail.theater?.branch;
 
     const dataForForm = {
       movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
@@ -80,13 +81,15 @@ export default function ShowtimeForm() {
   }, [data, isEditMode, form]);
 
   const cinemaList = useMemo(() => {
-    const cinemas = theaters.map((t) => t.cinema?.name || t.branch);
+    const cinemas = theaters.map((t) => t.cinemaName || t.cinema?.name || t.branch);
     return [...new Set(cinemas)].filter(Boolean);
   }, [theaters]);
 
   const filteredTheaters = useMemo(() => {
     if (!selectedCinema) return [];
-    return theaters.filter((t) => (t.cinema?.name || t.branch) === selectedCinema);
+    return theaters.filter(
+      (t) => (t.cinemaName || t.cinema?.name || t.branch) === selectedCinema
+    );
   }, [theaters, selectedCinema]);
 
   const handleSeatAction = (type, updatedSeat) => {
