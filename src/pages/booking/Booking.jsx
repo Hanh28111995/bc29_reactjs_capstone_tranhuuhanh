@@ -24,11 +24,14 @@ export default function Booking() {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
 
-  const { state: data = [] } = useAsync({
-    service: () => fetchShowtimesCusAPI(userState.userInfor?.user_inf.role, params.id),
-    codintion: !!userState.userInfor?.user_inf?.id,
-    dependencies: [params.id && userState.userInfor?.user_inf?.role]
+  const { state: rawData, loading: dataLoading } = useAsync({
+    service: () => fetchShowtimesCusAPI(userState.userInfor?.user_inf?.role, params.id),
+    condition: !!userState.userInfor?.user_inf?.id && !!params.id,
+    dependencies: [params.id, userState.userInfor?.user_inf?.role],
   });
+
+  // useAsync trả về content object { showtime: {...} } — extract ra
+  const data = rawData?.showtime ?? rawData;
 
   const handleSelect = (type, selectChair) => {
     console.log('selectChair:', selectChair);
