@@ -72,12 +72,7 @@ export default function ScheduleGenerator() {
 
     setLoading(true);
     try {
-      await generateScheduleAPI(payload);
-      notification.success({ message: "Tạo lịch chiếu thành công!" });
-    } catch {
-      notification.error({ message: "Tạo lịch thất bại" });
-    } finally {
-      setLoading(false);
+      
     }
   };
 
