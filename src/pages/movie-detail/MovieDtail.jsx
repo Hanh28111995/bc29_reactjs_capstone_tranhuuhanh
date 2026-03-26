@@ -10,7 +10,7 @@ import { useAsync } from 'hooks/useAsync';
 export default function MovieDtail() {
   const param = useParams();
 
-  const { state: movieDetail = [] } = useAsync({
+  const { state: movieDetail = {} } = useAsync({
     dependencies: [],
     service: () => fetchMovieDetailAPI(param.movieId),
   })

@@ -20,11 +20,7 @@ export default function TicketTable() {
     service: fetchAllTicketsAPI,
   });
 
-  const data = Array.isArray(rawData?.tickets)
-    ? rawData.tickets
-    : Array.isArray(rawData)
-      ? rawData
-      : [];
+  const data = Array.isArray(rawData) ? rawData : [];
 
   const filtered = useMemo(() => {
     let list = data;

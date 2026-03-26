@@ -26,7 +26,10 @@ export const useAsync = ({ dependencies = [], service, codintion = true }) => {
       setLoadingState({ isLoading: true });
       const result = await service();
       setLoadingState({ isLoading: false });
-      const data = result.data.content;
+      const content = result.data.content;
+      const data = Array.isArray(content)
+        ? content
+        : Object.values(content ?? {}).find(v => Array.isArray(v)) ?? content;
       asyncCache.set(cacheKey, data);
       setState(data);
     } catch (err) {

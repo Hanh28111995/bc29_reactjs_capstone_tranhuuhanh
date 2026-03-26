@@ -21,10 +21,11 @@ function MovieTable() {
   const [keyword, setKeyword] = useState("");
   const { notification } = App.useApp();
 
-  const { state: data = [], loading } = useAsync({
+  const { state: rawData, loading } = useAsync({
     dependencies: [toggle],
     service: fetchMovieListAPI,
   });
+  const data = Array.isArray(rawData) ? rawData : [];
 
   const movielist = useMemo(() => {
     if (!keyword) return data;

@@ -4,7 +4,6 @@ import { WrapperSpin } from "./styled";
 
 const LoadingContext = createContext(null);
 
-// Spinner tách riêng, chỉ rerender khi isLoading thay đổi
 const GlobalSpinner = ({ spinRef }) => {
   const [visible, setVisible] = useState(false);
   spinRef.current = setVisible;
@@ -17,13 +16,19 @@ const GlobalSpinner = ({ spinRef }) => {
 
 const LoadingProvider = (props) => {
   const spinRef = useRef(null);
+  const countRef = useRef(0);
 
   const setState = useCallback(({ isLoading }) => {
-    document.querySelector("body").style.overflow = isLoading ? "hidden" : "auto";
-    spinRef.current?.(isLoading);
+    if (isLoading) {
+      countRef.current += 1;
+    } else {
+      countRef.current = Math.max(0, countRef.current - 1);
+    }
+    const active = countRef.current > 0;
+    document.querySelector("body").style.overflow = active ? "hidden" : "auto";
+    spinRef.current?.(active);
   }, []);
 
-  // value là [fakeState, setState] để tương thích với useAsync hiện tại
   const value = useRef([{ isLoading: false }, setState]);
 
   return (

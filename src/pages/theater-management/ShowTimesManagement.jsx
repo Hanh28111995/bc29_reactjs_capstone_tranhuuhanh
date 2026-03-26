@@ -45,7 +45,10 @@ export default function ShowtimeManagement() {
         try {
             const res = await service();
             const content = res.data.content;
-            setOverrideData(Array.isArray(content) ? content : []);
+            const data = Array.isArray(content)
+                ? content
+                : Object.values(content ?? {}).find(v => Array.isArray(v)) ?? [];
+            setOverrideData(data);
         } catch {
             notification.error({ message: "Lỗi tải dữ liệu" });
         } finally {
