@@ -11,7 +11,7 @@ import {
   Select,
 } from "antd";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc"; // 1. Import plugin UTC
+import utc from "dayjs/plugin/utc";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
@@ -21,11 +21,11 @@ import { updateShowTime, addNewShowTime, getShowTimeDetail } from "services/show
 import SeatsRendering from "modules/seatsRendering/seatsRendering";
 import { useSelector } from "react-redux";
 
-// Kích hoạt plugin UTC cho dayjs
 dayjs.extend(utc);
 
 const DEFAULT_VALUES = {
   movie: undefined,
+  cinemaName: undefined,
   theater: undefined,
   startTime: null,
 };
@@ -41,57 +41,58 @@ export default function ShowtimeForm() {
   const [selectedCinema, setSelectedCinema] = useState(null);
   const [seats, setSeats] = useState([]);
 
+  const isEditMode = !!params.id && params.id !== "undefined";
+
   const { state: movies = [] } = useAsync({ service: fetchMovieListAPI });
   const { state: theaters = [] } = useAsync({ service: fetchTheaterListAPI });
 
   const { state: data, loading } = useAsync({
     service: () => getShowTimeDetail(params.id),
     dependencies: [params.id],
-    condition: !!params.id && params.id !== "undefined",
+    condition: isEditMode,
   });
 
-  // Xử lý dữ liệu khi đổ vào Form (Edit Mode)
+  // Đổ dữ liệu vào form khi ở Edit Mode
   useEffect(() => {
-    if (params.id && params.id !== "undefined" && showtimeDetail) {
-      const showtimeDetail = Array.isArray(data.showtimes) ? data.showtimes : (Array.isArray(data) ? data : []);
-      const cinemaName = showtimeDetail.theater?.branch || showtimeDetail.theater?.cinema?.name;
+    if (!isEditMode || !data) return;
 
-      const dataForForm = {
-        ...showtimeDetail,
-        cinemaName: cinemaName,
-        movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
-        theater: showtimeDetail.theater?._id || showtimeDetail.theater,
-        // Parse bỏ qua timezone suffix để giữ nguyên con số giờ từ DB
-        startTime: showtimeDetail.startTime ? dayjs(showtimeDetail.startTime.replace('Z', '').replace('+07:00', '')) : null,
-      };
+    // API có thể trả về object trực tiếp hoặc bọc trong mảng
+    const showtimeDetail = Array.isArray(data) ? data[0] : data;
+    if (!showtimeDetail) return;
 
-      form.setFieldsValue(dataForForm);
-      setOriginalData(dataForForm);
-      setSelectedCinema(cinemaName);
-      setSeats(showtimeDetail.seats || []);
-      setIsChanged(false);
-    } else {
-      form.setFieldsValue(DEFAULT_VALUES);
-      setSelectedCinema(null);
-      setSeats([]);
-      setIsChanged(false);
-    }
-  }, [showtimeDetail, params.id, form]);
+    const cinemaName = showtimeDetail.theater?.cinema?.name || showtimeDetail.theater?.branch;
+
+    const dataForForm = {
+      movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
+      theater: showtimeDetail.theater?._id || showtimeDetail.theater,
+      cinemaName: cinemaName,
+      // Bỏ suffix timezone để giữ nguyên giờ hiển thị từ DB
+      startTime: showtimeDetail.startTime
+        ? dayjs(showtimeDetail.startTime.replace(/Z$/, "").replace(/\+07:00$/, ""))
+        : null,
+    };
+
+    form.setFieldsValue(dataForForm);
+    setOriginalData(dataForForm);
+    setSelectedCinema(cinemaName);
+    setSeats(showtimeDetail.seats || []);
+    setIsChanged(false);
+  }, [data, isEditMode, form]);
 
   const cinemaList = useMemo(() => {
-    const cinemas = theaters.map(t => t.cinema?.name || t.branch);
+    const cinemas = theaters.map((t) => t.cinema?.name || t.branch);
     return [...new Set(cinemas)].filter(Boolean);
   }, [theaters]);
 
   const filteredTheaters = useMemo(() => {
     if (!selectedCinema) return [];
-    return theaters.filter(t => (t.cinema?.name || t.branch) === selectedCinema);
+    return theaters.filter((t) => (t.cinema?.name || t.branch) === selectedCinema);
   }, [theaters, selectedCinema]);
 
   const handleSeatAction = (type, updatedSeat) => {
-    if (type !== 'admin') return;
-    setSeats(prev =>
-      prev.map(s =>
+    if (type !== "admin") return;
+    setSeats((prev) =>
+      prev.map((s) =>
         s._id === updatedSeat._id
           ? { ...s, seatType: updatedSeat.seatTypeId, isBooked: updatedSeat.isBooked }
           : s
@@ -101,13 +102,12 @@ export default function ShowtimeForm() {
   };
 
   const onValuesChange = (_, allValues) => {
-    if (!params.id) {
+    if (!isEditMode) {
       setIsChanged(true);
       return;
     }
-    // So sánh sự thay đổi để bật/tắt nút Lưu
-    const hasChanged = Object.keys(allValues).some(key => {
-      if (key === 'startTime') {
+    const hasChanged = Object.keys(allValues).some((key) => {
+      if (key === "startTime") {
         return !dayjs(allValues[key]).isSame(originalData?.startTime);
       }
       return allValues[key] !== originalData?.[key];
@@ -117,11 +117,10 @@ export default function ShowtimeForm() {
 
   const handleSave = async (values) => {
     try {
-      // Strip Z khi hiển thị (display as local), thêm Z khi gửi lên (store as UTC string)
-      const utcStartTime = values.startTime 
+      const utcStartTime = values.startTime
         ? values.startTime.format("YYYY-MM-DDTHH:mm:ss.000") + "Z"
         : null;
-      
+
       const payload = {
         id_movie: values.movie,
         theater: values.theater,
@@ -129,16 +128,16 @@ export default function ShowtimeForm() {
         seats: seats,
       };
 
-      if (params.id && params.id !== "undefined") {
+      if (isEditMode) {
         await updateShowTime({ id: params.id, ...payload });
         notification.success({ message: "Cập nhật suất chiếu thành công!" });
       } else {
         await addNewShowTime(payload);
         notification.success({ message: "Thêm suất chiếu mới thành công!" });
       }
-      
+
       setIsChanged(false);
-      navigate("/admin/showtimes"); // Chuyển hướng sau khi lưu thành công
+      navigate("/admin/showtimes");
     } catch (error) {
       notification.error({
         message: "Thao tác thất bại",
@@ -153,7 +152,7 @@ export default function ShowtimeForm() {
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
-          <span>{params.id ? "Chỉnh sửa suất chiếu" : "Tạo suất chiếu mới"}</span>
+          <span>{isEditMode ? "Chỉnh sửa suất chiếu" : "Tạo suất chiếu mới"}</span>
         </Space>
       }
     >
@@ -169,13 +168,13 @@ export default function ShowtimeForm() {
             <Form.Item
               label="Chọn Phim"
               name="movie"
-              rules={[{ required: true, message: 'Vui lòng chọn phim' }]}
+              rules={[{ required: true, message: "Vui lòng chọn phim" }]}
             >
               <Select
                 showSearch
                 placeholder="Tìm kiếm phim..."
-                optionFilterProp="children"
-                options={movies.map(m => ({ label: m.title, value: m._id }))}
+                optionFilterProp="label"
+                options={movies.map((m) => ({ label: m.title, value: m._id }))}
               />
             </Form.Item>
           </Col>
@@ -184,13 +183,13 @@ export default function ShowtimeForm() {
             <Form.Item
               label="Thời gian bắt đầu"
               name="startTime"
-              rules={[{ required: true, message: 'Vui lòng chọn thời gian' }]}
+              rules={[{ required: true, message: "Vui lòng chọn thời gian" }]}
             >
               <DatePicker
-                style={{ width: '100%' }}
-                showTime={{ format: 'HH:mm', defaultValue: dayjs('00:00', 'HH:mm') }}
+                style={{ width: "100%" }}
+                showTime={{ format: "HH:mm", defaultValue: dayjs("00:00", "HH:mm") }}
                 format="DD/MM/YYYY HH:mm"
-                disabledDate={(current) => current && current < dayjs().startOf('day')}
+                disabledDate={(current) => current && current < dayjs().startOf("day")}
               />
             </Form.Item>
           </Col>
@@ -201,15 +200,15 @@ export default function ShowtimeForm() {
             <Form.Item
               label="Chọn Cụm Rạp"
               name="cinemaName"
-              rules={[{ required: true, message: 'Vui lòng chọn cụm rạp' }]}
+              rules={[{ required: true, message: "Vui lòng chọn cụm rạp" }]}
             >
               <Select
                 placeholder="Chọn cụm rạp..."
                 onChange={(value) => {
                   setSelectedCinema(value);
-                  form.setFieldValue('theater', undefined);
+                  form.setFieldValue("theater", undefined);
                 }}
-                options={cinemaList.map(c => ({ label: c, value: c }))}
+                options={cinemaList.map((c) => ({ label: c, value: c }))}
               />
             </Form.Item>
           </Col>
@@ -218,12 +217,12 @@ export default function ShowtimeForm() {
             <Form.Item
               label="Chọn Phòng Chiếu"
               name="theater"
-              rules={[{ required: true, message: 'Vui lòng chọn phòng chiếu' }]}
+              rules={[{ required: true, message: "Vui lòng chọn phòng chiếu" }]}
             >
               <Select
                 placeholder={selectedCinema ? "Chọn phòng..." : "Vui lòng chọn cụm rạp trước"}
                 disabled={!selectedCinema}
-                options={filteredTheaters.map(t => ({ label: t.name, value: t._id }))}
+                options={filteredTheaters.map((t) => ({ label: t.name, value: t._id }))}
               />
             </Form.Item>
           </Col>
@@ -231,7 +230,7 @@ export default function ShowtimeForm() {
 
         <SeatsRendering
           data={seats}
-          mode={userState.userInfor?.user_inf.role}
+          mode={userState.userInfor?.user_inf?.role}
           onAction={handleSeatAction}
           selectedSeats={[]}
         />
@@ -245,7 +244,7 @@ export default function ShowtimeForm() {
             disabled={!isChanged}
             block
           >
-            {params.id ? "CẬP NHẬT SUẤT CHIẾU" : "TẠO SUẤT CHIẾU"}
+            {isEditMode ? "CẬP NHẬT SUẤT CHIẾU" : "TẠO SUẤT CHIẾU"}
           </Button>
         </Form.Item>
       </Form>
