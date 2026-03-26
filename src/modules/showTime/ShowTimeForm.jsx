@@ -83,7 +83,9 @@ export default function ShowtimeForm() {
     form.setFieldsValue(dataForForm);
     setOriginalData(dataForForm);
     setSelectedCinema(showtimeDetail.cinema?._id || showtimeDetail.cinema);
-    setSeats(showtimeDetail.seats || []);
+    // Lấy seats từ showtime (có color, price, isBooked) — không dùng theater.seats
+    const showtimeSeats = showtimeDetail.seats?.filter(s => s.color) ?? showtimeDetail.seats ?? [];
+    setSeats(showtimeSeats);
     setIsChanged(false);
   }, [data, isEditMode, form]);
 
@@ -91,9 +93,12 @@ export default function ShowtimeForm() {
 
   const filteredTheaters = useMemo(() => {
     if (!selectedCinema) return [];
+    // Thử match theo cinema._id trực tiếp trên theater, hoặc fallback qua branch string
     const selectedBranch = branches.find((b) => b._id === selectedCinema);
     if (!selectedBranch) return [];
-    return theaters.filter((t) => t.branch === selectedBranch.branch);
+    return theaters.filter(
+      (t) => t.branch === selectedBranch.branch || t.cinemaName === selectedBranch.cinemaName
+    );
   }, [theaters, branches, selectedCinema]);
 
   const handleSeatAction = (type, updatedSeat) => {
