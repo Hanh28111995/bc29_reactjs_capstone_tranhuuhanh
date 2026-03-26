@@ -11,18 +11,20 @@ import { ConfigProvider, App as AntdApp } from "antd";
 import viVN from "antd/locale/vi_VN";
 import { HelmetProvider } from "react-helmet-async";
 
+const antdTheme = {
+  token: {
+    colorPrimary: "#1677ff",
+    borderRadius: 6,
+  },
+};
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <HelmetProvider>
     <Provider store={store}>
       <ConfigProvider
         locale={viVN}
-        theme={{
-          token: {          
-            colorPrimary: "#1677ff",
-            borderRadius: 6,
-          },
-        }}
+        theme={antdTheme}
       >
         <AntdApp>
             <App />

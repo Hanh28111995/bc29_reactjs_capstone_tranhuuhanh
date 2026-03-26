@@ -6,8 +6,9 @@ import {
 } from "@ant-design/icons";
 import { Breadcrumb,  Layout, Menu, Image } from "antd";
 import { ProConfigProvider } from "@ant-design/pro-components";
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, { memo, useCallback, useMemo, useState, Suspense } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Spin } from "antd";
 import "./index.scss";
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -76,24 +77,24 @@ const AdminMenu = memo(({ collapsed, setCollapsed }) => {
 });
 
 function AdminLayout() {
-  // const [collapsed, setCollapsed] = useState(true);
-  // const handleCollapse = useCallback((value) => setCollapsed(value), []);
-  // const handleMouseEnter = useCallback(() => setCollapsed(false), []);
-  // const handleMouseLeave = useCallback(() => setCollapsed(true), []);
-  // const handleSiderClick = useCallback(() => setCollapsed(false), []);
-  // const handleContentClick = useCallback(() => setCollapsed(true), []);
-  // const handleSetCollapsed = useCallback((v) => setCollapsed(v), []);
+  const [collapsed, setCollapsed] = useState(true);
+  const handleCollapse = useCallback((value) => setCollapsed(value), []);
+  const handleMouseEnter = useCallback(() => setCollapsed(false), []);
+  const handleMouseLeave = useCallback(() => setCollapsed(true), []);
+  const handleSiderClick = useCallback(() => setCollapsed(false), []);
+  const handleContentClick = useCallback(() => setCollapsed(true), []);
+  const handleSetCollapsed = useCallback((v) => setCollapsed(v), []);
 
   return (
     <ProConfigProvider>
       <Layout style={{ minHeight: '100vh' }}>
         <Sider
-          // collapsible
-          // collapsed={collapsed}
-          // onClick={handleSiderClick}
-          // onMouseEnter={handleMouseEnter}
-          // onMouseLeave={handleMouseLeave}
-          // onCollapse={handleCollapse}
+          collapsible
+          collapsed={collapsed}
+          onClick={handleSiderClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onCollapse={handleCollapse}
           style={{
             position: 'fixed',
             zIndex: 100,
@@ -107,14 +108,16 @@ function AdminLayout() {
               <Image src="/images/logo-admin.svg" width={100} preview={false} />
             </a>
           </div>
-          <AdminMenu collapsed={false} setCollapsed={() => {}} />
+          <AdminMenu collapsed={collapsed} setCollapsed={handleSetCollapsed} />
         </Sider>
         <Layout className="site-layout">
           <Header className="site-layout-background" style={{ padding: 0 }} />
-          <Content style={{ margin: '0 16px' }}>
+          <Content onClick={handleContentClick} style={{ margin: '0 16px' }}>
             <AdminBreadcrumb />
             <div className="site-layout-background" style={{ paddingTop: 24, minHeight: 360 }}>
-              <Outlet />
+              <Suspense fallback={<Spin style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }} />}>
+                <Outlet />
+              </Suspense>
             </div>
           </Content>
           <Footer style={{ textAlign: 'center' }}>

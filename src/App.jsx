@@ -9,7 +9,7 @@ import { AuthProvider } from "contexts/auth.context";
 function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<></>}>
+      <Suspense fallback={null}>
         <AuthProvider>
           <LoadingProvider>
             <Router />
