@@ -19,7 +19,11 @@ export default function UserTable() {
     dependencies: [toggle],
     service: userListApi,
   });
-  const data = Array.isArray(rawData) ? rawData : [];
+  const data = Array.isArray(rawData?.content?.users)
+    ? rawData.content.users
+    : Array.isArray(rawData)
+      ? rawData
+      : [];
 
   const userlist = useMemo(() => {
     if (!keyword) return data;

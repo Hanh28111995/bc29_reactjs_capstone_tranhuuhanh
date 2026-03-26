@@ -1,5 +1,8 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { LoadingContext } from "../contexts/loading.context";
+
+// Module-level cache: key = service.name, value = last fetched data
+const asyncCache = new Map();
 
 /**
  * Luôn trả về result.data.content từ API response.
@@ -7,7 +10,8 @@ import { LoadingContext } from "../contexts/loading.context";
  */
 export const useAsync = ({ dependencies = [], service, codintion = true }) => {
   const [loadingState, setLoadingState] = useContext(LoadingContext);
-  const [state, setState] = useState();
+  const cacheKey = service?.name || service?.toString();
+  const [state, setState] = useState(() => asyncCache.get(cacheKey));
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -22,7 +26,9 @@ export const useAsync = ({ dependencies = [], service, codintion = true }) => {
       setLoadingState({ isLoading: true });
       const result = await service();
       setLoadingState({ isLoading: false });
-      setState(result.data.content);
+      const data = result.data.content;
+      asyncCache.set(cacheKey, data);
+      setState(data);
     } catch (err) {
       console.log(err);
     } finally {
