@@ -44,7 +44,7 @@ export default function ShowtimeForm() {
   const { state: movies = [] } = useAsync({ service: fetchMovieListAPI });
   const { state: theaters = [] } = useAsync({ service: fetchTheaterListAPI });
 
-  const { state: showtimeDetail, loading } = useAsync({
+  const { state: data, loading } = useAsync({
     service: () => getShowTimeDetail(params.id),
     dependencies: [params.id],
     condition: !!params.id && params.id !== "undefined",
@@ -53,6 +53,7 @@ export default function ShowtimeForm() {
   // Xử lý dữ liệu khi đổ vào Form (Edit Mode)
   useEffect(() => {
     if (params.id && params.id !== "undefined" && showtimeDetail) {
+      const showtimeDetail = Array.isArray(data.showtimes) ? data.showtimes : (Array.isArray(data) ? data : []);
       const cinemaName = showtimeDetail.theater?.branch || showtimeDetail.theater?.cinema?.name;
 
       const dataForForm = {
