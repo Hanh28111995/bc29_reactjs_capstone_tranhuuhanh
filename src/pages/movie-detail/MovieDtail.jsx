@@ -15,8 +15,8 @@ export default function MovieDtail() {
     service: () => fetchMovieDetailAPI(param.movieId),
   });
 
-  // API có thể trả về { movie: {...} } hoặc object trực tiếp
-  const movieDetail = movieDetailRaw?.movie ?? movieDetailRaw;
+  // API trả về content: { movies: {...} } hoặc object trực tiếp
+  const movieDetail = movieDetailRaw?.movies ?? movieDetailRaw?.movie ?? movieDetailRaw;
 
   return (
     <div className="trailerPage pb-3" >

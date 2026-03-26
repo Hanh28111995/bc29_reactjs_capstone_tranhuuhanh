@@ -56,8 +56,8 @@ export default function ShowtimeForm() {
   useEffect(() => {
     if (!isEditMode || !data) return;
 
-    // API trả về content.showtime — useAsync unwrap content thành object { showtime: {...} }
-    const showtimeDetail = data?.showtime ?? (Array.isArray(data) ? data[0] : data);
+    // API trả về content.showtimes — useAsync unwrap content thành object { showtimes: {...} }
+    const showtimeDetail = data?.showtimes ?? data?.showtime ?? (Array.isArray(data) ? data[0] : data);
     if (!showtimeDetail) return;
 
     // cinema là object riêng biệt ở top-level, branch lấy từ cinema.branch hoặc theater.branch

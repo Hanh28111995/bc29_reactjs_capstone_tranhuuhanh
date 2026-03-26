@@ -35,8 +35,8 @@ export default function UserForm() {
     condition: !!params.tk && params.tk !== "create",
   });
 
-  // API có thể trả về { user: {...} } hoặc object trực tiếp
-  const userDetail = userDetailRaw?.user ?? userDetailRaw;
+  // API trả về content: { users: {...} } hoặc object trực tiếp
+  const userDetail = userDetailRaw?.users ?? userDetailRaw?.user ?? userDetailRaw;
 
   // 2. Đồng bộ dữ liệu vào Form
   useEffect(() => {

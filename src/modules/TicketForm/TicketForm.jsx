@@ -18,8 +18,8 @@ export default function TicketForm() {
     condition: !!ticketId,
   });
 
-  // API có thể trả về { ticket: {...} } hoặc object trực tiếp
-  const ticket = ticketRaw?.ticket ?? ticketRaw;
+  // API trả về content: { tickets: {...} } hoặc object trực tiếp
+  const ticket = ticketRaw?.tickets ?? ticketRaw?.ticket ?? ticketRaw;
 
   useEffect(() => {
     if (ticket) {

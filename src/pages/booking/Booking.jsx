@@ -30,8 +30,8 @@ export default function Booking() {
     dependencies: [params.id, userState.userInfor?.user_inf?.role],
   });
 
-  // useAsync trả về content object { showtime: {...} } — extract ra
-  const data = rawData?.showtime ?? rawData;
+  // useAsync trả về content object { showtimes: {...} } — extract ra
+  const data = rawData?.showtimes ?? rawData?.showtime ?? rawData;
 
   const handleSelect = (type, selectChair) => {
     console.log('selectChair:', selectChair);
