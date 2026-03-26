@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Card, Row, Col, Checkbox, Button, App, Typography, Divider, Tag, Switch
 } from "antd";
@@ -33,6 +33,19 @@ export default function ScheduleGenerator() {
   const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI });
   const { state: scheduleData } = useAsync({ service: getScheduleListAPI });
 
+  const schedule = scheduleData?.schedule ?? scheduleData ?? null;
+  const existingId = schedule?._id ?? null;
+
+  // Pre-populate form từ existing schedule
+  useEffect(() => {
+    if (!schedule) return;
+    if (schedule.movie_ids?.length) setSelectedMovies(schedule.movie_ids);
+    if (schedule.timeSlots?.length) setSelectedSlots(schedule.timeSlots);
+    if (schedule.theaters?.length) setSelectedTheaters(schedule.theaters);
+    if (schedule.scheduleTime) setScheduleTime(schedule.scheduleTime);
+    if (schedule.isActive !== undefined) setIsActive(schedule.isActive);
+  }, [schedule?._id]);
+
   const movies = useMemo(() => {
     const list = Array.isArray(rawMovies) ? rawMovies : [];
     return [...list]
@@ -42,7 +55,6 @@ export default function ScheduleGenerator() {
   }, [rawMovies]);
 
   const theaters = Array.isArray(rawTheaters) ? rawTheaters : [];
-  const existingId = scheduleData?._id ?? null;
 
   const handleGenerate = async () => {
     if (selectedMovies.length === 0)
