@@ -34,6 +34,7 @@ export const useAsync = ({ dependencies = [], service, codintion = true }) => {
       setState(data);
     } catch (err) {
       console.log(err);
+      setLoadingState({ isLoading: false });
     } finally {
       setLoading(false);
     }

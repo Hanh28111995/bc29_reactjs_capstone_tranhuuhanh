@@ -4,8 +4,8 @@ import {
   DatabaseOutlined,
   ToolOutlined,
 } from "@ant-design/icons";
-import { useLocation } from 'react-router-dom';
-import { Breadcrumb, Layout, Menu, Image } from "antd";
+// import { useLocation } from 'react-router-dom';
+import { /* Breadcrumb, */ Layout, Menu, Image } from "antd";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import React, { memo, useCallback, useMemo, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -32,20 +32,20 @@ const items = [
   ]),
 ];
 
-// Tách riêng để chỉ component này rerender khi pathname thay đổi
-const AdminBreadcrumb = memo(() => {
-  const { pathname } = useLocation();
-  const breadcrumb = pathname.split('/').map(segment => {
-    if (!segment) return '';
-    return segment.replace(/[^a-zA-Z0-9]/g, ' ').replace(/^\w/, c => c.toUpperCase());
-  });
-  return (
-    <Breadcrumb>
-      <Breadcrumb.Item>{breadcrumb[1]}</Breadcrumb.Item>
-      <Breadcrumb.Item>{breadcrumb[2]}</Breadcrumb.Item>
-    </Breadcrumb>
-  );
-});
+// // Tách riêng để chỉ component này rerender khi pathname thay đổi
+// const AdminBreadcrumb = memo(() => {
+//   const { pathname } = useLocation();
+//   const breadcrumb = pathname.split('/').map(segment => {
+//     if (!segment) return '';
+//     return segment.replace(/[^a-zA-Z0-9]/g, ' ').replace(/^\w/, c => c.toUpperCase());
+//   });
+//   return (
+//     <Breadcrumb>
+//       <Breadcrumb.Item>{breadcrumb[1]}</Breadcrumb.Item>
+//       <Breadcrumb.Item>{breadcrumb[2]}</Breadcrumb.Item>
+//     </Breadcrumb>
+//   );
+// });
 
 // Tách riêng để chỉ component này rerender khi pathname thay đổi
 const AdminMenu = memo(({ collapsed, setCollapsed }) => {
@@ -113,7 +113,7 @@ function AdminLayout() {
         <Layout className="site-layout">
           <Header className="site-layout-background" style={{ padding: 0 }} />
           <Content onClick={handleContentClick} style={{ margin: '0 16px' }}>
-            <AdminBreadcrumb />
+            {/* <AdminBreadcrumb /> */}
             <div className="site-layout-background" style={{ paddingTop: 24, minHeight: 360 }}>
               <Outlet />
             </div>
