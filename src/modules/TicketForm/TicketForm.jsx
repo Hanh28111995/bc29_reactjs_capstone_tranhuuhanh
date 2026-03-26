@@ -12,11 +12,14 @@ export default function TicketForm() {
   const [form] = Form.useForm();
   const { notification } = App.useApp();
 
-  const { state: ticket, loading } = useAsync({
+  const { state: ticketRaw, loading } = useAsync({
     service: () => fetchTicketByIdAPI(ticketId),
     dependencies: [ticketId],
     condition: !!ticketId,
   });
+
+  // API có thể trả về { ticket: {...} } hoặc object trực tiếp
+  const ticket = ticketRaw?.ticket ?? ticketRaw;
 
   useEffect(() => {
     if (ticket) {

@@ -29,11 +29,14 @@ export default function UserForm() {
   const [originalData, setOriginalData] = useState({});
 
   // Lấy dữ liệu chi tiết khi có ID trên URL (params.tk)
-  const { state: userDetail, loading } = useAsync({
+  const { state: userDetailRaw, loading } = useAsync({
     service: () => (params.tk ? userDetailApi(params.tk) : Promise.resolve(null)),
     dependencies: [params.tk],
     condition: !!params.tk && params.tk !== "create",
   });
+
+  // API có thể trả về { user: {...} } hoặc object trực tiếp
+  const userDetail = userDetailRaw?.user ?? userDetailRaw;
 
   // 2. Đồng bộ dữ liệu vào Form
   useEffect(() => {

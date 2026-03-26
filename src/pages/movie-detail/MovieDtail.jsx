@@ -10,10 +10,13 @@ import { useAsync } from 'hooks/useAsync';
 export default function MovieDtail() {
   const param = useParams();
 
-  const { state: movieDetail = {} } = useAsync({
+  const { state: movieDetailRaw = {} } = useAsync({
     dependencies: [],
     service: () => fetchMovieDetailAPI(param.movieId),
-  })
+  });
+
+  // API có thể trả về { movie: {...} } hoặc object trực tiếp
+  const movieDetail = movieDetailRaw?.movie ?? movieDetailRaw;
 
   return (
     <div className="trailerPage pb-3" >
