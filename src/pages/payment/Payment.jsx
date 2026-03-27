@@ -51,11 +51,12 @@ export default function Payment() {
                         paymentMethod: 'cash',
                         paymentStatus: 'Pending',
                     });
-                    const ticket = result?.data?.content;
-                    await fetchCreateCashPayment(ticket);
-                    navigate('/payment-result', {
-                        state: { payUrl: null, bookingId: ticket._id, method: 'cash' }
-                    });
+                    navigate("/")
+                    // const ticket = result?.data?.content;
+                    // await fetchCreateCashPayment(ticket);
+                    // navigate('/payment-result', {
+                    //     state: { payUrl: null, bookingId: ticket._id, method: 'cash' }
+                    // });
                 } catch (error) {
                     if (error?.response?.status === 409) {
                         return notification.error({ message: "Ghế đã được đặt", description: "Vui lòng chọn ghế khác." });
@@ -169,7 +170,7 @@ export default function Payment() {
                                 <Radio.Button value="momo" className="payment-radio-btn">
                                     <WalletOutlined /> Ví MoMo
                                 </Radio.Button>
-                                <Radio.Button value="cash" className="payment-radio-btn" disabled={userState.userInfor?.user_inf.role ==='customer' ? true : false}>
+                                <Radio.Button value="cash" className="payment-radio-btn" disabled={userState.userInfor?.user_inf.role === 'customer' ? true : false}>
                                     <DollarOutlined /> Thanh toán tại quầy
                                 </Radio.Button>
                             </Space>
