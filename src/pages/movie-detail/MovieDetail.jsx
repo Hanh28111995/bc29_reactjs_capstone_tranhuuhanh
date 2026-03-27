@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, List, Card, Row, Col, Empty, Spin, Select } from 'antd';
-import { useAsync } from 'hooks/useAsync';
+import { useAsync, safeArray } from 'hooks/useAsync';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchShowtimesAPI, fetchBranchesAPI, fetchMovieDetailAPI, fetchMovieListAPI } from 'services/general';
 import Calendar from 'modules/showTime/Calendar';
@@ -118,7 +118,8 @@ export default function MovieDetail() {
     }, []);
 
 
-    const { state: areasList = [] } = useAsync({ service: fetchLocationListAPI });
+    const { state: rawAreasList } = useAsync({ service: fetchLocationListAPI });
+    const areasList = safeArray(rawAreasList);
     const spans = { col1: 6, col2: 6, col3: 6 };
 
     const activeRegionData = areasList?.find(region => region.vungMien === selectedRegionName);

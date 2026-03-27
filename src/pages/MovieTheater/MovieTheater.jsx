@@ -1,4 +1,4 @@
-import { useAsync } from 'hooks/useAsync';
+import { useAsync, safeArray } from 'hooks/useAsync';
 import React, { useEffect, useState } from 'react';
 import { fetchBranchesAPI, fetchLocationListAPI } from '../../services/general';
 import { Button } from 'antd';
@@ -15,15 +15,17 @@ function MovieTheater() {
         city: "" // Thành phố
     });
 
-    const { state: locations = [] } = useAsync({
+    const { state: rawLocations } = useAsync({
         dependencies: [],
         service: fetchLocationListAPI,
     });
+    const locations = safeArray(rawLocations);
 
-    const { state: allCinemas = [] } = useAsync({
+    const { state: rawCinemas } = useAsync({
         dependencies: [],
         service: fetchBranchesAPI
     });
+    const allCinemas = safeArray(rawCinemas);
 
     const { decision, isLocating, locate } = useGeoLocationSelect({
         locations,

@@ -1,6 +1,6 @@
 import { EditableProTable } from '@ant-design/pro-components';
 import { Button, App, Card, Input, Popconfirm } from 'antd';
-import { useAsync } from '../../hooks/useAsync';
+import { useAsync, safeArray } from '../../hooks/useAsync';
 import React, { useState, useEffect, useMemo } from 'react';
 import { getAllBranches,  } from 'services/branches';
 import { DeleteOutlined, EditOutlined, SaveOutlined, SearchOutlined } from '@ant-design/icons';
@@ -21,10 +21,11 @@ export default function BranchesTable() {
     const [updatedIds, setUpdatedIds] = useState([]); // State theo dõi các ID đã sửa
     const [toggle, setToggle] = useState(false);
 
-    const { state: data = [], loading } = useAsync({
+    const { state: rawData, loading } = useAsync({
         dependencies: [toggle],
         service: getAllBranches,
     });
+    const data = safeArray(rawData);
 
     useEffect(() => {
         if (data) setDataSource(data);

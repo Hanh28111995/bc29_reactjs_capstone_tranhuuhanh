@@ -19,12 +19,12 @@ export default function SeatsRendering({ data, mode, onAction, selectedSeats }) 
     const isShowtimePage = location.pathname.includes("showtime");
     const isBookingPage = location.pathname.includes("booking");
 
-    const { state: seatList = [] } = useAsync({
+    const { state: rawSeatList } = useAsync({
         service: getAllSeatTypesApi,
         dependencies: [userState.userInfor],
         codintion: !!userState.userInfor?.user_inf?.id,
-
     });
+    const seatList = Array.isArray(rawSeatList) ? rawSeatList : [];
 
     // Tạo danh sách options chuẩn cho Select
     const seatTypeOptions = seatList.map(seat => ({

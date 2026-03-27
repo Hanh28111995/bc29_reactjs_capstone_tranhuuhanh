@@ -1,6 +1,6 @@
 import { Space, Table, Input, Button, App, Popconfirm, Card, Tag } from 'antd';
 import React, { useMemo, useState } from 'react';
-import { useAsync } from "../../hooks/useAsync";
+import { useAsync, safeArray } from "../../hooks/useAsync";
 import { useNavigate } from 'react-router-dom';
 import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { fetchTheaterListAPI, deleteTheaterAPI } from 'services/theater';
@@ -14,10 +14,11 @@ export default function TheaterManagement() {
   const [keyword, setKeyword] = useState("");
   const { notification } = App.useApp();
 
-  const { state: data = [], loading } = useAsync({
+  const { state: rawData, loading } = useAsync({
     dependencies: [toggle],
     service: fetchTheaterListAPI,
   });
+  const data = safeArray(rawData);
 
   const theaterList = useMemo(() => {
     if (!keyword) return data;

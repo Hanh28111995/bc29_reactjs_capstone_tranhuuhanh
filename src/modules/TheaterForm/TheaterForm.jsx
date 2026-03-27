@@ -4,7 +4,7 @@ import {
 } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAsync } from "hooks/useAsync";
+import { useAsync, safeArray } from "hooks/useAsync";
 import { fetchTheaterDetailAPI, addTheaterAPI, updateTheaterAPI } from "services/theater";
 import { getAllBranches } from "services/branches";
 import SeatsRendering from "modules/seatsRendering/seatsRendering";
@@ -30,13 +30,15 @@ export default function TheaterForm() {
   // State hiển thị số ghế tạm thời trên giao diện (Thay thế useWatch)
   const [tempTotal, setTempTotal] = useState({ rows: 10, cols: 10 });
 
-  const { state: seatsDB = [] } = useAsync({
+  const { state: rawSeatsDB } = useAsync({
     service: getAllSeatTypesApi,
   });
+  const seatsDB = safeArray(rawSeatsDB);
 
-  const { state: cinemas = [] } = useAsync({
+  const { state: rawCinemas } = useAsync({
     service: getAllBranches,
   });
+  const cinemas = safeArray(rawCinemas);
 
   const { state: theaterDetailRaw, loading } = useAsync({
     service: () => fetchTheaterDetailAPI(params.theaterId),

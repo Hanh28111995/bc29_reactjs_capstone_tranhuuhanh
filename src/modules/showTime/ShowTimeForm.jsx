@@ -13,7 +13,7 @@ import {
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAsync } from "hooks/useAsync";
+import { useAsync, safeArray } from "hooks/useAsync";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { fetchMovieListAPI } from "services/movie";
 import { fetchTheaterListAPI } from "services/theater";
@@ -44,8 +44,10 @@ export default function ShowtimeForm() {
 
   const isEditMode = !!params.id && params.id !== "undefined";
 
-  const { state: movies = [] } = useAsync({ service: fetchMovieListAPI });
-  const { state: theaters = [] } = useAsync({ service: fetchTheaterListAPI });
+  const { state: rawMovies } = useAsync({ service: fetchMovieListAPI });
+  const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI });
+  const movies = safeArray(rawMovies);
+  const theaters = safeArray(rawTheaters);
   const { state: rawBranches } = useAsync({ service: getAllBranches });
   const branches = useMemo(() => {
     if (!rawBranches) return [];

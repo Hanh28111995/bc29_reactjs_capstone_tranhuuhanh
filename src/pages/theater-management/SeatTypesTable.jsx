@@ -1,6 +1,6 @@
 import { EditableProTable } from '@ant-design/pro-components';
 import { Button, App, Popconfirm, Space, Tag, Card } from 'antd';
-import { useAsync } from '../../hooks/useAsync';
+import { useAsync, safeArray } from '../../hooks/useAsync';
 import React, { useState, useEffect } from 'react';
 import { DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import { getAllSeatTypesApi, updateSeatTypeApi, addOneSeatTypeApi, deleteOneSeatTypeApi } from 'services/seatType';
@@ -14,10 +14,11 @@ export default function SeatTypeTable() {
     const [updatedIds, setUpdatedIds] = useState([]);
     const { message, notification } = App.useApp();
 
-    const { state: data = [], loading } = useAsync({
+    const { state: rawData, loading } = useAsync({
         dependencies: [toggle],
         service: getAllSeatTypesApi,
     });
+    const data = safeArray(rawData);
 
     useEffect(() => {
         if (data) setDataSource(data);
