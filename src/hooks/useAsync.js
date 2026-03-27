@@ -10,8 +10,8 @@ const asyncCache = new Map();
  */
 export const useAsync = ({ dependencies = [], service, codintion = true, condition = true }) => {
   const [loadingState, setLoadingState] = useContext(LoadingContext);
-  const cacheKey = service?.name || service?.toString();
-  const [state, setState] = useState(() => asyncCache.get(cacheKey));
+  const cacheKey = service?.name && service.name !== "" ? service.name : null;
+  const [state, setState] = useState(() => cacheKey ? asyncCache.get(cacheKey) : undefined);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const useAsync = ({ dependencies = [], service, codintion = true, conditi
       const data = Array.isArray(content)
         ? content
         : Object.values(content ?? {}).find(v => Array.isArray(v)) ?? content;
-      asyncCache.set(cacheKey, data);
+      if (cacheKey) asyncCache.set(cacheKey, data);
       setState(data);
     } catch (err) {
       console.log(err);

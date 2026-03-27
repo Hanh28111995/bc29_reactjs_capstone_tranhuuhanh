@@ -12,10 +12,11 @@ export default function MovieList() {
   const [, setLoadingState] = useContext(LoadingContext);
   const [movieListType, setMovieListType] = useState("SHOWING");
 
-  const { state: movieList = [], loading } = useAsync({
+  const { state: rawMovieList, loading } = useAsync({
     dependencies: [],
     service: () => fetchMovieListAPI(),
   });
+  const movieList = Array.isArray(rawMovieList) ? rawMovieList : [];
 
   useEffect(() => {
     setLoadingState({ isLoading: loading });
