@@ -53,10 +53,11 @@ import { fetchMoviebannerAPI } from 'services/general';
 // };
 
 export default function Carousel() {
-  const { state: banner = [] } = useAsync({
+  const { state: rawBanner } = useAsync({
     dependencies: [],
     service: () => fetchMoviebannerAPI(),
   });
+  const banner = Array.isArray(rawBanner) ? rawBanner : [];
 
   const bannerList = banner?.map((item, index) => (
     <div key={index} style={{ height: "60rem" }}>

@@ -1,17 +1,9 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { LoadingContext } from "../contexts/loading.context";
 
-// Module-level cache: key = service.name, value = last fetched data
-const asyncCache = new Map();
-
-/**
- * Luôn trả về result.data.content từ API response.
- * BE phải thống nhất trả về { content: array | object }
- */
 export const useAsync = ({ dependencies = [], service, codintion = true, condition = true }) => {
-  const [loadingState, setLoadingState] = useContext(LoadingContext);
-  const cacheKey = service?.name && service.name !== "" ? service.name : null;
-  const [state, setState] = useState(() => cacheKey ? asyncCache.get(cacheKey) : undefined);
+  const [, setLoadingState] = useContext(LoadingContext);
+  const [state, setState] = useState(undefined);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -21,19 +13,28 @@ export const useAsync = ({ dependencies = [], service, codintion = true, conditi
   }, dependencies);
 
   const fetchData = async () => {
+    const fnName = service?.name || "(anonymous)";
     try {
       setLoading(true);
       setLoadingState({ isLoading: true });
       const result = await service();
       setLoadingState({ isLoading: false });
-      const content = result.data.content;
-      const data = Array.isArray(content)
-        ? content
-        : Object.values(content ?? {}).find(v => Array.isArray(v)) ?? content;
-      if (cacheKey) asyncCache.set(cacheKey, data);
-      setState(data);
+      const content = result?.data?.content;
+
+      console.log(`[useAsync] service="${fnName}" | content type=${Array.isArray(content) ? "array" : typeof content} | value=`, content);
+
+      if (Array.isArray(content)) {
+        setState(content);
+      } else if (content && typeof content === "object") {
+        const arr = Object.values(content).find(v => Array.isArray(v));
+        const resolved = arr !== undefined ? arr : content;
+        console.log(`[useAsync] service="${fnName}" | resolved to ${Array.isArray(resolved) ? "array" : "object"}:`, resolved);
+        setState(resolved);
+      } else {
+        setState(content);
+      }
     } catch (err) {
-      console.log(err);
+      console.error(`[useAsync] service="${fnName}" | ERROR:`, err?.response?.status, err?.message);
       setLoadingState({ isLoading: false });
     } finally {
       setLoading(false);
