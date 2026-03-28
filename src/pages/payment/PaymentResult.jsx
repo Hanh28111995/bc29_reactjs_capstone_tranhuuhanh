@@ -101,7 +101,7 @@ export default function PaymentResult() {
                     />
                 )}
 
-                {(success !== 'success' && status === 'error') && (
+                {(success !== 'success' && status !== 'success') && (
                     <Result
                         status="error"
                         title="Thanh Toán Thất Bại"
