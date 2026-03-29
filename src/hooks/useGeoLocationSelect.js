@@ -5,15 +5,11 @@ const GEO_CACHE_KEY = 'GEO_LOCATION_CACHE';
 const GEO_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 tiếng
 
 const getCachedLocation = () => {
-  try {
-    const cached = JSON.parse(localStorage.getItem(GEO_CACHE_KEY));
-    if (cached && Date.now() - cached.timestamp < GEO_CACHE_TTL) return cached.data;
-  } catch {}
-  return null;
+  return null; // Cache tạm thời disabled để test
 };
 
 const setCachedLocation = (data) => {
-  localStorage.setItem(GEO_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+  // Cache tạm thời disabled để test
 };
 
 const reverseGeocode = async ({ latitude, longitude }) => {
