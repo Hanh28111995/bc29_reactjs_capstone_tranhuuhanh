@@ -1,4 +1,3 @@
-import { Modal } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getDistance } from "constants/common";
 
@@ -216,15 +215,9 @@ export const useGeoLocationSelect = ({
       return;
     }
 
-    Modal.confirm({
-      title,
-      content,
-      okText: "Cho phép",
-      cancelText: "Không",
-      onOk: locate,
-      onCancel: () => setDecision("denied"),
-    });
-  }, [askOnMount, locate, locations, title, content]);
+    // Gọi thẳng geolocation — browser tự hiện popup xin quyền
+    locate().catch(() => setDecision("denied"));
+  }, [askOnMount, locate, locations]);
 
   return { decision, isLocating, locate };
 };
