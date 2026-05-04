@@ -98,9 +98,11 @@ request.interceptors.response.use(
 
     // Nếu lỗi 401 và không phải là request refresh chính nó
     if (isTokenExpired && !originalRequest.url?.includes("/auth/refresh")) {
+      // Nếu là request lấy thông báo trong Header hoặc HistoryTicket, ta có thể bỏ qua việc redirect nếu refresh lỗi
+      const isNotificationRequest = originalRequest.url?.includes("/notifications");
+
       if (!originalRequest._retry) {
         if (isRefreshing) {
-          // Nếu đang có request refresh khác chạy, xếp hàng đợi
           return new Promise((resolve) => {
             refreshSubscribers.push((token) => {
               originalRequest.headers.Authorization = `Bearer ${token}`;
@@ -113,14 +115,17 @@ request.interceptors.response.use(
         isRefreshing = true;
 
         try {
-          // Gọi API Refresh - KHÔNG dùng instance 'request' để tránh loop
-          // withCredentials: true cực kỳ quan trọng để gửi Cookie chứa refreshToken
           console.log("[Axios] Token expired, attempting refresh...");
-          const res = await axios.post(`${BASE_URL}/auth/refresh`, {}, { 
-            withCredentials: true 
+          // Quan trọng: Sử dụng axios cơ bản để tránh interceptors
+          const res = await axios({
+            method: 'post',
+            url: `${BASE_URL}/auth/refresh`,
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'application/json'
+            }
           });
 
-          // Lấy token mới - Thử nhiều cấu trúc trả về khác nhau
           const newToken = res.data?.content?.user_token || res.data?.content?.accessToken || res.data?.accessToken;
 
           if (newToken) {
@@ -132,9 +137,9 @@ request.interceptors.response.use(
             }
 
             isRefreshing = false;
-            onRefreshed(newToken); 
+            const tokenToNotify = newToken;
+            onRefreshed(tokenToNotify); 
 
-            // Thực hiện lại request bị lỗi ban đầu
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
             return request(originalRequest);
           } else {
@@ -142,12 +147,15 @@ request.interceptors.response.use(
           }
         } catch (refreshError) {
           console.error("[Axios] Refresh token failed:", refreshError);
-          isRefreshing = true; // Giữ true để các request khác không retry nữa
-          refreshSubscribers = []; // Clear queue
+          isRefreshing = false;
+          refreshSubscribers = []; 
           
-          localStorage.removeItem(USER_INFO_KEY);
-          if (window.location.pathname !== "/login") {
-            window.location.href = "/login";
+          // Chỉ xóa token và redirect nếu KHÔNG PHẢI là request thông báo (tránh làm phiền người dùng khi đang xem phim)
+          if (!isNotificationRequest) {
+            localStorage.removeItem(USER_INFO_KEY);
+            if (window.location.pathname !== "/login") {
+              window.location.href = "/login";
+            }
           }
           return Promise.reject(refreshError);
         }
