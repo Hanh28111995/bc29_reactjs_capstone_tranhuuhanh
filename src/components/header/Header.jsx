@@ -37,7 +37,7 @@ export default function Header() {
   const [render1, setRender1] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Hàm fetch dữ liệu để tái sử dụng cho polling
+  // Hàm fetch dữ liệu
   const getNotifications = async () => {
     if (!userId || !userRole) return;
     try {
@@ -52,25 +52,19 @@ export default function Header() {
       setRender(formattedNotifications);
       setRender1(formattedNotifications);
     } catch (error) {
-      console.error("Lỗi khi polling thông báo:", error);
+      console.error("Lỗi khi lấy thông báo:", error);
     }
   };
 
-  // Fetch ban đầu khi login
+  // Lấy dữ liệu khi chuyển trang hoặc login
   useEffect(() => {
     getNotifications();
-  }, [userRole, userId]);
+  }, [userRole, userId, pathname]); // Thêm pathname để gọi lại khi chuyển trang
 
-  // Thiết lập Polling mỗi 30 giây để cập nhật thông báo mới từ DB
-  useEffect(() => {
-    if (!userId) return;
-
-    const interval = setInterval(() => {
-      getNotifications();
-    }, 30000); // 30 giây
-
-    return () => clearInterval(interval);
-  }, [userId, userRole]);
+  // Hàm mở thông báo
+  const handleOpenNotifications = () => {
+    setIsModalOpen(true);
+  };
 
   const handleMarkAllAsRead = async () => {
     if (!userId || !userRole) return;
@@ -215,7 +209,7 @@ export default function Header() {
             </div>
           ) : (
             <div className="ml-auto d-flex align-items-center justify-content-between pl-2" >
-              <button className="btn mx-2" id="showNotificationBtn" onClick={() => setIsModalOpen(true)}>
+              <button className="btn mx-2" id="showNotificationBtn" onClick={handleOpenNotifications}>
                 <i className="fa fa-bell" style={{ fontSize: '2.5rem'}}/>
                 <p className="numNotificationItem">{render1.filter(item => !item.status).length}</p>
               </button>
