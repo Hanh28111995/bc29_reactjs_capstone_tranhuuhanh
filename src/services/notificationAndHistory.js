@@ -21,3 +21,10 @@ export const fetchChangeStatusNotificationAPI = (role, id) => {
   });
 };
 
+export const markAllNotificationsAsReadAPI = (role) => {
+  return request({
+    url: `/${role}/notifications/read-all`,
+    method: "PUT",
+  });
+};
+

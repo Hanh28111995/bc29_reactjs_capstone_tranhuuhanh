@@ -5,7 +5,7 @@ import { USER_INFO_KEY } from "../../constants/common";
 import { setUserInfoAction } from "../../store/actions/user.action";
 import { useAsync } from "hooks/useAsync";
 import { logoutAPI } from "services/user";
-import { fetchNotificationAPI } from "services/notificationAndHistory";
+import { fetchNotificationAPI, markAllNotificationsAsReadAPI, fetchChangeStatusNotificationAPI } from "services/notificationAndHistory";
 import "./index.scss";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -56,11 +56,43 @@ export default function Header() {
     }
   }, [notifications]);
 
+  const handleMarkAllAsRead = async () => {
+    if (!userId || !userRole) return;
+    try {
+      await markAllNotificationsAsReadAPI(userRole);
+      // Cập nhật UI cục bộ để người dùng thấy thay đổi ngay lập tức
+      const updated = render.map(item => ({ ...item, status: true }));
+      setRender(updated);
+      setRender1(updated);
+    } catch (error) {
+      console.error("Lỗi khi đánh dấu tất cả đã đọc:", error);
+    }
+  };
+
+  const handleMarkAsRead = async (id) => {
+    if (!id || !userRole) return;
+    try {
+      await fetchChangeStatusNotificationAPI(userRole, id);
+      // Cập nhật UI cục bộ
+      const updated = render.map(item =>
+        item._id === id ? { ...item, status: true } : item
+      );
+      setRender(updated);
+      setRender1(updated);
+    } catch (error) {
+      console.error("Lỗi khi đánh dấu đã xem:", error);
+    }
+  };
+
   const render_in_cart =
     render.slice(-5).map((ele, index) => {
       const isUnread = !ele.status;
       return (
-        <div key={index} className={`noti-item ${isUnread ? 'unread' : ''}`}>
+        <div
+          key={index}
+          className={`noti-item ${isUnread ? 'unread' : ''}`}
+          onClick={() => handleMarkAsRead(ele._id)}
+        >
           <div className="noti-icon-wrapper">
             <i className="fa fa-ticket-alt"></i>
           </div>
@@ -83,8 +115,8 @@ export default function Header() {
           <div className="noti-popover-wrapper">
             <div className="noti-header">
               <h4>Thông báo</h4>
-              <button className="close-btn" onClick={() => setIsModalOpen(false)}>
-                <i className="fa fa-times"></i>
+              <button className="mark-all-read-btn" onClick={handleMarkAllAsRead} title="Đánh dấu tất cả đã xem">
+                <i className="fa fa-check-double"></i>
               </button>
             </div>
             <div className="noti-body">
@@ -99,7 +131,7 @@ export default function Header() {
             <div className="noti-footer">
               <button className="see-all-btn" onClick={() => {
                 setIsModalOpen(false);
-                navigate("/ticket-management");
+                navigate("/ticket-history");
               }}>Xem tất cả</button>
             </div>
           </div>

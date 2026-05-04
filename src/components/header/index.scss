@@ -92,8 +92,8 @@
             color: #050505;
         }
 
-        .close-btn {
-            background: #e4e6eb;
+        .mark-all-read-btn {
+            background: transparent;
             border: none;
             width: 32px;
             height: 32px;
@@ -103,9 +103,11 @@
             justify-content: center;
             cursor: pointer;
             transition: background 0.2s;
+            color: #1877f2;
+            font-size: 18px;
 
             &:hover {
-                background: #d8dadf;
+                background: #f2f2f2;
             }
         }
     }
