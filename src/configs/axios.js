@@ -150,13 +150,7 @@ request.interceptors.response.use(
           isRefreshing = false;
           refreshSubscribers = []; 
           
-          // Chỉ xóa token và redirect nếu KHÔNG PHẢI là request thông báo (tránh làm phiền người dùng khi đang xem phim)
-          if (!isNotificationRequest) {
-            localStorage.removeItem(USER_INFO_KEY);
-            if (window.location.pathname !== "/login") {
-              window.location.href = "/login";
-            }
-          }
+          // Chỉ xóa token và redirect nếu KHÔNG PHẢI là request thông báo (tránh làm phiền người dùng khi đang xem phim)         
           return Promise.reject(refreshError);
         }
       }
