@@ -8,7 +8,7 @@ const GlobalSpinner = ({ spinRef }) => {
   const [visible, setVisible] = useState(false);
   spinRef.current = setVisible;
   return visible ? (
-    <WrapperSpin viewHeight="100vh">
+    <WrapperSpin>
       <Spin />
     </WrapperSpin>
   ) : null;
