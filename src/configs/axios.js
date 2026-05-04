@@ -3,7 +3,6 @@ import { BASE_URL, USER_INFO_KEY } from "../constants/common";
 
 export const request = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true,
 });
 
 // --- API Cache ---

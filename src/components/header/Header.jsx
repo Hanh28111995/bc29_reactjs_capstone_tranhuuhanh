@@ -30,10 +30,13 @@ export default function Header() {
     }
   };
 
+  const userRole = userState.userInfor?.user_inf?.role;
+  const userId = userState.userInfor?.user_inf?.id;
+
   const { state: notifications = [] } = useAsync({
-    service: () => fetchNotificationAPI(userState.userInfor?.user_inf?.role),
-    dependencies: [userState.userInfor],
-    condition: !!userState.userInfor?.user_inf?.id,
+    service: () => fetchNotificationAPI(userRole),
+    dependencies: [userRole, userId],
+    condition: !!userId,
   });
 
   const [render, setRender] = useState([]);
