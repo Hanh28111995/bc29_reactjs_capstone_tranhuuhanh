@@ -41,6 +41,7 @@ export default function Header() {
 
   const [render, setRender] = useState([]);
   const [render1, setRender1] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (notifications) {
@@ -68,29 +69,32 @@ export default function Header() {
   // console.log(render_card1, render_card2)
   return (
     < div >
-      <div className="modal fade" id="myModal" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div className="modal-dialog modal-lg" role="document">
-          <div className="modal-content">
-            {/* Modal Header */}
-            <div className="modal-header">
-              <h4 className="modal-title" id="myModalLabel">YOUR NOTIFICATION</h4>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-            {/* Modal body */}
-            <div className="modal-body">
-              <ul className="list-group">
-                {render_in_cart.length > 0 ? render_in_cart : <li className="list-group-item">Không có thông báo mới</li>}
-              </ul>
-            </div>
-            {/* Modal footer */}
-            <div className="modal-footer">
-              <button className="btn btn-primary" data-dismiss="modal" onClick={() => navigate("/ticket-management")}>Show more</button>
+      {/* Modal Notification bằng React State */}
+      {isModalOpen && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1" role="dialog">
+          <div className="modal-dialog modal-lg" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">YOUR NOTIFICATION</h4>
+                <button type="button" className="close" onClick={() => setIsModalOpen(false)}>
+                  <span>×</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <ul className="list-group">
+                  {render_in_cart.length > 0 ? render_in_cart : <li className="list-group-item">Không có thông báo mới</li>}
+                </ul>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-primary" onClick={() => {
+                  setIsModalOpen(false);
+                  navigate("/ticket-management");
+                }}>Show more</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <nav className="navbar navbar-expand-lg navbar-light py-3">
         <a className="navbar-brand" href="/">
@@ -144,7 +148,7 @@ export default function Header() {
             </div>
           ) : (
             <div className="ml-auto d-flex align-items-center justify-content-between pl-2" >
-              <button className="btn mx-2" id="showNotificationBtn" data-toggle="modal" data-target="#myModal">
+              <button className="btn mx-2" id="showNotificationBtn" onClick={() => setIsModalOpen(true)}>
                 <i className="fa fa-bell" style={{ fontSize: '2.5rem'}}/>
                 <p className="numNotificationItem">{render1.filter(item => !item.status).length}</p>
               </button>
