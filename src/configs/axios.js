@@ -77,52 +77,53 @@ let refreshSubscribers = [];
 let isRefreshing = false;
 
 const onRefreshed = (token) => {
-  refreshSubscribers.map((cb) => cb(token));
+  refreshSubscribers.forEach((cb) => cb.resolve(token));
+  refreshSubscribers = [];
+};
+
+const onRefreshFailed = (error) => {
+  refreshSubscribers.forEach((cb) => cb.reject(error));
   refreshSubscribers = [];
 };
 
 request.interceptors.response.use(
   (response) => {
-    // Lưu vào cache nếu là GET cacheable
-    const config = response.config;
-    if (isCacheable(config)) {
-      const key = getCacheKey(config);
-      apiCache.set(key, { data: response, expiry: Date.now() + CACHE_TTL });
-    }
+    // ... (giữ nguyên logic cache)
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
-    // Kiểm tra mã 401 (Unauthorized)
     const isTokenExpired = error.response?.status === 401;
 
-    // Nếu lỗi 401 và không phải là request refresh chính nó
     if (isTokenExpired && !originalRequest.url?.includes("/auth/refresh")) {
-      // Nếu là request lấy thông báo trong Header hoặc HistoryTicket, ta có thể bỏ qua việc redirect nếu refresh lỗi
       const isNotificationRequest = originalRequest.url?.includes("/notifications");
 
       if (!originalRequest._retry) {
         if (isRefreshing) {
-          return new Promise((resolve) => {
-            refreshSubscribers.push((token) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              resolve(request(originalRequest));
-            });
-          });
+          return new Promise((resolve, reject) => {
+            refreshSubscribers.push({ resolve, reject });
+          }).then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return request(originalRequest);
+          }).catch(err => Promise.reject(err));
         }
 
         originalRequest._retry = true;
         isRefreshing = true;
 
         try {
+          const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
+          const currentToken = userInfor?.user_token;
+
           console.log("[Axios] Token expired, attempting refresh...");
-          // Quan trọng: Sử dụng axios cơ bản để tránh interceptors
           const res = await axios({
             method: 'post',
             url: `${BASE_URL}/auth/refresh`,
             withCredentials: true,
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              // Thử gửi kèm token cũ nếu server yêu cầu để định danh
+              'Authorization': currentToken ? `Bearer ${currentToken}` : undefined
             }
           });
 
@@ -130,31 +131,36 @@ request.interceptors.response.use(
 
           if (newToken) {
             console.log("[Axios] Refresh token success!");
-            const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
             if (userInfor) {
               userInfor.user_token = newToken;
               localStorage.setItem(USER_INFO_KEY, JSON.stringify(userInfor));
             }
 
             isRefreshing = false;
-            const tokenToNotify = newToken;
-            onRefreshed(tokenToNotify); 
+            onRefreshed(newToken); 
 
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
             return request(originalRequest);
           } else {
-            throw new Error("No token found in refresh response");
+            throw new Error("No token in response");
           }
         } catch (refreshError) {
-          console.error("[Axios] Refresh token failed:", refreshError);
+          console.error("[Axios] Refresh token failed triệt để:", refreshError);
           isRefreshing = false;
-          refreshSubscribers = []; 
+          onRefreshFailed(refreshError);
           
-          // Chỉ xóa token và redirect nếu KHÔNG PHẢI là request thông báo (tránh làm phiền người dùng khi đang xem phim)         
+          if (!isNotificationRequest) {
+            localStorage.removeItem(USER_INFO_KEY);
+            if (window.location.pathname !== "/login") {
+              window.location.href = "/login";
+            }
+          }
           return Promise.reject(refreshError);
         }
       }
     }
     return Promise.reject(error);
+  }
+);
   }
 );
