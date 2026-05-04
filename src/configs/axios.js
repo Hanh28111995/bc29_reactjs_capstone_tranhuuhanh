@@ -3,11 +3,10 @@ import { BASE_URL, USER_INFO_KEY } from "../constants/common";
 
 export const request = axios.create({
   baseURL: BASE_URL,
-  // Không bật withCredentials toàn cục để tránh lỗi CORS trên Simple Requests
 });
 
 // --- API Cache ---
-// Các URL prefix được cache (GET only, không cần real-time)
+// Các URL prefix được cache (GET only)
 const CACHEABLE_URLS = [
   "/general/movie/all",
   "/general/showBanners",
@@ -16,63 +15,14 @@ const CACHEABLE_URLS = [
   "/general/movie/",
 ];
 
-const apiCache = new Map(); // key: url+params -> { data, expiry }
-const CACHE_TTL = 5 * 60 * 1000; // 5 phút
+const apiCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000;
 
-const getCacheKey = (config) => {
-  const params = config.params ? JSON.stringify(config.params) : "";
-  return `${config.url}__${params}`;
-};
+const isCacheable = (config) => 
+  config.method === "get" && CACHEABLE_URLS.some(url => config.url?.includes(url));
 
-const isCacheable = (config) =>
-  config.method === "get" &&
-  CACHEABLE_URLS.some((prefix) => config.url?.startsWith(prefix));
+const getCacheKey = (config) => `${config.url}${config.params ? JSON.stringify(config.params) : ""}`;
 
-// Request Interceptor
-request.interceptors.request.use((config) => {
-  const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
-  
-  // 1. Tối ưu cho Simple Request (GET public) để tránh hoàn toàn OPTIONS
-  if (config.method === 'get' && config.url?.includes("/general/")) {
-    delete config.headers.Authorization;
-    delete config.headers["Content-Type"];
-    config.headers["Accept"] = "application/json"; 
-    return config;
-  }
-
-  // 2. Chỉ gắn token cho các request cần bảo mật
-  if (userInfor?.user_token && !config.url?.includes("/general/")) {
-    config.headers.Authorization = `Bearer ${userInfor.user_token}`;
-  }
-
-  // 3. Đảm bảo Content-Type chuẩn cho POST/PUT để tránh một số lỗi server
-  if (config.method !== 'get' && !config.headers["Content-Type"]) {
-    config.headers["Content-Type"] = "application/json";
-  }
-
-  // Trả về cache nếu còn hạn
-  if (isCacheable(config)) {
-    const key = getCacheKey(config);
-    const cached = apiCache.get(key);
-    if (cached && cached.expiry > Date.now()) {
-      // Dùng adapter để trả về cached response ngay lập tức
-      config.adapter = () => Promise.resolve(cached.data);
-    }
-  }
-
-  return config;
-});
-
-// Xóa cache thủ công khi cần (gọi sau khi mutate data)
-export const clearApiCache = (urlPrefix) => {
-  if (!urlPrefix) {
-    apiCache.clear();
-    return;
-  }
-  for (const key of apiCache.keys()) {
-    if (key.startsWith(urlPrefix)) apiCache.delete(key);
-  }
-};
 let refreshSubscribers = [];
 let isRefreshing = false;
 
@@ -86,9 +36,53 @@ const onRefreshFailed = (error) => {
   refreshSubscribers = [];
 };
 
+// Request Interceptor
+request.interceptors.request.use((config) => {
+  const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
+  
+  // 1. Đối với API public (/general), không gửi bất kỳ header bảo mật nào để tránh Preflight/403
+  if (config.url?.includes("/general/")) {
+    delete config.headers.Authorization;
+    delete config.headers["Content-Type"];
+    return config;
+  }
+
+  // 2. Đối với API cần bảo mật, chỉ gửi token
+  if (userInfor?.user_token) {
+    config.headers.Authorization = `Bearer ${userInfor.user_token}`;
+  }
+
+  // Trả về cache nếu còn hạn
+  if (isCacheable(config)) {
+    const key = getCacheKey(config);
+    const cached = apiCache.get(key);
+    if (cached && cached.expiry > Date.now()) {
+      config.adapter = () => Promise.resolve(cached.data);
+    }
+  }
+
+  return config;
+});
+
+// Xóa cache thủ công khi cần
+export const clearApiCache = (urlPrefix) => {
+  if (!urlPrefix) {
+    apiCache.clear();
+    return;
+  }
+  for (const key of apiCache.keys()) {
+    if (key.startsWith(urlPrefix)) apiCache.delete(key);
+  }
+};
+
 request.interceptors.response.use(
   (response) => {
-    // ... (giữ nguyên logic cache)
+    // Lưu vào cache nếu là GET cacheable
+    const config = response.config;
+    if (isCacheable(config)) {
+      const key = getCacheKey(config);
+      apiCache.set(key, { data: response, expiry: Date.now() + CACHE_TTL });
+    }
     return response;
   },
   async (error) => {
@@ -96,8 +90,6 @@ request.interceptors.response.use(
     const isTokenExpired = error.response?.status === 401;
 
     if (isTokenExpired && !originalRequest.url?.includes("/auth/refresh")) {
-      const isNotificationRequest = originalRequest.url?.includes("/notifications");
-
       if (!originalRequest._retry) {
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
@@ -119,10 +111,9 @@ request.interceptors.response.use(
           const res = await axios({
             method: 'post',
             url: `${BASE_URL}/auth/refresh`,
-            withCredentials: true, // Bắt buộc để gửi Cookie
-            data: {}, 
+            withCredentials: true,
+            data: {},
             headers: {
-              'Accept': 'application/json',
               'Content-Type': 'application/json',
               'Authorization': currentToken ? `Bearer ${currentToken}` : undefined
             }
@@ -143,14 +134,14 @@ request.interceptors.response.use(
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
             return request(originalRequest);
           } else {
-            throw new Error("No token in response");
+            throw new Error("No token");
           }
         } catch (refreshError) {
-          console.error("[Axios] Refresh token failed triệt để:", refreshError);
+          console.error("[Axios] Refresh failed:", refreshError);
           isRefreshing = false;
           onRefreshFailed(refreshError);
           
-          if (!isNotificationRequest) {
+          if (!originalRequest.url?.includes("/notifications")) {
             localStorage.removeItem(USER_INFO_KEY);
             if (window.location.pathname !== "/login") {
               window.location.href = "/login";
