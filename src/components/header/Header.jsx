@@ -146,7 +146,7 @@ export default function Header() {
                 <i className="fa fa-bell" style={{ fontSize: '2.5rem'}}/>
                 <p className="numNotificationItem">{render1.filter(item => !item.status).length}</p>
               </button>
-              <div style={{ fontSize: '1rem', flexDirection: 'column' }}>
+              <div style={{ fontSize: '1rem', flexDirection: 'column' ,textAlign: 'center'}}>
                 <button
                   onClick={handleLogout}
                   className="btn-more-infor my-2 my-sm-0 mr-2"
