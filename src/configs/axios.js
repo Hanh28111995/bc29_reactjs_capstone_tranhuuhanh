@@ -27,10 +27,12 @@ const isCacheable = (config) =>
   config.method === "get" &&
   CACHEABLE_URLS.some((prefix) => config.url?.startsWith(prefix));
 
-// Request Interceptor: Luôn gắn token mới nhất từ LocalStorage
+// Request Interceptor: Chỉ gắn token cho các request cần bảo mật (thường là /admin hoặc /customer)
 request.interceptors.request.use((config) => {
   const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
-  if (userInfor?.user_token) {
+  
+  // Chỉ gắn Authorization nếu URL không bắt đầu bằng /general (các API công khai)
+  if (userInfor?.user_token && !config.url?.startsWith("/general")) {
     config.headers.Authorization = `Bearer ${userInfor.user_token}`;
   }
 
