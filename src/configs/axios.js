@@ -3,6 +3,7 @@ import { BASE_URL, USER_INFO_KEY } from "../constants/common";
 
 export const request = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true, // Khôi phục để dùng Cookie
 });
 
 // --- API Cache ---
@@ -27,13 +28,18 @@ const isCacheable = (config) =>
   config.method === "get" &&
   CACHEABLE_URLS.some((prefix) => config.url?.startsWith(prefix));
 
-// Request Interceptor: Chỉ gắn token cho các request cần bảo mật (thường là /admin hoặc /customer)
+// Request Interceptor
 request.interceptors.request.use((config) => {
   const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
   
-  // Chỉ gắn Authorization nếu URL không bắt đầu bằng /general (các API công khai)
-  if (userInfor?.user_token && !config.url?.startsWith("/general")) {
+  // 1. Chỉ gắn token cho các request KHÔNG phải là public (/general)
+  if (userInfor?.user_token && !config.url?.includes("/general/")) {
     config.headers.Authorization = `Bearer ${userInfor.user_token}`;
+  }
+
+  // 2. Tối ưu cho Simple Request để tránh OPTIONS nếu có thể
+  if (config.url?.includes("/general/")) {
+    delete config.headers["Content-Type"]; // Để trình duyệt tự quyết định cho GET
   }
 
   // Trả về cache nếu còn hạn
