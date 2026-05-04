@@ -33,19 +33,17 @@ export default function Header() {
   const userRole = userState.userInfor?.user_inf?.role;
   const userId = userState.userInfor?.user_inf?.id;
 
-  const { state: notifications = [] } = useAsync({
-    service: () => fetchNotificationAPI(userRole),
-    dependencies: [userRole, userId],
-    condition: !!userId,
-  });
-
   const [render, setRender] = useState([]);
   const [render1, setRender1] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (notifications) {
-      const formattedNotifications = notifications.map((noti) => ({
+  // Hàm fetch dữ liệu để tái sử dụng cho polling
+  const getNotifications = async () => {
+    if (!userId || !userRole) return;
+    try {
+      const res = await fetchNotificationAPI(userRole);
+      const data = res.data.content || [];
+      const formattedNotifications = data.map((noti) => ({
         ...noti,
         note: noti.message || noti.note || "Thông báo mới",
         status: noti.status ?? false,
@@ -53,8 +51,26 @@ export default function Header() {
       }));
       setRender(formattedNotifications);
       setRender1(formattedNotifications);
+    } catch (error) {
+      console.error("Lỗi khi polling thông báo:", error);
     }
-  }, [notifications]);
+  };
+
+  // Fetch ban đầu khi login
+  useEffect(() => {
+    getNotifications();
+  }, [userRole, userId]);
+
+  // Thiết lập Polling mỗi 30 giây để cập nhật thông báo mới từ DB
+  useEffect(() => {
+    if (!userId) return;
+
+    const interval = setInterval(() => {
+      getNotifications();
+    }, 30000); // 30 giây
+
+    return () => clearInterval(interval);
+  }, [userId, userRole]);
 
   const handleMarkAllAsRead = async () => {
     if (!userId || !userRole) return;
@@ -84,8 +100,17 @@ export default function Header() {
     }
   };
 
-  const render_in_cart =
-    render.slice(-5).map((ele, index) => {
+  const render_in_cart = [...render]
+    .sort((a, b) => {
+      // 1. Ưu tiên status = false (chưa đọc) lên trước
+      if (a.status !== b.status) {
+        return a.status ? 1 : -1;
+      }
+      // 2. Nếu cùng status, ưu tiên đối tượng sớm nhất (createdAt cũ nhất)
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    })
+    .slice(0, 5) // Lấy 5 thông báo đầu tiên sau khi đã sắp xếp
+    .map((ele, index) => {
       const isUnread = !ele.status;
       return (
         <div
