@@ -58,42 +58,52 @@ export default function Header() {
 
   const render_in_cart =
     render.slice(-5).map((ele, index) => {
+      const isUnread = !ele.status;
       return (
-        <li key={index} className={`list-group-item d-flex justify-content-between align-items-center ${!ele.status ? 'bg-secondary text-white' : ''}`}>
-          {ele.note}
-          <span className="badge badge-primary badge-pill">{ele.createdAt.toLocaleString()}</span>
-        </li>
+        <div key={index} className={`noti-item ${isUnread ? 'unread' : ''}`}>
+          <div className="noti-icon-wrapper">
+            <i className="fa fa-ticket-alt"></i>
+          </div>
+          <div className="noti-content">
+            <span className="noti-text">{ele.note}</span>
+            <span className="noti-time">{ele.createdAt.toLocaleString()}</span>
+          </div>
+          {isUnread && <div className="unread-dot"></div>}
+        </div>
       )
     })
 
   // console.log(render_card1, render_card2)
   return (
     < div >
-      {/* Modal Notification bằng React State */}
+      {/* Facebook Style Notification Popover */}
       {isModalOpen && (
-        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1" role="dialog">
-          <div className="modal-dialog modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h4 className="modal-title">YOUR NOTIFICATION</h4>
-                <button type="button" className="close" onClick={() => setIsModalOpen(false)}>
-                  <span>×</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <ul className="list-group">
-                  {render_in_cart.length > 0 ? render_in_cart : <li className="list-group-item">Không có thông báo mới</li>}
-                </ul>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-primary" onClick={() => {
-                  setIsModalOpen(false);
-                  navigate("/ticket-management");
-                }}>Show more</button>
-              </div>
+        <>
+          <div className="noti-backdrop" onClick={() => setIsModalOpen(false)}></div>
+          <div className="noti-popover-wrapper">
+            <div className="noti-header">
+              <h4>Thông báo</h4>
+              <button className="close-btn" onClick={() => setIsModalOpen(false)}>
+                <i className="fa fa-times"></i>
+              </button>
+            </div>
+            <div className="noti-body">
+              {render_in_cart.length > 0 ? (
+                <div className="list-group">
+                  {render_in_cart}
+                </div>
+              ) : (
+                <div className="empty-noti">Không có thông báo mới</div>
+              )}
+            </div>
+            <div className="noti-footer">
+              <button className="see-all-btn" onClick={() => {
+                setIsModalOpen(false);
+                navigate("/ticket-management");
+              }}>Xem tất cả</button>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       <nav className="navbar navbar-expand-lg navbar-light py-3">
