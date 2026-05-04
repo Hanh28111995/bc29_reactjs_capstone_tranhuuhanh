@@ -131,15 +131,16 @@
             border: none;
             margin-bottom: 2px;
             gap: 12px;
+             background: #797575;
 
             &:hover {
                 background: #f2f2f2;
             }
 
             &.unread {
-                background: #e7f3ff;
+                background: #ffffff;
                 &:hover {
-                    background: #dbeafe;
+                    background: #f2f2f2;
                 }
                 .noti-content {
                     .noti-text {
