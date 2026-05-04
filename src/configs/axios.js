@@ -119,10 +119,11 @@ request.interceptors.response.use(
           const res = await axios({
             method: 'post',
             url: `${BASE_URL}/auth/refresh`,
-            withCredentials: true,
+            withCredentials: true, // Bắt buộc để gửi Cookie
+            data: {}, 
             headers: {
+              'Accept': 'application/json',
               'Content-Type': 'application/json',
-              // Thử gửi kèm token cũ nếu server yêu cầu để định danh
               'Authorization': currentToken ? `Bearer ${currentToken}` : undefined
             }
           });
