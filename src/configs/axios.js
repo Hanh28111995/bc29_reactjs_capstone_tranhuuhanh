@@ -3,7 +3,7 @@ import { BASE_URL, USER_INFO_KEY } from "../constants/common";
 
 export const request = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true, // Khôi phục để dùng Cookie
+  // Không bật withCredentials toàn cục để tránh lỗi CORS trên Simple Requests
 });
 
 // --- API Cache ---
@@ -32,14 +32,22 @@ const isCacheable = (config) =>
 request.interceptors.request.use((config) => {
   const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
   
-  // 1. Chỉ gắn token cho các request KHÔNG phải là public (/general)
+  // 1. Tối ưu cho Simple Request (GET public) để tránh hoàn toàn OPTIONS
+  if (config.method === 'get' && config.url?.includes("/general/")) {
+    delete config.headers.Authorization;
+    delete config.headers["Content-Type"];
+    config.headers["Accept"] = "application/json"; 
+    return config;
+  }
+
+  // 2. Chỉ gắn token cho các request cần bảo mật
   if (userInfor?.user_token && !config.url?.includes("/general/")) {
     config.headers.Authorization = `Bearer ${userInfor.user_token}`;
   }
 
-  // 2. Tối ưu cho Simple Request để tránh OPTIONS nếu có thể
-  if (config.url?.includes("/general/")) {
-    delete config.headers["Content-Type"]; // Để trình duyệt tự quyết định cho GET
+  // 3. Đảm bảo Content-Type chuẩn cho POST/PUT để tránh một số lỗi server
+  if (config.method !== 'get' && !config.headers["Content-Type"]) {
+    config.headers["Content-Type"] = "application/json";
   }
 
   // Trả về cache nếu còn hạn
