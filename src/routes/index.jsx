@@ -13,6 +13,7 @@ const TicketManagement = lazy(() => import("pages/ticket-management/TicketManage
 const EditTicket = lazy(() => import("pages/EditTicket/EditTicket"));
 const ScheduleGenerator = lazy(() => import("pages/tools/ScheduleGenerator"));
 const PaymentResult = lazy(() => import("pages/payment/PaymentResult"));
+const HistoryTicket = lazy(() => import("pages/history/HistoryTicket"));
 
 const Login = lazy(() => import("pages/login/Login"));
 const Register = lazy(() => import("pages/register/Register"));
@@ -66,6 +67,10 @@ export default function Router() {
             {
               path: "/booking/payment/:id",
               element: <Payment />,
+            },
+            {
+              path: "/ticket-history",
+              element: <HistoryTicket />,
             },
           ],
         },

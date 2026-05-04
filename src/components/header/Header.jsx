@@ -4,11 +4,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { USER_INFO_KEY } from "../../constants/common";
 import { setUserInfoAction } from "../../store/actions/user.action";
 import { useAsync } from "hooks/useAsync";
-import { userDetailApi } from "services/user";
+import { logoutAPI } from "services/user";
+import { fetchNotificationAPI } from "services/notificationAndHistory";
 import "./index.scss";
 import { useEffect } from "react";
 import { useState } from "react";
-import { logoutAPI } from "services/user";
 
 
 
@@ -30,78 +30,35 @@ export default function Header() {
     }
   };
 
-  const { state: userDetail = [] } = useAsync({
-    service: () => userDetailApi(userState.userInfor?.user_inf?.id),
+  const { state: notifications = [] } = useAsync({
+    service: () => fetchNotificationAPI(userState.userInfor?.user_inf?.role),
     dependencies: [userState.userInfor],
-    codintion: !!userState.userInfor?.user_inf?.id,
+    condition: !!userState.userInfor?.user_inf?.id,
   });
 
   const [render, setRender] = useState([]);
   const [render1, setRender1] = useState([]);
 
   useEffect(() => {
-    // console.log(userState.userInfor? 'true': 'false')
-    if (userDetail?.thongTinDatVe) {
-      let render_card1 =
-        userDetail.thongTinDatVe?.map(ele => {
-          return [
-            ele.tenPhim,
-            ele.giaVe,
-          ]
-        })
-      let render_card2 =
-        userDetail.thongTinDatVe?.map(ele => {
-          return (ele.danhSachGhe.map(eles => {
-            return [
-              eles.tenGhe,
-              eles.tenHeThongRap,
-            ]
-          }))
-        })
-      let render_card = [];
-      if ((render_card1) && (render_card2)) {
-        for (let i = 0; i < render_card2.length; i++) {
-          render_card[i] = render_card1[i].concat(render_card2[i]);
-        }
-      }
-      setRender1(render_card1)
-      setRender(render_card)
+    if (notifications) {
+      const formattedNotifications = notifications.map((noti) => ({
+        ...noti,
+        note: noti.message || noti.note || "Thông báo mới",
+        status: noti.status ?? false,
+        createdAt: noti.createdAt ? new Date(noti.createdAt) : new Date(),
+      }));
+      setRender(formattedNotifications);
+      setRender1(formattedNotifications);
     }
-
-  }, [userDetail])
-
-  const sumTotal = (x) => {
-    let total = 0;
-    x.map(ele => {
-      total += (ele[1] * (ele.length - 2));
-    })
-    return total
-  }
+  }, [notifications]);
 
   const render_in_cart =
-    render.map((ele, index) => {
+    render.slice(-5).map((ele, index) => {
       return (
-
-        <tr key={index}>
-          <td>{index + 1}</td>
-          <td>{ele[0]}</td>
-          <td>
-            {
-              ele.slice(2).map(item => {
-                return (item[0] + [', '])
-              })
-            }
-          </td>
-          <td> {
-            ele.slice(2).map((item, index) => {
-              if (index === 0) {
-                return item[1]
-              }
-            })
-          }</td>
-          <td>{ele[1].toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}</td>
-        </tr>
-
+        <li key={index} className={`list-group-item d-flex justify-content-between align-items-center ${!ele.status ? 'bg-secondary text-white' : ''}`}>
+          {ele.note}
+          <span className="badge badge-primary badge-pill">{ele.createdAt.toLocaleString()}</span>
+        </li>
       )
     })
 
@@ -113,40 +70,18 @@ export default function Header() {
           <div className="modal-content">
             {/* Modal Header */}
             <div className="modal-header">
-              <h4 className="modal-title">YOUR CART</h4>
+              <h4 className="modal-title">YOUR NOTIFICATION</h4>
               <button type="button" className="close" data-dismiss="modal">×</button>
             </div>
             {/* Modal body */}
             <div className="modal-body">
-              <table className="table">
-                <thead>
-                  <tr><td>Order</td>
-                    <td>Name of Movie</td>
-                    <td>Seat</td>
-                    <td>Address</td>
-                    <td>Price</td>
-                    <td />
-                  </tr></thead>
-                <tbody >
-                  {render_in_cart}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td style={{ textAlign: 'right', fontWeight: 700 }} colSpan={6}>Total price:
-                      <span>{
-                        ' ' + sumTotal(render).toLocaleString('it-IT', { style: 'currency', currency: 'VND' })
-                      }
-                      </span>
-                    </td>
-
-                  </tr>
-                </tfoot>
-              </table>
+              <ul className="list-group">
+                {render_in_cart}
+              </ul>
             </div>
             {/* Modal footer */}
             <div className="modal-footer">
-              {/* <button className="btn btn-success" id="showBill" data-toggle="modal" data-target="#myPayment" >Purchase</button>
-              <button className="btn btn-warning" >Clear</button> */}
+              <button className="btn btn-primary" onClick={() => navigate("/ticket-history")}>Show more</button>
             </div>
           </div>
         </div>
@@ -204,11 +139,11 @@ export default function Header() {
             </div>
           ) : (
             <div className="ml-auto d-flex align-items-center justify-content-between pl-2" >
-              <button className="btn mx-2" id="showCartBtn" data-toggle="modal" data-target="#myModal">
-                <i className="fa fa-shopping-cart" />
-                <p className="numCartItem">{render1.length}</p>
+              <button className="btn mx-2" id="showNotificationBtn" data-toggle="modal" data-target="#myModal">
+                <i className="fa fa-bell" style={{ fontSize: '2.5rem'}}/>
+                <p className="numNotificationItem">{render1.filter(item => !item.status).length}</p>
               </button>
-              <div style={{ fontSize: '12px', flexDirection: 'column' }}>
+              <div style={{ fontSize: '1rem', flexDirection: 'column' }}>
                 <button
                   onClick={handleLogout}
                   className="btn-more-infor my-2 my-sm-0 mr-2"
