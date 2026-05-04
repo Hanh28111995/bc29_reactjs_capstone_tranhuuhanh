@@ -113,14 +113,16 @@ request.interceptors.response.use(
       try {
         // Gọi API Refresh - KHÔNG dùng instance 'request' để tránh loop
         // withCredentials: true cực kỳ quan trọng để gửi Cookie chứa refreshToken
+        console.log("[Axios] Token expired, attempting refresh...");
         const res = await axios.post(`${BASE_URL}/auth/refresh`, {}, { 
           withCredentials: true 
         });
 
-        // Lấy token mới (Kiểm tra lại cấu trúc trả về của BE)
-        const newToken = res.data?.content?.accessToken || res.data?.accessToken;
+        // Lấy token mới - Thử nhiều cấu trúc trả về khác nhau
+        const newToken = res.data?.content?.user_token || res.data?.content?.accessToken || res.data?.accessToken;
 
         if (newToken) {
+          console.log("[Axios] Refresh token success!");
           const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
           if (userInfor) {
             userInfor.user_token = newToken;
@@ -128,17 +130,23 @@ request.interceptors.response.use(
           }
 
           isRefreshing = false;
-          onRefreshed(newToken); // Giải phóng hàng đợi
+          onRefreshed(newToken); 
 
-          // Thực hiện lại request bị lỗi ban đầu với token mới
+          // Thực hiện lại request bị lỗi ban đầu
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return request(originalRequest);
+        } else {
+          throw new Error("No token found in refresh response");
         }
       } catch (refreshError) {
+        console.error("[Axios] Refresh token failed:", refreshError);
         isRefreshing = false;
-        // Nếu refresh cũng lỗi (hết hạn 7 ngày), xóa sạch và logout
+        // Nếu refresh cũng lỗi, xóa sạch và logout
         localStorage.removeItem(USER_INFO_KEY);
-        window.location.href = "/login";
+        // Tránh redirect liên tục nếu đang ở trang login
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
         return Promise.reject(refreshError);
       }
     }
