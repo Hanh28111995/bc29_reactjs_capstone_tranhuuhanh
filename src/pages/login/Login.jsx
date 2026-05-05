@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 import { USER_INFO_KEY } from "../../constants/common";
 import { loginAPI, loginGoogleAPI } from "services/user";
 import { setNotificationsAction, setUserInfoAction } from "../../store/actions/user.action";
@@ -13,6 +14,8 @@ import { fetchNotificationAPI, formatNotificationsForStore } from "services/noti
 export default function Login() {
   const { closeLogin } = useAuth(); 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [state, setState] = useState({
     username: "hanhtran",
     password: "123456",
@@ -42,6 +45,9 @@ export default function Login() {
       dispatch(setNotificationsAction([]));
     } finally {
       closeLogin();
+      if (pathname === "/login") {
+        navigate("/");
+      }
     }
   }
 

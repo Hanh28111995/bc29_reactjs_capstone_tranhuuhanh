@@ -10,7 +10,7 @@ export default function NoAuthGuards() {
         if (userState.userInfor){
             navigate('/');
         }
-    },[]);
+    },[userState.userInfor, navigate]);
   return (
     <Outlet />
   )
