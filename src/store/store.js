@@ -1,6 +1,10 @@
-import { combineReducers, createStore } from "redux";
+import { combineReducers, compose, createStore } from "redux";
 import { userReducer } from "./reducers/user.reducer";
- const rootReducer = combineReducers({
-    userReducer: userReducer,
- });
- export const store = createStore(rootReducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+
+const rootReducer = combineReducers({
+  userReducer: userReducer,
+});
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+export const store = createStore(rootReducer, composeEnhancers());

@@ -11,6 +11,11 @@ request.interceptors.request.use((config) => {
   if (userInfor?.user_token) {
     config.headers.Authorization = `Bearer ${userInfor.user_token}`;
   }
+  // GET /general là public, không nên gửi Authorization (dễ kích hoạt preflight/CORS ở một số BE)
+  if (config.method === "get" && config.url?.startsWith("/general/")) {
+    config.withCredentials = false;
+    delete config.headers.Authorization;
+  }
   return config;
 });
 
