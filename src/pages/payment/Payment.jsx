@@ -28,6 +28,14 @@ export default function Payment() {
         return <div className="error-state">Không có dữ liệu đơn hàng</div>;
     }
 
+    const refreshNotificationsToStore = async () => {
+        const role = userState.userInfor?.user_inf?.role;
+        if (!role) return;
+        const notiRes = await fetchNotificationAPI(role);
+        const formatted = formatNotificationsForStore(notiRes.data?.content);
+        dispatch(setNotificationsAction(formatted));
+    };
+
     // Chế độ ĐẶT VÉ — tạo vé Pending, không qua cổng thanh toán
     const handleReserve = async () => {
         confirm({
@@ -38,7 +46,7 @@ export default function Payment() {
             cancelText: 'Hủy',
             async onOk() {
                 try {
-                    const result = await fetchTicketBookingAPI(userState.userInfor?.user_inf.role, {
+                    await fetchTicketBookingAPI(userState.userInfor?.user_inf.role, {
                         user_id: customerInfo?.id || userState.userInfor?.user_inf?.id,
                         id_movie: movieInfor?._id,
                         id_theater: theater?._id,
@@ -54,14 +62,7 @@ export default function Payment() {
                         paymentMethod: 'cash',
                         paymentStatus: 'Pending',
                     });
-                    try {
-                        const role = userState.userInfor?.user_inf?.role;
-                        if (role) {
-                            const notiRes = await fetchNotificationAPI(role);
-                            const formatted = formatNotificationsForStore(notiRes.data?.content);
-                            dispatch(setNotificationsAction(formatted));
-                        }
-                    } catch {}
+                    await refreshNotificationsToStore();
                     navigate("/")
                     // const ticket = result?.data?.content;
                     // await fetchCreateCashPayment(ticket);
@@ -112,14 +113,7 @@ export default function Payment() {
                 paymentStatus: 'Pending',
             });
 
-            try {
-                const role = userState.userInfor?.user_inf?.role;
-                if (role) {
-                    const notiRes = await fetchNotificationAPI(role);
-                    const formatted = formatNotificationsForStore(notiRes.data?.content);
-                    dispatch(setNotificationsAction(formatted));
-                }
-            } catch {}
+            await refreshNotificationsToStore();
 
             if (result?.data?.success) {
                 notification.success({
