@@ -2,8 +2,12 @@ import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { USER_INFO_KEY } from "../../constants/common";
-import { setUserInfoAction } from "../../store/actions/user.action";
-import { useAsync } from "hooks/useAsync";
+import {
+  markAllNotificationsReadAction,
+  markNotificationReadAction,
+  setNotificationsAction,
+  setUserInfoAction,
+} from "../../store/actions/user.action";
 import { logoutAPI } from "services/user";
 import { fetchNotificationAPI, markAllNotificationsAsReadAPI, fetchChangeStatusNotificationAPI } from "services/notificationAndHistory";
 import "./index.scss";
@@ -33,8 +37,7 @@ export default function Header() {
   const userRole = userState.userInfor?.user_inf?.role;
   const userId = userState.userInfor?.user_inf?.id;
 
-  const [render, setRender] = useState([]);
-  const [render1, setRender1] = useState([]);
+  const notifications = userState.notifications || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Hàm fetch dữ liệu
@@ -49,8 +52,15 @@ export default function Header() {
         status: noti.status ?? false,
         createdAt: noti.createdAt ? new Date(noti.createdAt) : new Date(),
       }));
-      setRender(formattedNotifications);
-      setRender1(formattedNotifications);
+      const prevSignature = (notifications || [])
+        .map((n) => `${n?._id}:${n?.status}`)
+        .join("|");
+      const nextSignature = (formattedNotifications || [])
+        .map((n) => `${n?._id}:${n?.status}`)
+        .join("|");
+      if (prevSignature !== nextSignature) {
+        dispatch(setNotificationsAction(formattedNotifications));
+      }
     } catch (error) {
       console.error("Lỗi khi lấy thông báo:", error);
     }
@@ -59,7 +69,7 @@ export default function Header() {
   // Lấy dữ liệu khi chuyển trang hoặc login
   useEffect(() => {
     getNotifications();
-  }, [userRole, userId, pathname]); // Thêm pathname để gọi lại khi chuyển trang
+  }, [userRole, userId, pathname]);
 
   // Hàm mở thông báo
   const handleOpenNotifications = () => {
@@ -70,10 +80,7 @@ export default function Header() {
     if (!userId || !userRole) return;
     try {
       await markAllNotificationsAsReadAPI(userRole);
-      // Cập nhật UI cục bộ để người dùng thấy thay đổi ngay lập tức
-      const updated = render.map(item => ({ ...item, status: true }));
-      setRender(updated);
-      setRender1(updated);
+      dispatch(markAllNotificationsReadAction());
     } catch (error) {
       console.error("Lỗi khi đánh dấu tất cả đã đọc:", error);
     }
@@ -83,18 +90,13 @@ export default function Header() {
     if (!id || !userRole) return;
     try {
       await fetchChangeStatusNotificationAPI(userRole, id);
-      // Cập nhật UI cục bộ
-      const updated = render.map(item =>
-        item._id === id ? { ...item, status: true } : item
-      );
-      setRender(updated);
-      setRender1(updated);
+      dispatch(markNotificationReadAction(id));
     } catch (error) {
       console.error("Lỗi khi đánh dấu đã xem:", error);
     }
   };
 
-  const render_in_cart = [...render]
+  const render_in_cart = [...notifications]
     .sort((a, b) => {
       // 1. Ưu tiên status = false (chưa đọc) lên trước
       if (a.status !== b.status) {
@@ -211,7 +213,7 @@ export default function Header() {
             <div className="ml-auto d-flex align-items-center justify-content-between pl-2" >
               <button className="btn mx-2" id="showNotificationBtn" onClick={handleOpenNotifications}>
                 <i className="fa fa-bell" style={{ fontSize: '2.5rem'}}/>
-                <p className="numNotificationItem">{render1.filter(item => !item.status).length}</p>
+                <p className="numNotificationItem">{notifications.filter(item => !item.status).length}</p>
               </button>
               <div style={{ fontSize: '1rem', flexDirection: 'column' ,textAlign: 'center'}}>
                 <button

@@ -10,7 +10,6 @@ const fetchMoviebannerAPI = () => {
   return request({
     url: `/general/showBanners`,
     method: "GET",
-    bypassCache: true,
   });
 };
 
@@ -18,7 +17,6 @@ const fetchMovieListAPI = () => {
   return request({
     url: `/general/movie/all`,
     method: "GET",
-    bypassCache: true,
   });
 };
 

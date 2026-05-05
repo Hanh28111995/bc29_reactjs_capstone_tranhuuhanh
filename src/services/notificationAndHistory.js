@@ -27,4 +27,3 @@ export const markAllNotificationsAsReadAPI = (role) => {
     method: "PUT",
   });
 };
-
