@@ -1,1 +1,0 @@
-import{t as e}from"./axios-BLjIGg4t.js";var t=(t,n)=>e({url:`/${t}/showtime/showtimeDetail/${n}`,method:`GET`}),n=(t,n)=>(t==`admin`&&(t=`staff`),e({url:`/${t}/ticket/bookingTicket`,method:`POST`,data:n})),r=(t,n,r)=>e({url:`/${t}/cancelTicket`,method:`PUT`,data:r}),i=(t,n)=>e({url:`/admin/user/search`,method:`GET`,params:{keyword:n}});export{i,t as n,n as r,r as t};

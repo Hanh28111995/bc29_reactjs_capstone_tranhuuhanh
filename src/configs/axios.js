@@ -53,7 +53,7 @@ request.interceptors.request.use((config) => {
   }
 
   // Trả về cache nếu còn hạn
-  if (isCacheable(config)) {
+  if (!config.bypassCache && isCacheable(config)) {
     const key = getCacheKey(config);
     const cached = apiCache.get(key);
     if (cached && cached.expiry > Date.now()) {

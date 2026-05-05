@@ -1,1 +1,0 @@
-import{n as e}from"./ticket-YrGxt-d8.js";export{e as fetchAllTicketsAPI};

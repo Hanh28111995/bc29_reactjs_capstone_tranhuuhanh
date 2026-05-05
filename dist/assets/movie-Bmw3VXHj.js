@@ -1,1 +1,0 @@
-import{t as e}from"./axios-BLjIGg4t.js";var t=()=>e({url:`/admin/movie/allMovies`,method:`GET`}),n=t=>e({url:`/admin/movie/add`,method:`POST`,data:t}),r=t=>e({url:`/admin/movie/update`,method:`PUT`,data:t}),i=t=>e({url:`/admin/movie/delete/${t}`,method:`DELETE`});export{r as i,i as n,t as r,n as t};
