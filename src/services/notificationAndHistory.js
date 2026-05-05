@@ -14,6 +14,16 @@ export const fetchNotificationAPI = (role) => {
   });
 };
 
+export const formatNotificationsForStore = (notifications) => {
+  const list = Array.isArray(notifications) ? notifications : [];
+  return list.map((noti) => ({
+    ...noti,
+    note: noti.message || noti.note || "Thông báo mới",
+    status: noti.status ?? false,
+    createdAt: noti.createdAt ? new Date(noti.createdAt) : new Date(),
+  }));
+};
+
 export const fetchChangeStatusNotificationAPI = (role, id) => {
   return request({
     url: `/${role}/notifications/read/${id}`,

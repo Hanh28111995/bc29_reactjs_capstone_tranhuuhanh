@@ -9,7 +9,7 @@ import {
   setUserInfoAction,
 } from "../../store/actions/user.action";
 import { logoutAPI } from "services/user";
-import { fetchNotificationAPI, markAllNotificationsAsReadAPI, fetchChangeStatusNotificationAPI } from "services/notificationAndHistory";
+import { fetchNotificationAPI, formatNotificationsForStore, markAllNotificationsAsReadAPI, fetchChangeStatusNotificationAPI } from "services/notificationAndHistory";
 import "./index.scss";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -29,6 +29,7 @@ export default function Header() {
       console.error("Lỗi logout server:", error);
     } finally {
       localStorage.removeItem(USER_INFO_KEY);
+      dispatch(setNotificationsAction([]));
       dispatch(setUserInfoAction(null));
       navigate('/');
     }
@@ -45,22 +46,8 @@ export default function Header() {
     if (!userId || !userRole) return;
     try {
       const res = await fetchNotificationAPI(userRole);
-      const data = res.data.content || [];
-      const formattedNotifications = data.map((noti) => ({
-        ...noti,
-        note: noti.message || noti.note || "Thông báo mới",
-        status: noti.status ?? false,
-        createdAt: noti.createdAt ? new Date(noti.createdAt) : new Date(),
-      }));
-      const prevSignature = (notifications || [])
-        .map((n) => `${n?._id}:${n?.status}`)
-        .join("|");
-      const nextSignature = (formattedNotifications || [])
-        .map((n) => `${n?._id}:${n?.status}`)
-        .join("|");
-      if (prevSignature !== nextSignature) {
-        dispatch(setNotificationsAction(formattedNotifications));
-      }
+      const formattedNotifications = formatNotificationsForStore(res.data?.content);
+      dispatch(setNotificationsAction(formattedNotifications));
     } catch (error) {
       console.error("Lỗi khi lấy thông báo:", error);
     }

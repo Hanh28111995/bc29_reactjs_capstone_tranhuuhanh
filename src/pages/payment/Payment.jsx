@@ -2,18 +2,21 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Card, Button, Radio, Divider, Typography, Space, Modal, notification } from 'antd';
 import { CreditCardOutlined, WalletOutlined, DollarOutlined, ArrowLeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import dayjs from 'dayjs';
 import { fetchTicketBookingAPI } from 'services/customer';
 import { fetchCreateMomoPayment, fetchCreateCashPayment } from 'services/ticket';
 import "./index.scss"; // Import file scss mới
 import { fetchCreateVnpayPayment } from 'services/ticket';
+import { fetchNotificationAPI, formatNotificationsForStore } from 'services/notificationAndHistory';
+import { setNotificationsAction } from 'store/actions/user.action';
 
 const { Title, Text } = Typography;
 const { confirm } = Modal;
 
 export default function Payment() {
     const userState = useSelector((state) => state.userReducer);
+    const dispatch = useDispatch();
     const params = useParams();
     const location = useLocation();
     const navigate = useNavigate();
@@ -51,6 +54,14 @@ export default function Payment() {
                         paymentMethod: 'cash',
                         paymentStatus: 'Pending',
                     });
+                    try {
+                        const role = userState.userInfor?.user_inf?.role;
+                        if (role) {
+                            const notiRes = await fetchNotificationAPI(role);
+                            const formatted = formatNotificationsForStore(notiRes.data?.content);
+                            dispatch(setNotificationsAction(formatted));
+                        }
+                    } catch {}
                     navigate("/")
                     // const ticket = result?.data?.content;
                     // await fetchCreateCashPayment(ticket);
@@ -100,6 +111,15 @@ export default function Payment() {
                 paymentMethod: paymentMethod,
                 paymentStatus: 'Pending',
             });
+
+            try {
+                const role = userState.userInfor?.user_inf?.role;
+                if (role) {
+                    const notiRes = await fetchNotificationAPI(role);
+                    const formatted = formatNotificationsForStore(notiRes.data?.content);
+                    dispatch(setNotificationsAction(formatted));
+                }
+            } catch {}
 
             if (result?.data?.success) {
                 notification.success({
