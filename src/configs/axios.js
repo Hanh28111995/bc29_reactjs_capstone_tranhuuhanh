@@ -10,6 +10,8 @@ request.interceptors.request.use((config) => {
   const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
   if (userInfor?.user_token) {
     config.headers.Authorization = `Bearer ${userInfor.user_token}`;
+  } else if (config.headers?.Authorization) {
+    delete config.headers.Authorization;
   }
   // GET /general là public, không nên gửi Authorization (dễ kích hoạt preflight/CORS ở một số BE)
   if (config.method === "get" && config.url?.startsWith("/general/")) {
@@ -30,19 +32,22 @@ request.interceptors.response.use(
       !originalRequest?._retry &&
       !originalRequest?.url?.includes("/auth/refresh")
     ) {
+      const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
+      const currentToken = userInfor?.user_token;
+      if (!currentToken) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
 
       try {
-        const userInfor = JSON.parse(localStorage.getItem(USER_INFO_KEY) || "null");
-        const currentToken = userInfor?.user_token;
-
         const res = await axios.post(
           `${BASE_URL}/auth/refresh`,
           {},
           {
             withCredentials: true,
             headers: {
-              Authorization: currentToken ? `Bearer ${currentToken}` : undefined,
+              Authorization: `Bearer ${currentToken}`,
             },
           }
         );
@@ -61,9 +66,6 @@ request.interceptors.response.use(
         return request(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem(USER_INFO_KEY);
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
-        }
         return Promise.reject(refreshError);
       }
     }

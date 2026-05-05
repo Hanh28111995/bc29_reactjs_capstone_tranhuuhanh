@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { USER_INFO_KEY } from "../../constants/common";
 import { loginAPI, loginGoogleAPI } from "services/user";
-import { setUserInfoAction } from "../../store/actions/user.action";
+import { setNotificationsAction, setUserInfoAction } from "../../store/actions/user.action";
 import { notification } from "antd";
 import { useAuth } from "contexts/auth.context";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "configs/firebase.config";
 import SEO from "components/SEO";
+import { fetchNotificationAPI, formatNotificationsForStore } from "services/notificationAndHistory";
 
 export default function Login() {
   const { closeLogin } = useAuth(); 
@@ -25,13 +26,23 @@ export default function Login() {
     })
   }
 
-  const handleLoginSuccess = (userData) => {
+  const handleLoginSuccess = async (userData) => {
     localStorage.setItem(USER_INFO_KEY, JSON.stringify(userData));
     dispatch(setUserInfoAction(userData));
-    closeLogin(); 
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    try {
+      const role = userData?.user_inf?.role;
+      if (role) {
+        const res = await fetchNotificationAPI(role);
+        const formatted = formatNotificationsForStore(res.data?.content);
+        dispatch(setNotificationsAction(formatted));
+      } else {
+        dispatch(setNotificationsAction([]));
+      }
+    } catch {
+      dispatch(setNotificationsAction([]));
+    } finally {
+      closeLogin();
+    }
   }
 
   const handleSubmit = async (event) => {
@@ -40,7 +51,7 @@ export default function Login() {
       const result = await loginAPI(state);
       const userData = result.data.content;
       notification.success({ description: "Đăng nhập thành công!" });
-      handleLoginSuccess(userData);
+      await handleLoginSuccess(userData);
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Đăng nhập thất bại";
       notification.error({ description: errorMsg });
@@ -61,7 +72,7 @@ export default function Login() {
       const userData = response.data.content;
       
       notification.success({ description: "Đăng nhập bằng Google thành công!" });
-      handleLoginSuccess(userData);
+      await handleLoginSuccess(userData);
     } catch (error) {
       console.error("Chi tiết lỗi Google Login:", error);
       
