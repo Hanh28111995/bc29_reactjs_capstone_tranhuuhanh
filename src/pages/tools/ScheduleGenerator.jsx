@@ -50,8 +50,7 @@ export default function ScheduleGenerator() {
     const list = Array.isArray(rawMovies) ? rawMovies : [];
     return [...list]
       .filter((m) => m.releaseDate)
-      .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)))
-      .slice(0, 5);
+      .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)));
   }, [rawMovies]);
 
   const theaters = Array.isArray(rawTheaters) ? rawTheaters : [];
