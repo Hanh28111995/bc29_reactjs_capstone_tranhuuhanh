@@ -13,6 +13,7 @@ const logoutAPI = () => {
   return request({    
     url: `/auth/logout`,
     method: "POST",
+    withCredentials: true,
   });
 };
 
