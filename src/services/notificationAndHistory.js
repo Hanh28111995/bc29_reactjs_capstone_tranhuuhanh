@@ -15,7 +15,15 @@ export const fetchNotificationAPI = (role) => {
 };
 
 export const formatNotificationsForStore = (notifications) => {
-  const list = Array.isArray(notifications) ? notifications : [];
+  const list = Array.isArray(notifications)
+    ? notifications
+    : Array.isArray(notifications?.notifications)
+      ? notifications.notifications
+      : Array.isArray(notifications?.data)
+        ? notifications.data
+        : Array.isArray(notifications?.items)
+          ? notifications.items
+          : [];
   return list.map((noti) => ({
     ...noti,
     note: noti.message || noti.note || "Thông báo mới",
