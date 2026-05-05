@@ -13,10 +13,6 @@ export default function TrailerContent(props) {
         setPlay(true)
         setIsModalVisible(true);
     };
-    const handleOk = () => {
-        setPlay(false)
-        setIsModalVisible(false);
-    };
 
     const handleCancel = () => {
         setPlay(false)
@@ -55,7 +51,14 @@ export default function TrailerContent(props) {
             <div className="TitleCarousel" style={{ marginBottom: 0 }}>
             </div>
             <Modal
-                visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} centered={true} width={'70%'} height={800} destroyOnClose={true}>
+                open={isModalVisible}
+                onCancel={handleCancel}
+                footer={null}
+                className="trailer-modal"
+                centered={true}
+                width={'70%'}
+                destroyOnClose={true}
+            >
                 <ReactPlayer
                     url={props.trailer}
                     playing={play}

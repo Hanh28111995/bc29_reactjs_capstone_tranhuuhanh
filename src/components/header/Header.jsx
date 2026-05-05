@@ -23,16 +23,15 @@ export default function Header() {
   const { pathname } = useLocation();
 
   const handleLogout = async () => {
-    try {
-      await logoutAPI();
-    } catch (error) {
+    setIsModalOpen(false);
+    localStorage.removeItem(USER_INFO_KEY);
+    dispatch(setNotificationsAction([]));
+    dispatch(setUserInfoAction(null));
+    navigate("/");
+
+    logoutAPI().catch((error) => {
       console.error("Lỗi logout server:", error);
-    } finally {
-      localStorage.removeItem(USER_INFO_KEY);
-      dispatch(setNotificationsAction([]));
-      dispatch(setUserInfoAction(null));
-      navigate('/');
-    }
+    });
   };
 
   const userRole = userState.userInfor?.user_inf?.role;
