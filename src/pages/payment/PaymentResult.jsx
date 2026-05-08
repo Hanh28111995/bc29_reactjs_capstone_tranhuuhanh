@@ -52,37 +52,38 @@ export default function PaymentResult() {
     <>
       {/* Logic hiển thị Checkout / Cash Modal */}
       {location.state?.method?.toLowerCase() !== "cash" ? (
-        // <Checkout
-        //     payUrl={location.state?.payUrl}
-        //     bookingId={bookingId}
-        //     setStatus={setStatus} // Truyền hàm để con báo cáo trạng thái cho cha
-        //     // MODAL CHỈ MỞ KHI: Có URL và status vẫn đang là null (chưa Paid/Failed)
-        //     open={!!location.state?.payUrl && !status}
-        //     onCancel={() => navigate('/')}
-        // />
         <></>
       ) : (
         <Modal
           title="Xác nhận thanh toán"
           open={cashModal}
-          onOk={() => {async () => {            
+          // SỬA: Chuyển trực tiếp thành async function
+          onOk={async () => {
+            try {
               await updateTicketAPI(bookingId, {
                 ...location.state?.booking,
                 paymentStatus: "Completed",
               });
-            setCashModal(false);
-            setStatus("success");
-          }}}
-          onCancel={async () => {            
+              // Chỉ đóng modal và báo success sau khi API chạy xong
+              setCashModal(false);
+              setStatus("success");
+            } catch (error) {
+              console.error("Update Ticket Failed:", error);
+              // Có thể thêm thông báo lỗi ở đây
+            }
+          }}
+          onCancel={async () => {
+            try {
               await updateTicketAPI(bookingId, {
                 ...location.state?.booking,
                 paymentStatus: "Cancelled",
               });
-            //   navigate(-2);
               setCashModal(false);
               setStatus("error");
+            } catch (error) {
+              console.error("Cancel Ticket Failed:", error);
             }
-          }
+          }}
           okText="YES"
           cancelText="NO"
         >
