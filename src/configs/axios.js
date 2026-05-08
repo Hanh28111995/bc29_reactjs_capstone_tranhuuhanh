@@ -5,7 +5,7 @@ export const request = axios.create({
   proxy: false,  
   timeout: 10000,
   baseURL: BASE_URL,
-  withCredentials: false,
+  withCredentials: true,
 });
 
 request.interceptors.request.use((config) => {
