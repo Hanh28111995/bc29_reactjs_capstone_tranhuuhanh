@@ -1,12 +1,8 @@
 import axios from "axios";
-import http from 'http';
-import https from 'https';
 import { BASE_URL, USER_INFO_KEY } from "../constants/common";
 
 export const request = axios.create({
-  proxy: false,
-  httpAgent: new http.Agent({ keepAlive: true }),
-  httpsAgent: new https.Agent({ keepAlive: true }),    
+  proxy: false,  
   timeout: 10000,
   baseURL: BASE_URL,
   withCredentials: false,
