@@ -46,6 +46,7 @@ export default function Header() {
     try {
       const res = await fetchNotificationAPI(userRole);
       const formattedNotifications = formatNotificationsForStore(res.data?.content);
+
       dispatch(setNotificationsAction(formattedNotifications));
     } catch (error) {
       console.error("Lỗi khi lấy thông báo:", error);
@@ -83,12 +84,7 @@ export default function Header() {
   };
 
   const render_in_cart = [...notifications]
-    .sort((a, b) => {
-      // 1. Ưu tiên status = false (chưa đọc) lên trước
-      if (a.status !== b.status) {
-        return a.status ? 1 : -1;
-      }
-      // 2. Nếu cùng status, ưu tiên đối tượng sớm nhất (createdAt cũ nhất)
+    .sort((a, b) => {      
       return new Date(a.createdAt) - new Date(b.createdAt);
     })
     .slice(0, 5) // Lấy 5 thông báo đầu tiên sau khi đã sắp xếp
