@@ -1,0 +1,1 @@
+var e=`SET_USER_INFO`,t=`SET_DATE`,n=`SET_NOTIFICATIONS`,r=`MARK_NOTIFICATION_READ`,i=`MARK_ALL_NOTIFICATIONS_READ`,a=t=>({type:e,payload:t}),o=e=>({type:n,payload:e}),s=e=>({type:r,payload:e}),c=()=>({type:i});export{i as a,n as c,a as i,e as l,s as n,r as o,o as r,t as s,c as t};

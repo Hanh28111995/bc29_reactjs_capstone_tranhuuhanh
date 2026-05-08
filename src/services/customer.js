@@ -26,7 +26,6 @@ const searchCustomerAPI = (role, keyword) => {
 
 export {
   fetchShowtimesCusAPI,
-  fetchTicketBookingAPI,
-  fetchCancelBookingAPI,
+  fetchTicketBookingAPI,  
   searchCustomerAPI,
 };
