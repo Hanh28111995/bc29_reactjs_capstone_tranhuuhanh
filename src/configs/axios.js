@@ -2,8 +2,7 @@ import axios from "axios";
 import { BASE_URL, USER_INFO_KEY } from "../constants/common";
 
 export const request = axios.create({
-  proxy: false,  
-  timeout: 20000,
+  proxy: false,    
   baseURL: BASE_URL,
   withCredentials: true,
 });
