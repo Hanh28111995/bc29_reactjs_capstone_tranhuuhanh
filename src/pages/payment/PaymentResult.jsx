@@ -1,135 +1,145 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Spin, Button, Result, Modal } from "antd";
-import { fetchCheckPayment, updateTicketAPI } from "services/ticket";
+import { Spin, Button, Result, Modal, message } from "antd";
+import { fetchTicketByIdAPI, updateTicketAPI } from "services/ticket";
 import { useSelector } from "react-redux";
 
 export default function PaymentResult() {
   const userState = useSelector((state) => state.userReducer);
   const location = useLocation();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState(null); // 'success' hoặc 'error'
-  const [cashModal, setCashModal] = useState(true);
   const [searchParams] = useSearchParams();
 
-  const success = searchParams.get("status") || null;
+  // State quản lý luồng
+  const [loading, setLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false); // Loading cho nút bấm Modal
+  const [status, setStatus] = useState(null); // 'success' | 'error'
+  const [cashModal, setCashModal] = useState(true);
 
+  const successParam = searchParams.get("status");
   const bookingId = location.state?.booking?._id;
+  const paymentMethod = location.state?.method?.toLowerCase(); // Lấy từ state truyền sang
 
   useEffect(() => {
     const verifyPayment = async () => {
+      // Nếu là Cash, không cần verify ngay, chờ Modal xác nhận
+      if (paymentMethod === "cash") {
+        setLoading(false);
+        return;
+      }
+
       if (!bookingId) {
         setLoading(false);
         return;
       }
-      try {
-        const res = await fetchCheckPayment(bookingId);
-        const currentStatus = res.data?.content?.status;
 
-        if (currentStatus === "Paid") {
+      try {
+        const res = await fetchTicketByIdAPI(bookingId);
+        const currentStatus = res.data?.content?.paymentStatus;
+
+        if (currentStatus === "Completed") {
           setStatus("success");
-        } else if (currentStatus === "Failed") {
+        } else if (currentStatus === "Failed" || currentStatus === "Cancelled") {
           setStatus("error");
         }
       } catch (error) {
         console.error("Verify Error:", error);
+        setStatus("error");
       } finally {
         setLoading(false);
       }
     };
+
     verifyPayment();
-  }, [bookingId]);
+  }, [bookingId, paymentMethod]);
+
+  // Hàm xử lý cập nhật trạng thái vé (Dùng chung cho OK/Cancel)
+  const handleUpdateStatus = async (newStatus) => {
+    setIsProcessing(true);
+    try {
+      await updateTicketAPI(bookingId, {
+        ...location.state?.booking,
+        paymentStatus: newStatus,
+      });
+      
+      setCashModal(false);
+      setStatus(newStatus === "Completed" ? "success" : "error");
+      
+      if (newStatus === "Completed") {
+        message.success("Xác nhận thanh toán thành công!");
+      }
+    } catch (error) {
+      console.error("Update Status Failed:", error);
+      message.error("Có lỗi xảy ra, vui lòng thử lại.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   if (loading)
     return (
-      <div style={{ textAlign: "center", marginTop: 50 }}>
-        <Spin size="large" tip="Đang xác thực..." />
+      <div style={{ textAlign: "center", marginTop: 100 }}>
+        <Spin size="large" tip="Đang xác thực giao dịch..." />
       </div>
     );
 
   return (
     <>
-      {/* Logic hiển thị Checkout / Cash Modal */}
-      {location.state?.method?.toLowerCase() !== "cash" ? (
-        <></>
-      ) : (
+      {/* Modal xác nhận riêng cho phương thức Tiền mặt */}
+      {paymentMethod === "cash" && (
         <Modal
-          title="Xác nhận thanh toán"
+          title="Xác nhận đơn hàng"
           open={cashModal}
-          // SỬA: Chuyển trực tiếp thành async function
-          onOk={async () => {
-            try {
-              await updateTicketAPI(bookingId, {
-                ...location.state?.booking,
-                paymentStatus: "Completed",
-              });
-              // Chỉ đóng modal và báo success sau khi API chạy xong
-              setCashModal(false);
-              setStatus("success");
-            } catch (error) {
-              console.error("Update Ticket Failed:", error);
-              // Có thể thêm thông báo lỗi ở đây
-            }
-          }}
-          onCancel={async () => {
-            try {
-              await updateTicketAPI(bookingId, {
-                ...location.state?.booking,
-                paymentStatus: "Cancelled",
-              });
-              setCashModal(false);
-              setStatus("error");
-            } catch (error) {
-              console.error("Cancel Ticket Failed:", error);
-            }
-          }}
-          okText="YES"
-          cancelText="NO"
+          closable={false} // Tránh khách đóng modal bằng dấu X
+          maskClosable={false} // Tránh kích ra ngoài làm mất modal
+          confirmLoading={isProcessing}
+          onOk={() => handleUpdateStatus("Completed")}
+          onCancel={() => handleUpdateStatus("Cancelled")}
+          okText="Xác nhận"
+          cancelText="Hủy đặt vé"
+          cancelButtonProps={{ danger: true, disabled: isProcessing }}
         >
           {userState.userInfor?.user_inf?.role === "customer" ? (
-            <>
-              <p>Bạn đã chọn thanh toán bằng tiền mặt tại rạp.</p>
-              <p>Vui lòng xác nhận bạn sẽ đến nhận vé đúng giờ!</p>
-            </>
+            <div style={{ padding: "10px 0" }}>
+              <p>Bạn đã chọn thanh toán bằng <b>tiền mặt</b> tại rạp.</p>
+              <p>Vui lòng xác nhận để giữ chỗ. Bạn cần đến nhận vé đúng giờ!</p>
+            </div>
           ) : (
-            <p>Xác nhận đã nhận tiền mặt?</p>
+            <p>Xác nhận nhân viên đã nhận tiền mặt từ khách hàng?</p>
           )}
         </Modal>
       )}
 
-      {/* Hiển thị kết quả cuối cùng */}
       <div className="payment-result-container" style={{ padding: "50px" }}>
-        {(success === "success" || status === "success") && (
+        {/* Chỉ hiển thị kết quả khi đã có status hoặc có params từ cổng thanh toán */}
+        {(successParam === "success" || status === "success") ? (
           <Result
             status="success"
             title="Thanh Toán Thành Công!"
-            subTitle="Cảm ơn bạn đã sử dụng dịch vụ."
+            subTitle="Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của chúng tôi."
             extra={[
               <Button type="primary" key="home" onClick={() => navigate("/")}>
                 Quay lại trang chủ
               </Button>,
-              <Button
-                key="history"
-                onClick={() => navigate("/user-management")}
-              >
+              <Button key="history" onClick={() => navigate("/user-management")}>
                 Lịch sử đặt vé
               </Button>,
             ]}
           />
-        )}
-
-        {success !== "success" && status !== "success" && (
-          <Result
-            status="error"
-            title="Thanh Toán Thất Bại"
-            subTitle="Giao dịch đã bị hủy hoặc có lỗi xảy ra."
-            extra={[
-              <Button type="primary" key="retry" onClick={() => navigate("/")}>
-                Quay lại trang chủ
-              </Button>,
-            ]}
-          />
+        ) : (
+          // Chỉ hiện thông báo lỗi khi thực sự thất bại, tránh hiện nhầm khi đang chờ Modal
+          (status === "error" || (successParam && successParam !== "success")) && (
+            <Result
+              status="error"
+              title="Giao dịch không thành công"
+              subTitle="Giao dịch đã bị hủy hoặc có lỗi xảy ra trong quá trình thanh toán."
+              extra={[
+                <Button type="primary" key="retry" onClick={() => navigate("/")}>
+                  Quay lại trang chủ
+                </Button>,
+              ]}
+            />
+          )
         )}
       </div>
     </>
