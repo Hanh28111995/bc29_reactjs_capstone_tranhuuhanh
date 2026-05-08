@@ -135,7 +135,7 @@ export default function Payment() {
                 setTimeout(() => navigate('/payment-result', {
                     state: {
                         payUrl: null,
-                        bookingId: ticket._id,
+                        booking: ticket,
                         method: ticket.paymentMethod,                        
                     }
                 }), 2000);

@@ -16,14 +16,6 @@ const fetchTicketBookingAPI = (role, data) => {
   });
 };
 
-const fetchCancelBookingAPI = (role, id, data) => {
-  return request({
-    url: `/${role}/cancelTicket`,
-    method: "PUT",
-    data,
-  });
-};
-
 const searchCustomerAPI = (role, keyword) => {
   return request({
     url: `/admin/user/search`,

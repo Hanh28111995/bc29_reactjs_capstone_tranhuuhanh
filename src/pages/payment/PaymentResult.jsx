@@ -1,115 +1,136 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Spin, Button, Result, Modal } from 'antd';
-import { fetchCheckPayment } from 'services/ticket';
-import { fetchCancelBookingAPI } from 'services/customer';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Spin, Button, Result, Modal } from "antd";
+import { fetchCheckPayment, updateTicketAPI } from "services/ticket";
+import { useSelector } from "react-redux";
 
 export default function PaymentResult() {
-    const userState = useSelector((state) => state.userReducer);
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
-    const [status, setStatus] = useState(null); // 'success' hoặc 'error'
-    const [cashModal, setCashModal] = useState(true);
-    const [searchParams] = useSearchParams();
+  const userState = useSelector((state) => state.userReducer);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState(null); // 'success' hoặc 'error'
+  const [cashModal, setCashModal] = useState(true);
+  const [searchParams] = useSearchParams();
 
-    const success = searchParams.get('status') || null;
+  const success = searchParams.get("status") || null;
 
-    const bookingId = location.state?.bookingId;
+  const bookingId = location.state?.booking?._id;
 
-    useEffect(() => {
-        const verifyPayment = async () => {
-            if (!bookingId) {
-                setLoading(false);
-                return;
-            }
-            try {
-                const res = await fetchCheckPayment(bookingId);
-                const currentStatus = res.data?.content?.status;
+  useEffect(() => {
+    const verifyPayment = async () => {
+      if (!bookingId) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await fetchCheckPayment(bookingId);
+        const currentStatus = res.data?.content?.status;
 
-                if (currentStatus === 'Paid') {
-                    setStatus('success');
-                } else if (currentStatus === 'Failed') {
-                    setStatus('error');
-                }
-            } catch (error) {
-                console.error("Verify Error:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        verifyPayment();        
-    }, [bookingId]);
+        if (currentStatus === "Paid") {
+          setStatus("success");
+        } else if (currentStatus === "Failed") {
+          setStatus("error");
+        }
+      } catch (error) {
+        console.error("Verify Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    verifyPayment();
+  }, [bookingId]);
 
-    if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}><Spin size="large" tip="Đang xác thực..." /></div>;
-
+  if (loading)
     return (
-        <>
-            {/* Logic hiển thị Checkout / Cash Modal */}
-            {location.state?.method?.toLowerCase() !== 'cash' ? (
-                // <Checkout
-                //     payUrl={location.state?.payUrl}
-                //     bookingId={bookingId}
-                //     setStatus={setStatus} // Truyền hàm để con báo cáo trạng thái cho cha
-                //     // MODAL CHỈ MỞ KHI: Có URL và status vẫn đang là null (chưa Paid/Failed)
-                //     open={!!location.state?.payUrl && !status}
-                //     onCancel={() => navigate('/')}
-                // />
-                <></>
-            ) : (
-                <Modal
-                    title="Xác nhận thanh toán"
-                    open={cashModal}
-                    onOk={() => { setCashModal(false); setStatus('success'); }}
-                    onCancel={async () => {
-                        if (userState.userInfor?.user_inf?.role === 'customer') {
-                            await fetchCancelBookingAPI(userState.userInfor?.user_inf.role, bookingId, userState.userInfor?.user_inf.id);
-                            navigate(-2);
-                        } else {
-                            setCashModal(false);
-                            setStatus('error');
-                        }
-                    }}
-                    okText="YES"
-                    cancelText="NO"
-                >
-                    {userState.userInfor?.user_inf?.role === 'customer' ? (
-                        <>
-                            <p>Bạn đã chọn thanh toán bằng tiền mặt tại rạp.</p>
-                            <p>Vui lòng xác nhận bạn sẽ đến nhận vé đúng giờ!</p>
-                        </>
-                    ) : (
-                        <p>Xác nhận đã nhận tiền mặt?</p>
-                    )}
-                </Modal>
-            )}
-
-            {/* Hiển thị kết quả cuối cùng */}
-            <div className="payment-result-container" style={{ padding: '50px' }}>
-                {(success === 'success' || status === 'success') && (
-                    <Result
-                        status="success"
-                        title="Thanh Toán Thành Công!"
-                        subTitle="Cảm ơn bạn đã sử dụng dịch vụ."
-                        extra={[
-                            <Button type="primary" key="home" onClick={() => navigate('/')}>Quay lại trang chủ</Button>,
-                            <Button key="history" onClick={() => navigate('/user-management')}>Lịch sử đặt vé</Button>
-                        ]}
-                    />
-                )}
-
-                {(success !== 'success' && status !== 'success') && (
-                    <Result
-                        status="error"
-                        title="Thanh Toán Thất Bại"
-                        subTitle="Giao dịch đã bị hủy hoặc có lỗi xảy ra."
-                        extra={[
-                            <Button type="primary" key="retry" onClick={() => navigate('/')}>Quay lại trang chủ</Button>
-                        ]}
-                    />
-                )}
-            </div>
-        </>
+      <div style={{ textAlign: "center", marginTop: 50 }}>
+        <Spin size="large" tip="Đang xác thực..." />
+      </div>
     );
+
+  return (
+    <>
+      {/* Logic hiển thị Checkout / Cash Modal */}
+      {location.state?.method?.toLowerCase() !== "cash" ? (
+        // <Checkout
+        //     payUrl={location.state?.payUrl}
+        //     bookingId={bookingId}
+        //     setStatus={setStatus} // Truyền hàm để con báo cáo trạng thái cho cha
+        //     // MODAL CHỈ MỞ KHI: Có URL và status vẫn đang là null (chưa Paid/Failed)
+        //     open={!!location.state?.payUrl && !status}
+        //     onCancel={() => navigate('/')}
+        // />
+        <></>
+      ) : (
+        <Modal
+          title="Xác nhận thanh toán"
+          open={cashModal}
+          onOk={() => {async () => {            
+              await updateTicketAPI(bookingId, {
+                ...location.state?.booking,
+                paymentStatus: "Completed",
+              });
+            setCashModal(false);
+            setStatus("success");
+          }}}
+          onCancel={async () => {            
+              await updateTicketAPI(bookingId, {
+                ...location.state?.booking,
+                paymentStatus: "Cancelled",
+              });
+            //   navigate(-2);
+              setCashModal(false);
+              setStatus("error");
+            }
+          }
+          okText="YES"
+          cancelText="NO"
+        >
+          {userState.userInfor?.user_inf?.role === "customer" ? (
+            <>
+              <p>Bạn đã chọn thanh toán bằng tiền mặt tại rạp.</p>
+              <p>Vui lòng xác nhận bạn sẽ đến nhận vé đúng giờ!</p>
+            </>
+          ) : (
+            <p>Xác nhận đã nhận tiền mặt?</p>
+          )}
+        </Modal>
+      )}
+
+      {/* Hiển thị kết quả cuối cùng */}
+      <div className="payment-result-container" style={{ padding: "50px" }}>
+        {(success === "success" || status === "success") && (
+          <Result
+            status="success"
+            title="Thanh Toán Thành Công!"
+            subTitle="Cảm ơn bạn đã sử dụng dịch vụ."
+            extra={[
+              <Button type="primary" key="home" onClick={() => navigate("/")}>
+                Quay lại trang chủ
+              </Button>,
+              <Button
+                key="history"
+                onClick={() => navigate("/user-management")}
+              >
+                Lịch sử đặt vé
+              </Button>,
+            ]}
+          />
+        )}
+
+        {success !== "success" && status !== "success" && (
+          <Result
+            status="error"
+            title="Thanh Toán Thất Bại"
+            subTitle="Giao dịch đã bị hủy hoặc có lỗi xảy ra."
+            extra={[
+              <Button type="primary" key="retry" onClick={() => navigate("/")}>
+                Quay lại trang chủ
+              </Button>,
+            ]}
+          />
+        )}
+      </div>
+    </>
+  );
 }
