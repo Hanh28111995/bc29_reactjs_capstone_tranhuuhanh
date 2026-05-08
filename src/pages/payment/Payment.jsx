@@ -136,7 +136,7 @@ export default function Payment() {
                     state: {
                         payUrl: null,
                         bookingId: ticket._id,
-                        method: ticket.paymentMethod
+                        method: ticket.paymentMethod,                        
                     }
                 }), 2000);
             }

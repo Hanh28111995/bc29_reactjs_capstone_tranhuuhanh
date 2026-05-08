@@ -33,16 +33,14 @@ export default function PaymentResult() {
                 } else if (currentStatus === 'Failed') {
                     setStatus('error');
                 }
-                // Nếu là 'Pending', status vẫn là null để Modal Checkout có thể mở
             } catch (error) {
                 console.error("Verify Error:", error);
             } finally {
                 setLoading(false);
             }
         };
-
-        verifyPayment();
-    }, [bookingId], success, status);
+        verifyPayment();        
+    }, [bookingId]);
 
     if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}><Spin size="large" tip="Đang xác thực..." /></div>;
 
