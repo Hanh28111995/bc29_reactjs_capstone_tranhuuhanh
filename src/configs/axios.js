@@ -3,7 +3,7 @@ import { BASE_URL, USER_INFO_KEY } from "../constants/common";
 
 export const request = axios.create({
   proxy: false,  
-  timeout: 10000,
+  timeout: 20000,
   baseURL: BASE_URL,
   withCredentials: true,
 });
