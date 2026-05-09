@@ -78,8 +78,9 @@ export default function PaymentResult() {
     }
   };
   const handleCompletedTicket = async () => {
+    setCashModal(false);
     setStatus("success");
-    message.success("Xác nhận thanh toán thành công!");
+    message.success("Xác nhận thanh toán thành công!");    
   };
 
   if (loading)
