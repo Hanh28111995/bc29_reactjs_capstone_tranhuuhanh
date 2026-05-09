@@ -65,7 +65,7 @@ export default function PaymentResult() {
     try {
       await fetchCancelTicketAPI(
         userState.userInfor?.user_inf?.role,
-        location.state?.booking._id,
+        location.state?.booking,
       );
       setCashModal(false);
       setStatus("error");
