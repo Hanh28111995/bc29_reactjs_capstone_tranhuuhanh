@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import { Button, Form, Select, Card, Space, App, Descriptions, Tag } from "antd";
+import { Button, Form, Select, Card, Space, App, Descriptions, Tag, Divider } from "antd";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
-import { updateTicketAPI, fetchTicketByIdAPI } from "services/ticket";
+import { updateTicketAPI, fetchTicketByIdAPI } from "../../services/ticket";
 import dayjs from "dayjs";
 
 export default function TicketForm() {
@@ -12,14 +12,14 @@ export default function TicketForm() {
   const [form] = Form.useForm();
   const { notification } = App.useApp();
 
-  const { state: ticketRaw, loading } = useAsync({
+  const { state: response, loading } = useAsync({
     service: () => fetchTicketByIdAPI(ticketId),
     dependencies: [ticketId],
     condition: !!ticketId,
   });
 
-  // API trả về content: { tickets: {...} } hoặc object trực tiếp
-  const ticket = ticketRaw?.tickets ?? ticketRaw?.ticket ?? ticketRaw;
+  // Truy xuất đúng vào content.ticket từ response data của bạn
+  const ticket = response?.content?.ticket || response?.ticket || response;
 
   useEffect(() => {
     if (ticket) {
@@ -36,25 +36,25 @@ export default function TicketForm() {
       notification.success({ message: "Cập nhật vé thành công!" });
       navigate(-1);
     } catch (error) {
-      notification.error({ message: "Lỗi", description: error.response?.data?.message });
+      notification.error({ 
+        message: "Lỗi", 
+        description: error.response?.data?.message || "Không thể cập nhật" 
+      });
     }
   };
 
-  // Hỗ trợ cả 2 field name: bookedSeat hoặc seatName
-  const seats = ticket?.bookedSeat ?? ticket?.seatName ?? [];
+  // Ánh xạ đúng trường từ JSON: seatName và user_id
+  const seats = ticket?.seatName || [];
   const totalPrice = seats.reduce((t, s) => t + (s.price || 0), 0);
 
-  // Lấy thông tin user (có thể là object populated hoặc string id)
-  const user = ticket?.id_user;
-  const userName = user?.name || user?.username || user?.email || (typeof user === "string" ? user : "—");
+  const user = ticket?.user_id;
+  const userName = user?.username || "—";
+  const userPhone = user?.userphone || "—";
   const userEmail = user?.email || "—";
 
-  // Lấy thông tin showtime (có thể là object populated hoặc string id)
-  const showtime = ticket?.id_showtime;
-  const movieTitle = showtime?.id_movie?.title || showtime?.movieTitle || "—";
-  const theaterName = showtime?.theater?.name || showtime?.theaterName || "—";
-  const startTime = showtime?.startTime
-    ? dayjs(showtime.startTime.replace(/Z$/, "")).format("DD/MM/YYYY HH:mm")
+  // Định dạng thời gian (Dùng dayjs để format ISO string)
+  const startTime = ticket?.startTime
+    ? dayjs(ticket.startTime).format("HH:mm DD/MM/YYYY")
     : "—";
 
   return (
@@ -63,7 +63,7 @@ export default function TicketForm() {
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
-          <span>Chi tiết vé</span>
+          <span>Chi tiết vé #{ticket?._id?.slice(-6).toUpperCase()}</span>
         </Space>
       }
     >
@@ -73,71 +73,72 @@ export default function TicketForm() {
             bordered
             column={{ xs: 1, sm: 2 }}
             style={{ marginBottom: 24 }}
-            title="Thông tin vé"
+            title="Thông tin khách hàng & Phim"
           >
-            <Descriptions.Item label="Mã giao dịch" span={2}>
-              {ticket.transactionId || "—"}
+            <Descriptions.Item label="Khách hàng" className="font-bold">
+              {userName}
             </Descriptions.Item>
-
-            <Descriptions.Item label="Khách hàng">{userName}</Descriptions.Item>
-            <Descriptions.Item label="Email">{userEmail}</Descriptions.Item>
-
-            <Descriptions.Item label="Phim">{movieTitle}</Descriptions.Item>
-            <Descriptions.Item label="Phòng chiếu">{theaterName}</Descriptions.Item>
-
+            <Descriptions.Item label="Số điện thoại">{userPhone}</Descriptions.Item>
+            <Descriptions.Item label="Email" span={2}>{userEmail}</Descriptions.Item>
+            
+            <Descriptions.Item label="ID Phim">{ticket.id_movie}</Descriptions.Item>
+            <Descriptions.Item label="ID Rạp">{ticket.id_theater}</Descriptions.Item>
+            
             <Descriptions.Item label="Suất chiếu" span={2}>
-              {startTime}
+              <Tag color="blue" style={{ fontSize: '14px', padding: '4px 8px' }}>
+                {startTime}
+              </Tag>
             </Descriptions.Item>
 
             <Descriptions.Item label="Ghế đã đặt" span={2}>
               <Space wrap>
-                {seats.length > 0
-                  ? seats.map((s, i) => (
-                      <Tag key={s._id || i}>
-                        {s.seatNumber} — {s.price?.toLocaleString()} VNĐ
-                      </Tag>
-                    ))
-                  : "—"}
+                {seats.map((s, i) => (
+                  <Tag color="orange" key={i}>
+                    {s.seatNumber} — {s.price?.toLocaleString()} VNĐ
+                  </Tag>
+                ))}
               </Space>
             </Descriptions.Item>
 
             <Descriptions.Item label="Tổng tiền">
-              <strong>{totalPrice.toLocaleString()} VNĐ</strong>
+              <span style={{ color: '#cf1322', fontWeight: 'bold', fontSize: '16px' }}>
+                {totalPrice.toLocaleString()} VNĐ
+              </span>
             </Descriptions.Item>
-
-            <Descriptions.Item label="Thời gian đặt">
-              {ticket.createdAt
-                ? dayjs(ticket.createdAt).format("DD/MM/YYYY HH:mm")
-                : ticket.timeOfBooking
-                ? dayjs(ticket.timeOfBooking.replace(/Z$/, "")).format("DD/MM/YYYY HH:mm")
-                : "—"}
+            
+            <Descriptions.Item label="Mã giao dịch">
+               <code style={{ color: '#0958d9' }}>{ticket.transactionId}</code>
             </Descriptions.Item>
           </Descriptions>
 
+          <Divider orientation="left">Chỉnh sửa trạng thái</Divider>
+
           <Form form={form} layout="vertical" onFinish={handleSave}>
-            <Form.Item label="Phương thức thanh toán" name="paymentMethod">
-              <Select
-                options={[
-                  { label: "Tiền mặt", value: "cash" },
-                  { label: "MoMo", value: "momo" },
-                  { label: "VNPay", value: "vnpay" },
-                ]}
-              />
-            </Form.Item>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <Form.Item label="Phương thức thanh toán" name="paymentMethod">
+                    <Select
+                        options={[
+                            { label: "Tiền mặt", value: "cash" },
+                            { label: "MoMo", value: "momo" },
+                            { label: "VNPay", value: "vnpay" },
+                        ]}
+                    />
+                </Form.Item>
 
-            <Form.Item label="Trạng thái thanh toán" name="paymentStatus">
-              <Select
-                options={[
-                  { label: "Pending", value: "Pending" },
-                  { label: "Completed", value: "Completed" },
-                  { label: "Failed", value: "Failed" },
-                ]}
-              />
-            </Form.Item>
+                <Form.Item label="Trạng thái thanh toán" name="paymentStatus">
+                    <Select
+                        options={[
+                            { label: "Đang chờ (Pending)", value: "Pending" },
+                            { label: "Thành công (Completed)", value: "Completed" },
+                            { label: "Thất bại (Failed)", value: "Failed" },
+                        ]}
+                    />
+                </Form.Item>
+            </div>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit" icon={<SaveOutlined />} block>
-                CẬP NHẬT VÉ
+            <Form.Item style={{ marginTop: 16 }}>
+              <Button type="primary" htmlType="submit" icon={<SaveOutlined />} size="large" block>
+                LƯU THAY ĐỔI
               </Button>
             </Form.Item>
           </Form>
