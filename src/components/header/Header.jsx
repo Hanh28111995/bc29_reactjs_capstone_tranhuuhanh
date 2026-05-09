@@ -83,30 +83,33 @@ export default function Header() {
     }
   };
 
-  const render_in_cart = [...notifications]
-    .sort((a, b) => {      
-      return new Date(a.createdAt) - new Date(b.createdAt);
-    })
-    .slice(0, 5) // Lấy 5 thông báo đầu tiên sau khi đã sắp xếp
-    .map((ele, index) => {
-      const isUnread = !ele.status;
-      return (
-        <div
-          key={index}
-          className={`noti-item ${isUnread ? 'unread' : ''}`}
-          onClick={() => handleMarkAsRead(ele._id)}
-        >
-          <div className="noti-icon-wrapper">
-            <i className="fa fa-ticket-alt"></i>
-          </div>
-          <div className="noti-content">
-            <span className="noti-text">{ele.note}</span>
-            <span className="noti-time">{ele.createdAt.toLocaleString()}</span>
-          </div>
-          {isUnread && <div className="unread-dot"></div>}
+ const render_in_cart = [...notifications]
+  .sort((a, b) => {
+    // Chuyển đổi về kiểu số (milliseconds) để so sánh chính xác
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  })
+  .slice(0, 5) // Lấy 5 thông báo mới nhất
+  .map((ele, index) => {
+    const isUnread = !ele.status;
+    return (
+      <div
+        key={ele._id || index} // Ưu tiên dùng ID của database làm key
+        className={`noti-item ${isUnread ? 'unread' : ''}`}
+        onClick={() => handleMarkAsRead(ele._id)}
+      >
+        <div className="noti-icon-wrapper">
+          <i className="fa fa-ticket-alt"></i>
         </div>
-      )
-    })
+        <div className="noti-content">
+          <span className="noti-text">{ele.note}</span>
+          <span className="noti-time">
+            {new Date(ele.createdAt).toLocaleString('vi-VN')} 
+          </span>
+        </div>
+        {isUnread && <div className="unread-dot"></div>}
+      </div>
+    );
+  });
 
   // console.log(render_card1, render_card2)
   return (
