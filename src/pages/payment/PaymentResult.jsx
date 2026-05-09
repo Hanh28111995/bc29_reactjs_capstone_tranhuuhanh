@@ -4,7 +4,7 @@ import { Spin, Button, Result, Modal, message } from "antd";
 import {
   fetchCancelTicketAPI,
   fetchCompletedTicketAPI,
-  fetchTicketByIdAPI,  
+  fetchTicketByIdAPI,
 } from "services/ticket";
 import { useSelector } from "react-redux";
 
@@ -78,21 +78,8 @@ export default function PaymentResult() {
     }
   };
   const handleCompletedTicket = async () => {
-    setIsProcessing(true);
-    try {
-      await fetchCompletedTicketAPI(
-        userState.userInfor?.user_inf?.role,
-        location.state?.booking,
-      );
-      setCashModal(false);
-      setStatus("success");
-      message.success("Xác nhận thanh toán thành công!");
-    } catch (error) {
-      console.error("Update Status Failed:", error);
-      message.error("Có lỗi xảy ra, vui lòng thử lại.");
-    } finally {
-      setIsProcessing(false);
-    }
+    setStatus("success");
+    message.success("Xác nhận thanh toán thành công!");
   };
 
   if (loading)
