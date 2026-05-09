@@ -3,14 +3,11 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Card, Button, Radio, Divider, Typography, Space, Modal, notification } from 'antd';
 import { CreditCardOutlined, WalletOutlined, DollarOutlined, ArrowLeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
-import dayjs from 'dayjs';
-import { fetchTicketBookingAPI } from 'services/customer';
-import { fetchCreateMomoPayment, fetchCreateCashPayment } from 'services/ticket';
-import "./index.scss"; // Import file scss mới
-import { fetchCreateVnpayPayment } from 'services/ticket';
+import { fetchCreateMomoPayment, fetchCreateCashPayment, fetchCreateVnpayPayment, fetchTicketBookingAPI} from 'services/ticket';
 import { fetchNotificationAPI, formatNotificationsForStore } from 'services/notificationAndHistory';
 import { setNotificationsAction } from 'store/actions/user.action';
-
+import "./index.scss"; 
+import dayjs from 'dayjs';
 const { Title, Text } = Typography;
 const { confirm } = Modal;
 
