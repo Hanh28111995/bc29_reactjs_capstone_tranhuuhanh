@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Spin, Button, Result, Modal, message } from "antd";
 import {
-  fetchCancelTicketAPI,
-  fetchCompletedTicketAPI,
+  fetchCancelTicketAPI,  
   fetchTicketByIdAPI,
 } from "services/ticket";
 import { useSelector } from "react-redux";
@@ -66,7 +65,7 @@ export default function PaymentResult() {
     try {
       await fetchCancelTicketAPI(
         userState.userInfor?.user_inf?.role,
-        location.state?.booking,
+        location.state?.booking._id,
       );
       setCashModal(false);
       setStatus("error");
