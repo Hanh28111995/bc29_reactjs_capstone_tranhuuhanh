@@ -1,1 +1,0 @@
-import{t as e}from"./axios-Py3xZJai.js";var t=()=>e({url:`/admin/theater/all`,method:`GET`}),n=t=>e({url:`/admin/theater/${t}`,method:`GET`}),r=t=>e({url:`/admin/theater/add`,method:`POST`,data:t}),i=(t,n)=>e({url:`/admin/theater/update/${t}`,method:`PUT`,data:n}),a=t=>e({url:`/admin/theater/delete/${t}`,method:`DELETE`});export{i as a,t as i,a as n,n as r,r as t};

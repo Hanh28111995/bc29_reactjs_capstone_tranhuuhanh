@@ -1,1 +1,0 @@
-import{t as e}from"./axios-Py3xZJai.js";var t=()=>e({url:`/admin/branch/all`,method:`GET`}),n=t=>e({url:`/admin/branch/update`,method:`PUT`,data:t}),r=t=>e({url:`/admin/branch/${t}/delete`,method:`DELETE`}),i=t=>e({url:`/admin/branch/add`,method:`POST`,data:t});export{n as i,r as n,t as r,i as t};
