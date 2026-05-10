@@ -3,7 +3,7 @@ import { Button, Form, Select, Card, Space, App, Descriptions, Tag, Divider } fr
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
-import { updateTicketAPI, fetchTicketByIdAPI } from "../../services/ticket";
+import { updateTicketAPI, fetchTicketByIdAPI } from "services/ticket";
 import dayjs from "dayjs";
 
 export default function TicketForm() {
