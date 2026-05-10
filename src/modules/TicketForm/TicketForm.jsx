@@ -18,8 +18,8 @@ export default function TicketForm() {
     condition: !!ticketId,
   });
 
-  // Truy xuất đúng vào content.ticket từ response data của bạn
-  const ticket = response?.content?.ticket || response?.ticket || response;
+  // Lấy dữ liệu ticket an toàn
+  const ticket = response?.content?.ticket || response?.ticket;
 
   useEffect(() => {
     if (ticket) {
@@ -43,19 +43,13 @@ export default function TicketForm() {
     }
   };
 
-  // Ánh xạ đúng trường từ JSON: seatName và user_id
+  // Tính toán thông tin hiển thị
   const seats = ticket?.seatName || [];
   const totalPrice = seats.reduce((t, s) => t + (s.price || 0), 0);
-
-  const user = ticket?.user_id;
-  const userName = user?.username || "—";
-  const userPhone = user?.userphone || "—";
-  const userEmail = user?.email || "—";
-
-  // Định dạng thời gian (Dùng dayjs để format ISO string)
-  const startTime = ticket?.startTime
-    ? dayjs(ticket.startTime).format("HH:mm DD/MM/YYYY")
-    : "—";
+  
+  // Xử lý hiển thị an toàn cho Object (Tránh lỗi #31)
+  const movieDisplay = typeof ticket?.id_movie === 'object' ? ticket.id_movie.title : ticket?.id_movie;
+  const theaterDisplay = typeof ticket?.id_theater === 'object' ? ticket.id_theater.name : ticket?.id_theater;
 
   return (
     <Card
@@ -73,72 +67,77 @@ export default function TicketForm() {
             bordered
             column={{ xs: 1, sm: 2 }}
             style={{ marginBottom: 24 }}
-            title="Thông tin khách hàng & Phim"
+            title="Thông tin chi tiết suất chiếu"
           >
-            <Descriptions.Item label="Khách hàng" className="font-bold">
-              {userName}
+            <Descriptions.Item label="Phim" span={2}>
+              <strong style={{ fontSize: '16px' }}>{movieDisplay || "—"}</strong>
             </Descriptions.Item>
-            <Descriptions.Item label="Số điện thoại">{userPhone}</Descriptions.Item>
-            <Descriptions.Item label="Email" span={2}>{userEmail}</Descriptions.Item>
             
-            <Descriptions.Item label="ID Phim">{ticket.id_movie}</Descriptions.Item>
-            <Descriptions.Item label="ID Rạp">{ticket.id_theater}</Descriptions.Item>
-            
-            <Descriptions.Item label="Suất chiếu" span={2}>
-              <Tag color="blue" style={{ fontSize: '14px', padding: '4px 8px' }}>
-                {startTime}
+            <Descriptions.Item label="Rạp / Phòng" span={2}>
+              {theaterDisplay || "—"}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Thời gian">
+              <Tag color="blue" style={{ fontSize: '14px' }}>
+                {ticket.startTime ? dayjs(ticket.startTime).format("HH:mm DD/MM/YYYY") : "—"}
               </Tag>
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Mã giao dịch">
+               <code style={{ color: '#0958d9' }}>{ticket.transactionId}</code>
             </Descriptions.Item>
 
             <Descriptions.Item label="Ghế đã đặt" span={2}>
               <Space wrap>
                 {seats.map((s, i) => (
-                  <Tag color="orange" key={i}>
-                    {s.seatNumber} — {s.price?.toLocaleString()} VNĐ
+                  <Tag color="orange" key={i} style={{ padding: '4px 10px' }}>
+                    Ghế {s.seatNumber} — {s.price?.toLocaleString()} VNĐ
                   </Tag>
                 ))}
               </Space>
             </Descriptions.Item>
 
             <Descriptions.Item label="Tổng tiền">
-              <span style={{ color: '#cf1322', fontWeight: 'bold', fontSize: '16px' }}>
+              <span style={{ color: '#cf1322', fontWeight: 'bold', fontSize: '18px' }}>
                 {totalPrice.toLocaleString()} VNĐ
               </span>
             </Descriptions.Item>
-            
-            <Descriptions.Item label="Mã giao dịch">
-               <code style={{ color: '#0958d9' }}>{ticket.transactionId}</code>
+
+            <Descriptions.Item label="Ngày đặt">
+              {ticket.createdAt ? dayjs(ticket.createdAt).format("DD/MM/YYYY HH:mm") : "—"}
             </Descriptions.Item>
           </Descriptions>
 
-          <Divider orientation="left">Chỉnh sửa trạng thái</Divider>
+          <Divider orientation="left">Quản lý trạng thái</Divider>
 
           <Form form={form} layout="vertical" onFinish={handleSave}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <Form.Item label="Phương thức thanh toán" name="paymentMethod">
                     <Select
+                        size="large"
                         options={[
-                            { label: "Tiền mặt", value: "cash" },
-                            { label: "MoMo", value: "momo" },
-                            { label: "VNPay", value: "vnpay" },
+                            { label: "Tiền mặt (Cash)", value: "cash" },
+                            { label: "Ví điện tử MoMo", value: "momo" },
+                            { label: "Cổng VNPay", value: "vnpay" },
                         ]}
                     />
                 </Form.Item>
 
                 <Form.Item label="Trạng thái thanh toán" name="paymentStatus">
                     <Select
+                        size="large"
                         options={[
-                            { label: "Đang chờ (Pending)", value: "Pending" },
+                            { label: "Đang chờ xử lý (Pending)", value: "Pending" },
                             { label: "Thành công (Completed)", value: "Completed" },
-                            { label: "Thất bại (Failed)", value: "Failed" },
+                            { label: "Đã thất bại (Failed)", value: "Failed" },
                         ]}
                     />
                 </Form.Item>
             </div>
 
-            <Form.Item style={{ marginTop: 16 }}>
+            <Form.Item style={{ marginTop: 24 }}>
               <Button type="primary" htmlType="submit" icon={<SaveOutlined />} size="large" block>
-                LƯU THAY ĐỔI
+                LƯU THÔNG TIN CẬP NHẬT
               </Button>
             </Form.Item>
           </Form>
