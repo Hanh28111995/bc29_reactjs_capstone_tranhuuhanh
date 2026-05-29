@@ -22,6 +22,9 @@ const queryClient = new QueryClient({
     },
   },
 });
+/* eslint-disable no-console */
+console.debug('[RQ] QueryClient.defaultQueryOptions type:', typeof queryClient.defaultQueryOptions);
+/* eslint-enable no-console */
 
 const antdTheme = {
   token: {
