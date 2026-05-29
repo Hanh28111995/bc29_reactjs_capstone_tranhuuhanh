@@ -13,6 +13,19 @@ request.interceptors.request.use((config) => {
   if (userInfor?.user_token) {
     config.headers.Authorization = `Bearer ${userInfor.user_token}`;
   }
+  try {
+    // Lightweight debug: show outgoing request method/URL and trimmed data
+    // Kept minimal to avoid leaking secrets in prod logs
+    /* eslint-disable no-console */
+    console.debug('[AXIOS REQUEST]', config.method?.toUpperCase(), config.url, {
+      params: config.params,
+      data: config.data,
+      headers: config.headers && { ...config.headers },
+    });
+    /* eslint-enable no-console */
+  } catch (err) {
+    // ignore logging errors
+  }
   return config;
 });
 
@@ -60,6 +73,11 @@ request.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
+    try {
+      /* eslint-disable no-console */
+      console.debug('[AXIOS RESPONSE ERROR]', originalRequest?.method?.toUpperCase(), originalRequest?.url, error?.response?.status);
+      /* eslint-enable no-console */
+    } catch (e) {}
     return Promise.reject(error);
   }
 );

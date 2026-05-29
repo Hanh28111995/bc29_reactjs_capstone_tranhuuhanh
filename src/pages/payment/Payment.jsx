@@ -58,33 +58,34 @@ export default function Payment() {
             icon: <ExclamationCircleOutlined />,
             okText: 'Xác nhận',
             cancelText: 'Hủy',
-            async onOk() {
-                try {
-                    await bookingMutation.mutateAsync({
-                        role: userState.userInfor?.user_inf.role,
-                        payload: {
-                            user_id: customerInfo?.id || userState.userInfor?.user_inf?.id,
-                            id_movie: movieInfor?._id,
-                            id_theater: theater?._id,
-                            startTime: time,
-                            showtime_id: params.id,
-                            timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                            seatName: bookingData.map((seat) => ({
-                                seatNumber: seat.seatNumber,
-                                seatType: seat.seatType,
-                                price: seat.price,
-                                isBooked: true,
-                            })),
-                            paymentMethod: 'cash',
-                            paymentStatus: 'Pending',
-                        },
-                    });
-                    await refreshNotificationsToStore();
-                    navigate('/');
-                } catch (error) {
-                    // handled in mutation onError
-                }
-            },
+                    async onOk() {
+                        try {
+                            const payload = {
+                        user_id: customerInfo?.id || userState.userInfor?.user_inf?.id,
+                        id_movie: movieInfor?._id,
+                        id_theater: theater?._id,
+                        startTime: time,
+                        showtime_id: params.id,
+                        timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                        seatName: bookingData.map((seat) => ({
+                            seatNumber: seat.seatNumber,
+                            seatType: seat.seatType,
+                            price: seat.price,
+                            isBooked: true,
+                        })),
+                        paymentMethod: 'cash',
+                        paymentStatus: 'Pending',
+                    };
+                            /* eslint-disable no-console */
+                            console.debug('[PAYMENT] Trigger bookingMutation (reserve)', { role: userState.userInfor?.user_inf.role, payload });
+                            /* eslint-enable no-console */
+                            await bookingMutation.mutateAsync({ role: userState.userInfor?.user_inf.role, payload });
+                            await refreshNotificationsToStore();
+                            navigate('/');
+                        } catch (error) {
+                            // handled in mutation onError
+                        }
+                    },
         });
     };
 
@@ -105,25 +106,26 @@ export default function Payment() {
 
     const processBooking = async () => {
         try {
-            const result = await bookingMutation.mutateAsync({
-                role: userState.userInfor?.user_inf.role,
-                payload: {
-                    user_id: userState.userInfor?.user_inf?.id,
-                    id_movie: movieInfor?._id,
-                    id_theater: theater?._id,
-                    startTime: time,
-                    showtime_id: params.id,
-                    timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                    seatName: bookingData.map((seat) => ({
-                        seatNumber: seat.seatNumber,
-                        seatType: seat.seatType,
-                        price: seat.price,
-                        isBooked: true,
-                    })),
-                    paymentMethod: paymentMethod,
-                    paymentStatus: 'Pending',
-                },
-            });
+            const payload = {
+                user_id: userState.userInfor?.user_inf?.id,
+                id_movie: movieInfor?._id,
+                id_theater: theater?._id,
+                startTime: time,
+                showtime_id: params.id,
+                timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                seatName: bookingData.map((seat) => ({
+                    seatNumber: seat.seatNumber,
+                    seatType: seat.seatType,
+                    price: seat.price,
+                    isBooked: true,
+                })),
+                paymentMethod: paymentMethod,
+                paymentStatus: 'Pending',
+            };
+            /* eslint-disable no-console */
+            console.debug('[PAYMENT] Trigger bookingMutation (process)', { role: userState.userInfor?.user_inf?.role, payload });
+            /* eslint-enable no-console */
+            const result = await bookingMutation.mutateAsync({ role: userState.userInfor?.user_inf?.role, payload });
 
             await refreshNotificationsToStore();
 
