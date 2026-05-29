@@ -32,6 +32,9 @@ const ensureArray = (value) => {
   return Array.isArray(value) ? value : [value];
 };
 
+// ==========================================
+// 1. HOOK useAsync (ĐÃ FIX THEO V5)
+// ==========================================
 export const useAsync = ({
   dependencies = [],
   service,
@@ -42,24 +45,24 @@ export const useAsync = ({
 }) => {
   const [, setLoadingState] = useContext(LoadingContext);
   const finalEnabled = Boolean(condition && enabled && service);
+  
   const key = useMemo(
     () => queryKey ?? normalizeQueryKey(service, dependencies),
     [queryKey, service, dependencies]
   );
 
-  const query = useQuery(
-    key,
-    async () => {
+  // v5 yêu cầu truyền duy nhất 1 Object vào useQuery
+  const query = useQuery({
+    queryKey: key,
+    queryFn: async () => {
       const result = await service();
       return normalizeResult(result);
     },
-    {
-      enabled: finalEnabled,
-      refetchOnWindowFocus: false,
-      retry: false,
-      ...options,
-    }
-  );
+    enabled: finalEnabled,
+    refetchOnWindowFocus: false,
+    retry: false,
+    ...options, // Nhận các option hợp lệ khác từ ngoài truyền vào
+  });
 
   useEffect(() => {
     setLoadingState({ isLoading: query.isFetching || query.isLoading });
@@ -75,13 +78,17 @@ export const useAsync = ({
     error: query.error,
     refetch: query.refetch,
     isSuccess: query.isSuccess,
-    isIdle: query.isIdle,
     status: query.status,
     failureCount: query.failureCount,
     fetchStatus: query.fetchStatus,
+    // Lưu ý: query.isIdle đã bị XÓA ở bản v5, nếu dự án cũ xài thì fallback theo status
+    isIdle: query.status === "pending" && !query.isFetching, 
   };
 };
 
+// ==========================================
+// 2. HOOK useAsyncMutation (ĐÃ FIX THEO V5)
+// ==========================================
 export const useAsyncMutation = ({
   service,
   onSuccess,
@@ -96,38 +103,41 @@ export const useAsyncMutation = ({
   const [, setLoadingState] = useContext(LoadingContext);
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(
-    async (variables) => {
+  // v5 yêu cầu truyền duy nhất 1 Object vào useMutation
+  const mutation = useMutation({
+    mutationFn: async (variables) => {
       const result = await service(variables);
       return raw ? result : normalizeResult(result);
     },
-    {
-      onMutate,
-      onSuccess: async (data, variables, context) => {
-        if (Array.isArray(updateQueries)) {
-          updateQueries.forEach(({ queryKey, updater }) => {
-            if (queryKey && typeof updater === "function") {
-              queryClient.setQueryData(queryKey, (oldData) => updater(oldData, data, variables));
-            }
-          });
-        }
+    onMutate,
+    onSuccess: async (data, variables, context) => {
+      if (Array.isArray(updateQueries)) {
+        updateQueries.forEach(({ queryKey, updater }) => {
+          if (queryKey && typeof updater === "function") {
+            queryClient.setQueryData(queryKey, (oldData) => updater(oldData, data, variables));
+          }
+        });
+      }
 
-        const invalidations = ensureArray(invalidateQueries);
-        invalidations.forEach((queryKey) => queryClient.invalidateQueries(queryKey));
+      const invalidations = ensureArray(invalidateQueries);
+      invalidations.forEach((queryKey) => {
+        // v5 yêu cầu bọc queryKey vào object: { queryKey }
+        queryClient.invalidateQueries({ queryKey }); 
+      });
 
-        if (onSuccess) {
-          await onSuccess(data, variables, context);
-        }
-      },
-      onError,
-      onSettled,
-      ...options,
-    }
-  );
+      if (onSuccess) {
+        await onSuccess(data, variables, context);
+      }
+    },
+    onError,
+    onSettled,
+    ...options,
+  });
 
+  // Ở v5, mutation.isLoading đổi tên thành mutation.isPending
   useEffect(() => {
-    setLoadingState({ isLoading: mutation.isLoading });
-  }, [mutation.isLoading, setLoadingState]);
+    setLoadingState({ isLoading: mutation.isPending });
+  }, [mutation.isPending, setLoadingState]);
 
   return {
     mutate: mutation.mutate,
@@ -135,9 +145,11 @@ export const useAsyncMutation = ({
     data: mutation.data,
     error: mutation.error,
     isError: mutation.isError,
-    isLoading: mutation.isLoading,
+    // Map ngược lại isLoading để tránh sửa code ở các component đang xài hook này
+    isLoading: mutation.isPending, 
+    isPending: mutation.isPending,
     isSuccess: mutation.isSuccess,
-    isIdle: mutation.isIdle,
+    isIdle: mutation.status === "idle",
     reset: mutation.reset,
     status: mutation.status,
     failureCount: mutation.failureCount,

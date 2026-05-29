@@ -12,9 +12,11 @@ export default function LoginModal() {
             onCancel={closeLogin}
             footer={null}
             centered
-            width={450} // Độ rộng vừa phải cho form Login
-            bodyStyle={{ padding: 0 }} // Xóa padding mặc định của Antd để tự custom
-            destroyOnClose
+            width={450} 
+            // ✅ ĐÃ SỬA: Chuyển bodyStyle thành styles.body
+            styles={{ body: { padding: 0 } }} 
+            // ✅ ĐÃ SỬA: Đổi destroyOnClose thành destroyOnHidden
+            destroyOnHidden 
             closeIcon={<span className="text-gray-400 hover:text-red-500 transition-colors">✕</span>}
         >
             <div className="overflow-hidden rounded-lg">

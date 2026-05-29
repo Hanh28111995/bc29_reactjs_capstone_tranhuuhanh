@@ -14,13 +14,30 @@ export default function MovieList() {
 
   const {
     state: rawMovieList = [],
-    loading,
+    loading: isLoading, // ✅ Đã sửa: Alias 'loading' thành 'isLoading'
     isError,
     error,
   } = useAsync({
     service: () => fetchMovieListAPI(),
     queryKey: ["movies"],
   });
+
+  // TEMP DEBUG: call service directly to verify axios/network behavior
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetchMovieListAPI();
+        if (!mounted) return;
+        /* eslint-disable no-console */
+        console.debug('[TEMP DEBUG] fetchMovieListAPI response:', res?.status, res?.data);
+        /* eslint-enable no-console */
+      } catch (e) {
+        console.error('[TEMP DEBUG] fetchMovieListAPI error', e);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const movieList = Array.isArray(rawMovieList) ? rawMovieList : [];
 
@@ -78,7 +95,6 @@ export default function MovieList() {
       {/* Thêm class movie-list-row để kiểm soát flex-nowrap */}
       <div className="row mt-3  w-lg-75 movie-list-row">
         {filteredMovies.map((ele) => (
-          // Trong vòng lặp map
           <div className="col-3" key={ele._id}>
             <div className="card movie-card">
               <div className="card-header-wrapper">
