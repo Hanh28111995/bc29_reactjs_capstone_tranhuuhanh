@@ -16,19 +16,21 @@ export default function UserTable() {
   const queryClient = useQueryClient();
   const [api, contextHolder] = notification.useNotification();
 
-  const { data: response, isLoading } = useQuery(
-    ['users', pagination.page, pagination.limit, keyword],
-    () => userListApi({ page: pagination.page, limit: pagination.limit, keyword }),
-    {
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-      retry: false,
-    }
-  );
+  // ✅ ĐÃ SỬA: Chuyển useQuery sang cấu trúc Object của v5
+  const { data: response, isLoading } = useQuery({
+    queryKey: ['users', pagination.page, pagination.limit, keyword],
+    queryFn: () => userListApi({ page: pagination.page, limit: pagination.limit, keyword }),
+    placeholderData: (previousData) => previousData, // Thay thế cho keepPreviousData: true
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
-  const deleteMutation = useMutation((id) => deleteUserApi(id), {
+  // ✅ ĐÃ SỬA: Chuyển useMutation sang cấu trúc Object của v5
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteUserApi(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries(['users']);
+      // Chuẩn v5: Bọc queryKey trong một Object khi invalidate
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
       api.success({
         message: 'Thành công',
         description: 'Người dùng đã được xóa khỏi hệ thống.',
@@ -72,7 +74,7 @@ export default function UserTable() {
       title: 'Tài Khoản',
       dataIndex: 'username',
       key: 'username',
-      sorter: (a, b) => a.username.localeCompare(b.username),
+      sorter: (a, b) => (a.username || '').localeCompare(b.username || ''),
     },
     {
       title: 'Email',
@@ -98,7 +100,7 @@ export default function UserTable() {
           />
           <Popconfirm
             title="Xóa?"
-            onConfirm={() => handleDelete(record._id, record.username)}
+            onConfirm={() => handleDelete(record._id)}
           >
             <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
@@ -108,11 +110,11 @@ export default function UserTable() {
   ];
 
   return (
-    <div className="user-table-container"> {/* Thay style={{padding: '24px'}} */}
+    <div className="user-table-container">
       {contextHolder}
 
-      <div className="table-header"> {/* Thay thế div inline-style */}
-        <div className="search-box"> {/* Bọc Search để quản lý width rem */}
+      <div className="table-header">
+        <div className="search-box">
           <Search
             placeholder="Tìm kiếm tài khoản..."
             onSearch={setKeyword}
@@ -125,7 +127,7 @@ export default function UserTable() {
         <Button
           type="primary"
           size="large"
-          className="add-user-btn" // Thêm class để chỉnh width rem
+          className="add-user-btn"
           onClick={() => navigate('/admin/user-management/create')}
         >
           + Thêm người dùng
@@ -138,7 +140,8 @@ export default function UserTable() {
         rowKey="_id"
         columns={columns}
         dataSource={userlist}
-        loading={isLoading || deleteMutation.isLoading}
+        // ✅ ĐÃ SỬA: Đổi deleteMutation.isLoading thành deleteMutation.isPending cho chuẩn v5
+        loading={isLoading || deleteMutation.isPending}
         pagination={{
           current: pagination.page,
           pageSize: pagination.limit,

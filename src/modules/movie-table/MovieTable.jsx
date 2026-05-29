@@ -22,19 +22,21 @@ function MovieTable() {
   const queryClient = useQueryClient();
   const { notification } = App.useApp();
 
-  const { data: response, isLoading } = useQuery(
-    ['movies', pagination.page, pagination.limit, keyword],
-    () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
-    {
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-      retry: false,
-    }
-  );
+  // ✅ ĐÃ SỬA: Chuyển useQuery sang cấu trúc Object của React Query v5
+  const { data: response, isLoading } = useQuery({
+    queryKey: ['movies', pagination.page, pagination.limit, keyword],
+    queryFn: () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
+    placeholderData: (previousData) => previousData, // Thay thế cho keepPreviousData: true
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
-  const deleteMutation = useMutation((id) => deleteMovieAPI(id), {
+  // ✅ ĐÃ SỬA: Chuyển useMutation sang cấu trúc Object của React Query v5
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteMovieAPI(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries(['movies']);
+      // Chuẩn v5: Phải bọc queryKey trong một Object khi invalidate
+      await queryClient.invalidateQueries({ queryKey: ['movies'] });
       notification.success({ message: 'Thành công', description: 'Đã xóa phim!' });
     },
     onError: () => {
@@ -80,7 +82,7 @@ function MovieTable() {
       title: 'Tên phim',
       dataIndex: 'title',
       key: 'title',
-      ellipsis: true, // Chống tràn cực kỳ quan trọng
+      ellipsis: true, 
     },
     {
       title: 'Khởi chiếu',
@@ -126,7 +128,8 @@ function MovieTable() {
         rowKey="id_movie"
         columns={columns}
         dataSource={movielist}
-        loading={isLoading || deleteMutation.isLoading}
+        // ✅ ĐÃ SỬA: Đổi deleteMutation.isLoading thành deleteMutation.isPending cho đúng chuẩn v5
+        loading={isLoading || deleteMutation.isPending}
         bordered
         pagination={{ 
           current: pagination.page,

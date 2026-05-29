@@ -16,25 +16,27 @@ export default function TicketTable() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: response, isLoading } = useQuery(
-    ['tickets', pagination.page, pagination.limit, statusFilter, keyword],
-    () =>
+  // ✅ ĐÃ SỬA: Cấu trúc useQuery theo chuẩn Object của React Query v5
+  const { data: response, isLoading } = useQuery({
+    queryKey: ['tickets', pagination.page, pagination.limit, statusFilter, keyword],
+    queryFn: () =>
       fetchAllTicketsAPI({
         page: pagination.page,
         limit: pagination.limit,
         status: statusFilter,
         keyword,
       }),
-    {
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-      retry: false,
-    }
-  );
+    placeholderData: (previousData) => previousData, // Thay thế cho keepPreviousData: true
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
-  const deleteMutation = useMutation((id) => deleteTicketAPI(id), {
+  // ✅ ĐÃ SỬA: Cấu trúc useMutation theo chuẩn Object của React Query v5
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteTicketAPI(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries(['tickets']);
+      // Chuẩn v5: Phải bọc queryKey trong một Object khi invalidate
+      await queryClient.invalidateQueries({ queryKey: ['tickets'] });
       notification.success({ message: 'Thành công', description: 'Đã xóa vé!' });
     },
     onError: () => {
@@ -156,7 +158,8 @@ export default function TicketTable() {
         rowKey="_id"
         columns={columns}
         dataSource={filtered}
-        loading={isLoading || deleteMutation.isLoading}
+        // ✅ ĐÃ SỬA: Kiểm tra trạng thái loading đúng cú pháp v5 (dùng deleteMutation.isPending)
+        loading={isLoading || deleteMutation.isPending}
         bordered
         pagination={{
           pageSize: pagination.limit,
