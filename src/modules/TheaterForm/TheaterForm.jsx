@@ -4,7 +4,7 @@ import {
 } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAsync, safeArray } from "hooks/useAsync";
+import { useAsync, useAsyncMutation, safeArray } from "hooks/useAsync";
 import { fetchTheaterDetailAPI, addTheaterAPI, updateTheaterAPI } from "services/theater";
 import { getAllBranches } from "services/branches";
 import SeatsRendering from "modules/seatsRendering/seatsRendering";
@@ -139,6 +139,14 @@ export default function TheaterForm() {
     });
   };
 
+  const theaterMutation = useAsyncMutation({
+    service: (payload) =>
+      params.theaterId
+        ? updateTheaterAPI(params.theaterId, payload)
+        : addTheaterAPI(payload),
+    invalidateQueries: [["theaters"]],
+  });
+
   const handleSave = async (values) => {
     try {
       const payload = {
@@ -151,17 +159,11 @@ export default function TheaterForm() {
         seats: isResettingSeats ? [] : listGhe,
       };
 
-      if (params.theaterId) {
-        await updateTheaterAPI(params.theaterId, payload);
-        notification.success({ message: "Cập nhật thành công!" });
-      } else {
-        await addTheaterAPI(payload);
-        notification.success({ message: "Thêm phòng chiếu mới thành công!" });
-      }
-
+      await theaterMutation.mutateAsync(payload);
+      notification.success({ message: params.theaterId ? "Cập nhật thành công!" : "Thêm phòng chiếu mới thành công!" });
       navigate("/admin/theater-management");
-    } catch (error) {     
-      console.log(error) 
+    } catch (error) {
+      console.log(error);
       notification.error({
         message: "Lỗi hệ thống",
         description: error.message || "Không thể lưu dữ liệu phòng chiếu.",
@@ -171,7 +173,7 @@ export default function TheaterForm() {
 
   return (
     <Card
-      loading={loading}
+      loading={loading || theaterMutation.isLoading}
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />

@@ -10,7 +10,7 @@ import {
   Typography,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAsync } from "hooks/useAsync";
+import { useAsync, useAsyncMutation } from "hooks/useAsync";
 import { userDetailApi, updateUserApi, addUserApi } from "services/user";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 
@@ -56,6 +56,12 @@ export default function UserForm() {
     setIsChanged(hasChanged);
   };
 
+  const userMutation = useAsyncMutation({
+    service: (payload) =>
+      userDetail?._id ? updateUserApi(payload) : addUserApi(payload),
+    invalidateQueries: [["users"]],
+  });
+
   // 4. Xử lý lưu dữ liệu
   const handleSave = async (values) => {
     try {
@@ -67,10 +73,9 @@ export default function UserForm() {
         if (!isChangingPassword) {
           delete payload.password;
         }
-        await updateUserApi(payload);
-      } else {
-        await addUserApi(payload);
       }
+
+      await userMutation.mutateAsync(payload);
 
       api.success({
         message: "Thành công",
@@ -102,7 +107,7 @@ export default function UserForm() {
   };
 
   return (
-    <Card loading={loading}>
+    <Card loading={loading || userMutation.isLoading}>
       {/* Cần thiết cho Antd 5 Notification */}
       {contextHolder}
 

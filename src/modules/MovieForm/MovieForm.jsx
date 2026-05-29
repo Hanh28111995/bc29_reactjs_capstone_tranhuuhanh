@@ -5,7 +5,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAsync } from "hooks/useAsync";
+import { useAsync, useAsyncMutation } from "hooks/useAsync";
 import { addMovieUploadImage, updateMovieUploadImage } from "services/movie";
 import { fetchMovieDetailAPI } from "services/general";
 import { GenreList } from "enums/common";
@@ -75,6 +75,14 @@ export default function MovieForm() {
     setIsChanged(hasChanged || !!file);
   };
 
+  const movieMutation = useAsyncMutation({
+    service: (formData) =>
+      params.movieId && params.movieId !== "create"
+        ? updateMovieUploadImage(formData)
+        : addMovieUploadImage(formData),
+    invalidateQueries: [["movies"]],
+  });
+
   const handleSave = async (values) => {
     try {
       const formData = new FormData();
@@ -93,13 +101,8 @@ export default function MovieForm() {
       if (file) formData.append("File", file, file.name);
       if (params.movieId && params.movieId !== "create") formData.append("id_movie", params.movieId);
 
-      if (params.movieId && params.movieId !== "create") {
-        await updateMovieUploadImage(formData);
-        notification.success({ message: "Cập nhật thành công!" });
-      } else {
-        await addMovieUploadImage(formData);
-        notification.success({ message: "Thêm phim mới thành công!" });
-      }
+      await movieMutation.mutateAsync(formData);
+      notification.success({ message: params.movieId && params.movieId !== "create" ? "Cập nhật thành công!" : "Thêm phim mới thành công!" });
       navigate("/admin/movie-management");
     } catch (error) {
       notification.error({ message: "Lỗi", description: error.response?.data?.content });
@@ -121,7 +124,7 @@ export default function MovieForm() {
   return (
     <Card
       className="movie-form-card"
-      loading={loading}
+      loading={loading || movieMutation.isLoading}
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />

@@ -10,6 +10,18 @@ import { store } from "./store/store";
 import { ConfigProvider, App as AntdApp } from "antd";
 import viVN from "antd/locale/vi_VN";
 import { HelmetProvider } from "react-helmet-async";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2,
+      cacheTime: 1000 * 60 * 10,
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+});
 
 const antdTheme = {
   token: {
@@ -22,14 +34,16 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <HelmetProvider>
     <Provider store={store}>
-      <ConfigProvider
-        locale={viVN}
-        theme={antdTheme}
-      >
-        <AntdApp>
+      <QueryClientProvider client={queryClient}>
+        <ConfigProvider
+          locale={viVN}
+          theme={antdTheme}
+        >
+          <AntdApp>
             <App />
           </AntdApp>
-      </ConfigProvider>
+        </ConfigProvider>
+      </QueryClientProvider>
     </Provider>
   </HelmetProvider>
 );

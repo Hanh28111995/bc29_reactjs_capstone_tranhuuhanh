@@ -24,17 +24,32 @@ export default function Booking() {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
 
-  const { state: rawData, loading: dataLoading } = useAsync({
+  const {
+    state: rawData = {},
+    loading: dataLoading,
+    isError: showtimeError,
+    error: showtimeQueryError,
+  } = useAsync({
     service: () => fetchShowtimesCusAPI(userState.userInfor?.user_inf?.role, params.id),
-    condition: !!userState.userInfor?.user_inf?.id && !!params.id,
-    dependencies: [params.id, userState.userInfor?.user_inf?.role],
+    condition: !!userState.userInfor?.user_inf?.role && !!params.id,
+    dependencies: [userState.userInfor?.user_inf?.role, params.id],
+    queryKey: ["showtimeDetail", userState.userInfor?.user_inf?.role, params.id],
   });
 
-  // useAsync trả về content object { showtime: {...} } — extract ra
-  // Guard thêm: nếu rawData là array (cache sai) thì bỏ qua
   const data = !Array.isArray(rawData)
     ? (rawData?.showtimes ?? rawData?.showtime ?? rawData)
     : null;
+
+  if (showtimeError) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+        <div className="text-center">
+          <p>Không thể tải thông tin suất chiếu.</p>
+          <p>{showtimeQueryError?.message || 'Vui lòng thử lại sau.'}</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSelect = (type, selectChair) => {
     console.log('selectChair:', selectChair);

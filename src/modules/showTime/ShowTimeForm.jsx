@@ -13,7 +13,7 @@ import {
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAsync, safeArray } from "hooks/useAsync";
+import { useAsync, useAsyncMutation, safeArray } from "hooks/useAsync";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { fetchMovieListAPI } from "services/movie";
 import { fetchTheaterListAPI } from "services/theater";
@@ -129,6 +129,12 @@ export default function ShowtimeForm() {
     setIsChanged(hasChanged);
   };
 
+  const showtimeMutation = useAsyncMutation({
+    service: (payload) =>
+      isEditMode ? updateShowTime({ id: params.id, ...payload }) : addNewShowTime(payload),
+    invalidateQueries: [["showtimes"]],
+  });
+
   const handleSave = async (values) => {
     try {
       const utcStartTime = values.startTime
@@ -143,13 +149,8 @@ export default function ShowtimeForm() {
         seats: seats,
       };
 
-      if (isEditMode) {
-        await updateShowTime({ id: params.id, ...payload });
-        notification.success({ message: "Cập nhật suất chiếu thành công!" });
-      } else {
-        await addNewShowTime(payload);
-        notification.success({ message: "Thêm suất chiếu mới thành công!" });
-      }
+      await showtimeMutation.mutateAsync(payload);
+      notification.success({ message: isEditMode ? "Cập nhật suất chiếu thành công!" : "Thêm suất chiếu mới thành công!" });
 
       setIsChanged(false);
       navigate("/admin/showtimes");
@@ -163,7 +164,7 @@ export default function ShowtimeForm() {
 
   return (
     <Card
-      loading={loading}
+      loading={loading || showtimeMutation.isLoading}
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />

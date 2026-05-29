@@ -1,34 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { Table, Tag, Space, Card, Typography, Empty, Spin } from 'antd';
 import { fetchHistoryAPI } from 'services/notificationAndHistory';
+import { useAsync } from 'hooks/useAsync';
 import dayjs from 'dayjs';
 
 const { Title } = Typography;
 
 export default function HistoryTicket() {
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
   const userState = useSelector((state) => state.userReducer);
   const role = userState.userInfor?.user_inf?.role;
 
-  useEffect(() => {
-    const getHistory = async () => {
-      if (!role) return;
-      setLoading(true);
-      try {
-        const res = await fetchHistoryAPI(role);
-        const data = res.data.content || [];
-        setHistory(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Lỗi khi lấy lịch sử đặt vé:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getHistory();
-  }, [role]);
+  const { state: history = [], loading } = useAsync({
+    service: () => fetchHistoryAPI(role),
+    enabled: Boolean(role),
+    queryKey: ['historyTickets', role],
+  });
 
   const columns = [
     {

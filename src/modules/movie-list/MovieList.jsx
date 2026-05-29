@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoadingContext } from "../../contexts/loading.context";
 import { useAsync } from "../../hooks/useAsync";
-import { Radio } from "antd";
+import { Radio, Spin } from "antd";
 import dayjs from "dayjs";
 import { fetchMovieListAPI } from "services/general";
 import "./index.scss";
@@ -12,15 +12,38 @@ export default function MovieList() {
   const [, setLoadingState] = useContext(LoadingContext);
   const [movieListType, setMovieListType] = useState("SHOWING");
 
-  const { state: rawMovieList, loading } = useAsync({
-    dependencies: [],
+  const {
+    state: rawMovieList = [],
+    loading,
+    isError,
+    error,
+  } = useAsync({
     service: () => fetchMovieListAPI(),
+    queryKey: ["movies"],
   });
+
   const movieList = Array.isArray(rawMovieList) ? rawMovieList : [];
 
   useEffect(() => {
-    setLoadingState({ isLoading: loading });
-  }, [loading, setLoadingState]);
+    setLoadingState({ isLoading });
+  }, [isLoading, setLoadingState]);
+
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "50vh" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center mt-5">
+        <p>Đã có lỗi khi tải danh sách phim.</p>
+        <p>{error?.message || "Vui lòng thử lại sau."}</p>
+      </div>
+    );
+  }
 
   const filteredMovies = movieList.filter((ele) =>
     movieListType === "SHOWING" ? ele.showing === true : ele.coming === true

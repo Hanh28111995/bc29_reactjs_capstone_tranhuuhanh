@@ -1,14 +1,15 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { fetchMovieListAPI, deleteMovieAPI } from "services/movie";
-import { formatDate3 } from "../../utils/common";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchMovieListAPI, deleteMovieAPI } from 'services/movie';
+import { formatDate3 } from '../../utils/common';
 import {
   EditOutlined,
   DeleteOutlined,
   CarryOutOutlined,
   PlusOutlined,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 import { removeVietnameseTones } from 'constants/common';
 import './index.scss';
 
@@ -16,49 +17,47 @@ const { Search } = Input;
 
 function MovieTable() {
   const navigate = useNavigate();
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
-  const [paginationMeta, setPaginationMeta] = useState({ total: 0, totalPages: 1 });
-  const [movieData, setMovieData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const { notification } = App.useApp();
 
-  const fetchData = async (params = {}) => {
-    setLoading(true);
-    try {
-      const res = await fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, ...params });
-      const content = res.data.content;
-      const data = Array.isArray(content) ? content : (content?.movies ?? content?.data ?? []);
-      const meta = content?.pagination ?? {};
-      setMovieData(data);
-      setPaginationMeta({ total: meta.total ?? data.length, totalPages: meta.totalPages ?? 1 });
-    } catch {
-      notification.error({ message: "Lỗi", description: "Không thể tải danh sách phim." });
-    } finally {
-      setLoading(false);
+  const { data: response, isLoading } = useQuery(
+    ['movies', pagination.page, pagination.limit, keyword],
+    () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      retry: false,
     }
-  };
+  );
 
-  useEffect(() => {
-    fetchData({ page: pagination.page, limit: pagination.limit, keyword });
-  }, [pagination]);
+  const deleteMutation = useMutation((id) => deleteMovieAPI(id), {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(['movies']);
+      notification.success({ message: 'Thành công', description: 'Đã xóa phim!' });
+    },
+    onError: () => {
+      notification.error({ message: 'Lỗi', description: 'Không thể xóa.' });
+    },
+  });
+
+  const content = response?.data?.content;
+  const movieData = Array.isArray(content)
+    ? content
+    : content?.movies ?? content?.data ?? [];
+  const paginationMeta = content?.pagination ?? { total: movieData.length, totalPages: 1 };
 
   const movielist = useMemo(() => {
     if (!keyword) return movieData;
     const key = removeVietnameseTones(keyword).toLowerCase().trim();
-    return movieData.filter(ele =>
-      removeVietnameseTones(ele.tenPhim || ele.title || "").toLowerCase().includes(key)
+    return movieData.filter((ele) =>
+      removeVietnameseTones(ele.tenPhim || ele.title || '').toLowerCase().includes(key)
     );
   }, [movieData, keyword]);
 
   const handleDelete = async (id) => {
-    try {
-      await deleteMovieAPI(id);
-      notification.success({ message: "Thành công", description: "Đã xóa phim!" });
-      fetchData({ page: pagination.page, limit: pagination.limit, keyword });
-    } catch (err) {
-      notification.error({ message: "Lỗi", description: "Không thể xóa." });
-    }
+    await deleteMutation.mutateAsync(id);
   };
 
   const columns = [
@@ -127,7 +126,7 @@ function MovieTable() {
         rowKey="id_movie"
         columns={columns}
         dataSource={movielist}
-        loading={loading}
+        loading={isLoading || deleteMutation.isLoading}
         bordered
         pagination={{ 
           current: pagination.page,

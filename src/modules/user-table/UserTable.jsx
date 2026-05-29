@@ -1,7 +1,8 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Table, Button, Input, notification, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined,} from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userListApi, deleteUserApi } from 'services/user';
 import { removeVietnameseTones } from 'constants/common';
 import './index.scss';
@@ -10,56 +11,54 @@ const { Search } = Input;
 
 export default function UserTable() {
   const navigate = useNavigate();
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
-  const [paginationMeta, setPaginationMeta] = useState({ total: 0, totalPages: 1 });
-  const [userList, setUserList] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const [api, contextHolder] = notification.useNotification();
 
-  const fetchData = async (params = {}) => {
-    setLoading(true);
-    try {
-      const res = await userListApi({ page: pagination.page, limit: pagination.limit, ...params });
-      const content = res.data.content;
-      const data = Array.isArray(content) ? content : (content?.users ?? content?.data ?? []);
-      const meta = content?.pagination ?? {};
-      setUserList(data);
-      setPaginationMeta({ total: meta.total ?? data.length, totalPages: meta.totalPages ?? 1 });
-    } catch {
-      api.error({ message: 'Lỗi', description: 'Không thể tải danh sách người dùng.' });
-    } finally {
-      setLoading(false);
+  const { data: response, isLoading } = useQuery(
+    ['users', pagination.page, pagination.limit, keyword],
+    () => userListApi({ page: pagination.page, limit: pagination.limit, keyword }),
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      retry: false,
     }
-  };
+  );
 
-  useEffect(() => {
-    fetchData({ page: pagination.page, limit: pagination.limit, keyword });
-  }, [pagination]);
+  const deleteMutation = useMutation((id) => deleteUserApi(id), {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(['users']);
+      api.success({
+        message: 'Thành công',
+        description: 'Người dùng đã được xóa khỏi hệ thống.',
+        placement: 'topRight',
+      });
+    },
+    onError: (err) => {
+      api.error({
+        message: 'Lỗi xóa người dùng',
+        description: err.response?.data?.content || 'Đã có lỗi xảy ra, vui lòng thử lại.',
+      });
+    },
+  });
+
+  const content = response?.data?.content;
+  const userList = Array.isArray(content)
+    ? content
+    : content?.users ?? content?.data ?? [];
+  const paginationMeta = content?.pagination ?? { total: userList.length, totalPages: 1 };
 
   const userlist = useMemo(() => {
     if (!keyword) return userList;
     const key = removeVietnameseTones(keyword).toLowerCase().trim();
-    return userList.filter(ele =>
-      removeVietnameseTones(ele.username || "").toLowerCase().includes(key)
+    return userList.filter((ele) =>
+      removeVietnameseTones(ele.username || '').toLowerCase().includes(key)
     );
   }, [userList, keyword]);
 
-  const handleDelete = async (id, username) => {
-    try {
-      await deleteUserApi(id);
-      api.success({
-        message: 'Thành công',
-        description: `Người dùng ${username} đã được xóa khỏi hệ thống.`,
-        placement: 'topRight',
-      });
-      fetchData({ page: pagination.page, limit: pagination.limit, keyword });
-    } catch (err) {
-      api.error({
-        message: 'Lỗi xóa người dùng',
-        description: err.response?.data?.content || "Đã có lỗi xảy ra, vui lòng thử lại.",
-      });
-    }
+  const handleDelete = async (id) => {
+    await deleteMutation.mutateAsync(id);
   };
 
   const columns = [
@@ -139,7 +138,7 @@ export default function UserTable() {
         rowKey="_id"
         columns={columns}
         dataSource={userlist}
-        loading={loading}
+        loading={isLoading || deleteMutation.isLoading}
         pagination={{
           current: pagination.page,
           pageSize: pagination.limit,

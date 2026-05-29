@@ -1,5 +1,6 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Table, Input, Button, App, Popconfirm, Tag, Select } from 'antd';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchAllTicketsAPI, deleteTicketAPI } from 'services/ticket';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -11,49 +12,54 @@ export default function TicketTable() {
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState(undefined);
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
-  const [paginationMeta, setPaginationMeta] = useState({ total: 0, totalPages: 1 });
-  const [ticketList, setTicketList] = useState([]);
-  const [loading, setLoading] = useState(false);
   const { notification } = App.useApp();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const fetchData = async (params = {}) => {
-    setLoading(true);
-    try {
-      const res = await fetchAllTicketsAPI({ page: pagination.page, limit: pagination.limit, ...params });
-      const content = res.data.content;
-      const data = Array.isArray(content) ? content : (content?.tickets ?? content?.data ?? []);
-      const meta = content?.pagination ?? {};
-      setTicketList(data);
-      setPaginationMeta({ total: meta.total ?? data.length, totalPages: meta.totalPages ?? 1 });
-    } catch {
-      notification.error({ message: "Lỗi", description: "Không thể tải danh sách vé." });
-    } finally {
-      setLoading(false);
+  const { data: response, isLoading } = useQuery(
+    ['tickets', pagination.page, pagination.limit, statusFilter, keyword],
+    () =>
+      fetchAllTicketsAPI({
+        page: pagination.page,
+        limit: pagination.limit,
+        status: statusFilter,
+        keyword,
+      }),
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      retry: false,
     }
-  };
+  );
 
-  useEffect(() => {
-    fetchData({ page: pagination.page, limit: pagination.limit, status: statusFilter, keyword });
-  }, [pagination, statusFilter]);
+  const deleteMutation = useMutation((id) => deleteTicketAPI(id), {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(['tickets']);
+      notification.success({ message: 'Thành công', description: 'Đã xóa vé!' });
+    },
+    onError: () => {
+      notification.error({ message: 'Lỗi', description: 'Không thể xóa.' });
+    },
+  });
+
+  const content = response?.data?.content;
+  const ticketList = Array.isArray(content)
+    ? content
+    : content?.tickets ?? content?.data ?? [];
+  const paginationMeta = content?.pagination ?? { total: ticketList.length, totalPages: 1 };
 
   const filtered = useMemo(() => {
     if (!keyword) return ticketList;
     const key = keyword.toLowerCase().trim();
-    return ticketList.filter(e =>
-      e.transactionId?.toLowerCase().includes(key) ||
-      e.paymentMethod?.toLowerCase().includes(key)
+    return ticketList.filter(
+      (e) =>
+        e.transactionId?.toLowerCase().includes(key) ||
+        e.paymentMethod?.toLowerCase().includes(key)
     );
   }, [ticketList, keyword]);
 
   const handleDelete = async (id) => {
-    try {
-      await deleteTicketAPI(id);
-      notification.success({ message: "Thành công", description: "Đã xóa vé!" });
-      fetchData({ page: pagination.page, limit: pagination.limit, status: statusFilter, keyword });
-    } catch {
-      notification.error({ message: "Lỗi", description: "Không thể xóa." });
-    }
+    await deleteMutation.mutateAsync(id);
   };
 
   const columns = [
@@ -68,7 +74,7 @@ export default function TicketTable() {
       title: 'Ghế',
       dataIndex: 'seatName',
       key: 'seats',
-      render: (seats) => seats?.map(s => s.seatNumber).join(', '),
+      render: (seats) => seats?.map((s) => s.seatNumber).join(', '),
     },
     {
       title: 'Tổng tiền',
@@ -150,9 +156,9 @@ export default function TicketTable() {
         rowKey="_id"
         columns={columns}
         dataSource={filtered}
-        loading={loading}
+        loading={isLoading || deleteMutation.isLoading}
         bordered
-        pagination={{ 
+        pagination={{
           pageSize: pagination.limit,
           current: pagination.page,
           total: paginationMeta.total,

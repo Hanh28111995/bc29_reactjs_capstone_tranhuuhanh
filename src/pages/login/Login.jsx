@@ -6,6 +6,7 @@ import { loginAPI, loginGoogleAPI } from "services/user";
 import { setNotificationsAction, setUserInfoAction } from "../../store/actions/user.action";
 import { notification } from "antd";
 import { useAuth } from "contexts/auth.context";
+import { useAsyncMutation } from "hooks/useAsync";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "configs/firebase.config";
 import SEO from "components/SEO";
@@ -19,6 +20,15 @@ export default function Login() {
   const [state, setState] = useState({
     username: "hanhtran",
     password: "123456",
+  });
+
+  const loginMutation = useAsyncMutation({
+    service: async (payload) => loginAPI(payload),
+    raw: true,
+    onError: (err) => {
+      const errorMsg = err.response?.data?.message || 'Đăng nhập thất bại';
+      notification.error({ description: errorMsg });
+    },
   });
 
   const handleChange = (event) => {
@@ -54,13 +64,16 @@ export default function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const result = await loginAPI(state);
+      const result = await loginMutation.mutateAsync(state);
       const userData = result.data.content;
       notification.success({ description: "Đăng nhập thành công!" });
       await handleLoginSuccess(userData);
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "Đăng nhập thất bại";
-      notification.error({ description: errorMsg });
+      // lỗi hiển thị đã xử lý trong loginMutation.onError
+      if (!err?.response) {
+        const errorMsg = err?.message || "Đăng nhập thất bại";
+        notification.error({ description: errorMsg });
+      }
     }
   };
 
@@ -126,7 +139,9 @@ export default function Login() {
             className="form-control"
           />
         </div>
-        <button className="btn btn-success w-100">LOGIN</button>
+        <button className="btn btn-success w-100" disabled={loginMutation.isLoading}>
+          {loginMutation.isLoading ? 'Đang đăng nhập...' : 'LOGIN'}
+        </button>
       </form>
       
       <div className="text-center my-3">--- HOẶC ---</div>

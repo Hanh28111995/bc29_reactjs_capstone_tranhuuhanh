@@ -6,6 +6,7 @@ import {
   fetchTicketByIdAPI,
 } from "services/ticket";
 import { useSelector } from "react-redux";
+import { useAsync, useAsyncMutation } from "hooks/useAsync";
 
 export default function PaymentResult() {
   const userState = useSelector((state) => state.userReducer);
@@ -13,9 +14,6 @@ export default function PaymentResult() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // State quản lý luồng
-  const [loading, setLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false); // Loading cho nút bấm Modal
   const [status, setStatus] = useState(null); // 'success' | 'error'
   const [cashModal, setCashModal] = useState(true);
 
@@ -23,66 +21,68 @@ export default function PaymentResult() {
   const bookingId = location.state?.booking?._id;
   const paymentMethod = location.state?.method?.toLowerCase(); // Lấy từ state truyền sang
 
+  const {
+    state: ticketData,
+    loading: verifying,
+    isError: verifyError,
+  } = useAsync({
+    service: () => fetchTicketByIdAPI(bookingId),
+    enabled: Boolean(bookingId && paymentMethod !== 'cash'),
+    queryKey: ['paymentResult', bookingId],
+  });
+
+  const cancelMutation = useAsyncMutation({
+    service: async ({ role, payload }) => fetchCancelTicketAPI(role, payload),
+    raw: true,
+    onError: (error) => {
+      console.error('Update Status Failed:', error);
+      message.error('Có lỗi xảy ra, vui lòng thử lại.');
+    },
+  });
+
   useEffect(() => {
-    const verifyPayment = async () => {
-      // Nếu là Cash, không cần verify ngay, chờ Modal xác nhận
-      if (paymentMethod === "cash") {
-        setLoading(false);
-        return;
-      }
+    if (paymentMethod === 'cash') {
+      setStatus(null);
+      return;
+    }
 
-      if (!bookingId) {
-        setLoading(false);
-        return;
-      }
+    if (verifying) {
+      return;
+    }
 
-      try {
-        const res = await fetchTicketByIdAPI(bookingId);
-        const currentStatus = res.data?.content?.paymentStatus;
+    if (verifyError) {
+      setStatus('error');
+      return;
+    }
 
-        if (currentStatus === "Completed") {
-          setStatus("success");
-        } else if (
-          currentStatus === "Failed" ||
-          currentStatus === "Cancelled"
-        ) {
-          setStatus("error");
-        }
-      } catch (error) {
-        console.error("Verify Error:", error);
-        setStatus("error");
-      } finally {
-        setLoading(false);
-      }
-    };
+    const currentStatus = ticketData?.paymentStatus;
+    if (currentStatus === 'Completed') {
+      setStatus('success');
+    } else if (currentStatus === 'Failed' || currentStatus === 'Cancelled') {
+      setStatus('error');
+    }
+  }, [paymentMethod, ticketData, verifying, verifyError]);
 
-    verifyPayment();
-  }, [bookingId, paymentMethod]);
-
-  // Hàm xử lý cập nhật trạng thái vé (Dùng chung cho OK/Cancel)
   const handleCancelTicket = async () => {
-    setIsProcessing(true);
     try {
-      await fetchCancelTicketAPI(
-        userState.userInfor?.user_inf?.role,
-        location.state?.booking,
-      );
+      await cancelMutation.mutateAsync({
+        role: userState.userInfor?.user_inf?.role,
+        payload: location.state?.booking,
+      });
       setCashModal(false);
-      setStatus("error");
+      setStatus('error');
     } catch (error) {
-      console.error("Update Status Failed:", error);
-      message.error("Có lỗi xảy ra, vui lòng thử lại.");
-    } finally {
-      setIsProcessing(false);
+      // lỗi đã được xử lý trong onError
     }
   };
+
   const handleCompletedTicket = async () => {
     setCashModal(false);
-    setStatus("success");
-    message.success("Xác nhận thanh toán thành công!");    
+    setStatus('success');
+    message.success('Xác nhận thanh toán thành công!');
   };
 
-  if (loading)
+  if (verifying)
     return (
       <div style={{ textAlign: "center", marginTop: 100 }}>
         <Spin size="large" tip="Đang xác thực giao dịch..." />

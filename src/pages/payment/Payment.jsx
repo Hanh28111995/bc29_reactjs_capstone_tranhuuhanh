@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchCreateMomoPayment, fetchCreateCashPayment, fetchCreateVnpayPayment, fetchTicketBookingAPI} from 'services/ticket';
 import { fetchNotificationAPI, formatNotificationsForStore } from 'services/notificationAndHistory';
 import { setNotificationsAction } from 'store/actions/user.action';
+import { useAsyncMutation } from 'hooks/useAsync';
 import "./index.scss"; 
 import dayjs from 'dayjs';
 const { Title, Text } = Typography;
@@ -18,6 +19,22 @@ export default function Payment() {
     const location = useLocation();
     const navigate = useNavigate();
     const { bookingData, movieInfor, theater, time, customerInfo, mode } = location.state || {};
+
+    const bookingMutation = useAsyncMutation({
+      service: async ({ role, payload }) => fetchTicketBookingAPI(role, payload),
+      raw: true,
+      onError: (error) => {
+        if (error?.response?.status === 409) {
+          notification.error({
+            message: 'Ghế đã được đặt',
+            description: 'Vui lòng chọn ghế khác.',
+          });
+          return;
+        }
+
+        notification.error({ message: 'Đặt vé thất bại' });
+      },
+    });
 
     const [paymentMethod, setPaymentMethod] = useState(null);
 
@@ -43,34 +60,29 @@ export default function Payment() {
             cancelText: 'Hủy',
             async onOk() {
                 try {
-                    await fetchTicketBookingAPI(userState.userInfor?.user_inf.role, {
-                        user_id: customerInfo?.id || userState.userInfor?.user_inf?.id,
-                        id_movie: movieInfor?._id,
-                        id_theater: theater?._id,
-                        startTime: time,
-                        showtime_id: params.id,
-                        timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                        seatName: bookingData.map(seat => ({
-                            seatNumber: seat.seatNumber,
-                            seatType: seat.seatType,
-                            price: seat.price,
-                            isBooked: true,
-                        })),
-                        paymentMethod: 'cash',
-                        paymentStatus: 'Pending',
+                    await bookingMutation.mutateAsync({
+                        role: userState.userInfor?.user_inf.role,
+                        payload: {
+                            user_id: customerInfo?.id || userState.userInfor?.user_inf?.id,
+                            id_movie: movieInfor?._id,
+                            id_theater: theater?._id,
+                            startTime: time,
+                            showtime_id: params.id,
+                            timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                            seatName: bookingData.map((seat) => ({
+                                seatNumber: seat.seatNumber,
+                                seatType: seat.seatType,
+                                price: seat.price,
+                                isBooked: true,
+                            })),
+                            paymentMethod: 'cash',
+                            paymentStatus: 'Pending',
+                        },
                     });
                     await refreshNotificationsToStore();
-                    navigate("/")
-                    // const ticket = result?.data?.content;
-                    // await fetchCreateCashPayment(ticket);
-                    // navigate('/payment-result', {
-                    //     state: { payUrl: null, bookingId: ticket._id, method: 'cash' }
-                    // });
+                    navigate('/');
                 } catch (error) {
-                    if (error?.response?.status === 409) {
-                        return notification.error({ message: "Ghế đã được đặt", description: "Vui lòng chọn ghế khác." });
-                    }
-                    notification.error({ message: "Đặt vé thất bại" });
+                    // handled in mutation onError
                 }
             },
         });
@@ -78,7 +90,7 @@ export default function Payment() {
 
     const handleFinishPayment = () => {
         if (!paymentMethod) {
-            return notification.warning({ message: "Vui lòng chọn phương thức thanh toán!" });
+            return notification.warning({ message: 'Vui lòng chọn phương thức thanh toán!' });
         }
         confirm({
             title: 'Xác nhận đặt vé?',
@@ -89,30 +101,36 @@ export default function Payment() {
                 processBooking();
             },
         });
-
     };
+
     const processBooking = async () => {
         try {
-            const result = await fetchTicketBookingAPI(userState.userInfor?.user_inf.role, {
-                user_id: userState.userInfor?.user_inf?.id,
-                id_movie: movieInfor?._id,
-                id_theater: theater?._id,
-                startTime: time,
-                showtime_id: params.id,
-                timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                seatName: bookingData.map(seat => ({
-                    seatNumber: seat.seatNumber,
-                    seatType: seat.seatType,
-                    price: seat.price,
-                    isBooked: true,
-                })),
-                paymentMethod: paymentMethod,
-                paymentStatus: 'Pending',
+            const result = await bookingMutation.mutateAsync({
+                role: userState.userInfor?.user_inf.role,
+                payload: {
+                    user_id: userState.userInfor?.user_inf?.id,
+                    id_movie: movieInfor?._id,
+                    id_theater: theater?._id,
+                    startTime: time,
+                    showtime_id: params.id,
+                    timeOfBooking: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                    seatName: bookingData.map((seat) => ({
+                        seatNumber: seat.seatNumber,
+                        seatType: seat.seatType,
+                        price: seat.price,
+                        isBooked: true,
+                    })),
+                    paymentMethod: paymentMethod,
+                    paymentStatus: 'Pending',
+                },
             });
 
             await refreshNotificationsToStore();
 
-            if (result?.data?.success) {
+            const success = result?.data?.success;
+            const ticket = result?.data?.content;
+
+            if (success) {
                 notification.success({
                     message: 'Thành công',
                     description: 'Đặt vé thành công!',
@@ -121,38 +139,45 @@ export default function Payment() {
                 const errorMsg = result?.data?.message;
                 notification.error({
                     message: 'Đặt vé thất bại',
-                    description: Array.isArray(errorMsg) ? errorMsg.join(" | ") : errorMsg || 'Lỗi không xác định từ hệ thống',
+                    description: Array.isArray(errorMsg) ? errorMsg.join(' | ') : errorMsg || 'Lỗi không xác định từ hệ thống',
                 });
             }
 
-            const ticket = result?.data.content;
-            const keyword = ticket.paymentMethod.toLowerCase();
-            if (keyword === "cash") {
-                await fetchCreateCashPayment(ticket)
-                setTimeout(() => navigate('/payment-result', {
-                    state: {
-                        payUrl: null,
-                        booking: ticket,
-                        method: ticket.paymentMethod,                        
-                    }
-                }), 2000);
+            if (!ticket) {
+                return;
             }
 
-            if (keyword === "momo") {
+            const keyword = ticket.paymentMethod?.toLowerCase();
+            if (keyword === 'cash') {
+                await fetchCreateCashPayment(ticket);
+                setTimeout(
+                    () =>
+                        navigate('/payment-result', {
+                            state: {
+                                payUrl: null,
+                                booking: ticket,
+                                method: ticket.paymentMethod,
+                            },
+                        }),
+                    2000
+                );
+            }
+
+            if (keyword === 'momo') {
                 const getCode = await fetchCreateMomoPayment(ticket);
                 const payUrl = getCode?.data?.content?.paymentUrl;
-                notification.success({ message: "Đang chuyển hướng đến MoMo..." });
+                notification.success({ message: 'Đang chuyển hướng đến MoMo...' });
                 setTimeout(() => window.open(payUrl, '_blank'), 2000);
             }
 
-            if (keyword === "internet banking") {
+            if (keyword === 'internet banking') {
                 const getCode = await fetchCreateVnpayPayment(ticket);
                 const payUrl = getCode?.data?.content?.paymentUrl;
-                notification.success({ message: "Đang chuyển hướng đến VNpay..." });
+                notification.success({ message: 'Đang chuyển hướng đến VNpay...' });
                 setTimeout(() => window.open(payUrl, '_blank'), 2000);
             }
         } catch (error) {
-            console.error("Qúa trình bị gián đoạn.", error);
+            console.error('Qúa trình bị gián đoạn.', error);
         }
     };
     return (
@@ -212,6 +237,7 @@ export default function Payment() {
                             block
                             className="btn-confirm"
                             onClick={handleReserve}
+                            loading={bookingMutation.isLoading}
                         >
                             XÁC NHẬN ĐẶT VÉ
                         </Button>
@@ -222,6 +248,7 @@ export default function Payment() {
                             block
                             className="btn-confirm"
                             onClick={handleFinishPayment}
+                            loading={bookingMutation.isLoading}
                         >
                             XÁC NHẬN THANH TOÁN
                         </Button>
