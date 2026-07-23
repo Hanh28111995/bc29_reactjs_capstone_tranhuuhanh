@@ -18,7 +18,7 @@ export default function AuthGuards() {
         message: "Cảnh báo",
         description: "Bạn cần đăng nhập để tiếp tục đặt vé",
       });
-      // openLogin();
+      openLogin();
       navigate(-1);
     }
     setChecked(true);
