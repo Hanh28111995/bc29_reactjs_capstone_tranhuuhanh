@@ -20,7 +20,7 @@ export default function AuthGuards() {
     setChecked(true);
   }, userRole);
   
-  if (!userRole) return null;
+  // if (!userRole) return null;
 
   return <Outlet />;
 }
