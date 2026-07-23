@@ -16,11 +16,7 @@ export default function AdminGuards() {
       });
       navigate("/login");
     }
-  }, [userRole, navigate]);
-
-  if (userRole !== MaLoaiNguoiDung.QuanTri) {
-    return null;
-  }
+  }, [userRole, navigate]);  
 
   return <Outlet />;
 }

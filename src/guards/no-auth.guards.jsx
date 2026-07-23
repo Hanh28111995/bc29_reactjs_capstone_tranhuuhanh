@@ -11,6 +11,7 @@ export default function NoAuthGuards() {
             navigate('/');
         }
     },[userState.userInfor, navigate]);
+    
   return (
     <Outlet />
   )
