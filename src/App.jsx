@@ -6,6 +6,7 @@ import { Suspense, useEffect } from "react";
 import { LoadingProvider } from "./contexts/loading.context";
 import { AuthProvider } from "contexts/auth.context";
 import { Spin } from "antd";
+import LoginModal from "pages/login/LoginModal";
 
 function App() {
   useEffect(() => {
@@ -68,6 +69,7 @@ function App() {
         <AuthProvider>
           <LoadingProvider>
             <Router />
+            <LoginModal />
           </LoadingProvider>
         </AuthProvider>
       </Suspense>
