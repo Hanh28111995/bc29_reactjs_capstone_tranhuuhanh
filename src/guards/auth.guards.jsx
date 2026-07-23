@@ -4,19 +4,22 @@ import { useSelector } from 'react-redux';
 import { useAuth } from 'contexts/auth.context';
 
 export default function AuthGuards() {
-  const userState = useSelector((state) => state.userReducer);
+  const userRole = useSelector((state) => state.userReducer.userInfor?.user_inf?.role);
   const { openLogin } = useAuth();
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (!userState.userInfor) {
+    if (!userRole) {
+      notification.warning({
+        message: "Cảnh báo",
+        description: "Bạn cần đăng nhập để tiếp tục đặt vé",
+      });
       openLogin();
     }
     setChecked(true);
-  }, [userState.userInfor]);
-
-  if (!checked) return null;
-  if (!userState.userInfor) return null;
+  }, userRole);
+  
+  if (!userRole) return null;
 
   return <Outlet />;
 }

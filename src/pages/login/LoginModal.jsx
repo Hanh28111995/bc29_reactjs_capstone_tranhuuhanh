@@ -12,10 +12,9 @@ export default function LoginModal() {
             onCancel={closeLogin}
             footer={null}
             centered
-            width={450} 
-            // ✅ ĐÃ SỬA: Chuyển bodyStyle thành styles.body
+            width={450}             
             styles={{ body: { padding: 0 } }} 
-            // ✅ ĐÃ SỬA: Đổi destroyOnClose thành destroyOnHidden
+            
             destroyOnHidden 
             closeIcon={<span className="text-gray-400 hover:text-red-500 transition-colors">✕</span>}
         >

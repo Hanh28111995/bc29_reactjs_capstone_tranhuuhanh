@@ -22,7 +22,7 @@ function MovieTable() {
   const queryClient = useQueryClient();
   const { notification } = App.useApp();
 
-  // ✅ ĐÃ SỬA: Chuyển useQuery sang cấu trúc Object của React Query v5
+  //ĐÃ SỬA: Chuyển useQuery sang cấu trúc Object của React Query v5
   const { data: response, isLoading } = useQuery({
     queryKey: ['movies', pagination.page, pagination.limit, keyword],
     queryFn: () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
@@ -31,7 +31,7 @@ function MovieTable() {
     retry: false,
   });
 
-  // ✅ ĐÃ SỬA: Chuyển useMutation sang cấu trúc Object của React Query v5
+  //ĐÃ SỬA: Chuyển useMutation sang cấu trúc Object của React Query v5
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteMovieAPI(id),
     onSuccess: async () => {
