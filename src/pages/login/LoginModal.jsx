@@ -14,7 +14,6 @@ export default function LoginModal() {
             centered
             width={450}            
             styles={{ body: { padding: 0 } }} 
-            // Xóa dòng destroyOnHidden đi để tránh lỗi iterable của Antd Modal
             closeIcon={<span className="text-gray-400 hover:text-red-500 transition-colors">✕</span>}
         >
             <div className="overflow-hidden rounded-lg">
@@ -26,7 +25,8 @@ export default function LoginModal() {
 
                 {/* Phần chứa Form Login */}
                 <div className="p-8 bg-white">
-                    <Login />
+                    {/* Chỉ mount component Login khi modal thực sự mở để tránh lỗi iterable của Antd */}
+                    {isLoginModalOpen && <Login />}
                 </div>
             </div>
         </Modal>
