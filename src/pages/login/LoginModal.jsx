@@ -12,10 +12,9 @@ export default function LoginModal() {
             onCancel={closeLogin}
             footer={null}
             centered
-            width={450}             
+            width={450}            
             styles={{ body: { padding: 0 } }} 
-            
-            destroyOnHidden 
+            // Xóa dòng destroyOnHidden đi để tránh lỗi iterable của Antd Modal
             closeIcon={<span className="text-gray-400 hover:text-red-500 transition-colors">✕</span>}
         >
             <div className="overflow-hidden rounded-lg">
