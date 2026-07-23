@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { notification } from "antd";
@@ -6,10 +6,9 @@ import { useAuth } from "contexts/auth.context";
 
 export default function AuthGuards() {
   const userRole = useSelector(
-    (state) => state.userReducer.userInfor?.user_inf?.role,
+    (state) => state.userReducer.userInfor?.user_inf?.role
   );
   const { openLogin } = useAuth();
-  const [checked, setChecked] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,8 +20,8 @@ export default function AuthGuards() {
       openLogin();
       navigate(-1);
     }
-    setChecked(true);
-  }, [userRole]);
+  }, [userRole]); // Chỉ chạy lại khi userRole thay đổi, không để hàm openLogin hay navigate làm trigger lặp
+
   if (!userRole) {
     return <></>;
   }
