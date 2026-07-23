@@ -18,7 +18,7 @@ export default function AuthGuards() {
       openLogin();
     }
     setChecked(true);
-  }, userRole);
+  }, [userRole]);
   
   // if (!userRole) return null;
 
