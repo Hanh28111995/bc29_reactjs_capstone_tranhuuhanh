@@ -2,6 +2,7 @@ import { useAuth } from 'contexts/auth.context';
 import React from 'react';
 import { Modal } from 'antd';
 import Login from './Login';
+import "./index.scss";
 
 export default function LoginModal() {
     const { isLoginModalOpen, closeLogin } = useAuth();
@@ -16,7 +17,7 @@ export default function LoginModal() {
             styles={{ body: { padding: 0 } }} 
             closeIcon={<span className="text-gray-400 hover:text-red-500 transition-colors">✕</span>}
         >
-            <div className="overflow-hidden rounded-lg">
+            <div className="overflow-hidden rounded-lg login-modal">
                 {/* Header trang trí nhẹ */}
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-center">
                     <h2 className="text-2xl font-bold text-white">Chào mừng trở lại</h2>
