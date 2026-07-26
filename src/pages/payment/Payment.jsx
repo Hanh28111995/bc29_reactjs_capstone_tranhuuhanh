@@ -266,7 +266,7 @@ export default function Payment() {
 
         setTimeout(
           () =>
-            navigate("/payment-result?status=success", {
+            navigate(`/payment-result?status=success&method=cash&ticketId=${ticket._id}`, {
               state: {
                 payUrl: null,
 
