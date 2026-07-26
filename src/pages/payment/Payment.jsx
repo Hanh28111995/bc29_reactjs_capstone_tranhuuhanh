@@ -266,15 +266,18 @@ export default function Payment() {
 
         setTimeout(
           () =>
-            navigate(`/payment-result?status=success&method=cash&ticketId=${ticket._id}`, {
-              state: {
-                payUrl: null,
+            navigate(
+              `/payment-result?status=success&method=cash&ticketId=${ticket._id}`,
+              {
+                state: {
+                  payUrl: null,
 
-                booking: ticket,
+                  booking: ticket,
 
-                method: ticket.paymentMethod,
+                  method: ticket.paymentMethod,
+                },
               },
-            }),
+            ),
 
           2000,
         );
@@ -309,7 +312,7 @@ export default function Payment() {
       <Button
         className="btn-back"
         icon={<ArrowLeftOutlined />}
-        onClick={() => navigate(-1)}
+        onClick={() => navigate(`/booking/${params.id}`)}
       >
         Quay lại
       </Button>
