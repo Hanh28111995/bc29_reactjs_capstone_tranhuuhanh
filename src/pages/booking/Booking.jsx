@@ -36,6 +36,8 @@ export default function Booking() {
     queryKey: ["showtimeDetail", userState.userInfor?.user_inf?.role, params.id],
   });
 
+  console.log("rawData:", rawData);
+
   const data = !Array.isArray(rawData)
     ? (rawData?.showtimes ?? rawData?.showtime ?? rawData)
     : null;
