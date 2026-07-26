@@ -16,6 +16,7 @@ export default function PaymentResult() {
 
   const [status, setStatus] = useState(null); // 'success' | 'error'
   const [cashModal, setCashModal] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const successParam = searchParams.get("status");
   const bookingId = location.state?.booking?._id;
