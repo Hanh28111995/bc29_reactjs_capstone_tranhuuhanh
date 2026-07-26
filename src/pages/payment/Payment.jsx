@@ -264,23 +264,24 @@ export default function Payment() {
       if (keyword === "cash") {
         await fetchCreateCashPayment(ticket);
 
-        setTimeout(
-          () =>
-            navigate(
-              `/payment-result?status=success&method=cash&ticketId=${ticket._id}`,
-              {
-                state: {
-                  payUrl: null,
+        setTimeout(() => {
+          // 1. Lưu state vào sessionStorage để tab mới có thể đọc lại
+          const paymentState = {
+            payUrl: null,
+            booking: ticket,
+            method: ticket.paymentMethod,
+          };
+          sessionStorage.setItem(
+            "paymentResultState",
+            JSON.stringify(paymentState),
+          );
 
-                  booking: ticket,
+          // 2. Tạo đường dẫn URL
+          const targetUrl = `/payment-result?status=success&method=cash&ticketId=${ticket._id}`;
 
-                  method: ticket.paymentMethod,
-                },
-              },
-            ),
-
-          2000,
-        );
+          // 3. Mở ở tab mới
+          window.open(targetUrl, "_blank");
+        }, 2000);
       }
 
       if (keyword === "momo") {
