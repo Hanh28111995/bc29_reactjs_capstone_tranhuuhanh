@@ -260,3 +260,4 @@ export default function Payment() {
         </div>
     );
 }
+//////////////dùng new page để chứa trang payment //////////////
