@@ -34,9 +34,7 @@ export default function Booking() {
     condition: !!userState.userInfor?.user_inf?.role && !!params.id,
     dependencies: [userState.userInfor?.user_inf?.role, params.id],
     queryKey: ["showtimeDetail", userState.userInfor?.user_inf?.role, params.id],
-  });
-
-  console.log("rawData:", rawData);
+  });  
 
   const data = !Array.isArray(rawData)
     ? (rawData?.showtimes ?? rawData?.showtime ?? rawData)
@@ -104,9 +102,9 @@ export default function Booking() {
     <div className="container-fluid bookingPage">
       <div className="booking-wrapper">
         <div className="booking-sidebar">
-          <div className="poster-container">
+          {/* <div className="poster-container">
             <img className="movie-banner" src={data?.id_movie?.banner} alt={data?.id_movie?.title} />
-          </div>
+          </div> */}
 
           <div className="info-item">
             <label>Tên phim:</label>
