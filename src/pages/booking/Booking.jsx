@@ -1,5 +1,5 @@
 import "./index.scss";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "hooks/useAsync";
 import { fetchShowtimesCusAPI, searchCustomerAPI } from "services/customer";
@@ -29,6 +29,7 @@ export default function Booking() {
     loading: dataLoading,
     isError: showtimeError,
     error: showtimeQueryError,
+    refetch,
   } = useAsync({
     service: () => fetchShowtimesCusAPI(userState.userInfor?.user_inf?.role, params.id),
     condition: !!userState.userInfor?.user_inf?.role && !!params.id,
@@ -97,6 +98,10 @@ export default function Booking() {
       }
     });
   };
+
+  useEffect(() => {
+    refetch();
+  }, [params.id, refetch]);
 
   return (
     <div className="container-fluid bookingPage">
