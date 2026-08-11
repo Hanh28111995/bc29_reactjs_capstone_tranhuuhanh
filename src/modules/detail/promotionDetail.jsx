@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import "./../home/index.scss";
 import { Spin } from "antd";
 import { useParams } from "react-router-dom";
 import { useAsync } from "../../hooks/useAsync"; // Đã bổ sung import
