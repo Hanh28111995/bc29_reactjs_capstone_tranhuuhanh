@@ -2,9 +2,7 @@ import React, { useContext, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Spin, Select, InputNumber, Button, message } from "antd";
 import { useAsync } from "../../hooks/useAsync";
-
 import { LoadingContext } from "../../contexts/loading.context";
-import "./../home/index.scss"; // Hoặc file scss tương ứng
 import { fetchShopProductAPI } from "services/general";
 
 export default function ShopDetail() {
