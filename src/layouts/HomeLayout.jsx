@@ -7,13 +7,16 @@ import "./index.scss";
 import RightSidebar from "../components/sidebar/RightSideBar";
 
 export default function HomeLayout() {
+  const userRole = useSelector(
+    (state) => state.userReducer.userInfor?.user_inf?.role,
+  );
   return (
     <div
       className="wrapper d-flex flex-column justify-content-between"
       style={{ caretColor: "transparent" }}
     >
       <Header />
-      <RightSidebar />
+      {userRole && <RightSidebar />}      
       <Outlet />
       <Footer />
       <GoToTop />
