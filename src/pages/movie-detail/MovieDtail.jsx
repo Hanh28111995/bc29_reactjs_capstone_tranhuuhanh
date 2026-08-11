@@ -12,7 +12,7 @@ export default function MovieDtail() {
   const param = useParams();
 
   const {
-    state: movieDetailRaw = {},
+    state: movieDetail = {},
     loading: isLoading,
     isError,
     error,
@@ -21,9 +21,7 @@ export default function MovieDtail() {
     condition: !!param.movieId,
     dependencies: [param.movieId],
     queryKey: ["movieDetail", param.movieId],
-  });
-
-  const movieDetail = movieDetailRaw?.movies ?? movieDetailRaw?.movie ?? movieDetailRaw;
+  });  
 
   if (isLoading) {
     return (

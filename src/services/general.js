@@ -20,6 +20,13 @@ const fetchMovieListAPI = () => {
   });
 };
 
+const fetchPromotionListAPI = () => {
+  return request({
+    url: `/general/promotions`,
+    method: "GET",
+  });
+};
+
 const fetchLocationListAPI = () => {
   return request({
     url: `/general/locations`,
@@ -31,6 +38,21 @@ const fetchMovieDetailAPI = (id) => {
   return request({
     url: `/general/movie/${id}`,
     method: "GET",
+  });
+};
+
+const fetchPromotionDetailAPI = (id) => {
+  return request({
+    url: `/general/promotion/${id}`,
+    method: "GET",
+  });
+};
+
+const fetchShopFilterAPI = (filters) => {
+  return request({
+    url: `/general/shop/`,
+    method: "GET",
+    params: filters,
   });
 };
 
@@ -68,8 +90,11 @@ const fetchBranchesAPI = (filters) => {
 export {
   fetchMoviebannerAPI,
   fetchMovieListAPI,
+  fetchPromotionListAPI,
+  fetchPromotionDetailAPI,
   fetchMovieDetailAPI,
   fetchLocationListAPI,
   fetchShowtimesAPI,
   fetchBranchesAPI,
+  fetchShopFilterAPI
 };

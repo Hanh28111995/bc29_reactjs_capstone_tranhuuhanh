@@ -29,6 +29,9 @@ const UpdateMovie = lazy(() => import("pages/EditMovie/UpdateMovie"));
 
 const Home = lazy(() => import("pages/home/Home"));
 import HomeLayout from "../layouts/HomeLayout";
+import Promotion from "pages/Promotion/Promotion";
+import PromotionDetail from "modules/detail/promotionDetail";
+import Shop from "pages/Store/shop";
 const MovieDetail = lazy(() => import("pages/movie-detail/MovieDetail"));
 const MovieDtail = lazy(() => import("pages/movie-detail/MovieDtail"));
 const MovieTheater = lazy(() => import("pages/MovieTheater/MovieTheater"));
@@ -53,9 +56,29 @@ export default function Router() {
           element: <MovieDtail />,
         },
         {
+          path: "/movie-search",
+          element: <MovieDetail />,
+        },                
+        {
+          path: "movie-talk",
+          element: <Home />,
+        },        
+        {
           path: "/movie-theater",
           element: <MovieTheater />,
-        },        
+        },
+        {
+          path: "/promotion",
+          element: <Promotion/>,
+        },
+        {
+          path: "/store",
+          element: <Shop/>,
+        },
+        {
+          path: "/promotion/:id",
+          element: <PromotionDetail/>,
+        },
         {
           path: "/",
           element: <AuthGuards />,

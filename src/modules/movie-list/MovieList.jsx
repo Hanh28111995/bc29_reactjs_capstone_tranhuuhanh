@@ -14,31 +14,14 @@ export default function MovieList() {
 
   const {
     state: rawMovieList = [],
-    loading: isLoading, // ✅ Đã sửa: Alias 'loading' thành 'isLoading'
+    loading: isLoading,
     isError,
     error,
   } = useAsync({
     service: () => fetchMovieListAPI(),
     queryKey: ["movies"],
   });
-
-  // TEMP DEBUG: call service directly to verify axios/network behavior
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await fetchMovieListAPI();
-        if (!mounted) return;
-        /* eslint-disable no-console */
-        console.debug('[TEMP DEBUG] fetchMovieListAPI response:', res?.status, res?.data);
-        /* eslint-enable no-console */
-      } catch (e) {
-        console.error('[TEMP DEBUG] fetchMovieListAPI error', e);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
-
+  
   const movieList = Array.isArray(rawMovieList) ? rawMovieList : [];
 
   useEffect(() => {
@@ -85,11 +68,7 @@ export default function MovieList() {
             </Radio.Button>
           </Radio.Group>
         </div>
-
-        {/* Hàng chứa danh sách phim - Nơi áp dụng w-100 dưới 500px */}
-        <div className="movie-list-row-wrapper">
-          {/* Render danh sách phim của bạn ở đây */}
-        </div>
+        
       </div>
 
       {/* Thêm class movie-list-row để kiểm soát flex-nowrap */}
