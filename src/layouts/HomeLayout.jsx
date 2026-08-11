@@ -5,6 +5,7 @@ import Footer from "../components/footer/Footer";
 import Header from "../components/header/Header";
 import "./index.scss";
 import RightSidebar from "../components/sidebar/RightSideBar";
+import { useSelector } from "react-redux";
 
 export default function HomeLayout() {
   const userRole = useSelector(
