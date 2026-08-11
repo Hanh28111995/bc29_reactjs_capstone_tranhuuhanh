@@ -32,6 +32,7 @@ import HomeLayout from "../layouts/HomeLayout";
 import Promotion from "pages/Promotion/Promotion";
 import PromotionDetail from "modules/detail/promotionDetail";
 import Shop from "pages/Store/shop";
+import ShopDetail from "modules/detail/shopDetail";
 const MovieDetail = lazy(() => import("pages/movie-detail/MovieDetail"));
 const MovieDtail = lazy(() => import("pages/movie-detail/MovieDtail"));
 const MovieTheater = lazy(() => import("pages/MovieTheater/MovieTheater"));
@@ -78,6 +79,10 @@ export default function Router() {
         {
           path: "/promotion/:id",
           element: <PromotionDetail/>,
+        },
+        {
+          path: "/shop/:id",
+          element: <ShopDetail/>,
         },
         {
           path: "/",

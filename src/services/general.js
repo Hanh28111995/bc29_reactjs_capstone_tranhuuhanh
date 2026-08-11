@@ -22,7 +22,7 @@ const fetchMovieListAPI = () => {
 
 const fetchPromotionListAPI = () => {
   return request({
-    url: `/general/promotions`,
+    url: `/general/promotion/all`,
     method: "GET",
   });
 };
@@ -50,11 +50,18 @@ const fetchPromotionDetailAPI = (id) => {
 
 const fetchShopFilterAPI = (filters) => {
   return request({
-    url: `/general/shop/`,
+    url: `/general/shop/all`,
     method: "GET",
     params: filters,
   });
 };
+
+const fetchShopProductAPI = (id) => {
+  return request({
+    url: `/general/shop/${id}`,
+    method: "GET",
+  });
+};  
 
 const fetchShowtimesAPI = (filters) => {
   return request({
@@ -96,5 +103,6 @@ export {
   fetchLocationListAPI,
   fetchShowtimesAPI,
   fetchBranchesAPI,
-  fetchShopFilterAPI
+  fetchShopFilterAPI,
+  fetchShopProductAPI
 };
