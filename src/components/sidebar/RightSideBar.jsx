@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Badge } from "antd";
 import {
-  TicketOutlined,
+  FileTextOutlined,
   ShopOutlined,
   EnvironmentOutlined,
   TrophyOutlined,
@@ -51,7 +51,7 @@ export default function RightSidebar({ cartCount = 0 }) {
         {/* Đặt vé nhanh */}
         <li>
           <a href="#" onClick={(e) => e.preventDefault()} title="Đặt vé nhanh">
-            <TicketOutlined className="sidebar-icon" />
+            <FileTextOutlined className="sidebar-icon" />
             <span>Đặt vé nhanh</span>
           </a>
         </li>
