@@ -1,0 +1,103 @@
+.right-floating-sidebar {
+  position: fixed;
+  right: 15px;
+  width: 85px;
+  background-color: #ffffff;
+  border: 1px solid #d9d9d9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Trạng thái khi đang scroll */
+  &.is-scrolling {
+    top: 20%;
+  }
+
+  /* Trạng thái khi kết thúc scroll (cố định ở 30% screen) */
+  &.at-rest {
+    top: 30%;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      border-bottom: 1px solid #f0f0f0;
+      text-align: center;
+
+      a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 4px;
+        text-decoration: none;
+        color: #333333;
+        font-size: 11px;
+        transition: all 0.25s ease-in-out;
+
+        .sidebar-icon {
+          font-size: 22px;
+          margin-bottom: 4px;
+          transition: color 0.25s ease-in-out;
+        }
+
+        span {
+          line-height: 1.2;
+        }
+
+        /* Hiệu ứng Hover cổ điển: Đổi màu chữ và icon sang màu đỏ/cam đặc trưng hoặc tùy ý */
+        &:hover {
+          background-color: #111111; // Nền đen khi hover giống thiết kế web phim
+          color: #ffffff;
+
+          .sidebar-icon {
+            color: #ffffff;
+          }
+
+          .quick-cart-label {
+            color: #ffffff;
+          }
+        }
+      }
+
+      /* Riêng phần Canteen nhãn màu */
+      &.canteen-cart-wrap {
+        .quick-cart-label {
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  /* Nút TOP ở dưới cùng */
+  .btn_top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #d4c5a9; // Màu cát cổ điển
+    color: #ffffff;
+    padding: 8px 0;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+
+    .top-text {
+      margin-bottom: 2px;
+    }
+
+    .top-icon {
+      font-size: 14px;
+    }
+
+    &:hover {
+      background-color: #bfae8f;
+    }
+  }
+}
