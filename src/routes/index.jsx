@@ -5,6 +5,7 @@ import { useRoutes, Navigate } from "react-router-dom";
 // --- Layouts ---
 import AdminLayout from "../layouts/AdminLayout";
 import HomeLayout from "../layouts/HomeLayout";
+import HeroPage from "pages/heroPage/heroPage";
 
 // --- Guards ---
 const AuthGuards = lazy(() => import("guards/auth.guards"));

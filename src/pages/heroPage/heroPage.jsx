@@ -4,7 +4,7 @@ import { LoadingContext } from "contexts/loading.context";
 import SEO from "components/SEO";
 import "./index.scss";
 
-export default function heroPage() {
+export default function HeroPage() {
   const [loadingState] = useContext(LoadingContext);
 
   return (
