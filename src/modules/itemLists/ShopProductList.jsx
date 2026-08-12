@@ -14,7 +14,6 @@ import "./index.scss";
 export default function ShopProduct(props) {
   const navigate = useNavigate();
   const [, setLoadingState] = useContext(LoadingContext);
-  const [promotionList, setPromotionList] = useState([]);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -25,30 +24,48 @@ export default function ShopProduct(props) {
     productType: "all",
   });
 
-  // Fetch locations (Khu vực)
+  // State lưu trữ bộ filters thực sự được kích hoạt khi bấm nút "Lọc"
+  const [appliedFilters, setAppliedFilters] = useState({
+    area: undefined,
+    theater: undefined,
+    productName: "",
+    priceSort: "default",
+    productType: "all",
+  });
+
+  // 1. Fetch locations (Khu vực)
   const { state: rawLocations = [] } = useAsync({
     service: () => fetchLocationListAPI(),
     queryKey: ["locations"],
   });
   const locations = Array.isArray(rawLocations) ? rawLocations : [];
 
-  // Fetch branches (Rạp) - Đã định nghĩa đầy đủ loading, isError, error như PromotionList
-  const { 
-    state: rawBranches = [], 
-    loading: isBranchesLoading,
-    isError,
-    error,
-   } = useAsync({
+  // 2. Fetch branches (Rạp)
+  const { state: rawBranches = [] } = useAsync({
     service: () => fetchBranchesAPI(),
     queryKey: ["branches"],
   });
   const allBranches = Array.isArray(rawBranches) ? rawBranches : [];
 
-  // Khai báo thêm state loading riêng cho việc call API Lọc (tương tự PromotionList)
-  const [isFiltering, setIsFiltering] = useState(false);
+  // 3. Fetch danh sách sản phẩm dựa theo appliedFilters bằng useAsync (Giống hệt PromotionList)
+  const { 
+    state: rawPromotionList = [],
+    loading: isProductsLoading,
+    isError,
+    error,
+  } = useAsync({
+    service: () => fetchShopFilterAPI(appliedFilters),
+    queryKey: ["shop-products", appliedFilters], // Tự động refetch mỗi khi appliedFilters thay đổi
+  });
 
-  // Tổng hợp trạng thái loading chung cho toàn component
-  const isLoading = isBranchesLoading || isFiltering;
+  const promotionList = Array.isArray(rawPromotionList) 
+    ? rawPromotionList 
+    : (rawPromotionList?.data?.content || rawPromotionList?.data || rawPromotionList?.content || []);
+
+  // Quản lý loading chung đồng bộ
+  useEffect(() => {
+    setLoadingState({ isLoading: isProductsLoading });
+  }, [isProductsLoading, setLoadingState]);
 
   // Filter branches theo khu vực
   const filteredBranches = filters.area
@@ -61,52 +78,15 @@ export default function ShopProduct(props) {
       })
     : allBranches;
 
-  useEffect(() => {
-    setLoadingState({ isLoading });
-  }, [isLoading, setLoadingState]);
-
-  // Load danh sách sản phẩm mặc định ban đầu khi vào trang
-  useEffect(() => {
-    setIsFiltering(true);
-    fetchShopFilterAPI(filters)
-      .then((response) => {
-        const resultData = Array.isArray(response) 
-          ? response 
-          : (response?.data?.content || response?.data || response?.content || []);
-        setPromotionList(Array.isArray(resultData) ? resultData : []);
-      })
-      .catch((err) => {
-        console.error("Error fetching initial products:", err);
-        setPromotionList([]);
-      })
-      .finally(() => {
-        setIsFiltering(false);
-      });
-  }, []);
-
-  // Xử lý khi bấm nút Lọc
+  // Xử lý khi bấm nút Lọc -> Cập nhật appliedFilters để useAsync tự động chạy
   const handleFilterSubmit = () => {
-    setIsFiltering(true);
-    fetchShopFilterAPI(filters)
-      .then((response) => {
-        const resultData = Array.isArray(response) 
-          ? response 
-          : (response?.data?.content || response?.data || response?.content || []);
-        setPromotionList(Array.isArray(resultData) ? resultData : []);
-      })
-      .catch((err) => {
-        console.error("Error fetching filtered products:", err);
-        setPromotionList([]);
-      })
-      .finally(() => {
-        setIsFiltering(false);
-      });
+    setAppliedFilters({ ...filters });
   };
 
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải dữ liệu hệ thống.</p>
+        <p>Đã có lỗi khi tải danh sách sản phẩm.</p>
         <p>{error?.message || "Vui lòng thử lại sau."}</p>
       </div>
     );
@@ -232,7 +212,7 @@ export default function ShopProduct(props) {
               block
               style={{ height: "40px", fontWeight: "600" }}
               onClick={handleFilterSubmit}
-              loading={isFiltering}
+              loading={isProductsLoading}
             >
               Lọc
             </Button>
@@ -240,46 +220,40 @@ export default function ShopProduct(props) {
         </Row>
       </div>
 
-      {/* Hiển thị Spin khi đang tải dữ liệu */}
-      {isLoading && promotionList.length === 0 ? (
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "30vh" }}>
-          <Spin size="large" />
-        </div>
-      ) : (
-        <div className="row mt-3 w-lg-75 movie-list-row">
-          {Array.isArray(promotionList) && promotionList.map((ele) => (
-            <div className="col-3 mb-4" key={ele._id}>
-              <div 
-                className="card movie-card h-100" 
-                onClick={() => navigate(`/promotion/${ele._id}`)}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="card-header-wrapper">
-                  <img
-                    className="card-img-top"
-                    src={ele.banner}
-                    alt={ele.title || ele.tag}
-                    width={300}
-                    height={200}
-                    style={{ objectFit: "cover" }}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <div className="card-body-custom p-3">
-                  <h5 className="card-title text-truncate" title={ele.title}>
-                    {ele.title || "Sản phẩm"}
-                  </h5>
-                  <p className="movie-release text-muted mb-0">
-                    {ele.startDate ? dayjs(ele.startDate).format("DD/MM/YYYY") : "Đang cập nhật"} -{" "}
-                    {ele.endDate ? dayjs(ele.endDate).format("DD/MM/YYYY") : "Không thời hạn"}
-                  </p>
-                </div>
+      {/* Danh sách sản phẩm */}
+      <div className="row mt-3 w-lg-75 movie-list-row">
+        {Array.isArray(promotionList) && promotionList.map((ele) => (
+          <div className="col-3 mb-4" key={ele._id}>
+            <div 
+              className="card movie-card h-100" 
+              onClick={() => navigate(`/promotion/${ele._id}`)}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="card-header-wrapper">
+                <img
+                  className="card-img-top"
+                  src={ele.banner}
+                  alt={ele.title || ele.tag}
+                  width={300}
+                  height={200}
+                  style={{ objectFit: "cover" }}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div className="card-body-custom p-3">
+                <h5 className="card-title text-truncate" title={ele.title}>
+                  {ele.title || "Sản phẩm"}
+                </h5>
+                <p className="movie-release text-muted mb-0">
+                  {ele.startDate ? dayjs(ele.startDate).format("DD/MM/YYYY") : "Đang cập nhật"} -{" "}
+                  {ele.endDate ? dayjs(ele.endDate).format("DD/MM/YYYY") : "Không thời hạn"}
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
