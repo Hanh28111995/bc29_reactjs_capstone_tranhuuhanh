@@ -2,15 +2,15 @@ import React, { useContext } from 'react'
 import { Spin} from 'antd';
 import { LoadingContext } from 'contexts/loading.context';
 import "./../home/index.scss";
-import PromotionList from 'modules/itemLists/PromotionList';
+import ShopProduct from 'modules/itemLists/ShopProduct';
 
-export default function Promotion() {
+export default function Shop() {
   const [loadingState] = useContext(LoadingContext);
 
   return (
     <Spin spinning={loadingState.isLoading} size="large">      
       <div className='homePage'>        
-        <PromotionList />
+        <ShopProduct />
       </div>
     </Spin>
   )

@@ -3,7 +3,7 @@ import { Button, List, Card, Row, Col, Empty, Spin, Select } from 'antd';
 import { useAsync, safeArray } from 'hooks/useAsync';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchShowtimesAPI, fetchBranchesAPI, fetchMovieDetailAPI, fetchMovieListAPI } from 'services/general';
-import Calendar from 'modules/showTime/Calendar';
+import Calendar from 'modules/showtimeModules/Calendar';
 import dayjs from 'dayjs';
 import { fetchLocationListAPI } from 'services/general';
 import './index.scss';

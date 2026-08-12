@@ -17,7 +17,7 @@ export default function HomeLayout() {
       style={{ caretColor: "transparent" }}
     >
       <Header />
-      {userRole && <RightSidebar />}      
+      {/* {userRole && <RightSidebar />}       */}
       <Outlet />
       <Footer />
       <GoToTop />
