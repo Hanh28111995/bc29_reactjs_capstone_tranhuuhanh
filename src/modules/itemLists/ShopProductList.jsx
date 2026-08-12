@@ -2,13 +2,13 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoadingContext } from "../../contexts/loading.context";
 import { useAsync } from "../../hooks/useAsync";
-import { Radio, Spin, Select, Input, Button, Row, Col } from "antd";
+import { Spin, Select, Input, Button, Row, Col } from "antd";
 import dayjs from "dayjs";
 import {  
   fetchLocationListAPI,
   fetchBranchesAPI,
-  fetchShopFilterAPI,
 } from "services/general";
+import { fetchShopProductFilterAPI } from "services/shop";
 import "./index.scss";
 
 export default function ShopProduct(props) {
@@ -32,10 +32,10 @@ export default function ShopProduct(props) {
   });
   const locations = Array.isArray(rawLocations) ? rawLocations : [];
 
-  // Fetch branches (Rạp) - ĐÃ SỬA LỖI ĐẶT TÊN BIẾN error
+  // Fetch branches (Rạp) - Đã định nghĩa đầy đủ loading, isError, error như PromotionList
   const { 
     state: rawBranches = [], 
-    loading: isLoading,
+    loading: isBranchesLoading,
     isError,
     error,
    } = useAsync({
@@ -43,6 +43,12 @@ export default function ShopProduct(props) {
     queryKey: ["branches"],
   });
   const allBranches = Array.isArray(rawBranches) ? rawBranches : [];
+
+  // Khai báo thêm state loading riêng cho việc call API Lọc (tương tự PromotionList)
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  // Tổng hợp trạng thái loading chung cho toàn component
+  const isLoading = isBranchesLoading || isFiltering;
 
   // Filter branches theo khu vực
   const filteredBranches = filters.area
@@ -59,21 +65,48 @@ export default function ShopProduct(props) {
     setLoadingState({ isLoading });
   }, [isLoading, setLoadingState]);
 
-  if (isLoading) {
-    return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "50vh" }}
-      >
-        <Spin size="large" />
-      </div>
-    );
-  }
+  // Load danh sách sản phẩm mặc định ban đầu khi vào trang
+  useEffect(() => {
+    setIsFiltering(true);
+    fetchShopProductFilterAPI(filters)
+      .then((response) => {
+        const resultData = Array.isArray(response) 
+          ? response 
+          : (response?.data?.content || response?.data || response?.content || []);
+        setPromotionList(Array.isArray(resultData) ? resultData : []);
+      })
+      .catch((err) => {
+        console.error("Error fetching initial products:", err);
+        setPromotionList([]);
+      })
+      .finally(() => {
+        setIsFiltering(false);
+      });
+  }, []);
+
+  // Xử lý khi bấm nút Lọc
+  const handleFilterSubmit = () => {
+    setIsFiltering(true);
+    fetchShopProductFilterAPI(filters)
+      .then((response) => {
+        const resultData = Array.isArray(response) 
+          ? response 
+          : (response?.data?.content || response?.data || response?.content || []);
+        setPromotionList(Array.isArray(resultData) ? resultData : []);
+      })
+      .catch((err) => {
+        console.error("Error fetching filtered products:", err);
+        setPromotionList([]);
+      })
+      .finally(() => {
+        setIsFiltering(false);
+      });
+  };
 
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải danh sách sản phẩm cửa hàng.</p>
+        <p>Đã có lỗi khi tải dữ liệu hệ thống.</p>
         <p>{error?.message || "Vui lòng thử lại sau."}</p>
       </div>
     );
@@ -90,13 +123,7 @@ export default function ShopProduct(props) {
           {/* Khu vực */}
           <Col xs={24} sm={12} lg={4}>
             <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "500",
-                }}
-              >
+              <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
                 Khu vực
               </label>
               <Select
@@ -118,13 +145,7 @@ export default function ShopProduct(props) {
           {/* Rạp */}
           <Col xs={24} sm={12} lg={4}>
             <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "500",
-                }}
-              >
+              <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
                 Rạp
               </label>
               <Select
@@ -145,13 +166,7 @@ export default function ShopProduct(props) {
           {/* Tên sản phẩm */}
           <Col xs={24} sm={12} lg={4}>
             <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "500",
-                }}
-              >
+              <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
                 Tên sản phẩm
               </label>
               <Input
@@ -167,13 +182,7 @@ export default function ShopProduct(props) {
           {/* Sắp xếp giá */}
           <Col xs={24} sm={12} lg={4}>
             <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "500",
-                }}
-              >
+              <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
                 Sắp xếp giá
               </label>
               <Select
@@ -195,13 +204,7 @@ export default function ShopProduct(props) {
           {/* Loại sản phẩm */}
           <Col xs={24} sm={12} lg={4}>
             <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "500",
-                }}
-              >
+              <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
                 Loại sản phẩm
               </label>
               <Select
@@ -222,62 +225,61 @@ export default function ShopProduct(props) {
           </Col>
 
           {/* Nút Lọc */}
-          <Col
-            xs={24}
-            sm={12}
-            lg={4}
-            style={{ display: "flex", alignItems: "flex-end" }}
-          >
+          <Col xs={24} sm={12} lg={4} style={{ display: "flex", alignItems: "flex-end" }}>
             <Button
               type="primary"
               danger
               block
               style={{ height: "40px", fontWeight: "600" }}
-              onClick={() => {
-                console.log("Applied filters:", filters);
-                fetchShopFilterAPI(filters)
-                  .then((response) => {
-                    console.log("Filtered products:", response);
-                    setPromotionList(response?.data?.content || response);
-                  })
-                  .catch((err) => {
-                    console.error("Error fetching filtered products:", err);
-                  });
-              }}
+              onClick={handleFilterSubmit}
+              loading={isFiltering}
             >
               Lọc
             </Button>
           </Col>
         </Row>
       </div>
-      <div className="row mt-3 w-lg-75 movie-list-row">
-        {promotionList.map((ele) => (
-          <div className="col-3" key={ele._id}>
-            <div
-              className="card movie-card"
-              onClick={() => navigate(`/promotion/${ele._id}`)}
-            >
-              <div className="card-header-wrapper">
-                <img
-                  className="card-img-top"
-                  src={ele.banner}
-                  alt={ele.tag}
-                  width={300}
-                  height={350}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div className="card-body-custom">
-                <h4 className="movie-release">
-                  {ele.startDate ? dayjs(ele.startDate).format("DD/MM/YYYY") : ""} -{" "}
-                  {ele.endDate ? dayjs(ele.endDate).format("DD/MM/YYYY") : ""}
-                </h4>
+
+      {/* Hiển thị Spin khi đang tải dữ liệu */}
+      {isLoading && promotionList.length === 0 ? (
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "30vh" }}>
+          <Spin size="large" />
+        </div>
+      ) : (
+        <div className="row mt-3 w-lg-75 movie-list-row">
+          {Array.isArray(promotionList) && promotionList.map((ele) => (
+            <div className="col-3 mb-4" key={ele._id}>
+              <div 
+                className="card movie-card h-100" 
+                onClick={() => navigate(`/promotion/${ele._id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="card-header-wrapper">
+                  <img
+                    className="card-img-top"
+                    src={ele.banner}
+                    alt={ele.title || ele.tag}
+                    width={300}
+                    height={200}
+                    style={{ objectFit: "cover" }}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div className="card-body-custom p-3">
+                  <h5 className="card-title text-truncate" title={ele.title}>
+                    {ele.title || "Sản phẩm"}
+                  </h5>
+                  <p className="movie-release text-muted mb-0">
+                    {ele.startDate ? dayjs(ele.startDate).format("DD/MM/YYYY") : "Đang cập nhật"} -{" "}
+                    {ele.endDate ? dayjs(ele.endDate).format("DD/MM/YYYY") : "Không thời hạn"}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
