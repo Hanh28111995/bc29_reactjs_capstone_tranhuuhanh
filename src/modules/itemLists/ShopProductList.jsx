@@ -7,8 +7,8 @@ import dayjs from "dayjs";
 import {  
   fetchLocationListAPI,
   fetchBranchesAPI,
+  fetchShopFilterAPI,
 } from "services/general";
-import { fetchShopProductFilterAPI } from "services/shop";
 import "./index.scss";
 
 export default function ShopProduct(props) {
@@ -68,7 +68,7 @@ export default function ShopProduct(props) {
   // Load danh sách sản phẩm mặc định ban đầu khi vào trang
   useEffect(() => {
     setIsFiltering(true);
-    fetchShopProductFilterAPI(filters)
+    fetchShopFilterAPI(filters)
       .then((response) => {
         const resultData = Array.isArray(response) 
           ? response 
@@ -87,7 +87,7 @@ export default function ShopProduct(props) {
   // Xử lý khi bấm nút Lọc
   const handleFilterSubmit = () => {
     setIsFiltering(true);
-    fetchShopProductFilterAPI(filters)
+    fetchShopFilterAPI(filters)
       .then((response) => {
         const resultData = Array.isArray(response) 
           ? response 
