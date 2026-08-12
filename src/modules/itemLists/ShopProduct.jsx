@@ -4,10 +4,10 @@ import { LoadingContext } from "../../contexts/loading.context";
 import { useAsync } from "../../hooks/useAsync";
 import { Radio, Spin, Select, Input, Button, Row, Col } from "antd";
 import dayjs from "dayjs";
-import {
-  fetchPromotionListAPI,
+import {  
   fetchLocationListAPI,
   fetchBranchesAPI,
+  fetchShopFilterAPI,
 } from "services/general";
 import "./index.scss";
 
@@ -32,12 +32,12 @@ export default function ShopProduct(props) {
   });
   const locations = Array.isArray(rawLocations) ? rawLocations : [];
 
-  // Fetch branches (Rạp)
+  // Fetch branches (Rạp) - ĐÃ SỬA LỖI ĐẶT TÊN BIẾN error
   const { 
     state: rawBranches = [], 
     loading: isLoading,
     isError,
-    errror,
+    error,
    } = useAsync({
     service: () => fetchBranchesAPI(),
     queryKey: ["branches"],
@@ -73,7 +73,7 @@ export default function ShopProduct(props) {
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải danh sách phim.</p>
+        <p>Đã có lỗi khi tải danh sách sản phẩm cửa hàng.</p>
         <p>{error?.message || "Vui lòng thử lại sau."}</p>
       </div>
     );
@@ -234,15 +234,14 @@ export default function ShopProduct(props) {
               block
               style={{ height: "40px", fontWeight: "600" }}
               onClick={() => {
-                // Handle filter logic here
                 console.log("Applied filters:", filters);
                 fetchShopFilterAPI(filters)
                   .then((response) => {
                     console.log("Filtered products:", response);
-                    setPromotionList(response);
+                    setPromotionList(response?.data?.content || response);
                   })
-                  .catch((error) => {
-                    console.error("Error fetching filtered products:", error);
+                  .catch((err) => {
+                    console.error("Error fetching filtered products:", err);
                   });
               }}
             >
@@ -251,7 +250,7 @@ export default function ShopProduct(props) {
           </Col>
         </Row>
       </div>
-      <div className="row mt-3  w-lg-75 movie-list-row">
+      <div className="row mt-3 w-lg-75 movie-list-row">
         {promotionList.map((ele) => (
           <div className="col-3" key={ele._id}>
             <div
@@ -271,8 +270,8 @@ export default function ShopProduct(props) {
               </div>
               <div className="card-body-custom">
                 <h4 className="movie-release">
-                  {dayjs(ele.startDate).format("DD/MM/YYYY")} -{" "}
-                  {dayjs(ele.endDate).format("DD/MM/YYYY")}
+                  {ele.startDate ? dayjs(ele.startDate).format("DD/MM/YYYY") : ""} -{" "}
+                  {ele.endDate ? dayjs(ele.endDate).format("DD/MM/YYYY") : ""}
                 </h4>
               </div>
             </div>
