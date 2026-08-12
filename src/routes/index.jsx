@@ -68,7 +68,7 @@ export default function Router() {
       children: [
         {
           path: "/",
-          element: <Home />,
+          element: <HeroPage />,
         },
         {
           path: "/movie/selectT/:movieId",

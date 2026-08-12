@@ -13,11 +13,6 @@ export default function Home() {
 
   return (
     <Spin spinning={loadingState.isLoading} size="large">
-      <SEO 
-        title="Trang chủ" 
-        description="Chào mừng bạn đến với Movie Cybersoft - Hệ thống đặt vé xem phim trực tuyến."
-        keywords="đặt vé xem phim, lịch chiếu phim, rạp chiếu phim, phim mới nhất"
-      />
       <div className='homePage'>
         <Carousel />
         <MovieList />
