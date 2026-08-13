@@ -75,7 +75,7 @@ function Header() {
           </div>
         ) : (
           <div className="ml-auto d-flex align-items-center justify-content-between pl-2">
-            <NotificationBell />
+            {/* <NotificationBell /> */}
             <div
               style={{
                 fontSize: "1rem",
