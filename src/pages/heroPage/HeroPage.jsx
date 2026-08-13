@@ -1,14 +1,12 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Spin } from "antd";
 import Slider from "react-slick";
-import { LoadingContext } from "contexts/loading.context";
 import SEO from "components/SEO";
 import "./index.scss";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 export default function HeroPage() {
-  const [loadingState] = useContext(LoadingContext);
   const settings = {
     dots: false,
     infinite: false,
@@ -17,15 +15,15 @@ export default function HeroPage() {
     slidesToScroll: 1,
     variableWidth: true,
     arrows: true,
-    swipeToSlide: true,    
+    swipeToSlide: true,
   };
   return (
-    <Spin spinning={loadingState.isLoading} size="large">
+    <>
       <SEO
         title="Trang chủ"
         description="Chào mừng bạn đến với Movie Cybersoft - Hệ thống đặt vé xem phim trực tuyến."
         keywords="đặt vé xem phim, lịch chiếu phim, rạp chiếu phim, phim mới nhất"
-      />      
+      />
       <section className="cinema-hero-section">
         <div className="cinema-hero-container">
           <Slider {...settings}>
@@ -237,6 +235,6 @@ export default function HeroPage() {
 
       <button className="nav-arrow prev">‹</button>
       <button className="nav-arrow next">›</button>
-    </Spin>     
+    </>
   );
 }

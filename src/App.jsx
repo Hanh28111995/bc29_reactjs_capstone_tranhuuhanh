@@ -51,9 +51,9 @@ function App() {
   return (
     <BrowserRouter>      
         <AuthProvider>
-          <LoadingProvider>
+          {/* <LoadingProvider> */}
             <Router />            
-          </LoadingProvider>
+          {/* </LoadingProvider> */}
         </AuthProvider>      
     </BrowserRouter>
   );

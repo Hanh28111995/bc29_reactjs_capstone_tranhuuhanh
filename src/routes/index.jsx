@@ -20,7 +20,7 @@ const MovieTheater = lazy(() => import("pages/MovieTheater/MovieTheater"));
 const Booking = lazy(() => import("pages/booking/Booking"));
 const Promotion = lazy(() => import("pages/promotionpage/Promotion"));
 const PromotionDetail = lazy(() => import("modules/detail/promotionDetail"));
-const Shop = lazy(() => import("pages/shop/shop"));
+const Shop = lazy(() => import("pages/shop/Shop"));
 const ShopDetail = lazy(() => import("modules/detail/shopDetail"));
 const HistoryTicket = lazy(() => import("pages/history/HistoryTicket"));
 
@@ -72,6 +72,10 @@ export default function Router() {
           element: <HeroPage />,
         },
         {
+          path: "/movie-search",
+          element: <MovieDetail />,
+        },        
+        {
           path: "/movie-talk",
           element: <Home />,
         },
@@ -94,10 +98,6 @@ export default function Router() {
         {
           path: "/movie/detail/:movieId",
           element: <MovieDtail />,
-        },
-        {
-          path: "/movie-search",
-          element: <MovieDetail />,
         },        
         {
           path: "/promotion/:id",
