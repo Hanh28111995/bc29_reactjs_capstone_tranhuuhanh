@@ -52,7 +52,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Suspense
+      {/* <Suspense
         fallback={
           <div
             style={{
@@ -65,14 +65,14 @@ function App() {
             <Spin size="large" />
           </div>
         }
-      >
+      > */}
         <AuthProvider>
           <LoadingProvider>
             <Router />
-            <LoginModal />
+            {/* <LoginModal /> */}
           </LoadingProvider>
         </AuthProvider>
-      </Suspense>
+      {/* </Suspense> */}
     </BrowserRouter>
   );
 }
