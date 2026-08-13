@@ -8,9 +8,9 @@ const GlobalSpinner = ({ spinRef }) => {
   const [visible, setVisible] = useState(false);
   spinRef.current = setVisible;
   return visible ? (
-    <WrapperSpin>
+    // <WrapperSpin>
       <Spin />
-    </WrapperSpin>
+    // </WrapperSpin>
   ) : null;
 };
 

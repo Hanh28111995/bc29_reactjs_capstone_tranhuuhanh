@@ -4,8 +4,6 @@ import MovieList from 'modules/itemLists/MovieList'
 import './index.scss'
 import SEO from 'components/SEO';
 
-
-
 export default function Home() {  
 
   return (    

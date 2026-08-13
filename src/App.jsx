@@ -1,12 +1,9 @@
-import logo from "./logo.svg";
 import "./App.css";
 import { BrowserRouter } from "react-router-dom";
 import Router from "./routes";
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { LoadingProvider } from "./contexts/loading.context";
 import { AuthProvider } from "contexts/auth.context";
-import { Spin } from "antd";
-import LoginModal from "pages/login/LoginModal";
 
 function App() {
   useEffect(() => {
