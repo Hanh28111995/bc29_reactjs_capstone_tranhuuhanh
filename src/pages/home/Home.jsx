@@ -17,6 +17,6 @@ export default function Home() {
         <Carousel />
         <MovieList />
       </div>
-    </Spin>
+     </Spin>
   )
 }

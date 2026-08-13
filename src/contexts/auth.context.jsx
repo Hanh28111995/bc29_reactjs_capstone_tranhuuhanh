@@ -1,18 +1,23 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useCallback, useMemo, useContext } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [isLoginModalOpen, setLoginModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-    const openLogin = () => setLoginModalOpen(true);
-    const closeLogin = () => setLoginModalOpen(false);
+  const openLogin = useCallback(() => setIsLoginModalOpen(true), []);
+  const closeLogin = useCallback(() => setIsLoginModalOpen(false), []);
 
-    return (
-        <AuthContext.Provider value={{ isLoginModalOpen, openLogin, closeLogin }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  const value = useMemo(
+    () => ({
+      isLoginModalOpen,
+      openLogin,
+      closeLogin,
+    }),
+    [isLoginModalOpen, openLogin, closeLogin],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

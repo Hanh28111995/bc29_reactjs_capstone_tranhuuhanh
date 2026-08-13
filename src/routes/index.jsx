@@ -72,18 +72,6 @@ export default function Router() {
           element: <HeroPage />,
         },
         {
-          path: "/movie/selectT/:movieId",
-          element: <MovieDetail />,
-        },
-        {
-          path: "/movie/detail/:movieId",
-          element: <MovieDtail />,
-        },
-        {
-          path: "/movie-search",
-          element: <MovieDetail />,
-        },
-        {
           path: "movie-talk",
           element: <Home />,
         },
@@ -99,6 +87,18 @@ export default function Router() {
           path: "/store",
           element: <Shop />,
         },
+        {
+          path: "/movie/selectT/:movieId",
+          element: <MovieDetail />,
+        },
+        {
+          path: "/movie/detail/:movieId",
+          element: <MovieDtail />,
+        },
+        {
+          path: "/movie-search",
+          element: <MovieDetail />,
+        },        
         {
           path: "/promotion/:id",
           element: <PromotionDetail />,

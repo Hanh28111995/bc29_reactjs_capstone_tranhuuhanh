@@ -1,29 +1,20 @@
 import React from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { USER_INFO_KEY } from "../../constants/common";
 import {
-  markAllNotificationsReadAction,
-  markNotificationReadAction,
   setNotificationsAction,
   setUserInfoAction,
 } from "../../store/actions/user.action";
 import { logoutAPI } from "services/user";
-import {
-  fetchNotificationAPI,
-  formatNotificationsForStore,
-  markAllNotificationsAsReadAPI,
-  fetchChangeStatusNotificationAPI,
-} from "services/notificationAndHistory";
+import NotificationBell from "modules/notification/NotificationBell";
 import "./index.scss";
-import { useEffect, useState } from "react";
 
-export default function Header() {
+function Header() {
   const userState = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   const { t, i18n } = useTranslation();
 
   const handleToggleLanguage = () => {
@@ -33,7 +24,6 @@ export default function Header() {
   };
 
   const handleLogout = async () => {
-    setIsModalOpen(false);
     localStorage.removeItem(USER_INFO_KEY);
     dispatch(setNotificationsAction([]));
     dispatch(setUserInfoAction(null));
@@ -44,126 +34,8 @@ export default function Header() {
     });
   };
 
-  const userRole = userState.userInfor?.user_inf?.role;
-  const userId = userState.userInfor?.user_inf?.id;
-
-  const notifications = userState.notifications || [];
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Hàm fetch dữ liệu
-  const getNotifications = async () => {
-    if (!userId || !userRole) return;
-    try {
-      const res = await fetchNotificationAPI(userRole);
-      const formattedNotifications = formatNotificationsForStore(
-        res.data?.content,
-      );
-
-      dispatch(setNotificationsAction(formattedNotifications));
-    } catch (error) {
-      console.error("Lỗi khi lấy thông báo:", error);
-    }
-  };
-
-  // Lấy dữ liệu khi chuyển trang hoặc login
-  useEffect(() => {
-    getNotifications();
-  }, [userRole, userId, pathname]);
-
-  // Hàm mở thông báo
-  const handleOpenNotifications = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleMarkAllAsRead = async () => {
-    if (!userId || !userRole) return;
-    try {
-      await markAllNotificationsAsReadAPI(userRole);
-      dispatch(markAllNotificationsReadAction());
-    } catch (error) {
-      console.error("Lỗi khi đánh dấu tất cả đã đọc:", error);
-    }
-  };
-
-  const handleMarkAsRead = async (id) => {
-    if (!id || !userRole) return;
-    try {
-      await fetchChangeStatusNotificationAPI(userRole, id);
-      dispatch(markNotificationReadAction(id));
-    } catch (error) {
-      console.error("Lỗi khi đánh dấu đã xem:", error);
-    }
-  };
-
-  const render_in_cart = [...notifications]
-    .sort((a, b) => {
-      // Chuyển đổi về kiểu số (milliseconds) để so sánh chính xác
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    })
-    .slice(0, 5) // Lấy 5 thông báo mới nhất
-    .map((ele, index) => {
-      const isUnread = !ele.status;
-      return (
-        <div
-          key={ele._id || index} // Ưu tiên dùng ID của database làm key
-          className={`noti-item ${isUnread ? "unread" : ""}`}
-          onClick={() => handleMarkAsRead(ele._id)}
-        >
-          <div className="noti-icon-wrapper">
-            <i className="fa fa-ticket-alt"></i>
-          </div>
-          <div className="noti-content">
-            <span className="noti-text">{ele.note}</span>
-            <span className="noti-time">
-              {new Date(ele.createdAt).toLocaleString("vi-VN")}
-            </span>
-          </div>
-          {isUnread && <div className="unread-dot"></div>}
-        </div>
-      );
-    });
-
-  // console.log(render_card1, render_card2)
   return (
     <div>
-      {isModalOpen && (
-        <>
-          <div
-            className="noti-backdrop"
-            onClick={() => setIsModalOpen(false)}
-          ></div>
-          <div className="noti-popover-wrapper">
-            <div className="noti-header">
-              <h4>{t("notifications.title")}</h4>
-              <button
-                className="mark-all-read-btn"
-                onClick={handleMarkAllAsRead}
-                title={t("notifications.markAllRead")}
-              >
-                <i className="fa fa-check-double"></i>
-              </button>
-            </div>
-            <div className="noti-body">
-              {render_in_cart.length > 0 ? (
-                <div className="list-group">{render_in_cart}</div>
-              ) : (
-                <div className="empty-noti">{t("notifications.noNew")}</div>
-              )}
-            </div>
-            <div className="noti-footer">
-              <button
-                className="see-all-btn"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  navigate("/ticket-history");
-                }}
-              >
-                {t("notifications.seeAll")}
-              </button>
-            </div>
-          </div>
-        </>
-      )}
       <div className="header-top">
         {!userState.userInfor ? (
           <div className="d-flex align-items-center justify-content-end">
@@ -203,16 +75,7 @@ export default function Header() {
           </div>
         ) : (
           <div className="ml-auto d-flex align-items-center justify-content-between pl-2">
-            <button
-              className="btn mx-2"
-              id="showNotificationBtn"
-              onClick={handleOpenNotifications}
-            >
-              <i className="fa fa-bell" style={{ fontSize: "2.5rem" }} />
-              <p className="numNotificationItem">
-                {notifications.filter((item) => !item.status).length}
-              </p>
-            </button>
+            <NotificationBell />
             <div
               style={{
                 fontSize: "1rem",
@@ -276,7 +139,7 @@ export default function Header() {
           <ul className="navbar-nav mx-auto mt-2 mt-lg-0">
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/movie-search">
-                MUA VÉ
+                MUA VÉ
               </NavLink>
             </li>
             <li className="nav-item ">
@@ -286,7 +149,7 @@ export default function Header() {
             </li>
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/movie-theater">
-                RẠP CHIẾU PHIM
+                RẠP CHIẾU PHIM
               </NavLink>
             </li>
             <li className="nav-item ">
@@ -305,3 +168,5 @@ export default function Header() {
     </div>
   );
 }
+
+export default React.memo(Header);

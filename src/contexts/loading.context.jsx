@@ -1,5 +1,5 @@
 import { Spin } from "antd";
-import { createContext, useCallback, useRef, useState } from "react";
+import { createContext, useCallback, useRef, useState , useMemo} from "react";
 import { WrapperSpin } from "./styled";
 
 const LoadingContext = createContext(null);
@@ -14,9 +14,10 @@ const GlobalSpinner = ({ spinRef }) => {
   ) : null;
 };
 
-const LoadingProvider = (props) => {
+const LoadingProvider = ({ children }) => {
   const spinRef = useRef(null);
   const countRef = useRef(0);
+  const [loadingState, setLoadingState] = useState({ isLoading: false });
 
   const setState = useCallback(({ isLoading }) => {
     if (isLoading) {
@@ -29,13 +30,10 @@ const LoadingProvider = (props) => {
     spinRef.current?.(active);
   }, []);
 
-  const value = useRef([{ isLoading: false }, setState]);
+  const value = useMemo(() => [loadingState, setLoadingState], [loadingState]);
 
   return (
-    <LoadingContext.Provider value={value.current}>
-      <GlobalSpinner spinRef={spinRef} />
-      {props.children}
-    </LoadingContext.Provider>
+    <LoadingContext.Provider value={value}>{children}</LoadingContext.Provider>
   );
 };
 
