@@ -51,28 +51,13 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <Suspense
-        fallback={
-          <div
-            style={{
-              minHeight: "100vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Spin size="large" />
-          </div>
-        }
-      >
+    <BrowserRouter>     
         <AuthProvider>
           <LoadingProvider>
             <Router />
             <LoginModal />
           </LoadingProvider>
-        </AuthProvider>
-      </Suspense>
+        </AuthProvider>     
     </BrowserRouter>
   );
 }
