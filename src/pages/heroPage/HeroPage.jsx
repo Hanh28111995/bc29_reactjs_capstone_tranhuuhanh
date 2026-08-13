@@ -8,7 +8,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 export default function HeroPage() {
-  // const [loadingState] = useContext(LoadingContext);
+  const [loadingState] = useContext(LoadingContext);
   const settings = {
     dots: false,
     infinite: false,
