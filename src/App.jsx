@@ -9,70 +9,54 @@ import { Spin } from "antd";
 import LoginModal from "pages/login/LoginModal";
 
 function App() {
-  useEffect(() => {
-    const reloadOnce = () => {
-      const key = "__chunk_reload_ts__";
-      const last = Number(sessionStorage.getItem(key) || "0");
-      if (Date.now() - last < 10000) return;
-      sessionStorage.setItem(key, String(Date.now()));
-      window.location.reload();
-    };
+  // useEffect(() => {
+  //   const reloadOnce = () => {
+  //     const key = "__chunk_reload_ts__";
+  //     const last = Number(sessionStorage.getItem(key) || "0");
+  //     if (Date.now() - last < 10000) return;
+  //     sessionStorage.setItem(key, String(Date.now()));
+  //     window.location.reload();
+  //   };
 
-    const isChunkLoadFailure = (message) => {
-      const msg = (message || "").toLowerCase();
-      return (
-        msg.includes("loading chunk") ||
-        msg.includes("chunkloaderror") ||
-        msg.includes("failed to fetch dynamically imported module") ||
-        msg.includes("importing a module script failed")
-      );
-    };
+  //   const isChunkLoadFailure = (message) => {
+  //     const msg = (message || "").toLowerCase();
+  //     return (
+  //       msg.includes("loading chunk") ||
+  //       msg.includes("chunkloaderror") ||
+  //       msg.includes("failed to fetch dynamically imported module") ||
+  //       msg.includes("importing a module script failed")
+  //     );
+  //   };
 
-    const onError = (event) => {
-      const message =
-        event?.message ||
-        event?.error?.message ||
-        (typeof event?.error === "string" ? event.error : "");
-      if (isChunkLoadFailure(message)) reloadOnce();
-    };
+  //   const onError = (event) => {
+  //     const message =
+  //       event?.message ||
+  //       event?.error?.message ||
+  //       (typeof event?.error === "string" ? event.error : "");
+  //     if (isChunkLoadFailure(message)) reloadOnce();
+  //   };
 
-    const onUnhandledRejection = (event) => {
-      const reason = event?.reason;
-      const message = reason?.message || (typeof reason === "string" ? reason : "");
-      if (isChunkLoadFailure(message)) reloadOnce();
-    };
+  //   const onUnhandledRejection = (event) => {
+  //     const reason = event?.reason;
+  //     const message = reason?.message || (typeof reason === "string" ? reason : "");
+  //     if (isChunkLoadFailure(message)) reloadOnce();
+  //   };
 
-    window.addEventListener("error", onError);
-    window.addEventListener("unhandledrejection", onUnhandledRejection);
-    return () => {
-      window.removeEventListener("error", onError);
-      window.removeEventListener("unhandledrejection", onUnhandledRejection);
-    };
-  }, []);
+  //   window.addEventListener("error", onError);
+  //   window.addEventListener("unhandledrejection", onUnhandledRejection);
+  //   return () => {
+  //     window.removeEventListener("error", onError);
+  //     window.removeEventListener("unhandledrejection", onUnhandledRejection);
+  //   };
+  // }, []);
 
   return (
-    <BrowserRouter>
-      {/* <Suspense
-        fallback={
-          <div
-            style={{
-              minHeight: "100vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Spin size="large" />
-          </div>
-        }
-      > */}
+    <BrowserRouter>      
         <AuthProvider>
           <LoadingProvider>
-            <Router />
-            {/* <LoginModal /> */}
+            <Router />            
           </LoadingProvider>
-        </AuthProvider>
-      {/* </Suspense> */}
+        </AuthProvider>      
     </BrowserRouter>
   );
 }

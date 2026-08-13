@@ -24,7 +24,6 @@ export default React.memo(function HomeLayout() {
          <LoginModal />
         <Outlet />
       </Suspense>
-
       <Footer />
       <GoToTop />
     </div>
