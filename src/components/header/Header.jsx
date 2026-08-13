@@ -164,17 +164,103 @@ export default function Header() {
           </div>
         </>
       )}
-
-      <nav className="navbar navbar-expand-lg navbar-light py-3">
+      <div className="header-top">
+        {!userState.userInfor ? (
+          <div className="d-flex align-items-center justify-content-end">
+            <button
+              onClick={() => navigate("/register")}
+              className="btn-more-infor my-2 my-sm-0 mr-2"
+              style={{
+                height: "40px",
+                width: "100px",
+                display: "inline-block",
+              }}
+            >
+              {t("auth.register")}
+            </button>
+            <button
+              onClick={() => navigate("/login")}
+              className="btn-more-infor my-2 my-sm-0 mr-2"
+              style={{
+                height: "40px",
+                width: "100px",
+                display: "inline-block",
+              }}
+            >
+              {t("auth.login")}
+            </button>
+            <button
+              className="btn-more-infor my-2 my-sm-0"
+              style={{
+                height: "40px",
+                width: "120px",
+                display: "inline-block",
+              }}
+              onClick={handleToggleLanguage}
+            >
+              {t(`language.${i18n.language === "en" ? "vi" : "en"}`)}
+            </button>
+          </div>
+        ) : (
+          <div className="ml-auto d-flex align-items-center justify-content-between pl-2">
+            <button
+              className="btn mx-2"
+              id="showNotificationBtn"
+              onClick={handleOpenNotifications}
+            >
+              <i className="fa fa-bell" style={{ fontSize: "2.5rem" }} />
+              <p className="numNotificationItem">
+                {notifications.filter((item) => !item.status).length}
+              </p>
+            </button>
+            <div
+              style={{
+                fontSize: "1rem",
+                flexDirection: "column",
+                textAlign: "center",
+              }}
+            >
+              <button
+                onClick={handleLogout}
+                className="btn-more-infor my-2 my-sm-0 mr-2"
+                style={{
+                  height: "40px",
+                  width: "100px",
+                  display: "inline-block",
+                }}
+              >
+                {t("auth.logout")}
+              </button>
+              <button
+                className="btn-more-infor my-2 my-sm-0"
+                style={{
+                  height: "40px",
+                  width: "120px",
+                  display: "inline-block",
+                }}
+                onClick={handleToggleLanguage}
+              >
+                {t(`language.${i18n.language === "en" ? "vi" : "en"}`)}
+              </button>
+              <p className="my-0">
+                {t("auth.hello")} {userState.userInfor?.user_inf?.username}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="noti-icon">
         <a className="navbar-brand" href="/">
           <img
-            src="/images/logo-nav.png"
+            src=""
             alt="Movie Cybersoft"
             width="120"
             height="45"
             style={{ height: "45px", marginLeft: "10%" }}
           />
         </a>
+      </div>
+      <nav className="navbar navbar-expand-lg navbar-light py-3">
         <button
           className="navbar-toggler d-lg-none"
           type="button"
@@ -188,19 +274,6 @@ export default function Header() {
         </button>
         <div className="collapse navbar-collapse " id="collapsibleNavId">
           <ul className="navbar-nav mx-auto mt-2 mt-lg-0">
-            {/* <li className="nav-item ">              
-              <NavLink
-                className={
-                  pathname.includes("/movie/") || pathname === "/"
-                    ? "nav-link nav-header active"
-                    : "nav-link nav-header inactive"
-                }
-                to="/"
-              >
-                PHIM
-              </NavLink>
-            </li> */}
-
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/movie-search">
                 MUA VÉ
@@ -220,96 +293,13 @@ export default function Header() {
               <NavLink className="nav-link nav-header" to="/promotion">
                 TIN MỚI & ƯU ĐÃI
               </NavLink>
-            </li>            
+            </li>
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/store">
                 SHOP
               </NavLink>
             </li>
           </ul>
-          {!userState.userInfor ? (
-            <div className="ml-auto d-flex align-items-center">
-              <button
-                onClick={() => navigate("/register")}
-                className="btn-more-infor my-2 my-sm-0 mr-2"
-                style={{
-                  height: "40px",
-                  width: "100px",
-                  display: "inline-block",
-                }}
-              >
-                {t("auth.register")}
-              </button>
-              <button
-                onClick={() => navigate("/login")}
-                className="btn-more-infor my-2 my-sm-0 mr-2"
-                style={{
-                  height: "40px",
-                  width: "100px",
-                  display: "inline-block",
-                }}
-              >
-                {t("auth.login")}
-              </button>
-              <button
-                className="btn-more-infor my-2 my-sm-0"
-                style={{
-                  height: "40px",
-                  width: "120px",
-                  display: "inline-block",
-                }}
-                onClick={handleToggleLanguage}
-              >
-                {t(`language.${i18n.language === "en" ? "vi" : "en"}`)}
-              </button>
-            </div>
-          ) : (
-            <div className="ml-auto d-flex align-items-center justify-content-between pl-2">
-              <button
-                className="btn mx-2"
-                id="showNotificationBtn"
-                onClick={handleOpenNotifications}
-              >
-                <i className="fa fa-bell" style={{ fontSize: "2.5rem" }} />
-                <p className="numNotificationItem">
-                  {notifications.filter((item) => !item.status).length}
-                </p>
-              </button>
-              <div
-                style={{
-                  fontSize: "1rem",
-                  flexDirection: "column",
-                  textAlign: "center",
-                }}
-              >
-                <button
-                  onClick={handleLogout}
-                  className="btn-more-infor my-2 my-sm-0 mr-2"
-                  style={{
-                    height: "40px",
-                    width: "100px",
-                    display: "inline-block",
-                  }}
-                >
-                  {t("auth.logout")}
-                </button>
-                <button
-                  className="btn-more-infor my-2 my-sm-0"
-                  style={{
-                    height: "40px",
-                    width: "120px",
-                    display: "inline-block",
-                  }}
-                  onClick={handleToggleLanguage}
-                >
-                  {t(`language.${i18n.language === "en" ? "vi" : "en"}`)}
-                </button>
-                <p className="my-0">
-                  {t("auth.hello")} {userState.userInfor?.user_inf?.username}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
       </nav>
     </div>

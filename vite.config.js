@@ -6,6 +6,14 @@ export default defineConfig({
   plugins: [react()],
   root: ".",
   publicDir: "public",
+
+  server: {
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
+  },
+
   resolve: {
     alias: {
       src: path.resolve(__dirname, "./src"),
@@ -25,13 +33,20 @@ export default defineConfig({
       utils: path.resolve(__dirname, "./src/utils"),
     },
   },
+
   css: {
     preprocessorOptions: {
       scss: {
-        silenceDeprecations: ["import", "mixed-decls", "global-builtin", "color-functions"],
+        silenceDeprecations: [
+          "import",
+          "mixed-decls",
+          "global-builtin",
+          "color-functions",
+        ],
       },
     },
   },
+
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
@@ -39,9 +54,15 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes("node_modules")) {
             if (id.includes("firebase")) return "firebase";
-            if (id.includes("@ant-design/pro-components")) return "pro-components";
-            if (id.includes("antd") || id.includes("@ant-design")) return "antd-vendor";
-            if (id.includes("react-dom") || id.includes("react-router")) return "react-vendor";
+            if (id.includes("@ant-design/pro-components"))
+              return "pro-components";
+            if (id.includes("antd") || id.includes("@ant-design"))
+              return "antd-vendor";
+            if (
+              id.includes("react-dom") ||
+              id.includes("react-router")
+            )
+              return "react-vendor";
           }
         },
       },

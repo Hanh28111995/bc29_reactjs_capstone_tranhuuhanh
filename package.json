@@ -32,6 +32,7 @@
     "react-viewport-height": "^1.2.1",
     "redux": "^4.2.0",
     "sass": "^1.80.5",
+    "slick-carousel": "^1.8.1",
     "styled-components": "^5.3.5",
     "uuid": "^11.0.2",
     "web-vitals": "^2.1.4"
