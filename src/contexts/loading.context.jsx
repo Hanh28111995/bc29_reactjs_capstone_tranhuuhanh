@@ -1,6 +1,20 @@
 import { Spin } from "antd";
 import { createContext, useCallback, useRef, useState } from "react";
-import { WrapperSpin } from "./styled";
+import styled from "styled-components"; // Hoặc đường dẫn file styled của bạn
+
+const WrapperSpin = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: transparent; /* Nền trong suốt tuyệt đối */
+  pointer-events: none;          /* Cho phép click chuột xuyên qua màn hình loading */
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 const LoadingContext = createContext(null);
 
@@ -8,9 +22,9 @@ const GlobalSpinner = ({ spinRef }) => {
   const [visible, setVisible] = useState(false);
   spinRef.current = setVisible;
   return visible ? (
-    // <WrapperSpin>
+    <WrapperSpin>
       <Spin />
-    // </WrapperSpin>
+    </WrapperSpin>
   ) : null;
 };
 
@@ -25,7 +39,7 @@ const LoadingProvider = (props) => {
       countRef.current = Math.max(0, countRef.current - 1);
     }
     const active = countRef.current > 0;
-    document.querySelector("body").style.overflow = active ? "hidden" : "auto";
+        
     spinRef.current?.(active);
   }, []);
 
