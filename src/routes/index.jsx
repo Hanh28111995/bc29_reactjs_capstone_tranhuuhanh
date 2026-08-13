@@ -20,7 +20,7 @@ const MovieTheater = lazy(() => import("pages/MovieTheater/MovieTheater"));
 const Booking = lazy(() => import("pages/booking/Booking"));
 const Promotion = lazy(() => import("pages/promotionpage/Promotion"));
 const PromotionDetail = lazy(() => import("modules/detail/promotionDetail"));
-const Shop = lazy(() => import("pages/shop/Shop"));
+const Shop = lazy(() => import("pages/shop/shop"));
 const ShopDetail = lazy(() => import("modules/detail/shopDetail"));
 const HistoryTicket = lazy(() => import("pages/history/HistoryTicket"));
 
