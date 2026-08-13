@@ -72,7 +72,7 @@ export default function Router() {
           element: <HeroPage />,
         },
         {
-          path: "movie-talk",
+          path: "/movie-talk",
           element: <Home />,
         },
         {

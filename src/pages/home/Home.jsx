@@ -14,8 +14,8 @@ export default function Home() {
   return (
     <Spin spinning={loadingState.isLoading} size="large">
       <div className='homePage'>
-        <Carousel />
-        <MovieList />
+        {/* <Carousel />
+        <MovieList /> */}
       </div>
      </Spin>
   )
