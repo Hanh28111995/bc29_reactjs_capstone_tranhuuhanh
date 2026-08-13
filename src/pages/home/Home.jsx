@@ -12,11 +12,11 @@ export default function Home() {
   const [loadingState] = useContext(LoadingContext);
 
   return (
-    <Spin spinning={loadingState.isLoading} size="large">
+    // <Spin spinning={loadingState.isLoading} size="large">
       <div className='homePage'>
         <Carousel />
         <MovieList />
       </div>
-     </Spin>
+    //  </Spin>
   )
 }
