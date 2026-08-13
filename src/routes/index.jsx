@@ -5,7 +5,6 @@ import { useRoutes, Navigate } from "react-router-dom";
 // --- Layouts ---
 import AdminLayout from "../layouts/AdminLayout";
 import HomeLayout from "../layouts/HomeLayout";
-import HeroPage from "pages/heroPage/HeroPage";
 
 // --- Guards ---
 const AuthGuards = lazy(() => import("guards/auth.guards"));
@@ -13,6 +12,7 @@ const AdminGuards = lazy(() => import("guards/admin.guards"));
 const NoAuthGuards = lazy(() => import("guards/no-auth.guards"));
 
 // --- Public Pages ---
+const HeroPage = lazy(() => import("pages/heroPage/HeroPage"));
 const Home = lazy(() => import("pages/home/Home"));
 const MovieDetail = lazy(() => import("pages/movie-detail/MovieDetail"));
 const MovieDtail = lazy(() => import("pages/movie-detail/MovieDtail"));
