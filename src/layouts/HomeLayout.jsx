@@ -17,4 +17,4 @@ export default React.memo(function HomeLayout() {
       <GoToTop />
     </div>
   );
-}
+})
