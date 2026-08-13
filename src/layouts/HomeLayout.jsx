@@ -14,14 +14,8 @@ export default React.memo(function HomeLayout() {
       style={{ caretColor: "transparent" }}
     >
       <Header />
-      <Suspense
-        fallback={
-          <div style={{ textAlign: "center", padding: "50px" }}>
-            <Spin />
-          </div>
-        }
-      >
-         <LoginModal />
+      <Suspense>
+        <LoginModal />
         <Outlet />
       </Suspense>
       <Footer />
