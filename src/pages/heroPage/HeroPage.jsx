@@ -1,21 +1,67 @@
-import React from "react";
-import { Spin } from "antd";
+import React, { useRef, useState } from "react";
 import Slider from "react-slick";
 import SEO from "components/SEO";
 import "./index.scss";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 export default function HeroPage() {
+  const bannerSliderRef = useRef(null);
+  const trailerSliderRef = useRef(null);
+  const [isMoved, setIsMoved] = useState(false);
+  // Dùng useRef để lưu vị trí tọa độ khi bắt đầu kéo/vuốt
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  // Khoảng cách tối thiểu (pixel) để tính là một cú vuốt hợp lệ
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    touchEndX.current = 0; // Reset
+    touchStartX.current = e.targetTouches
+      ? e.targetTouches[0].clientX
+      : e.clientX;
+  };
+
+  const onTouchMove = (e) => {
+    touchEndX.current = e.targetTouches
+      ? e.targetTouches[0].clientX
+      : e.clientX;
+  };
+
+  const onTouchEnd = () => {
+    if (!touchEndX.current) return;
+
+    const distance = touchStartX.current - touchEndX.current;
+
+    // Vuốt sang trái (kéo sang trái) -> Chuyển sang trang/khối tiếp theo
+    if (distance > minSwipeDistance) {
+      setIsMoved(true);
+    }
+
+    // Vuốt sang phải (kéo sang phải) -> Trở về trang đầu
+    if (distance < -minSwipeDistance) {
+      setIsMoved(false);
+    }
+  };
   const settings = {
     dots: false,
-    infinite: false,
+    infinite: true,
     speed: 500,
-    slidesToShow: 2,
-    slidesToScroll: 1,
-    variableWidth: true,
+    slidesToShow: 5,
+    slidesToScroll: 3,
     arrows: true,
-    swipeToSlide: true,
+    swipe: true,
+  };
+  const settings_child = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+    swipe: false,
   };
   return (
     <>
@@ -25,156 +71,264 @@ export default function HeroPage() {
         keywords="đặt vé xem phim, lịch chiếu phim, rạp chiếu phim, phim mới nhất"
       />
       <section className="cinema-hero-section">
-        <div className="cinema-hero-container">
-          <Slider {...settings}>
-            <div className="hero-banner">
-              <div className="banner-slide">
-                <a href="#">
+        {isMoved && (
+          <button
+            className="custom-arrow prev-btn"
+            onClick={() => setIsMoved(false)}
+          >
+            <LeftOutlined />
+          </button>
+        )}
+        <button
+          className="custom-arrow prev-btn"
+          onClick={() => bannerSliderRef.current?.slickPrev()}
+          style={{ zIndex: 9 }}
+        >
+          <LeftOutlined />
+        </button>
+        <div
+          className={`cinema-hero-container ${isMoved ? "moved" : ""}`}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          onMouseDown={onTouchStart}
+          onMouseMove={onTouchMove}
+          onMouseUp={onTouchEnd}
+          style={{ touchAction: "pan-y", cursor: "grab" }}
+        >
+          <div className="hero-banner">
+            <div className="child-slider-wrapper">
+              <Slider ref={bannerSliderRef} {...settings_child}>
+                <div className="banner-slide">
+                  <a href="#">
+                    <img
+                      src="https://media.lottecinemavn.com/Media/WebAdmin/2c51c67cfda94d5b8a8cb4149942ea40.jpg"
+                      alt="Amazing Day"
+                    />
+                  </a>
+                </div>
+                <div className="banner-slide">
+                  <a href="#">
+                    <img
+                      src="https://media.lottecinemavn.com/Media/WebAdmin/2c51c67cfda94d5b8a8cb4149942ea40.jpg"
+                      alt="Amazing Day"
+                    />
+                  </a>
+                </div>
+                <div className="banner-slide">
+                  <a href="#">
+                    <img
+                      src="https://media.lottecinemavn.com/Media/WebAdmin/2c51c67cfda94d5b8a8cb4149942ea40.jpg"
+                      alt="Amazing Day"
+                    />
+                  </a>
+                </div>
+              </Slider>
+            </div>
+          </div>
+
+          <div className="box-office">
+            <div className="head">
+              <h3>BOX OFFICE</h3>
+            </div>
+
+            <ol className="ranking-list">
+              <li>
+                <span className="rank-num">1</span>
+                <span className="movie-name">NGƯỜI NHỆN: KHỞI ĐẦU MỚI</span>
+              </li>
+              <li>
+                <span className="rank-num">2</span>
+                <span className="movie-name">THƯ TÌNH GỬI NGOẠI</span>
+              </li>
+              <li>
+                <span className="rank-num">3</span>
+                <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
+              </li>
+              <li>
+                <span className="rank-num">3</span>
+                <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
+              </li>
+              <li>
+                <span className="rank-num">3</span>
+                <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
+              </li>
+              <li>
+                <span className="rank-num">3</span>
+                <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
+              </li>
+            </ol>
+            <a href="#" className="btn-ticket">
+              Mua vé ngay
+            </a>
+          </div>
+
+          <div className="movie-trailer">
+            <div className="child-slider-wrapper">
+              <Slider ref={trailerSliderRef} {...settings_child}>
+                <div className="trailer-card">
                   <img
-                    src="https://media.lottecinemavn.com/Media/WebAdmin/2c51c67cfda94d5b8a8cb4149942ea40.jpg"
-                    alt="Amazing Day"
+                    src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
+                    alt="Trailer"
                   />
-                </a>
-              </div>
+                  <button className="btn-play">▶ Play</button>
+                </div>
+                <div className="trailer-card">
+                  <img
+                    src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
+                    alt="Trailer"
+                  />
+                  <button className="btn-play">▶ Play</button>
+                </div>
+                <div className="trailer-card">
+                  <img
+                    src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
+                    alt="Trailer"
+                  />
+                  <button className="btn-play">▶ Play</button>
+                </div>
+              </Slider>
             </div>
+          </div>
+        </div>
+        <button
+          className="custom-arrow next-btn"
+          onClick={() => trailerSliderRef.current?.slickNext()}
+          style={{ zIndex: 9 }}
+        >
+          <RightOutlined />
+        </button>
+        {!isMoved && (
+          <button
+            className="custom-arrow next-btn"
+            onClick={() => setIsMoved(true)}
+          >
+            <RightOutlined />
+          </button>
+        )}
+      </section>
 
-            <div className="box-office">
-              <div className="head">
-                <h3>BOX OFFICE</h3>
-              </div>
-
-              <ol className="ranking-list">
-                <li>
-                  <span className="rank-num">1</span>
-                  <span className="movie-name">NGƯỜI NHỆN: KHỞI ĐẦU MỚI</span>
-                </li>
-                <li>
-                  <span className="rank-num">2</span>
-                  <span className="movie-name">THƯ TÌNH GỬI NGOẠI</span>
-                </li>
-                <li>
-                  <span className="rank-num">3</span>
-                  <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
-                </li>
-                <li>
-                  <span className="rank-num">3</span>
-                  <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
-                </li>
-                <li>
-                  <span className="rank-num">3</span>
-                  <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
-                </li>
-                <li>
-                  <span className="rank-num">3</span>
-                  <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
-                </li>
-              </ol>
-              <a href="#" className="btn-ticket">
-                Mua vé ngay
-              </a>
+      <section className="movie-slider-section">
+        <div className="movie-track">
+          <Slider {...settings}>
+            <div className="movie-item">
+              <img
+                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12301_105_100001.png"
+                alt="Movie 1"
+              />
             </div>
-
-            <div className="movie-trailer">
-              <div className="trailer-card">
-                <img
-                  src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
-                  alt="Trailer"
-                />
-                <button className="btn-play">▶ Play</button>
-              </div>
+            <div className="movie-item">
+              <img
+                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12301_105_100001.png"
+                alt="Movie 2"
+              />
+            </div>
+            <div className="movie-item">
+              <img
+                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
+                alt="Spider-Man"
+              />
+            </div>
+            <div className="movie-item">
+              <img
+                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202608/12295_105_100003.jpg"
+                alt="Movie 4"
+              />
+            </div>
+            <div className="movie-item">
+              <img
+                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12203_105_100003.jpg"
+                alt="Movie 5"
+              />
+            </div>
+            <div className="movie-item">
+              <img
+                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12203_105_100003.jpg"
+                alt="Movie 5"
+              />
+            </div>
+            <div className="movie-item">
+              <img
+                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12203_105_100003.jpg"
+                alt="Movie 5"
+              />
             </div>
           </Slider>
         </div>
       </section>
 
-      <section className="movie-slider-section">
-        <div className="movie-track">
-          <div className="movie-item">
-            <img
-              src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12301_105_100001.png"
-              alt="Movie 1"
-            />
-          </div>
-          <div className="movie-item">
-            <img
-              src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12301_105_100001.png"
-              alt="Movie 2"
-            />
-          </div>
-          <div className="movie-item">
-            <img
-              src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
-              alt="Spider-Man"
-            />
-          </div>
-          <div className="movie-item">
-            <img
-              src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202608/12295_105_100003.jpg"
-              alt="Movie 4"
-            />
-          </div>
-          <div className="movie-item">
-            <img
-              src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12203_105_100003.jpg"
-              alt="Movie 5"
-            />
-          </div>
-        </div>
-        <button className="slider-arrow next-arrow">›</button>
-      </section>
-
-      <section>
+      <section className="event-announcement-section">
         <div className="event-section">
           <h2 className="event-title">EVENT</h2>
           <div className="event-grid">
-            <div className="event-item item-large">
-              <img
-                src="https://media.lottecinemavn.com/Media/WebAdmin/469f3c4df24e43ad8d60f10242f342ed.jpg"
-                alt="Quyền lợi thành viên"
-              />
-            </div>
 
-            <div className="event-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/WebAdmin/2c51c67cfda94d5b8a8cb4149942ea40.jpg"
-                alt="Thứ 2 ưu đãi"
-              />
+            <div className="item-large">
+              <div className="item-tall">
+                <div className="event-item">
+                  <img
+                    src="https://media.lottecinemavn.com/Media/Event/661fe46e894748bfbfbdff864789fd4a.png"
+                    alt="Quyền lợi thành viên"
+                  />
+                </div>
+              </div>
+              <div className="item-nm">
+                <div className="event-item ">
+                  <img
+                    src="https://media.lottecinemavn.com/Media/WebAdmin/b5fe97ebdaab46299ce539027fff755c.jpg"
+                    alt="Family Day"
+                  />
+                </div>
+              </div>
             </div>
-
-            <div className="event-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/WebAdmin/bbfa3888ce0c4f82a47cb95091231f44.jpg"
-                alt="Spider-man merchandise"
-              />
+            <div className="item-large">
+              <div className="item-nm">
+                <div className="event-item ">
+                  <img
+                    src="https://media.lottecinemavn.com/Media/Event/34b1a121f2cc4c5995a17e19e77b47d9.jpg"
+                    alt="Thứ 2 ưu đãi"
+                  />
+                </div>
+              </div>
+              <div className="item-tall">
+                <div className="event-item">
+                  <img
+                    src="https://media.lottecinemavn.com/Media/Event/2554633691be4e729fa8242bafe8b4f4.jpg"
+                    alt="HDBank Promo"
+                  />
+                </div>
+              </div>
+            </div>   
+                 
+              <div className="item-x-large">
+              <div className="item-nm">
+                <div className="event-item ">
+                  <img
+                    src="https://media.lottecinemavn.com/Media/Event/d56d841488374e8fb5af9c0d72d24033.jpg"
+                    alt="Thứ 2 ưu đãi"
+                  />
+                </div>
+              </div>
+              <div className="item-tall">
+                <div className="event-item">
+                  <img
+                    src="https://media.lottecinemavn.com/Media/Event/e74980bb21b747259157c8138dcd086d.jpg"
+                    alt="HDBank Promo"
+                  />
+                </div>
+              
+            </div>    
+            </div>         
+            <div className="item-wrap-large">
+              <div className="event-item ">
+                <img
+                  src="https://media.lottecinemavn.com/Media/Event/f353e37e868a425ea171d41d9a9bab0b.png"
+                  alt="Thue"
+                  style={{objectPosition: "left"}}
+                />
+              </div>
             </div>
-
-            <div className="event-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/WebAdmin/b5fe97ebdaab46299ce539027fff755c.jpg"
-                alt="Family Day"
-              />
-            </div>
-
-            <div className="event-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/WebAdmin/caf7f074dcfe4e66bccb76e73fad261f.jpg"
-                alt="HDBank Promo"
-              />
-            </div>
-
-            <div className="event-item item-tall">
-              <img
-                src="https://media.lottecinemavn.com/Media/WebAdmin/7cbdf43f16504986bc9835d2ccafac70.jpg"
-                alt="Nạp L-Corn"
-              />
-            </div>
-
-            <div className="event-item item-wide">
-              <img
-                src="https://media.lottecinemavn.com/Media/WebAdmin/cc69977093904b2cadab729947f3b794.jpg"
-                alt="Thuê rạp mua vé nhóm"
-              />
-            </div>
+       
+           
           </div>
         </div>
       </section>
@@ -232,9 +386,6 @@ export default function HeroPage() {
           />
         </div>
       </section>
-
-      <button className="nav-arrow prev">‹</button>
-      <button className="nav-arrow next">›</button>
     </>
   );
 }

@@ -2,7 +2,7 @@
 html {
   /* 16px * 62.5% = 10px. Công thức: Số px / 10 = số rem */
   font-size: 62.5%;
-  box-sizing: border-box;
+  box-sizing: border-box;  
 }
 html {
   font-size: 10px;

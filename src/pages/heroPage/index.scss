@@ -3,46 +3,98 @@
   min-width: 980px;
   border-top: 1px solid #e9e4d2;
   min-height: 669px;
+  width: 100vw;
+  overflow-x: hidden;
+  .custom-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.7); // Nền tối trong suốt
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2); // Viền mảnh nhẹ nhàng
+    font-size: 18px;
+    width: 40px;
+    height: 100px;
+    border-radius: 4px; // Bo góc nhẹ vuông vắn thay vì hình tròn hoàn toàn
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+
+    &:hover {
+      background: gray; // Nhấn đỏ đặc trưng khi hover
+      border-color: gray;
+      color: #fff;
+    }
+
+    /* Định vị nút Previous */
+    &.prev-btn {
+      left: 0; // Nằm thụt vào phía trong mép khung hoặc chỉnh âm tùy ý
+    }
+
+    /* Định vị nút Next */
+    &.next-btn {
+      right: 15px;
+    }
+  }
   .cinema-hero-container {
+    position: relative;
     margin-top: 2rem;
-    .slick-list {
-      width: 100vw;
-      max-width: 100%;
-      overflow: hidden !important;
-      .slick-track {
-        width: max-content !important;
-        [data-index="0"] {
-          width: 1000px !important;
-          height: fit-content;
-        }
-        [data-index="1"] {
-          width: 350px !important;
-          height: max-content !important;         
-        }
-        [data-index="2"] {
-          width: 1000px !important;
-          height: fit-content;
-        }
-        .slick-slide {
-          height: 600px !important;
-          [bis_skin_checked="1"] {
+    width: 120%;
+    height: 600px;
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    transform: translateX(-10%);
+
+    /* Khung chứa các thành phần con độc lập không bị ảnh hưởng */
+    .movie-trailer {
+      width: 60%;
+    }
+    .hero-banner {
+      width: 50%;
+    }
+    .hero-banner,
+    .movie-trailer {
+      height: 100%;
+      box-sizing: border-box;
+      .child-slider-wrapper {
+        height: 100%;
+        > .slick-slider {
+          height: 100%;
+          > .slick-list {
             height: 100%;
+            > .slick-track {
+              height: 100%;
+              > .slick-slide {
+                height: 100%;
+                > div {
+                  height: 100%;
+                  div {
+                    height: 100%;
+                    img {
+                      object-fit: cover;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
+    .box-office {
+      width: 30%;
+    }
+  }
+  .cinema-hero-container.moved {
+    transform: translateX(-35%);
   }
 }
 
-/* Banner */
-.hero-banner {
-  border-radius: 8px;
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
 /* Box Office */
 .box-office {
   background: transparent;
@@ -140,40 +192,127 @@
 
 .movie-slider-section {
   position: relative;
-  max-width: 1200px;
-  margin: 0 auto;
-  background: #000;
-  padding: 20px 0;
-  overflow: hidden;
-}
-
-.movie-track {
-  display: flex;
-  gap: 15px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scrollbar-width: none; /* Ẩn thanh cuộn trên Firefox */
-}
-
-.movie-track::-webkit-scrollbar {
-  display: none; /* Ẩn thanh cuộn trên Chrome/Safari */
-}
-
-.movie-item {
-  flex: 0 0 180px; /* Chiều rộng cố định cho mỗi poster */
-  height: 270px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.movie-item img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 2rem 0;
+  background: transparent !important; // 1. Set background trong suốt cho toàn section
+
+  .movie-track {
+    position: relative;
+    width: 100%;
+    background: transparent !important; // Trong suốt cho track
+
+    .slick-list {
+      overflow: hidden !important;
+      margin: 0 -10px; // Tạo khoảng đệm âm để cân đối khoảng cách giữa các item
+      background: transparent !important;
+    }
+
+    .slick-track {
+      display: flex !important;
+      align-items: center;
+      background: transparent !important;
+    }
+
+    .slick-slide {
+      padding: 0 10px; // 3. Khoảng cách (gap) giữa mỗi item (mỗi bên 10px = tổng 20px)
+      box-sizing: border-box;
+      height: 250px !important; // 2. Chiều cao của item (bạn có thể thay đổi số này, ví dụ 500px)
+      background: transparent !important;
+
+      > div {
+        height: 100% !important;
+        background: transparent !important;
+      }
+
+      /* Style cho card phim bên trong */
+      .movie-item {
+        height: 100% !important;
+        background: transparent !important;
+        border-radius: 8px;
+        overflow: hidden;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover; // Giữ tỉ lệ và phủ kín khung item
+        }
+      }
+    }
+  }
+
+  /* 4. Style và hiển thị cho arrows khi set arrows: true trong react-slick */
+  .slick-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #e50914;
+      border-color: #e50914;
+    }
+
+    &.slick-prev {
+      left: 10px; // Nút mũi tên trái nằm sát mép trái
+    }
+
+    &.slick-next {
+      right: 10px; // Nút mũi tên phải nằm sát mép phải
+    }
+
+    /* Ẩn chữ mặc định của slick nếu có (như "Previous" / "Next") */
+    font-size: 0;
+    &::before {
+      font-size: 18px;
+      color: #fff;
+    }
+  }
+
+  /* Trường hợp bạn dùng nút Custom Arrow bên ngoài component Slider */
+  .custom-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #e50914;
+      border-color: #e50914;
+    }
+
+    &.prev-btn {
+      left: 10px;
+    }
+    &.next-btn {
+      right: 10px;
+    }
+  }
 }
 
-/* Nút mũi tên chuyển trang */
 .slider-arrow {
   position: absolute;
   top: 50%;
@@ -196,75 +335,106 @@
 .slider-arrow:hover {
   background: rgba(255, 255, 255, 0.3);
 }
-.event-section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  background-color: #f4f4f4;
-  font-family: Arial, sans-serif;
-}
 
-.event-title {
-  text-align: center;
-  font-size: 28px;
-  font-style: italic;
-  font-weight: bold;
-  margin-bottom: 30px;
-  color: #222;
-  letter-spacing: 2px;
-}
-
-/* Thiết lập lưới cho các banner */
-.event-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.event-item {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease;
-  background: #fff;
-}
-
-.event-item:hover {
-  transform: translateY(-5px);
-}
-
-.event-item img {
+.event-announcement-section {
+  background-image: url("./../../assets/images/bg_pattern.png");
+  background-repeat: repeat;
+  background-position: center;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+  padding: 50px 0;
 
-/* Định dạng các ô có kích thước đặc biệt theo layout ảnh */
-.item-large {
-  grid-row: span 2; /* Chiếm 2 dòng */
-}
+  .event-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background-color: transparent;
+    font-family: Arial, sans-serif;
+  }
 
-.item-tall {
-  grid-row: span 2; /* Chiếm 2 dòng */
-}
+  .event-title {
+    text-align: center;
+    font-size: 28px;
+    font-style: italic;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: #222;
+    letter-spacing: 2px;
+  }
 
-.item-wide {
-  grid-column: span 3; /* Trải dài toàn bộ 3 cột ở hàng dưới */
+  .event-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .event-grid-child {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .event-item {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+    background: #fff;
+    height: 100%;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .item-nm {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    gap: 20px;
+  }
+
+  /* Khớp chính xác các ô đặc biệt */
+  .item-wrap-large{
+    grid-column: span 2;
+    grid-row: span 1;
+    display: grid;
+    gap: 20px;
+    height: 100%;
+  }
+  .item-large {
+    grid-column: span 1;
+    grid-row: span 2;
+    display: grid;
+    gap: 20px;
+  }
+
+  .item-tall {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(1, 2fr);
+    gap: 20px;
+  }
+    
+
+  .item-x-large {
+    grid-column: span 1;
+    grid-row: span 3;
+    display:grid;
+    gap: 20px;
+  }
+  
 }
 
 /* Responsive cho thiết bị di động */
-@media (max-width: 768px) {
-  .event-grid {
-    grid-template-columns: 1fr;
-  }
-  .item-large,
-  .item-tall,
-  .item-wide {
-    grid-column: span 1;
-    grid-row: span 1;
-  }
-}
+
 .announcement-section {
   max-width: 1200px;
   margin: 0 auto;
