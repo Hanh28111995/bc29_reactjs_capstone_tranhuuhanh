@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Table, Input, Button, Image, App, Popconfirm, Tag } from 'antd';
+import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import { formatDate3 } from '../../utils/common';
 import {
   EditOutlined,
@@ -18,21 +18,20 @@ function PromotionTable() {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
-  const queryClient = useQueryClient();
   const { notification } = App.useApp();
 
-  const { data: response, isLoading } = useQuery({
-    queryKey: ['promotions', pagination.page, pagination.limit, keyword],
-    queryFn: () => getPromotionListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
+  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách khuyến mãi
+  const { data: responseContent, loading: isLoading } = useAsync({
+    dependencies: [pagination.page, pagination.limit, keyword],
+    service: () => getPromotionListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
     placeholderData: (previousData) => previousData,
-    refetchOnWindowFocus: false,
-    retry: false,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id) => deletePromotionAPI(id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['promotions'] });
+  // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache
+  const { mutateAsync: deletePromotion, isPending: isDeleting } = useAsyncMutation({
+    service: (id) => deletePromotionAPI(id),
+    invalidateQueries: [['getPromotionListAPI']],
+    onSuccess: () => {
       notification.success({ message: 'Thành công', description: 'Đã xóa chương trình khuyến mãi!' });
     },
     onError: () => {
@@ -40,11 +39,12 @@ function PromotionTable() {
     },
   });
 
-  const content = response?.data?.content;
-  const promoData = Array.isArray(content)
-    ? content
-    : content?.promotions ?? content?.data ?? [];
-  const paginationMeta = content?.pagination ?? { total: promoData.length, totalPages: 1 };
+  // Tận dụng cơ chế bóc tách dữ liệu tự động từ normalizeResult của useAsync
+  const promoData = Array.isArray(responseContent)
+    ? responseContent
+    : responseContent?.promotions ?? responseContent?.data ?? [];
+    
+  const paginationMeta = responseContent?.pagination ?? { total: promoData.length, totalPages: 1 };
 
   const promotionList = useMemo(() => {
     if (!keyword) return promoData;
@@ -55,7 +55,7 @@ function PromotionTable() {
   }, [promoData, keyword]);
 
   const handleDelete = async (id) => {
-    await deleteMutation.mutateAsync(id);
+    await deletePromotion(id);
   };
 
   const columns = [
@@ -64,7 +64,7 @@ function PromotionTable() {
       dataIndex: '_id',
       key: '_id',
       width: '15%',
-      render: (text) => text?.slice(-6).toUpperCase(), // Rút gọn ID hiển thị cho đẹp
+      render: (text) => text?.slice(-6).toUpperCase(),
     },
     {
       title: 'Banner',
@@ -115,8 +115,14 @@ function PromotionTable() {
       <div className="table-header-actions">
         <Search
           placeholder="Tìm kiếm khuyến mãi..."
-          onSearch={setKeyword}
-          onChange={(e) => setKeyword(e.target.value)}
+          onSearch={(val) => {
+            setKeyword(val);
+            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
+          }}
+          onChange={(e) => {
+            setKeyword(e.target.value);
+            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi gõ
+          }}
           className="search-input"
           size="middle"
         />
@@ -136,7 +142,7 @@ function PromotionTable() {
         rowKey="_id"
         columns={columns}
         dataSource={promotionList}
-        loading={isLoading || deleteMutation.isPending}
+        loading={isLoading || isDeleting}
         bordered
         pagination={{ 
           current: pagination.page,

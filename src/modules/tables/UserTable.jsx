@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Table, Button, Input, notification, Popconfirm } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import { userListApi, deleteUserApi } from 'services/user';
 import { removeVietnameseTones } from 'constants/common';
 import './index.scss';
@@ -13,24 +13,20 @@ export default function UserTable() {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
-  const queryClient = useQueryClient();
   const [api, contextHolder] = notification.useNotification();
 
-  // ✅ ĐÃ SỬA: Chuyển useQuery sang cấu trúc Object của v5
-  const { data: response, isLoading } = useQuery({
-    queryKey: ['users', pagination.page, pagination.limit, keyword],
-    queryFn: () => userListApi({ page: pagination.page, limit: pagination.limit, keyword }),
-    placeholderData: (previousData) => previousData, // Thay thế cho keepPreviousData: true
-    refetchOnWindowFocus: false,
-    retry: false,
+  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách người dùng
+  const { data: responseContent, loading: isLoading } = useAsync({
+    dependencies: [pagination.page, pagination.limit, keyword],
+    service: () => userListApi({ page: pagination.page, limit: pagination.limit, keyword }),
+    placeholderData: (previousData) => previousData,
   });
 
-  // ✅ ĐÃ SỬA: Chuyển useMutation sang cấu trúc Object của v5
-  const deleteMutation = useMutation({
-    mutationFn: (id) => deleteUserApi(id),
-    onSuccess: async () => {
-      // Chuẩn v5: Bọc queryKey trong một Object khi invalidate
-      await queryClient.invalidateQueries({ queryKey: ['users'] });
+  // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache
+  const { mutateAsync: deleteUser, isPending: isDeleting } = useAsyncMutation({
+    service: (id) => deleteUserApi(id),
+    invalidateQueries: [['userListApi']],
+    onSuccess: () => {
       api.success({
         message: 'Thành công',
         description: 'Người dùng đã được xóa khỏi hệ thống.',
@@ -45,11 +41,12 @@ export default function UserTable() {
     },
   });
 
-  const content = response?.data?.content;
-  const userList = Array.isArray(content)
-    ? content
-    : content?.users ?? content?.data ?? [];
-  const paginationMeta = content?.pagination ?? { total: userList.length, totalPages: 1 };
+  // Tận dụng cơ chế bóc tách dữ liệu tự động từ normalizeResult của useAsync
+  const userList = Array.isArray(responseContent)
+    ? responseContent
+    : responseContent?.users ?? responseContent?.data ?? [];
+    
+  const paginationMeta = responseContent?.pagination ?? { total: userList.length, totalPages: 1 };
 
   const userlist = useMemo(() => {
     if (!keyword) return userList;
@@ -60,7 +57,7 @@ export default function UserTable() {
   }, [userList, keyword]);
 
   const handleDelete = async (id) => {
-    await deleteMutation.mutateAsync(id);
+    await deleteUser(id);
   };
 
   const columns = [
@@ -68,7 +65,7 @@ export default function UserTable() {
       title: 'No',
       key: 'index',
       width: '5%',
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => (pagination.page - 1) * pagination.limit + index + 1,
     },
     {
       title: 'Tài Khoản',
@@ -117,8 +114,14 @@ export default function UserTable() {
         <div className="search-box">
           <Search
             placeholder="Tìm kiếm tài khoản..."
-            onSearch={setKeyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            onSearch={(val) => {
+              setKeyword(val);
+              setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
+            }}
+            onChange={(e) => {
+              setKeyword(e.target.value);
+              setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi gõ
+            }}
             className="search-input"
             size="middle"
           />
@@ -140,8 +143,7 @@ export default function UserTable() {
         rowKey="_id"
         columns={columns}
         dataSource={userlist}
-        // ✅ ĐÃ SỬA: Đổi deleteMutation.isLoading thành deleteMutation.isPending cho chuẩn v5
-        loading={isLoading || deleteMutation.isPending}
+        loading={isLoading || isDeleting}
         pagination={{
           current: pagination.page,
           pageSize: pagination.limit,

@@ -4,30 +4,37 @@ import { useAsync, safeArray } from '../../hooks/useAsync';
 import React, { useState, useEffect } from 'react';
 import { DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import { getAllSeatTypesApi, updateSeatTypeApi, addOneSeatTypeApi, deleteOneSeatTypeApi } from 'services/seatType';
-import './index.scss'; // Link SCSS
+import './index.scss'; 
 
 export default function SeatTypeTable() {
     const [editableKeys, setEditableRowKeys] = useState([]);
     const [dataSource, setDataSource] = useState([]);
-    const [toggle, setToggle] = useState(false);
     const [deleteIds, setDeleteIds] = useState([]);
     const [updatedIds, setUpdatedIds] = useState([]);
     const { message, notification } = App.useApp();
 
-    const { state: rawData, loading } = useAsync({
-        dependencies: [toggle],
+    // Sử dụng useAsync chuẩn của dự án kết hợp queryKey để dễ dàng refetch
+    const { state: rawData, loading, refetch } = useAsync({
         service: getAllSeatTypesApi,
+        queryKey: ['seatTypes'],
     });
+    
     const data = safeArray(rawData);
 
+    // Đồng bộ dữ liệu gốc vào local state khi fetch thành công
     useEffect(() => {
-        if (data) setDataSource(data);
+        if (data && data.length > 0) {
+            setDataSource(data);
+            setDeleteIds([]);
+            setUpdatedIds([]);
+        }
     }, [data]);
 
     const handleDelete = (record) => {
         const isNew = record._id?.toString().startsWith('new_');
         if (!isNew) {
-            setDeleteIds((prev) => [...prev, record._id]);
+            setDeleteIds((prev) => [...new Set([...prev, record._id])]);
+            setUpdatedIds((prev) => prev.filter(id => id !== record._id));
         }
         setDataSource(dataSource.filter((item) => item._id !== record._id));
         message.info("Đã xóa tạm thời. Nhấn LƯU TẤT CẢ để áp dụng.");
@@ -38,7 +45,7 @@ export default function SeatTypeTable() {
         if (!isNew) {
             setUpdatedIds((prev) => [...new Set([...prev, key])]);
         }
-        message.info("Đã lưu thay đổi. Nhấn LƯU TẤT CẢ để áp dụng.");
+        message.info("Đã ghi nhận thay đổi dòng. Nhấn LƯU TẤT CẢ để cập nhật server.");
     };
 
     const columns = [
@@ -89,34 +96,41 @@ export default function SeatTypeTable() {
             title: 'Thao tác',
             valueType: 'option',
             width: '10%',
-            render: (text, record, _, action) => [
-                <div className="action-btns">
-                    <Button
-                        key="edit"
-                        type="text"
-                        icon={<EditOutlined style={{ color: '#1677ff' }} />}
-                        onClick={() => action?.startEditable?.(record._id)}
-                    />,
-                    <Popconfirm
-                        key="delete"
-                        title="Xóa?"
-                        onConfirm={() => handleDelete(record)}
-                    >
-                        <Button type="text" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
-                </div>,
-            ],
+            render: (text, record, _, action) => {
+                const isEditing = editableKeys.includes(record._id);
+                if (isEditing) return null;
+
+                return [
+                    <div className="action-btns" key="actions">
+                        <Button
+                            key="edit"
+                            type="text"
+                            icon={<EditOutlined style={{ color: '#1677ff' }} />}
+                            onClick={() => action?.startEditable?.(record._id)}
+                        />
+                        <Popconfirm
+                            key="delete"
+                            title="Xóa tạm thời loại ghế này?"
+                            onConfirm={() => handleDelete(record)}
+                        >
+                            <Button type="text" danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    </div>
+                ];
+            },
         },
     ];
 
     const handleSaveAll = async () => {
+        if (editableKeys.length > 0) {
+            return message.warning("Vui lòng nhấn 'Lưu' hoặc 'Hủy' trên các dòng đang sửa trước!");
+        }
+
         try {
             const promises = [];
 
-            // Delete
             deleteIds.forEach(id => promises.push(deleteOneSeatTypeApi(id)));
 
-            // Add mới (new_)
             dataSource
                 .filter(item => item._id?.toString().startsWith('new_'))
                 .forEach(item => {
@@ -124,19 +138,19 @@ export default function SeatTypeTable() {
                     promises.push(addOneSeatTypeApi(rest));
                 });
 
-            // Update những item đã được sửa
             updatedIds.forEach(id => {
                 const item = dataSource.find(d => d._id === id);
-                if (item) promises.push(updateSeatTypeApi(item));
+                if (item && !deleteIds.includes(id)) {
+                    promises.push(updateSeatTypeApi(item));
+                }
             });
 
-            if (promises.length === 0) return message.warning("Không có thay đổi");
+            if (promises.length === 0) return message.warning("Không có thay đổi nào để lưu!");
 
             await Promise.all(promises);
-            notification.success({ message: "Thành công", description: "Dữ liệu đã được cập nhật." });
-            setDeleteIds([]);
-            setUpdatedIds([]);
-            setToggle(t => !t);
+            notification.success({ message: "Thành công", description: "Dữ liệu loại ghế đã được cập nhật." });
+            
+            refetch(); // Làm mới dữ liệu chuẩn xác từ server
         } catch (error) {
             notification.error({ message: "Lỗi", description: "Vui lòng thử lại" });
         }
@@ -155,7 +169,7 @@ export default function SeatTypeTable() {
                     onChange={setDataSource}
                     recordCreatorProps={{
                         position: 'bottom',
-                        record: () => ({ _id: `new_${Date.now()}` }),
+                        record: () => ({ _id: `new_${Date.now()}`, name: 'Standard', price: 0, color: '#1677ff', description: '' }),
                         creatorButtonText: "Thêm loại ghế mới"
                     }}
                     editable={{
@@ -170,15 +184,18 @@ export default function SeatTypeTable() {
                             defaultDoms.cancel,
                         ],
                     }}
+                    search={false}
+                    options={false}
                 />
 
-                <div className="save-all-wrapper">
+                <div className="save-all-wrapper" style={{ marginTop: 24, textAlign: 'right' }}>
                     <Button
                         type="primary"
+                        size="large"
                         className="btn-save-all"
                         icon={<SaveOutlined />}
                         onClick={handleSaveAll}
-                        disabled={dataSource.length === 0}
+                        disabled={loading || (deleteIds.length === 0 && updatedIds.length === 0 && !dataSource.some(item => item._id?.toString().startsWith('new_')))}
                     >
                         LƯU TẤT CẢ THAY ĐỔI
                     </Button>

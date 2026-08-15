@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Table, Input, Button, App, Popconfirm, Tag, Select } from 'antd';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import { fetchAllTicketsAPI, deleteTicketAPI } from 'services/ticket';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -14,29 +14,25 @@ export default function TicketTable() {
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
   const { notification } = App.useApp();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
-  // ✅ ĐÃ SỬA: Cấu trúc useQuery theo chuẩn Object của React Query v5
-  const { data: response, isLoading } = useQuery({
-    queryKey: ['tickets', pagination.page, pagination.limit, statusFilter, keyword],
-    queryFn: () =>
+  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách vé (kèm statusFilter và keyword)
+  const { data: responseContent, loading: isLoading } = useAsync({
+    dependencies: [pagination.page, pagination.limit, statusFilter, keyword],
+    service: () =>
       fetchAllTicketsAPI({
         page: pagination.page,
         limit: pagination.limit,
         status: statusFilter,
         keyword,
       }),
-    placeholderData: (previousData) => previousData, // Thay thế cho keepPreviousData: true
-    refetchOnWindowFocus: false,
-    retry: false,
+    placeholderData: (previousData) => previousData,
   });
 
-  // ✅ ĐÃ SỬA: Cấu trúc useMutation theo chuẩn Object của React Query v5
-  const deleteMutation = useMutation({
-    mutationFn: (id) => deleteTicketAPI(id),
-    onSuccess: async () => {
-      // Chuẩn v5: Phải bọc queryKey trong một Object khi invalidate
-      await queryClient.invalidateQueries({ queryKey: ['tickets'] });
+  // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa vé và tự động làm mới cache
+  const { mutateAsync: deleteTicket, isPending: isDeleting } = useAsyncMutation({
+    service: (id) => deleteTicketAPI(id),
+    invalidateQueries: [['fetchAllTicketsAPI']],
+    onSuccess: () => {
       notification.success({ message: 'Thành công', description: 'Đã xóa vé!' });
     },
     onError: () => {
@@ -44,11 +40,12 @@ export default function TicketTable() {
     },
   });
 
-  const content = response?.data?.content;
-  const ticketList = Array.isArray(content)
-    ? content
-    : content?.tickets ?? content?.data ?? [];
-  const paginationMeta = content?.pagination ?? { total: ticketList.length, totalPages: 1 };
+  // Tận dụng cơ chế bóc tách dữ liệu tự động từ normalizeResult của useAsync
+  const ticketList = Array.isArray(responseContent)
+    ? responseContent
+    : responseContent?.tickets ?? responseContent?.data ?? [];
+    
+  const paginationMeta = responseContent?.pagination ?? { total: ticketList.length, totalPages: 1 };
 
   const filtered = useMemo(() => {
     if (!keyword) return ticketList;
@@ -61,7 +58,7 @@ export default function TicketTable() {
   }, [ticketList, keyword]);
 
   const handleDelete = async (id) => {
-    await deleteMutation.mutateAsync(id);
+    await deleteTicket(id);
   };
 
   const columns = [
@@ -108,7 +105,7 @@ export default function TicketTable() {
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: '15%',
-      render: (text) => dayjs(text).format('DD/MM/YYYY HH:mm'),
+      render: (text) => (text ? dayjs(text).format('DD/MM/YYYY HH:mm') : '---'),
     },
     {
       title: 'Hành động',
@@ -134,8 +131,14 @@ export default function TicketTable() {
       <div className="table-header-actions">
         <Search
           placeholder="Tìm theo mã vé, phương thức..."
-          onSearch={setKeyword}
-          onChange={(e) => setKeyword(e.target.value)}
+          onSearch={(val) => {
+            setKeyword(val);
+            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
+          }}
+          onChange={(e) => {
+            setKeyword(e.target.value);
+            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi gõ
+          }}
           className="search-input"
           size="middle"
         />
@@ -144,7 +147,10 @@ export default function TicketTable() {
           placeholder="Lọc trạng thái"
           style={{ width: 160 }}
           value={statusFilter}
-          onChange={(val) => setStatusFilter(val)}
+          onChange={(val) => {
+            setStatusFilter(val);
+            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi lọc trạng thái
+          }}
           options={[
             { label: 'Pending', value: 'Pending' },
             { label: 'Completed', value: 'Completed' },
@@ -158,8 +164,7 @@ export default function TicketTable() {
         rowKey="_id"
         columns={columns}
         dataSource={filtered}
-        // ✅ ĐÃ SỬA: Kiểm tra trạng thái loading đúng cú pháp v5 (dùng deleteMutation.isPending)
-        loading={isLoading || deleteMutation.isPending}
+        loading={isLoading || isDeleting}
         bordered
         pagination={{
           pageSize: pagination.limit,

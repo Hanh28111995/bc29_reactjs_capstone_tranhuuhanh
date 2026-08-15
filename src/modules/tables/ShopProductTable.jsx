@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Table, Input, Button, Image, App, Popconfirm, Switch, Badge } from 'antd';
+import { Table, Input, Button, Image, App, Popconfirm, Badge } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
+import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import {
   EditOutlined,
   DeleteOutlined,
@@ -18,21 +17,20 @@ export default function ShopProductTable() {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
-  const queryClient = useQueryClient();
   const { notification } = App.useApp();
 
-  const { data: response, isLoading } = useQuery({
-    queryKey: ['shop-products', pagination.page, pagination.limit, keyword],
-    queryFn: () => getShopProductListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
+  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách sản phẩm
+  const { data: responseContent, loading: isLoading } = useAsync({
+    dependencies: [pagination.page, pagination.limit, keyword],
+    service: () => getShopProductListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
     placeholderData: (previousData) => previousData,
-    refetchOnWindowFocus: false,
-    retry: false,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id) => deleteShopProductAPI(id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['shop-products'] });
+  // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache
+  const { mutateAsync: deleteProduct, isPending: isDeleting } = useAsyncMutation({
+    service: (id) => deleteShopProductAPI(id),
+    invalidateQueries: [['getShopProductListAPI']],
+    onSuccess: () => {
       notification.success({ message: 'Thành công', description: 'Đã xóa sản phẩm!' });
     },
     onError: () => {
@@ -40,11 +38,12 @@ export default function ShopProductTable() {
     },
   });
 
-  const content = response?.data?.content;
-  const productData = Array.isArray(content)
-    ? content
-    : content?.shops ?? content?.data ?? [];
-  const paginationMeta = content?.pagination ?? { total: productData.length, totalPages: 1 };
+  // Tận dụng cơ chế bóc tách dữ liệu tự động từ normalizeResult của useAsync
+  const productData = Array.isArray(responseContent)
+    ? responseContent
+    : responseContent?.shops ?? responseContent?.data ?? [];
+    
+  const paginationMeta = responseContent?.pagination ?? { total: productData.length, totalPages: 1 };
 
   const productList = useMemo(() => {
     if (!keyword) return productData;
@@ -55,7 +54,7 @@ export default function ShopProductTable() {
   }, [productData, keyword]);
 
   const handleDelete = async (id) => {
-    await deleteMutation.mutateAsync(id);
+    await deleteProduct(id);
   };
 
   const columns = [
@@ -79,14 +78,14 @@ export default function ShopProductTable() {
       dataIndex: 'price',
       key: 'price',
       width: '15%',
-      render: (price) => `${price.toLocaleString('vi-VN')} đ`,
+      render: (price) => (price ? `${price.toLocaleString('vi-VN')} đ` : '0 đ'),
     },
     {
       title: 'Tồn kho',
       dataIndex: 'stock',
       key: 'stock',
       width: '10%',
-      render: (stock) => stock ?? <span style={{color: '#999'}}>Vô hạn</span>,
+      render: (stock) => (stock !== undefined && stock !== null ? stock : <span style={{color: '#999'}}>Vô hạn</span>),
     },
     {
       title: 'Trạng thái',
@@ -121,8 +120,14 @@ export default function ShopProductTable() {
       <div className="table-header-actions">
         <Search
           placeholder="Tìm kiếm sản phẩm..."
-          onSearch={setKeyword}
-          onChange={(e) => setKeyword(e.target.value)}
+          onSearch={(val) => {
+            setKeyword(val);
+            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
+          }}
+          onChange={(e) => {
+            setKeyword(e.target.value);
+            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi gõ
+          }}
           className="search-input"
           size="middle"
         />
@@ -142,7 +147,7 @@ export default function ShopProductTable() {
         rowKey="_id"
         columns={columns}
         dataSource={productList}
-        loading={isLoading || deleteMutation.isPending}
+        loading={isLoading || isDeleting}
         bordered
         pagination={{ 
           current: pagination.page,
@@ -156,4 +161,3 @@ export default function ShopProductTable() {
     </div>
   );
 }
-

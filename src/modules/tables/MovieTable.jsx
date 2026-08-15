@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import { fetchMovieListAPI, deleteMovieAPI } from 'services/movie';
 import { formatDate3 } from '../../utils/common';
 import {
@@ -19,24 +19,20 @@ function MovieTable() {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
-  const queryClient = useQueryClient();
   const { notification } = App.useApp();
 
-  //ĐÃ SỬA: Chuyển useQuery sang cấu trúc Object của React Query v5
-  const { data: response, isLoading } = useQuery({
-    queryKey: ['movies', pagination.page, pagination.limit, keyword],
-    queryFn: () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
-    placeholderData: (previousData) => previousData, // Thay thế cho keepPreviousData: true
-    refetchOnWindowFocus: false,
-    retry: false,
+  // Sử dụng useAsync chuẩn của dự án để fetch danh sách phim
+  const { data: responseContent, loading: isLoading } = useAsync({
+    dependencies: [pagination.page, pagination.limit, keyword],
+    service: () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
+    placeholderData: (previousData) => previousData,
   });
 
-  //ĐÃ SỬA: Chuyển useMutation sang cấu trúc Object của React Query v5
-  const deleteMutation = useMutation({
-    mutationFn: (id) => deleteMovieAPI(id),
-    onSuccess: async () => {
-      // Chuẩn v5: Phải bọc queryKey trong một Object khi invalidate
-      await queryClient.invalidateQueries({ queryKey: ['movies'] });
+  // Sử dụng useAsyncMutation chuẩn của dự án để xóa phim và tự động invalidate cache
+  const { mutateAsync: deleteMovie, isPending: isDeleting } = useAsyncMutation({
+    service: (id) => deleteMovieAPI(id),
+    invalidateQueries: [['fetchMovieListAPI']],
+    onSuccess: () => {
       notification.success({ message: 'Thành công', description: 'Đã xóa phim!' });
     },
     onError: () => {
@@ -44,11 +40,12 @@ function MovieTable() {
     },
   });
 
-  const content = response?.data?.content;
-  const movieData = Array.isArray(content)
-    ? content
-    : content?.movies ?? content?.data ?? [];
-  const paginationMeta = content?.pagination ?? { total: movieData.length, totalPages: 1 };
+  // normalizeResult từ useAsync đã tự bóc tách content, ta chỉ cần mapping an toàn
+  const movieData = Array.isArray(responseContent)
+    ? responseContent
+    : responseContent?.movies ?? responseContent?.data ?? [];
+    
+  const paginationMeta = responseContent?.pagination ?? { total: movieData.length, totalPages: 1 };
 
   const movielist = useMemo(() => {
     if (!keyword) return movieData;
@@ -59,7 +56,7 @@ function MovieTable() {
   }, [movieData, keyword]);
 
   const handleDelete = async (id) => {
-    await deleteMutation.mutateAsync(id);
+    await deleteMovie(id);
   };
 
   const columns = [
@@ -112,8 +109,14 @@ function MovieTable() {
       <div className="table-header-actions">
         <Search
           placeholder="Tìm kiếm..."
-          onSearch={setKeyword}
-          onChange={(e) => setKeyword(e.target.value)}
+          onSearch={(val) => {
+            setKeyword(val);
+            setPagination((prev) => ({ ...prev, page: 1 }));
+          }}
+          onChange={(e) => {
+            setKeyword(e.target.value);
+            setPagination((prev) => ({ ...prev, page: 1 }));
+          }}
           className="search-input"
           size="middle"
         />
@@ -128,8 +131,7 @@ function MovieTable() {
         rowKey="id_movie"
         columns={columns}
         dataSource={movielist}
-        // ✅ ĐÃ SỬA: Đổi deleteMutation.isLoading thành deleteMutation.isPending cho đúng chuẩn v5
-        loading={isLoading || deleteMutation.isPending}
+        loading={isLoading || isDeleting}
         bordered
         pagination={{ 
           current: pagination.page,

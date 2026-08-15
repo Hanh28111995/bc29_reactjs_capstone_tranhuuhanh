@@ -3,6 +3,7 @@ import {
   UserOutlined,
   DatabaseOutlined,
   ToolOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 import { Breadcrumb,  Layout, Menu, Image } from "antd";
 import { ProConfigProvider } from "@ant-design/pro-components";
@@ -20,6 +21,8 @@ function getItem(label, key, icon, children, type) {
 const items = [
   getItem('Movie management', '/admin/movie-management', <DesktopOutlined />),
   getItem('User management', '/admin/user-management', <UserOutlined />),
+  getItem('Event management', '/admin/promotion-management', <ShopOutlined />),
+  getItem('Shop management', '/admin/shop-management', <ShopOutlined />),
   getItem('Theater management', 'theater', <DatabaseOutlined />, [
     getItem('Seat Types', '/admin/seat-types'),
     getItem('Branches', '/admin/branches'),
