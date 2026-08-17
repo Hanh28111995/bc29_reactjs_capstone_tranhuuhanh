@@ -4,12 +4,12 @@ import {
   DatabaseOutlined,
   ToolOutlined,
   ShopOutlined,
+  TagOutlined
 } from "@ant-design/icons";
 import { Breadcrumb,  Layout, Menu, Image } from "antd";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import React, { memo, useCallback, useMemo, useState, Suspense } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { Spin } from "antd";
 import "./index.scss";
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -21,7 +21,7 @@ function getItem(label, key, icon, children, type) {
 const items = [
   getItem('Movie management', '/admin/movie-management', <DesktopOutlined />),
   getItem('User management', '/admin/user-management', <UserOutlined />),
-  getItem('Event management', '/admin/promotion-management', <ShopOutlined />),
+  getItem('Event management', '/admin/promotion-management', <TagOutlined />),
   getItem('Shop management', '/admin/shop-management', <ShopOutlined />),
   getItem('Theater management', 'theater', <DatabaseOutlined />, [
     getItem('Seat Types', '/admin/seat-types'),
@@ -115,10 +115,10 @@ function AdminLayout() {
         </Sider>
         <Layout className="site-layout">
           <Header className="site-layout-background" style={{ padding: 0 }} />
-          <Content onClick={handleContentClick} style={{ margin: '0 16px' }}>
-            <AdminBreadcrumb />
+          <Content onClick={handleContentClick} style={{ margin: '0 16px' }}>            
             <div className="site-layout-background" style={{ paddingTop: 24, minHeight: 360 }}>
-              <Suspense fallback={<Spin style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }} />}>
+              <Suspense >
+                <AdminBreadcrumb />
                 <Outlet />
               </Suspense>
             </div>
