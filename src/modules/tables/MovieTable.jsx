@@ -84,10 +84,9 @@ function MovieTable() {
         page: 1,
         limit: 20,
       });
-      const searchResult = res?.content?.movies ?? [];
-      console.log("Search API result:", res);
+      const searchResult = res.data.content.movies ?? [];
       setMovieList(searchResult);
-      setTotalItems(res?.content?.pagination?.total ?? searchResult.length);
+      setTotalItems(res.data.content.pagination.total ?? searchResult.length);
     } catch (error) {
       notification.error({
         message: "Lỗi",
