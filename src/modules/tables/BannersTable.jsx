@@ -7,33 +7,26 @@ import { fetchSearchMovieAPI } from 'services/movie';
 import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import './index.scss';
 
-// --- Component con xử lý upload và preview trực tiếp ---
-const BannerImageUploader = ({ value, record, setDataSource }) => {
-    const inputRef = useRef(null);
-    const [previewUrl, setPreviewUrl] = useState(record.url || value);
+// --- Khai báo Map toàn cục lưu file theo _id của dòng ---
+const globalFileMap = {};
 
-    // Đồng bộ lại preview nếu record.url thay đổi từ ngoài vào
-    useEffect(() => {
-        setPreviewUrl(record.url || value);
-    }, [record.url, value]);
+const BannerImageUploader = ({ record }) => {
+    const inputRef = useRef(null);
+    const [previewUrl, setPreviewUrl] = useState(record.url);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        console.log("👉 File được chọn từ ổ cứng:", file);
+        // Lưu thẳng vào Map toàn cục theo _id của dòng hiện tại
+        globalFileMap[record._id] = file;
+        console.log(`✅ Đã lưu file cho row [${record._id}]:`, file);
 
-        // 1. Lưu trực tiếp file object vào record của dòng này
-        record.fileObj = file;
-
-        // 2. Tạo preview base64 hiển thị lên giao diện ngay lập tức
         const reader = new FileReader();
         reader.onload = (ev) => {
             const base64Url = ev.target.result;
-            record.url = base64Url;
             setPreviewUrl(base64Url);
-            // Trigger cập nhật lại state của bảng để render lại toàn bộ
-            setDataSource(prev => [...prev]);
+            record.url = base64Url; // Cập nhật preview trực tiếp
         };
         reader.readAsDataURL(file);
     };
@@ -112,10 +105,7 @@ export default function BannerTable() {
     });
 
     useEffect(() => {
-        if (rawData) {
-            const initializedData = safeArray(rawData).map(item => ({ ...item, fileObj: null }));
-            setDataSource(initializedData);
-        }
+        if (rawData) setDataSource(safeArray(rawData));
     }, [rawData]);
 
     const handleSaveAll = async () => {
@@ -134,24 +124,21 @@ export default function BannerTable() {
                     const formData = new FormData();
                     formData.append("movie_id", currentMovieId || "");
                     
-                    if (item.fileObj) {
-                        formData.append("file", item.fileObj);
+                    // Lấy file trực tiếp từ globalFileMap dựa vào _id của dòng
+                    const targetFile = globalFileMap[item._id];
+
+                    if (targetFile) {
+                        formData.append("file", targetFile);
                     } else if (item.url && !item.url.startsWith('data:')) {
                         formData.append("url", item.url);
                     }
 
-                    // =========================================================================
-                    // 🔍 CONSOLE.LOG CHECK PAYLOAD TRƯỚC KHI GỬI API (HÃY MỞ F12 ĐỂ XEM)
-                    // =========================================================================
-                    console.log(`========================================`);
-                    console.log(`📌 Đang kiểm tra Payload cho row ID: ${item._id}`);
-                    console.log(`📌 item.fileObj hiện tại:`, item.fileObj);
-                    console.log(`📌 Các trường dữ liệu trong FormData:`);
+                    // --- DEBUG CONSOLE.LOG ---
+                    console.log(`=== PAYLOAD CHO ROW: ${item._id} ===`);
+                    console.log("Lấy từ globalFileMap:", targetFile);
                     for (let pair of formData.entries()) {
-                        console.log(`   - Key: [${pair[0]}] => Value:`, pair[1]);
+                        console.log(`   - ${pair[0]}:`, pair[1]);
                     }
-                    console.log(`========================================`);
-                    // =========================================================================
 
                     if (isNew) {
                         promises.push(addBannerAPI(formData));
@@ -165,6 +152,10 @@ export default function BannerTable() {
 
             await Promise.all(promises);
             notification.success({ message: 'Thành công', description: 'Cập nhật banner thành công.' });
+            
+            // Xóa sạch map sau khi lưu thành công
+            Object.keys(globalFileMap).forEach(k => delete globalFileMap[k]);
+
             refetch();
             setDeleteIds([]);
             setUpdatedIds([]);
@@ -197,10 +188,9 @@ export default function BannerTable() {
             renderFormItem: (_, config) => {
                 const recordPath = config.path ? config.path.slice(0, -1) : [];
                 const record = formRef.current?.getFieldValue(recordPath) || {};
-                
                 if (!record._id && config.record) Object.assign(record, config.record);
 
-                return <BannerImageUploader value={config.value} record={record} setDataSource={setDataSource} />;
+                return <BannerImageUploader record={record} />;
             }
         },
         {
@@ -236,6 +226,7 @@ export default function BannerTable() {
                                     setDeleteIds(prev => [...new Set([...prev, record._id])]);
                                     setUpdatedIds(prev => prev.filter(id => id !== record._id));
                                 }
+                                delete globalFileMap[record._id]; // Xóa file trong map nếu xóa dòng
                                 setDataSource(prev => prev.filter(i => i._id !== record._id));
                                 message.info("Đã xóa tạm thời.");
                             }}
@@ -267,8 +258,7 @@ export default function BannerTable() {
                         record: () => ({ 
                             _id: `new_${Date.now()}`, 
                             url: '', 
-                            movie_id: '',
-                            fileObj: null 
+                            movie_id: ''
                         })
                     }}
                     editable={{
