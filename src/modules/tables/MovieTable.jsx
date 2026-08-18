@@ -84,18 +84,18 @@ function MovieTable() {
     await deleteMovie(id);
   };
 
-  const columns = [
+ const columns = [
     {
       title: 'Mã',
       dataIndex: 'id_movie',
       key: 'id_movie',
-      width: '15%',
+      width: '10%', // Giảm nhẹ xuống
     },
     {
       title: 'Ảnh',
       dataIndex: 'banner',
       key: 'banner',
-      width: '25%',
+      width: '20%',
       render: (text) => (
         <Image src={text} className="movie-banner" fallback="https://via.placeholder.com/60x90?text=No+Image" />
       ),
@@ -104,13 +104,14 @@ function MovieTable() {
       title: 'Tên phim',
       dataIndex: 'title',
       key: 'title',
+      width: '35%', // 👈 Thêm width cố định thay vì để trống
       ellipsis: true, 
     },
     {
       title: 'Khởi chiếu',
       dataIndex: 'releaseDate',
       key: 'releaseDate',
-      width: '15%',
+      width: '20%',
       render: (text) => formatDate3(text),
     },
     {

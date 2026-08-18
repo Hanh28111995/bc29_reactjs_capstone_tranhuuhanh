@@ -271,14 +271,16 @@ $mobile-breakpoint: 500px;
     @include custom-table-base;
 
     .movie-banner {
-      width: 15rem;
-      height: auto;
+      width: 4.5rem;   
+      height: 6.5rem;  
       border-radius: 0.2rem;
       object-fit: cover;
-      margin: auto;
+      display: block;
+      margin: 0 auto;  
 
       @media (max-width: $mobile-breakpoint) {
         width: 2.5rem;
+        height: 3.5rem;
       }
     }
   }
