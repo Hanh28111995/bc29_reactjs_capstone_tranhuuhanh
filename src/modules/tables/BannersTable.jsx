@@ -121,6 +121,7 @@ export default function BannerTable() {
                     if (item.fileObj) {
                         // Sửa thành "file" để khớp với req.file ở phía backend
                         formData.append("file", item.fileObj);
+                        console.log("Appending file for banner:", formData);
                     } else if (item.url && !item.url.startsWith('data:')) {
                         formData.append("url", item.url);
                     }
