@@ -5,6 +5,7 @@ import { useRoutes, Navigate } from "react-router-dom";
 // --- Layouts ---
 import AdminLayout from "../layouts/AdminLayout";
 import HomeLayout from "../layouts/HomeLayout";
+import BannerCreate from "pages/toolManagement/BannerCreate";
 
 // --- Guards ---
 const AuthGuards = lazy(() => import("guards/auth.guards"));
@@ -185,6 +186,10 @@ export default function Router() {
             {
               path: "/admin/tools/schedule-generator",
               element: <ScheduleGenerator />,
+            },
+            {
+              path: "/admin/tools/banner-generator",
+              element: <BannerCreate />,
             },
 
             //////  Create Group //////
