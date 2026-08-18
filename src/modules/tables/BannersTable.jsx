@@ -7,23 +7,33 @@ import { fetchSearchMovieAPI } from 'services/movie';
 import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import './index.scss';
 
-// Khai báo một object ngoài component BannerTable để lưu tạm file theo ID của dòng
-const fileMap = {};
-
-const BannerImageUploader = ({ value, record }) => {
+// --- Component con xử lý upload và preview trực tiếp ---
+const BannerImageUploader = ({ value, record, setDataSource }) => {
     const inputRef = useRef(null);
+    const [previewUrl, setPreviewUrl] = useState(record.url || value);
+
+    // Đồng bộ lại preview nếu record.url thay đổi từ ngoài vào
+    useEffect(() => {
+        setPreviewUrl(record.url || value);
+    }, [record.url, value]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
-        // Lưu file vào map dựa theo _id của row
-        fileMap[record._id] = file;
 
+        console.log("👉 File được chọn từ ổ cứng:", file);
+
+        // 1. Lưu trực tiếp file object vào record của dòng này
+        record.fileObj = file;
+
+        // 2. Tạo preview base64 hiển thị lên giao diện ngay lập tức
         const reader = new FileReader();
         reader.onload = (ev) => {
-            // Trigger re-render nhẹ nếu cần hiển thị preview ảnh base64 ngay lập tức
-            record.url = ev.target.result;
+            const base64Url = ev.target.result;
+            record.url = base64Url;
+            setPreviewUrl(base64Url);
+            // Trigger cập nhật lại state của bảng để render lại toàn bộ
+            setDataSource(prev => [...prev]);
         };
         reader.readAsDataURL(file);
     };
@@ -40,9 +50,9 @@ const BannerImageUploader = ({ value, record }) => {
             <Button icon={<UploadOutlined />} onClick={() => inputRef.current?.click()}>
                 Chọn ảnh
             </Button>
-            {record.url && (
+            {previewUrl && (
                 <img 
-                    src={record.url} 
+                    src={previewUrl} 
                     alt="Preview" 
                     style={{ width: 40, height: 20, objectFit: 'cover', borderRadius: 2 }} 
                 />
@@ -52,7 +62,7 @@ const BannerImageUploader = ({ value, record }) => {
 };
 
 // --- Component hỗ trợ chọn phim ---
-const MovieIdSelect = ({ value, onChange, setMovieTitleCache }) => {
+const MovieIdSelect = ({ value, onChange }) => {
     const [keyword, setKeyword] = useState('');
     const [options, setOptions] = useState([]);
     const [searching, setSearching] = useState(false);
@@ -70,10 +80,9 @@ const MovieIdSelect = ({ value, onChange, setMovieTitleCache }) => {
                     value: m.id_movie || m._id,
                     label: m.title,
                 })));
-                setMovieTitleCache(prev => ({ ...prev, ...Object.fromEntries(list.map(m => [m.id_movie || m._id, m.title])) }));
             } finally { setSearching(false); }
         }, 500);
-    }, [keyword, setMovieTitleCache]);
+    }, [keyword]);
 
     return (
         <AutoComplete
@@ -94,9 +103,7 @@ export default function BannerTable() {
     const [dataSource, setDataSource] = useState([]);
     const [deleteIds, setDeleteIds] = useState([]);
     const [updatedIds, setUpdatedIds] = useState([]);
-    const [movieTitleCache, setMovieTitleCache] = useState({});
     
-    // Thêm formRef để lấy dữ liệu từ các dòng đang edit trực tiếp
     const formRef = useRef();
 
     const { state: rawData, loading, refetch } = useAsync({
@@ -105,10 +112,13 @@ export default function BannerTable() {
     });
 
     useEffect(() => {
-        if (rawData) setDataSource(safeArray(rawData));
+        if (rawData) {
+            const initializedData = safeArray(rawData).map(item => ({ ...item, fileObj: null }));
+            setDataSource(initializedData);
+        }
     }, [rawData]);
 
-   const handleSaveAll = async () => {
+    const handleSaveAll = async () => {
         const tableFormValues = formRef.current?.getFieldsValue() || {};
         
         try {
@@ -117,7 +127,6 @@ export default function BannerTable() {
 
             dataSource.forEach(item => {
                 const isNew = item._id?.toString().startsWith('new_');
-                // Lấy thông tin form mới nhất của dòng (ví dụ: movie_id mới nhập)
                 const rowFormValues = tableFormValues[item._id] || {};
                 const currentMovieId = rowFormValues.movie_id !== undefined ? rowFormValues.movie_id : item.movie_id;
 
@@ -125,20 +134,24 @@ export default function BannerTable() {
                     const formData = new FormData();
                     formData.append("movie_id", currentMovieId || "");
                     
-                    // Lấy file từ fileMap theo _id của dòng
-                    const selectedFile = fileMap[item._id];
-
-                    if (selectedFile) {
-                        formData.append("file", selectedFile);
+                    if (item.fileObj) {
+                        formData.append("file", item.fileObj);
                     } else if (item.url && !item.url.startsWith('data:')) {
                         formData.append("url", item.url);
                     }
 
-                    // Console log kiểm tra kỹ payload trước khi bắn API
-                    console.log(`--- Payload cho row ${item._id} ---`);
+                    // =========================================================================
+                    // 🔍 CONSOLE.LOG CHECK PAYLOAD TRƯỚC KHI GỬI API (HÃY MỞ F12 ĐỂ XEM)
+                    // =========================================================================
+                    console.log(`========================================`);
+                    console.log(`📌 Đang kiểm tra Payload cho row ID: ${item._id}`);
+                    console.log(`📌 item.fileObj hiện tại:`, item.fileObj);
+                    console.log(`📌 Các trường dữ liệu trong FormData:`);
                     for (let pair of formData.entries()) {
-                        console.log(`${pair[0]}:`, pair[1]);
+                        console.log(`   - Key: [${pair[0]}] => Value:`, pair[1]);
                     }
+                    console.log(`========================================`);
+                    // =========================================================================
 
                     if (isNew) {
                         promises.push(addBannerAPI(formData));
@@ -151,23 +164,19 @@ export default function BannerTable() {
             if (promises.length === 0) return message.warning("Không có thay đổi nào để lưu!");
 
             await Promise.all(promises);
-            notification.success({ message: 'Thành công', description: 'Hệ thống banner đã được cập nhật thành công.' });
-            
-            // Clear lại fileMap sau khi lưu thành công
-            Object.keys(fileMap).forEach(key => delete fileMap[key]);
-
+            notification.success({ message: 'Thành công', description: 'Cập nhật banner thành công.' });
             refetch();
             setDeleteIds([]);
             setUpdatedIds([]);
             setEditableRowKeys([]);
         } catch (e) {
-            console.error("Lỗi:", e);
-            notification.error({ message: 'Lỗi', description: 'Lưu thất bại. Vui lòng kiểm tra lại hệ thống.' });
+            console.error("Lỗi khi lưu:", e);
+            notification.error({ message: 'Lỗi', description: 'Lưu thất bại.' });
         }
     };
 
     const columns = [
-     {
+        {
             title: 'Banner',
             dataIndex: 'url',
             width: '40%',
@@ -185,12 +194,13 @@ export default function BannerTable() {
                     </span>
                 </Space>
             ),
-            renderFormItem: (schema, config, form) => {
-                // Lấy record từ đường dẫn form hiện tại của Ant Design ProTable
+            renderFormItem: (_, config) => {
                 const recordPath = config.path ? config.path.slice(0, -1) : [];
-                const record = form.getFieldValue(recordPath) || {};
+                const record = formRef.current?.getFieldValue(recordPath) || {};
                 
-                return <BannerImageUploader value={config.value} record={record} />;
+                if (!record._id && config.record) Object.assign(record, config.record);
+
+                return <BannerImageUploader value={config.value} record={record} setDataSource={setDataSource} />;
             }
         },
         {
@@ -198,11 +208,7 @@ export default function BannerTable() {
             dataIndex: 'movie_id',
             width: '30%',
             renderFormItem: (_, { value, onChange }) => (
-                <MovieIdSelect 
-                    value={value} 
-                    onChange={onChange} 
-                    setMovieTitleCache={setMovieTitleCache} 
-                />
+                <MovieIdSelect value={value} onChange={onChange} />
             )
         },
         {
@@ -231,7 +237,7 @@ export default function BannerTable() {
                                     setUpdatedIds(prev => prev.filter(id => id !== record._id));
                                 }
                                 setDataSource(prev => prev.filter(i => i._id !== record._id));
-                                message.info("Đã xóa tạm thời. Nhấn LƯU TẤT CẢ để áp dụng.");
+                                message.info("Đã xóa tạm thời.");
                             }}
                             okText="Xóa"
                             cancelText="Hủy"
@@ -250,7 +256,7 @@ export default function BannerTable() {
                 <EditableProTable
                     className="custom-editable-table"
                     rowKey="_id"
-                    formRef={formRef} // Truyền formRef vào đây để lấy giá trị realtime đang nhập
+                    formRef={formRef}
                     loading={loading}
                     columns={columns}
                     value={dataSource}
@@ -273,7 +279,7 @@ export default function BannerTable() {
                             if (!key.toString().startsWith('new_')) {
                                 setUpdatedIds(prev => [...new Set([...prev, key])]);
                             }
-                            message.info("Đã ghi nhận thay đổi dòng. Nhấn LƯU TẤT CẢ để cập nhật server.");
+                            message.info("Đã ghi nhận dòng. Nhấn LƯU TẤT CẢ để gửi lên server.");
                         },
                         saveText: 'Lưu',
                         cancelText: 'Hủy'
