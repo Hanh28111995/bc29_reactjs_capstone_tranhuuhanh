@@ -1,10 +1,10 @@
 import { EditableProTable } from '@ant-design/pro-components';
-import { Button, App, Card, Input, Popconfirm, Space, Image, AutoComplete, Spin, message as antMessage } from 'antd';
+import { Button, App, Card, Input, Popconfirm, Space, Image, AutoComplete, Spin } from 'antd';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAsync, safeArray } from '../../hooks/useAsync';
 import { getBannerListAPI, addBannerAPI, updateBannerAPI, deleteBannerAPI } from 'services/banner';
 import { fetchSearchMovieAPI } from 'services/movie';
-import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined, SearchOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import './index.scss';
 
 const { Search } = Input;
@@ -32,7 +32,7 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
                 setMovieTitleCache(prev => ({ ...prev, ...Object.fromEntries(list.map(m => [m.id_movie || m._id, m.title])) }));
             } finally { setSearching(false); }
         }, 500);
-    }, [keyword]);
+    }, [keyword, setMovieTitleCache]);
 
     return (
         <AutoComplete
@@ -67,10 +67,15 @@ export default function BannerTable() {
 
     const displayData = useMemo(() => {
         if (!searchText) return dataSource;
-        return dataSource.filter(item => item.url?.includes(searchText) || item.movie_id?.toString().includes(searchText));
+        const lower = searchText.toLowerCase();
+        return dataSource.filter(item => item.url?.toLowerCase().includes(lower) || item.movie_id?.toString().toLowerCase().includes(lower));
     }, [dataSource, searchText]);
 
     const handleSaveAll = async () => {
+        if (editableKeys.length > 0) {
+            return message.warning("Vui lòng nhấn 'Lưu' hoặc 'Hủy' trên các dòng đang sửa trước!");
+        }
+
         try {
             const promises = [];
             deleteIds.forEach(id => promises.push(deleteBannerAPI(id)));
@@ -79,22 +84,30 @@ export default function BannerTable() {
                 const isNew = item._id?.toString().startsWith('new_');
                 if (isNew || updatedIds.includes(item._id)) {
                     const formData = new FormData();
-                    formData.append("movie_id", item.movie_id);
-                    if (item.fileObj) formData.append("File", item.fileObj);
-                    else formData.append("url", item.url);
+                    formData.append("movie_id", item.movie_id || "");
+                    if (item.fileObj) {
+                        formData.append("File", item.fileObj);
+                    } else if (item.url && !item.url.startsWith('data:')) {
+                        formData.append("url", item.url);
+                    }
 
-                    if (isNew) promises.push(addBannerAPI(formData));
-                    else promises.push(updateBannerAPI(item._id, formData));
+                    if (isNew) {
+                        promises.push(addBannerAPI(formData));
+                    } else {
+                        promises.push(updateBannerAPI(item._id, formData));
+                    }
                 }
             });
 
+            if (promises.length === 0) return message.warning("Không có thay đổi nào để lưu!");
+
             await Promise.all(promises);
-            notification.success({ message: 'Cập nhật thành công' });
+            notification.success({ message: 'Thành công', description: 'Hệ thống banner đã được cập nhật thành công.' });
             refetch();
             setDeleteIds([]);
             setUpdatedIds([]);
         } catch (e) {
-            notification.error({ message: 'Lưu thất bại' });
+            notification.error({ message: 'Lỗi', description: 'Lưu thất bại. Vui lòng kiểm tra lại hệ thống.' });
         }
     };
 
@@ -105,68 +118,160 @@ export default function BannerTable() {
             width: '40%',
             render: (text) => (
                 <Space>
-                    <Image src={text} width={80} height={40} style={{ objectFit: 'cover', borderRadius: 4 }} />
-                    <span style={{ fontSize: '11px', color: '#888' }}>{text?.startsWith('data:') ? 'Ảnh tạm' : 'Ảnh server'}</span>
+                    <Image 
+                        src={text} 
+                        width={80} 
+                        height={40} 
+                        style={{ objectFit: 'cover', borderRadius: 4 }} 
+                        fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+                    />
+                    <span style={{ fontSize: '11px', color: '#888' }}>
+                        {text?.startsWith('data:') ? 'Ảnh tạm' : 'Ảnh server'}
+                    </span>
                 </Space>
             ),
             renderFormItem: (_, { value, onChange }, record) => (
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <input type="file" id={`f_${record._id}`} hidden accept="image/*" onChange={(e) => {
-                        const file = e.target.files[0];
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                            onChange(ev.target.result);
-                            record.fileObj = file; // Đánh dấu có file để gửi FormData
-                        };
-                        reader.readAsDataURL(file);
-                    }} />
-                    <Button icon={<UploadOutlined />} onClick={() => document.getElementById(`f_${record._id}`).click()}>Chọn ảnh</Button>
-                    {value && <img src={value} style={{ width: 40, height: 20 }} />}
+                    <input 
+                        type="file" 
+                        id={`f_${record._id}`} 
+                        hidden 
+                        accept="image/*" 
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                                onChange(ev.target.result);
+                                record.fileObj = file; 
+                            };
+                            reader.readAsDataURL(file);
+                        }} 
+                    />
+                    <Button icon={<UploadOutlined />} onClick={() => document.getElementById(`f_${record._id}`).click()}>
+                        Chọn ảnh
+                    </Button>
+                    {value && (
+                        <img 
+                            src={value} 
+                            alt="Preview" 
+                            style={{ width: 40, height: 20, objectFit: 'cover', borderRadius: 2 }} 
+                        />
+                    )}
                 </div>
             )
         },
         {
             title: 'Movie ID',
             dataIndex: 'movie_id',
+            width: '30%',
             renderFormItem: (_, { value, onChange }) => (
-                <MovieIdSelect value={value} onChange={onChange} movieTitleCache={movieTitleCache} setMovieTitleCache={setMovieTitleCache} />
+                <MovieIdSelect 
+                    value={value} 
+                    onChange={onChange} 
+                    movieTitleCache={movieTitleCache} 
+                    setMovieTitleCache={setMovieTitleCache} 
+                />
             )
         },
         {
             title: 'Thao tác',
             valueType: 'option',
-            render: (_, record, __, action) => [
-                <Button key="edit" type="text" onClick={() => action?.startEditable?.(record._id)} icon={<EditOutlined />} />,
-                <Popconfirm key="del" title="Xóa?" onConfirm={() => {
-                    if (!record._id.startsWith('new_')) setDeleteIds(prev => [...prev, record._id]);
-                    setDataSource(prev => prev.filter(i => i._id !== record._id));
-                }}>
-                    <Button type="text" danger icon={<DeleteOutlined />} />
-                </Popconfirm>
-            ]
+            width: '15%',
+            render: (_, record, __, action) => {
+                const isEditing = editableKeys.includes(record._id);
+                if (isEditing) return null;
+
+                return [
+                    <div className='action-btns' key="actions">
+                        <Button
+                            key="edit"
+                            type="text"
+                            icon={<EditOutlined style={{ color: '#1677ff' }} />}
+                            onClick={() => action?.startEditable?.(record._id)}
+                        />
+                        <Popconfirm
+                            key="delete"
+                            title="Xóa tạm thời banner này?"
+                            onConfirm={() => {
+                                const isNew = record._id?.toString().startsWith('new_');
+                                if (!isNew) {
+                                    setDeleteIds(prev => [...new Set([...prev, record._id])]);
+                                    setUpdatedIds(prev => prev.filter(id => id !== record._id));
+                                }
+                                setDataSource(prev => prev.filter(i => i._id !== record._id));
+                                message.info("Đã xóa tạm thời. Nhấn LƯU TẤT CẢ để áp dụng.");
+                            }}
+                            okText="Xóa"
+                            cancelText="Hủy"
+                        >
+                            <Button type="text" icon={<DeleteOutlined style={{ color: 'red' }} />} />
+                        </Popconfirm>
+                    </div>
+                ];
+            }
         }
     ];
 
     return (
-        <Card title="Quản lý Banner">
-            <Search placeholder="Tìm kiếm..." style={{ marginBottom: 16, width: 300 }} onChange={e => setSearchText(e.target.value)} />
-            <EditableProTable
-                rowKey="_id"
-                columns={columns}
-                value={displayData}
-                onChange={setDataSource}
-                recordCreatorProps={{
-                    record: () => ({ _id: `new_${Date.now()}`, url: '', movie_id: '' })
-                }}
-                editable={{
-                    editableKeys,
-                    onChange: setEditableRowKeys,
-                    onSave: (key) => { if (!key.toString().startsWith('new_')) setUpdatedIds(prev => [...new Set([...prev, key])]); }
-                }}
-            />
-            <Button type="primary" size="large" onClick={handleSaveAll} style={{ marginTop: 20 }} icon={<SaveOutlined />}>
-                LƯU TẤT CẢ THAY ĐỔI
-            </Button>
-        </Card>
+        <div className="banner-table-container">
+            <Card title="Quản lý Banner">
+                <div style={{ marginBottom: 16, width: 320 }}>
+                    <Search
+                        placeholder="Tìm kiếm theo URL hoặc ID phim..."
+                        allowClear
+                        value={searchText}
+                        onChange={e => setSearchText(e.target.value)}
+                        size="large"
+                    />
+                </div>
+
+                <EditableProTable
+                    className="custom-editable-table"
+                    rowKey="_id"
+                    loading={loading}
+                    columns={columns}
+                    value={displayData}
+                    onChange={setDataSource}
+                    recordCreatorProps={{
+                        position: 'bottom',
+                        creatorButtonText: "Thêm banner mới",
+                        record: () => ({ 
+                            _id: `new_${Date.now()}`, 
+                            url: '', 
+                            movie_id: '',
+                            fileObj: null 
+                        })
+                    }}
+                    editable={{
+                        type: 'multiple',
+                        editableKeys,
+                        onChange: setEditableRowKeys,
+                        onSave: (key) => {
+                            if (!key.toString().startsWith('new_')) {
+                                setUpdatedIds(prev => [...new Set([...prev, key])]);
+                            }
+                            message.info("Đã ghi nhận thay đổi dòng. Nhấn LƯU TẤT CẢ để cập nhật server.");
+                        },
+                        saveText: 'Lưu',
+                        cancelText: 'Hủy'
+                    }}
+                    search={false}
+                    options={false}
+                />
+
+                <div style={{ marginTop: 24, textAlign: 'right' }}>
+                    <Button
+                        type="primary"
+                        size="large"
+                        icon={<SaveOutlined />}
+                        onClick={handleSaveAll}
+                        disabled={loading || (deleteIds.length === 0 && updatedIds.length === 0 && !dataSource.some(item => item._id?.toString().startsWith('new_')))}
+                    >
+                        LƯU TẤT CẢ THAY ĐỔI
+                    </Button>
+                </div>
+            </Card>
+        </div>
     );
 }
