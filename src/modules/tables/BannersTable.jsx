@@ -13,7 +13,7 @@ export default function BannerTable() {
     const [updatedIds, setUpdatedIds] = useState([]);
     const { message, notification } = App.useApp();
 
-    // Sử dụng useAsync chuẩn với queryKey để dễ dàng refetch
+    
     const { state: rawData, loading, refetch } = useAsync({
         service: getBannerListAPI,
         queryKey: ['banners'],

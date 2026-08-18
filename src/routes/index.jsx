@@ -5,7 +5,6 @@ import { useRoutes, Navigate } from "react-router-dom";
 // --- Layouts ---
 import AdminLayout from "../layouts/AdminLayout";
 import HomeLayout from "../layouts/HomeLayout";
-import BannerCreate from "pages/toolManagement/BannerCreate";
 
 // --- Guards ---
 const AuthGuards = lazy(() => import("guards/auth.guards"));
@@ -35,6 +34,7 @@ const PaymentResult = lazy(() => import("pages/payment/PaymentResult"));
 
 // --- Tool & Other Pages ---
 const ScheduleGenerator = lazy(() => import("pages/toolManagement/ScheduleGenerator"));
+const BannerCreate = lazy(() => import("pages/toolManagement/BannerCreate"));
 const PageNotFound = lazy(() => import("pages/PageNotFound/PageNotFound"));
 
 // --- Theater Management Pages ---
