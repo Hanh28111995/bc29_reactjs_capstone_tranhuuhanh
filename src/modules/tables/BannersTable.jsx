@@ -7,21 +7,23 @@ import { fetchSearchMovieAPI } from 'services/movie';
 import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import './index.scss';
 
-// --- Component con độc lập xử lý chọn file ảnh ---
-const BannerImageUploader = ({ value, record, setDataSource }) => {
+// Khai báo một object ngoài component BannerTable để lưu tạm file theo ID của dòng
+const fileMap = {};
+
+const BannerImageUploader = ({ value, record }) => {
     const inputRef = useRef(null);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
         
+        // Lưu file vào map dựa theo _id của row
+        fileMap[record._id] = file;
+
         const reader = new FileReader();
         reader.onload = (ev) => {
-            const base64 = ev.target.result;
-            // Gán trực tiếp vào record và đồng thời cập nhật state
-            record.url = base64;
-            record.fileObj = file;
-            setDataSource(prev => [...prev]);
+            // Trigger re-render nhẹ nếu cần hiển thị preview ảnh base64 ngay lập tức
+            record.url = ev.target.result;
         };
         reader.readAsDataURL(file);
     };
@@ -106,31 +108,36 @@ export default function BannerTable() {
         if (rawData) setDataSource(safeArray(rawData));
     }, [rawData]);
 
-    const handleSaveAll = async () => {
-        // Lấy toàn bộ dữ liệu mới nhất kể cả dòng đang bật chế độ sửa (editing)
+   const handleSaveAll = async () => {
         const tableFormValues = formRef.current?.getFieldsValue() || {};
         
-        // Merge dữ liệu từ form vào dataSource hiện tại
-        const latestDataSource = dataSource.map(item => {
-            const rowFormValues = tableFormValues[item._id];
-            return rowFormValues ? { ...item, ...rowFormValues } : item;
-        });
-
         try {
             const promises = [];
             deleteIds.forEach(id => promises.push(deleteBannerAPI(id)));
 
-            latestDataSource.forEach(item => {
+            dataSource.forEach(item => {
                 const isNew = item._id?.toString().startsWith('new_');
-                // Nếu là dòng mới hoặc nằm trong danh sách đã chỉnh sửa
+                // Lấy thông tin form mới nhất của dòng (ví dụ: movie_id mới nhập)
+                const rowFormValues = tableFormValues[item._id] || {};
+                const currentMovieId = rowFormValues.movie_id !== undefined ? rowFormValues.movie_id : item.movie_id;
+
                 if (isNew || updatedIds.includes(item._id) || editableKeys.includes(item._id)) {
                     const formData = new FormData();
-                    formData.append("movie_id", item.movie_id || "");
+                    formData.append("movie_id", currentMovieId || "");
                     
-                    if (item.fileObj) {
-                        formData.append("file", item.fileObj);
+                    // Lấy file từ fileMap theo _id của dòng
+                    const selectedFile = fileMap[item._id];
+
+                    if (selectedFile) {
+                        formData.append("file", selectedFile);
                     } else if (item.url && !item.url.startsWith('data:')) {
                         formData.append("url", item.url);
+                    }
+
+                    // Console log kiểm tra kỹ payload trước khi bắn API
+                    console.log(`--- Payload cho row ${item._id} ---`);
+                    for (let pair of formData.entries()) {
+                        console.log(`${pair[0]}:`, pair[1]);
                     }
 
                     if (isNew) {
@@ -145,11 +152,16 @@ export default function BannerTable() {
 
             await Promise.all(promises);
             notification.success({ message: 'Thành công', description: 'Hệ thống banner đã được cập nhật thành công.' });
+            
+            // Clear lại fileMap sau khi lưu thành công
+            Object.keys(fileMap).forEach(key => delete fileMap[key]);
+
             refetch();
             setDeleteIds([]);
             setUpdatedIds([]);
             setEditableRowKeys([]);
         } catch (e) {
+            console.error("Lỗi:", e);
             notification.error({ message: 'Lỗi', description: 'Lưu thất bại. Vui lòng kiểm tra lại hệ thống.' });
         }
     };
