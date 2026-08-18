@@ -62,7 +62,7 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
             setSearching(true);
             try {
                 const res = await fetchSearchMovieAPI({ title: keyword.trim(), page: 1, limit: 10 });
-                const list = res?.content?.movies || [];
+                const list = res.data.content.movies || [];
                 setOptions(list.map(m => ({
                     value: m.id_movie || m._id,
                     label: m.title,
