@@ -7,29 +7,35 @@ import { fetchSearchMovieAPI } from 'services/movie';
 import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import './index.scss';
 
-// --- Khai báo Map toàn cục lưu file theo _id của dòng ---
+// --- Map toàn cục lưu file giữ nguyên không đổi ---
 const globalFileMap = {};
 
-// --- Component con xử lý upload và preview trực tiếp ---
+// --- Component con xử lý upload và preview ---
 const BannerImageUploader = ({ record, setDataSource }) => {
     const inputRef = useRef(null);
+    // Sử dụng state nội bộ để giữ giá trị preview, tránh bị mất khi bảng re-render
+    const [previewUrl, setPreviewUrl] = useState(record.url);
+
+    // Đồng bộ lại nếu record.url thay đổi từ bên ngoài (ví dụ load từ server lên)
+    useEffect(() => {
+        setPreviewUrl(record.url);
+    }, [record.url]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // 1. Lưu thẳng vào Map toàn cục theo _id của dòng
+        // 1. Lưu file vào map toàn cục để gửi API sau
         globalFileMap[record._id] = file;
         console.log(`✅ Đã lưu file cho row [${record._id}]:`, file);
 
-        // 2. Đọc file và cập nhật trực tiếp vào record.url
+        // 2. Đọc file và hiển thị preview tức thì
         const reader = new FileReader();
         reader.onload = (ev) => {
             const base64Url = ev.target.result;
-            record.url = base64Url; // Gán trực tiếp vào record của dòng
-            
-            // Trigger render lại toàn bộ bảng để ảnh preview cập nhật tức thì
-            setDataSource(prev => [...prev]);
+            setPreviewUrl(base64Url);
+            record.url = base64Url; // Cập nhật vào record
+            setDataSource(prev => [...prev]); // Trigger render lại bảng
         };
         reader.readAsDataURL(file);
     };
@@ -44,12 +50,11 @@ const BannerImageUploader = ({ record, setDataSource }) => {
                 onChange={handleFileChange} 
             />
             <Button icon={<UploadOutlined />} onClick={() => inputRef.current?.click()}>
-                Chọn ảnh mới
+                Chọn ảnh
             </Button>
-            {/* Sử dụng trực tiếp record.url để ảnh preview luôn bám sát giá trị mới nhất */}
-            {record.url && (
+            {previewUrl && (
                 <img 
-                    src={record.url} 
+                    src={previewUrl} 
                     alt="Preview" 
                     style={{ width: 40, height: 20, objectFit: 'cover', borderRadius: 2 }} 
                 />
@@ -128,7 +133,6 @@ export default function BannerTable() {
                     const formData = new FormData();
                     formData.append("movie_id", currentMovieId || "");
                     
-                    // Lấy file trực tiếp từ globalFileMap dựa vào _id của dòng
                     const targetFile = globalFileMap[item._id];
 
                     if (targetFile) {
@@ -157,7 +161,6 @@ export default function BannerTable() {
             await Promise.all(promises);
             notification.success({ message: 'Thành công', description: 'Cập nhật banner thành công.' });
             
-            // Xóa sạch map sau khi lưu thành công
             Object.keys(globalFileMap).forEach(k => delete globalFileMap[k]);
 
             refetch();
@@ -175,6 +178,7 @@ export default function BannerTable() {
             title: 'Banner',
             dataIndex: 'url',
             width: '40%',
+            // Hiển thị ảnh bình thường khi dòng không ở chế độ Edit
             render: (text) => (
                 <Space>
                     <Image 
@@ -189,12 +193,13 @@ export default function BannerTable() {
                     </span>
                 </Space>
             ),
+            // Hiển thị nút upload và preview khi bấm Edit
             renderFormItem: (_, config) => {
                 const recordPath = config.path ? config.path.slice(0, -1) : [];
                 const record = formRef.current?.getFieldValue(recordPath) || {};
                 if (!record._id && config.record) Object.assign(record, config.record);
 
-                return <BannerImageUploader record={record} />;
+                return <BannerImageUploader record={record} setDataSource={setDataSource} />;
             }
         },
         {
@@ -230,7 +235,7 @@ export default function BannerTable() {
                                     setDeleteIds(prev => [...new Set([...prev, record._id])]);
                                     setUpdatedIds(prev => prev.filter(id => id !== record._id));
                                 }
-                                delete globalFileMap[record._id]; // Xóa file trong map nếu xóa dòng
+                                delete globalFileMap[record._id];
                                 setDataSource(prev => prev.filter(i => i._id !== record._id));
                                 message.info("Đã xóa tạm thời.");
                             }}
