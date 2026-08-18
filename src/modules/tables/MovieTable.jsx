@@ -1,16 +1,20 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
-import { fetchMovieListAPI, fetchSearchMovieAPI, deleteMovieAPI } from 'services/movie';
-import { formatDate3 } from '../../utils/common';
+import React, { useMemo, useState, useEffect } from "react";
+import { Table, Input, Button, Image, App, Popconfirm } from "antd";
+import { useNavigate } from "react-router-dom";
+import { useAsync, useAsyncMutation } from "../../hooks/useAsync";
+import {
+  fetchMovieListAPI,
+  fetchSearchMovieAPI,
+  deleteMovieAPI,
+} from "services/movie";
+import { formatDate3 } from "../../utils/common";
 import {
   EditOutlined,
   DeleteOutlined,
   CarryOutOutlined,
   PlusOutlined,
-} from '@ant-design/icons';
-import './index.scss';
+} from "@ant-design/icons";
+import "./index.scss";
 
 // Hàm debounce tự viết
 function debounce(func, wait) {
@@ -23,10 +27,10 @@ function debounce(func, wait) {
 
 function MovieTable() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState(''); // State cho ô input gõ liên tục
-  const [keyword, setKeyword] = useState('');        // State lưu từ khóa hiện tại
+  const [searchTerm, setSearchTerm] = useState(""); // State cho ô input gõ liên tục
+  const [keyword, setKeyword] = useState(""); // State lưu từ khóa hiện tại
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
-  
+
   // 🔥 State riêng biệt lưu danh sách phim hiển thị lên bảng
   const [movieList, setMovieList] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -36,29 +40,26 @@ function MovieTable() {
   // 1. Gọi API danh sách mặc định (có phân trang) khi KHÔNG có keyword
   const { data: responseContent, loading: isLoadingList } = useAsync({
     dependencies: [pagination.page, pagination.limit],
-    queryKey: ['movies', pagination.page, pagination.limit],
-    service: () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit }),
+    queryKey: ["movies", pagination.page, pagination.limit],
+    service: () =>
+      fetchMovieListAPI({ page: pagination.page, limit: pagination.limit }),
     enabled: !keyword, // Chỉ gọi khi không ở chế độ search
   });
 
   // Tự động đồng bộ data từ API danh sách vào state bảng khi fetch xong và không có keyword
   useEffect(() => {
     if (!keyword && responseContent) {
-      // 🔥 Bóc tách cực kỳ an toàn cho danh sách mặc định
-      let list = [];
-      if (Array.isArray(responseContent)) {
-        list = responseContent;
-      } else if (Array.isArray(responseContent?.movies)) {
-        list = responseContent.movies;
-      } else if (Array.isArray(responseContent?.data?.movies)) {
-        list = responseContent.data.movies;
-      } else if (Array.isArray(responseContent?.data)) {
-        list = responseContent.data;
-      }
+      const list = Array.isArray(responseContent)
+        ? responseContent
+        : (responseContent?.movies ??
+          responseContent?.data?.movies ??
+          responseContent?.data ??
+          []);
 
-      const total = responseContent?.pagination?.total 
-        ?? responseContent?.data?.pagination?.total 
-        ?? list.length;
+      const total =
+        responseContent?.pagination?.total ??
+        responseContent?.data?.pagination?.total ??
+        list.length;
 
       setMovieList(list);
       setTotalItems(total);
@@ -73,27 +74,21 @@ function MovieTable() {
       return;
     }
 
-  try {
-      const res = await fetchSearchMovieAPI({ title: titleKeyword, page: 1, limit: 20 });
-      
-      // 🔥 Bóc tách cực kỳ an toàn, đảm bảo searchResult LUÔN LÀ MẢNG
-      let searchResult = [];
-      if (Array.isArray(res)) {
-        searchResult = res;
-      } else if (Array.isArray(res?.movies)) {
-        searchResult = res.movies;
-      } else if (Array.isArray(res?.data?.movies)) {
-        searchResult = res.data.movies;
-      } else if (Array.isArray(res?.data)) {
-        searchResult = res.data;
-      }
-
+    try {
+      // Gọi trực tiếp fetchSearchMovieAPI khi người dùng tìm kiếm
+      const res = await fetchSearchMovieAPI({
+        title: titleKeyword,
+        page: 1,
+        limit: 20,
+      });
+      const searchResult = res?.content?.movies ?? [];
       setMovieList(searchResult);
-      setTotalItems(searchResult.length);
+      setTotalItems(res?.content?.pagination?.total ?? searchResult.length);
     } catch (error) {
-      setMovieList([]); // Nếu lỗi, ép về mảng rỗng để Table không bị crash
-      setTotalItems(0);
-      notification.error({ message: 'Lỗi', description: 'Không thể tìm kiếm phim.' });
+      notification.error({
+        message: "Lỗi",
+        description: "Không thể tìm kiếm phim.",
+      });
     }
   };
 
@@ -105,7 +100,7 @@ function MovieTable() {
         setKeyword(trimmed);
         handleSearchAPI(trimmed);
       }, 500),
-    []
+    [],
   );
 
   const handleSearchChange = (e) => {
@@ -117,12 +112,15 @@ function MovieTable() {
   // Sử dụng useAsyncMutation chuẩn của dự án để xóa phim
   const { mutateAsync: deleteMovie, isPending: isDeleting } = useAsyncMutation({
     service: (id) => deleteMovieAPI(id),
-    invalidateQueries: [['movies']],
+    invalidateQueries: [["movies"]],
     onSuccess: () => {
-      notification.success({ message: 'Thành công', description: 'Đã xóa phim!' });
+      notification.success({
+        message: "Thành công",
+        description: "Đã xóa phim!",
+      });
     },
     onError: () => {
-      notification.error({ message: 'Lỗi', description: 'Không thể xóa.' });
+      notification.error({ message: "Lỗi", description: "Không thể xóa." });
     },
   });
 
@@ -132,43 +130,64 @@ function MovieTable() {
 
   const columns = [
     {
-      title: 'Mã',
-      dataIndex: 'id_movie',
-      key: 'id_movie',
-      width: '10%',
+      title: "Mã",
+      dataIndex: "id_movie",
+      key: "id_movie",
+      width: "10%",
     },
     {
-      title: 'Ảnh',
-      dataIndex: 'banner',
-      key: 'banner',
-      width: '20%',
+      title: "Ảnh",
+      dataIndex: "banner",
+      key: "banner",
+      width: "20%",
       render: (text) => (
-        <Image src={text} className="movie-banner" fallback="https://via.placeholder.com/60x90?text=No+Image" />
+        <Image
+          src={text}
+          className="movie-banner"
+          fallback="https://via.placeholder.com/60x90?text=No+Image"
+        />
       ),
     },
     {
-      title: 'Tên phim',
-      dataIndex: 'title',
-      key: 'title',
-      width: '35%',
-      ellipsis: true, 
+      title: "Tên phim",
+      dataIndex: "title",
+      key: "title",
+      width: "35%",
+      ellipsis: true,
     },
     {
-      title: 'Khởi chiếu',
-      dataIndex: 'releaseDate',
-      key: 'releaseDate',
-      width: '20%',
+      title: "Khởi chiếu",
+      dataIndex: "releaseDate",
+      key: "releaseDate",
+      width: "20%",
       render: (text) => formatDate3(text),
     },
     {
-      title: 'Hành động',
-      key: 'action',
-      width: '15%',
+      title: "Hành động",
+      key: "action",
+      width: "15%",
       render: (_, record) => (
         <div className="action-btns">
-          <Button type="text" icon={<EditOutlined style={{ color: '#1677ff' }} />} onClick={() => navigate(`/admin/movie-management/${record.id_movie}/update`)} />
-          <Button type="text" icon={<CarryOutOutlined style={{ color: '#52c41a' }} />} onClick={() => navigate(`/admin/movie-management/${record.id_movie}/edit-showtime`)} />
-          <Popconfirm title="Xóa?" onConfirm={() => handleDelete(record.id_movie)}>
+          <Button
+            type="text"
+            icon={<EditOutlined style={{ color: "#1677ff" }} />}
+            onClick={() =>
+              navigate(`/admin/movie-management/${record.id_movie}/update`)
+            }
+          />
+          <Button
+            type="text"
+            icon={<CarryOutOutlined style={{ color: "#52c41a" }} />}
+            onClick={() =>
+              navigate(
+                `/admin/movie-management/${record.id_movie}/edit-showtime`,
+              )
+            }
+          />
+          <Popconfirm
+            title="Xóa?"
+            onConfirm={() => handleDelete(record.id_movie)}
+          >
             <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </div>
@@ -176,7 +195,7 @@ function MovieTable() {
     },
   ];
 
-  return (    
+  return (
     <div className="movie-table-container">
       <div className="table-header-actions">
         <Input
@@ -187,7 +206,12 @@ function MovieTable() {
           className="search-input"
           size="middle"
         />
-        <Button className='add-btn' type="primary" icon={<PlusOutlined />} onClick={() => navigate('/admin/movie-management/create')}>
+        <Button
+          className="add-btn"
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => navigate("/admin/movie-management/create")}
+        >
           THÊM PHIM
         </Button>
       </div>
@@ -201,13 +225,13 @@ function MovieTable() {
         loading={isLoadingList || isDeleting}
         bordered
         pagination={
-          keyword 
+          keyword
             ? false // Ẩn phân trang khi đang search
-            : { 
+            : {
                 current: pagination.page,
                 pageSize: pagination.limit,
                 total: totalItems,
-                size: 'small',
+                size: "small",
                 showTotal: (total) => `${total} phim`,
                 onChange: (page, limit) => setPagination({ page, limit }),
               }
