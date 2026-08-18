@@ -111,7 +111,7 @@ export default function BannerTable() {
         try {
             const promises = [];
             deleteIds.forEach(id => promises.push(deleteBannerAPI(id)));
-
+console.log("Appending file for banner:", dataSource);
             dataSource.forEach(item => {
                 const isNew = item._id?.toString().startsWith('new_');
                 if (isNew || updatedIds.includes(item._id)) {
