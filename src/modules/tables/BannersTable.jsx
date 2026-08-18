@@ -7,6 +7,126 @@ import { getBannerListAPI, addBannerAPI, updateBannerAPI, deleteBannerAPI } from
 import { fetchSearchMovieAPI } from 'services/movie';
 import './index.scss';
 
+// ===============================
+// ===== MovieIdSelect component (ĐỊNH NGHĨA Ở CẤP MODULE để không bị re-mount mỗi lần BannerTable re-render) =====
+// ===============================
+const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache }) => {
+    const [keyword, setKeyword] = useState('');
+    const [debounced, setDebounced] = useState('');
+    const [options, setOptions] = useState([]);
+    const [searching, setSearching] = useState(false);
+    const timerRef = useRef(null);
+    const latestReqRef = useRef(0);
+
+    // Debounce 1s khi gõ
+    useEffect(() => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+            setDebounced(keyword.trim());
+        }, 1000);
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, [keyword]);
+
+    // Gọi API search phim từ debounced keyword
+    useEffect(() => {
+        let cancel = false;
+        const reqId = ++latestReqRef.current;
+        const run = async () => {
+            if (!debounced) {
+                setOptions([]);
+                setSearching(false);
+                return;
+            }
+            setSearching(true);
+            try {
+                const res = await fetchSearchMovieAPI({ title: debounced, page: 1, limit: 50 });
+                if (cancel || reqId !== latestReqRef.current) return;
+                const list = safeArray(res?.movies ?? res?.data ?? res);
+                // Build options: value = id_movie, label = title
+                const newOptions = list.map(m => ({
+                    value: m.id_movie,
+                    label: (
+                        <Space size={12} align="center">
+                            {m.banner && (
+                                <Image
+                                    src={m.banner}
+                                    alt={m.title}
+                                    width={40}
+                                    height={22}
+                                    style={{ objectFit: 'cover', borderRadius: 3 }}
+                                    preview={false}
+                                    fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+                                />
+                            )}
+                            <div style={{ lineHeight: 1.2 }}>
+                                <div style={{ fontWeight: 500 }}>{m.title}</div>
+                                <div style={{ color: '#888', fontSize: 11 }}>id: {m.id_movie}</div>
+                            </div>
+                        </Space>
+                    ),
+                    title: m.title,
+                    // Lưu phụ để hiển thị khi không edit
+                    _title: m.title,
+                }));
+                setOptions(newOptions);
+                // Update cache
+                setMovieTitleCache(prev => {
+                    const next = { ...prev };
+                    list.forEach(m => { next[m.id_movie] = m.title; });
+                    return next;
+                });
+            } catch (err) {
+                if (cancel) return;
+                setOptions([]);
+            } finally {
+                if (!cancel) setSearching(false);
+            }
+        };
+        run();
+        return () => { cancel = true; };
+    }, [debounced, setMovieTitleCache]);
+
+    // Khi value thay đổi → tự động fetch title để cache nếu chưa có
+    useEffect(() => {
+        if (!value || movieTitleCache[value]) return;
+        // Không biết title → search theo id_movie qua API search (regex title có thể không ra,
+        // tạm thời gán fallback = value, UI sẽ hiển thị value đến khi user chọn lại)
+        setMovieTitleCache(prev => prev[value] ? prev : { ...prev, [value]: value });
+    }, [value, movieTitleCache, setMovieTitleCache]);
+
+    // Xử lý khi user chọn 1 option
+    const handleSelect = (val, option) => {
+        onChange?.(val);
+        if (option?._title) {
+            setMovieTitleCache(prev => prev[val] === option._title
+                ? prev
+                : { ...prev, [val]: option._title });
+        }
+    };
+
+    return (
+        <AutoComplete
+            value={value}
+            onChange={(val) => onChange?.(val)}
+            onSelect={handleSelect}
+            onSearch={setKeyword}
+            options={options}
+            allowClear
+            placeholder="Gõ tên phim để tìm (ngừng gõ 1s sẽ search)..."
+            size="middle"
+            style={{ width: '100%' }}
+            notFoundContent={
+                searching ? (
+                    <div style={{ textAlign: 'center', padding: 8 }}><Spin size="small" /> Đang tìm...</div>
+                ) : keyword ? 'Không tìm thấy phim nào' : 'Nhập tên phim để tìm kiếm'
+            }
+            showSearch
+        />
+    );
+};
+
 export default function BannerTable() {
     const [editableKeys, setEditableRowKeys] = useState([]);
     const [dataSource, setDataSource] = useState([]);
@@ -35,126 +155,6 @@ export default function BannerTable() {
             // Hoặc nếu có route get movie by id thì dùng, tạm thời ta tìm kiếm dynamic
         }
     }, [data]);
-
-    // ===============================
-    // ===== Movie ID Select with debounce search =====
-    // ===============================
-    const MovieIdSelect = ({ value, onChange }) => {
-        const [keyword, setKeyword] = useState('');
-        const [debounced, setDebounced] = useState('');
-        const [options, setOptions] = useState([]);
-        const [searching, setSearching] = useState(false);
-        const timerRef = useRef(null);
-        const latestReqRef = useRef(0);
-
-        // Debounce 1s khi gõ
-        useEffect(() => {
-            if (timerRef.current) clearTimeout(timerRef.current);
-            timerRef.current = setTimeout(() => {
-                setDebounced(keyword.trim());
-            }, 1000);
-            return () => {
-                if (timerRef.current) clearTimeout(timerRef.current);
-            };
-        }, [keyword]);
-
-        // Gọi API search phim từ debounced keyword
-        useEffect(() => {
-            let cancel = false;
-            const reqId = ++latestReqRef.current;
-            const run = async () => {
-                if (!debounced) {
-                    setOptions([]);
-                    setSearching(false);
-                    return;
-                }
-                setSearching(true);
-                try {
-                    const res = await fetchSearchMovieAPI({ title: debounced, page: 1, limit: 50 });
-                    if (cancel || reqId !== latestReqRef.current) return;
-                    const list = safeArray(res?.movies ?? res?.data ?? res);
-                    // Build options: value = id_movie, label = title
-                    const newOptions = list.map(m => ({
-                        value: m.id_movie,
-                        label: (
-                            <Space size={12} align="center">
-                                {m.banner && (
-                                    <Image
-                                        src={m.banner}
-                                        alt={m.title}
-                                        width={40}
-                                        height={22}
-                                        style={{ objectFit: 'cover', borderRadius: 3 }}
-                                        preview={false}
-                                        fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-                                    />
-                                )}
-                                <div style={{ lineHeight: 1.2 }}>
-                                    <div style={{ fontWeight: 500 }}>{m.title}</div>
-                                    <div style={{ color: '#888', fontSize: 11 }}>id: {m.id_movie}</div>
-                                </div>
-                            </Space>
-                        ),
-                        title: m.title,
-                        // Lưu phụ để hiển thị khi không edit
-                        _title: m.title,
-                    }));
-                    setOptions(newOptions);
-                    // Update cache
-                    setMovieTitleCache(prev => {
-                        const next = { ...prev };
-                        list.forEach(m => { next[m.id_movie] = m.title; });
-                        return next;
-                    });
-                } catch (err) {
-                    if (cancel) return;
-                    setOptions([]);
-                } finally {
-                    if (!cancel) setSearching(false);
-                }
-            };
-            run();
-            return () => { cancel = true; };
-        }, [debounced]);
-
-        // Khi value thay đổi → tự động fetch title để cache nếu chưa có
-        useEffect(() => {
-            if (!value || movieTitleCache[value]) return;
-            // Không biết title → search theo id_movie qua API search (regex title có thể không ra,
-            // tạm thời gán fallback = value, UI sẽ hiển thị value đến khi user chọn lại)
-            setMovieTitleCache(prev => prev[value] ? prev : { ...prev, [value]: value });
-        }, [value, movieTitleCache]);
-
-        // Xử lý khi user chọn 1 option
-        const handleSelect = (val, option) => {
-            onChange?.(val);
-            if (option?._title) {
-                setMovieTitleCache(prev => prev[val] === option._title
-                    ? prev
-                    : { ...prev, [val]: option._title });
-            }
-        };
-
-        return (
-            <AutoComplete
-                value={value}
-                onChange={(val) => onChange?.(val)}
-                onSelect={handleSelect}
-                onSearch={setKeyword}
-                options={options}
-                allowClear
-                placeholder="Gõ tên phim để tìm (ngừng gõ 1s sẽ search)..."
-                size="middle"
-                style={{ width: '100%' }}
-                notFoundContent={
-                    searching ? (
-                        <div style={{ textAlign: 'center', padding: 8 }}><Spin size="small" /> Đang tìm...</div>
-                    ) : keyword ? 'Không tìm thấy phim nào' : 'Nhập tên phim để tìm kiếm'
-                }
-                showSearch
-            />
-        );
-    };
 
     // Helper hiển thị movie_id: nếu có cache title → hiển thị "title (id_movie)"
     const renderMovieId = (id) => {
@@ -225,12 +225,15 @@ export default function BannerTable() {
             title: 'Phim (Movie ID)',
             dataIndex: 'movie_id',
             width: '25%',
-            // ===== KHÓA CHÍNH: editable dùng ProFormSelect custom render =====
-            valueType: 'select',
-            fieldProps: (form) => ({
-                // Render component tùy chỉnh thay cho Select mặc định của ProTable
-                renderFormItem: (_, { value, onChange }) => <MovieIdSelect value={value} onChange={onChange} />,
-            }),
+            // ===== SỬA: bỏ valueType: 'select' (sẽ render ProFormSelect mặc định), dùng renderFormItem ở mức CỘT =====
+            renderFormItem: (_, { value, onChange }) => (
+                <MovieIdSelect
+                    value={value}
+                    onChange={onChange}
+                    movieTitleCache={movieTitleCache}
+                    setMovieTitleCache={setMovieTitleCache}
+                />
+            ),
             formItemProps: { rules: [{ required: true, message: 'Vui lòng chọn phim cho banner' }] },
             // Khi không edit → hiển thị title kèm id
             render: (text) => renderMovieId(text),
