@@ -192,60 +192,81 @@ export default function BannerTable() {
             width: '18%',
             render: (text) => <span className="font-mono text-xs" style={{ color: '#888' }}>{text}</span>,
         },
-        {
-            title: 'Banner URL & Xem trước',
+      {
+            title: 'Banner',
             dataIndex: 'url',
             width: '42%',
             formItemProps: { rules: [{ required: true, message: 'Vui lòng chọn ảnh banner' }] },
-            // Viết gọn trực tiếp hàm upload ảnh và preview giống MovieForm vào đây
             renderFormItem: (_, { value, onChange }, record) => {
-                const fileInputId = `file_upload_${record?._id}`;
-                
-                const handleFileChange = (e) => {
-                    const fileUploaded = e.target.files[0];
-                    if (!fileUploaded) return;
+                // Tạo một sub-component nhẹ để quản lý preview riêng biệt cho từng dòng
+                const CellUpload = () => {
+                    const [localPreview, setLocalPreview] = useState(value || '');
 
-                    const reader = new FileReader();
-                    reader.readAsDataURL(fileUploaded);
-                    reader.onload = (event) => {
-                        onChange?.(event.target.result); // Cập nhật giá trị preview vào form
-                        if (record) record.fileObj = fileUploaded; // Lưu trữ file object vào record để gửi FormData
+                    const handleFileChange = (e) => {
+                        const fileUploaded = e.target.files[0];
+                        if (!fileUploaded) return;
+
+                        const reader = new FileReader();
+                        reader.readAsDataURL(fileUploaded);
+                        reader.onload = (event) => {
+                            const result = event.target.result;
+                            setLocalPreview(result); // Hiển thị preview ngay lập tức
+                            onChange?.(result);      // Cập nhật giá trị cho ProTable
+                            if (record) record.fileObj = fileUploaded; // Lưu file để gọi FormData khi lưu
+                        };
                     };
+
+                    return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            <input 
+                                type="file" 
+                                id={`file_${record?._id}`} 
+                                hidden 
+                                onChange={handleFileChange} 
+                                accept="image/*" 
+                            />
+                            <Space>
+                                <Button 
+                                    icon={<UploadOutlined />} 
+                                    onClick={() => document.getElementById(`file_${record?._id}`).click()}
+                                    size="small"
+                                    type="dashed"
+                                >
+                                    Chọn ảnh từ máy
+                                </Button>
+                                <Input 
+                                    value={localPreview && !localPreview.startsWith('data:') ? localPreview : ''}
+                                    onChange={(e) => {
+                                        setLocalPreview(e.target.value);
+                                        onChange?.(e.target.value);
+                                        if (record) record.fileObj = null;
+                                    }}
+                                    placeholder="Hoặc dán URL ảnh..." 
+                                    size="small"
+                                />
+                            </Space>
+
+                            {/* Khung hiển thị preview ảnh */}
+                            {localPreview && (
+                                <div style={{ marginTop: 4 }}>
+                                    <Image
+                                        src={localPreview}
+                                        alt="Preview"
+                                        width={100}
+                                        height={45}
+                                        style={{ objectFit: 'cover', borderRadius: 4, border: '1px solid #d9d9d9' }}
+                                        fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+                                    />
+                                    <span style={{ marginLeft: 8, color: '#52c41a', fontSize: 12, fontWeight: 500 }}>
+                                        ✓ Đã chọn ảnh
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    );
                 };
 
-                return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <input type="file" id={fileInputId} hidden onChange={handleFileChange} accept="image/*" />
-                        <Space>
-                            <Button 
-                                icon={<UploadOutlined />} 
-                                onClick={() => document.getElementById(fileInputId).click()}
-                                size="small"
-                            >
-                                Chọn ảnh
-                            </Button>
-                            <Input 
-                                value={value && !value.startsWith('data:') ? value : ''}
-                                onChange={(e) => {
-                                    onChange?.(e.target.value);
-                                    if (record) record.fileObj = null;
-                                }}
-                                placeholder="Hoặc dán URL ảnh..." 
-                                size="small"
-                            />
-                        </Space>
-                        {value && (
-                            <Image
-                                src={value}
-                                alt="Preview"
-                                width={80}
-                                height={38}
-                                style={{ objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }}
-                                fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-                            />
-                        )}
-                    </div>
-                );
+                return <CellUpload />;
             },
             render: (text) => (
                 <Space align="center" size={12}>
