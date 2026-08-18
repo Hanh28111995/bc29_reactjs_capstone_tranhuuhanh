@@ -1,8 +1,8 @@
 import { EditableProTable } from '@ant-design/pro-components';
-import { Button, App, Popconfirm, Space, Card, Image, AutoComplete, Spin } from 'antd';
+import { Button, App, Popconfirm, Space, Card, Image, AutoComplete, Spin, Input } from 'antd';
 import { useAsync, safeArray, useAsyncMutation } from '../../hooks/useAsync';
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useRef } from 'react';
+import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import { getBannerListAPI, addBannerAPI, updateBannerAPI, deleteBannerAPI } from 'services/banner';
 import { fetchSearchMovieAPI } from 'services/movie';
 import './index.scss';
@@ -18,7 +18,6 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
     const timerRef = useRef(null);
     const latestReqRef = useRef(0);
 
-    // Debounce 1s khi gõ
     useEffect(() => {
         if (timerRef.current) clearTimeout(timerRef.current);
         timerRef.current = setTimeout(() => {
@@ -29,7 +28,6 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
         };
     }, [keyword]);
 
-    // Gọi API search phim từ debounced keyword
     useEffect(() => {
         let cancel = false;
         const reqId = ++latestReqRef.current;
@@ -42,12 +40,12 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
             setSearching(true);
             try {
                 const res = await fetchSearchMovieAPI({ title: debounced, page: 1, limit: 20 });
-                if (cancel || reqId !== latestReqRef.current) return;                                
-                const list = res?.data?.content?.movies ?? [];
+                if (cancel || reqId !== latestReqRef.current) return;                            
+                
+                const list = res?.content?.movies || res?.data?.content?.movies || [];
 
-                // Build options: value = id_movie (hoặc _id), label = giao diện hiển thị
                 const newOptions = list.map(m => {
-                    const movieId = m.id_movie;
+                    const movieId = m.id_movie || m._id;
                     return {
                         value: movieId,
                         label: (
@@ -76,7 +74,6 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
 
                 setOptions(newOptions);
 
-                // Update cache title
                 setMovieTitleCache(prev => {
                     const next = { ...prev };
                     list.forEach(m => { 
@@ -96,13 +93,11 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
         return () => { cancel = true; };
     }, [debounced, setMovieTitleCache]);
 
-    // Khi value thay đổi → tự động fetch title để cache nếu chưa có
     useEffect(() => {
         if (!value || movieTitleCache[value]) return;
         setMovieTitleCache(prev => prev[value] ? prev : { ...prev, [value]: value });
     }, [value, movieTitleCache, setMovieTitleCache]);
 
-    // Xử lý khi user chọn 1 option
     const handleSelect = (val, option) => {
         onChange?.(val);
         if (option?._title) {
@@ -120,7 +115,7 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
             onSearch={setKeyword}
             options={options}
             allowClear
-            placeholder="Gõ tên phim để tìm (ngừng gõ 1s sẽ search)..."
+            placeholder="Gõ tên phim để tìm..."
             size="middle"
             style={{ width: '100%' }}
             notFoundContent={
@@ -139,7 +134,6 @@ export default function BannerTable() {
     const [updatedIds, setUpdatedIds] = useState([]);
     const { message, notification } = App.useApp();
 
-    // ===== Cache title phim theo movie_id để hiển thị khi không ở chế độ edit =====
     const [movieTitleCache, setMovieTitleCache] = useState({});
 
     const { state: rawData, loading, refetch } = useAsync({
@@ -149,7 +143,6 @@ export default function BannerTable() {
 
     const data = safeArray(rawData);
 
-    // Đồng bộ dữ liệu gốc
     useEffect(() => {
         if (data && data.length > 0) {
             setDataSource(data);
@@ -158,7 +151,6 @@ export default function BannerTable() {
         }
     }, [data]);
 
-    // Helper hiển thị movie_id: nếu có cache title → hiển thị "title (id_movie)"
     const renderMovieId = (id) => {
         if (!id) return <span style={{ color: '#aaa' }}>—</span>;
         const title = movieTitleCache[id];
@@ -204,7 +196,57 @@ export default function BannerTable() {
             title: 'Banner URL & Xem trước',
             dataIndex: 'url',
             width: '42%',
-            formItemProps: { rules: [{ required: true, message: 'URL banner không được để trống' }] },
+            formItemProps: { rules: [{ required: true, message: 'Vui lòng chọn ảnh banner' }] },
+            // Viết gọn trực tiếp hàm upload ảnh và preview giống MovieForm vào đây
+            renderFormItem: (_, { value, onChange }, record) => {
+                const fileInputId = `file_upload_${record?._id}`;
+                
+                const handleFileChange = (e) => {
+                    const fileUploaded = e.target.files[0];
+                    if (!fileUploaded) return;
+
+                    const reader = new FileReader();
+                    reader.readAsDataURL(fileUploaded);
+                    reader.onload = (event) => {
+                        onChange?.(event.target.result); // Cập nhật giá trị preview vào form
+                        if (record) record.fileObj = fileUploaded; // Lưu trữ file object vào record để gửi FormData
+                    };
+                };
+
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <input type="file" id={fileInputId} hidden onChange={handleFileChange} accept="image/*" />
+                        <Space>
+                            <Button 
+                                icon={<UploadOutlined />} 
+                                onClick={() => document.getElementById(fileInputId).click()}
+                                size="small"
+                            >
+                                Chọn ảnh
+                            </Button>
+                            <Input 
+                                value={value && !value.startsWith('data:') ? value : ''}
+                                onChange={(e) => {
+                                    onChange?.(e.target.value);
+                                    if (record) record.fileObj = null;
+                                }}
+                                placeholder="Hoặc dán URL ảnh..." 
+                                size="small"
+                            />
+                        </Space>
+                        {value && (
+                            <Image
+                                src={value}
+                                alt="Preview"
+                                width={80}
+                                height={38}
+                                style={{ objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }}
+                                fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+                            />
+                        )}
+                    </div>
+                );
+            },
             render: (text) => (
                 <Space align="center" size={12}>
                     {text && (
@@ -280,14 +322,27 @@ export default function BannerTable() {
             dataSource
                 .filter(item => item._id?.toString().startsWith('new_'))
                 .forEach(item => {
-                    const { _id, ...rest } = item;
-                    promises.push(addBannerAPI(rest));
+                    if (item.fileObj) {
+                        const formData = new FormData();
+                        formData.append("File", item.fileObj);
+                        formData.append("movie_id", item.movie_id || "");
+                        promises.push(addBannerAPI(formData));
+                    } else {
+                        promises.push(addBannerAPI({ url: item.url, movie_id: item.movie_id }));
+                    }
                 });
 
             updatedIds.forEach(id => {
                 const item = dataSource.find(d => d._id === id);
                 if (item && !deleteIds.includes(id)) {
-                    promises.push(updateBannerAPI(id, { url: item.url, movie_id: item.movie_id }));
+                    if (item.fileObj) {
+                        const formData = new FormData();
+                        formData.append("File", item.fileObj);
+                        formData.append("movie_id", item.movie_id || "");
+                        promises.push(updateBannerAPI(id, formData));
+                    } else {
+                        promises.push(updateBannerAPI(id, { url: item.url, movie_id: item.movie_id }));
+                    }
                 }
             });
 
