@@ -78,7 +78,7 @@ export default function PromotionForm() {
   const promoMutation = useAsyncMutation({
     service: (formData) =>
       params.promoId && params.promoId !== "create"
-        ? updatePromotionAPI(formData)
+        ? updatePromotionAPI(params.promoId, formData)
         : addPromotionAPI(formData),
     invalidateQueries: [["promotions"]],
   });

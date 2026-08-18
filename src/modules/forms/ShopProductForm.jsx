@@ -71,7 +71,7 @@ export default function ShopProductForm() {
   const productMutation = useAsyncMutation({
     service: (formData) =>
       params.productId && params.productId !== "create"
-        ? updateShopProductAPI(formData)
+        ? updateShopProductAPI( params.productId , formData)
         : addShopProductAPI(formData),
     invalidateQueries: [["shop-products"]],
   });

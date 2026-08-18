@@ -22,16 +22,16 @@ const addPromotionAPI = (data) => {
   });
 };
 
-const updatePromotionAPI = (data) => {
+const updatePromotionAPI = ( Id, data) => {
   return request({
-    url: "/admin/promotion/update",
+    url: `/admin/promotion/update${Id}`,
     method: "PUT",
     data,
   });
 };
-const deletePromotionAPI = (movieId) => {
+const deletePromotionAPI = (Id) => {
   return request({
-    url: `/admin/promotion/delete/${movieId}`,
+    url: `/admin/promotion/delete/${Id}`,
     method: "DELETE",
   });
 };

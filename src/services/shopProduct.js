@@ -22,16 +22,16 @@ const addShopProductAPI = (data) => {
   });
 };
 
-const updateShopProductAPI = (data) => {
+const updateShopProductAPI = (id, data) => {
   return request({
-    url: "/admin/shop/update",
+    url: `/admin/shop/update/${id}`,
     method: "PUT",
     data,
   });
 };
-const deleteShopProductAPI = (movieId) => {
+const deleteShopProductAPI = (Id) => {
   return request({
-    url: `/admin/shop/delete/${movieId}`,
+    url: `/admin/shop/delete/${Id}`,
     method: "DELETE",
   });
 };
