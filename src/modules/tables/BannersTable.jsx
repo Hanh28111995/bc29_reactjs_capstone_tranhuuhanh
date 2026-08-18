@@ -167,7 +167,7 @@ export default function BannerTable() {
     };
 
     const columns = [
-        {
+     {
             title: 'Banner',
             dataIndex: 'url',
             width: '40%',
@@ -185,9 +185,13 @@ export default function BannerTable() {
                     </span>
                 </Space>
             ),
-            renderFormItem: (_, { value }, record) => (
-                <BannerImageUploader value={value} record={record} setDataSource={setDataSource} />
-            )
+            renderFormItem: (schema, config, form) => {
+                // Lấy record từ đường dẫn form hiện tại của Ant Design ProTable
+                const recordPath = config.path ? config.path.slice(0, -1) : [];
+                const record = form.getFieldValue(recordPath) || {};
+                
+                return <BannerImageUploader value={config.value} record={record} />;
+            }
         },
         {
             title: 'Movie ID',
