@@ -52,7 +52,7 @@ function MovieTable() {
     queryKey: ['movies', pagination.page, pagination.limit, keyword],
     service: () => {
       if (keyword) {
-        return fetchSearchMovieAPI({ title: keyword });
+        return fetchSearchMovieAPI({ title: keyword, page: 1, limit: 20 });
       }
       return fetchMovieListAPI({ page: pagination.page, limit: pagination.limit });
     },    
