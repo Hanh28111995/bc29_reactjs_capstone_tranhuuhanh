@@ -35,7 +35,7 @@ function MovieTable() {
       debounce((val) => {
         setKeyword(val);
         setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
-      }, 1000),
+      }, 500),
     []
   );
 
