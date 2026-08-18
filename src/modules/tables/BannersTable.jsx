@@ -7,6 +7,47 @@ import { fetchSearchMovieAPI } from 'services/movie';
 import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import './index.scss';
 
+// --- Component con độc lập xử lý chọn file ảnh (Tránh lỗi Hook #321) ---
+const BannerImageUploader = ({ value, record, setDataSource }) => {
+    const inputRef = useRef(null);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const base64 = ev.target.result;
+            record.url = base64;
+            record.fileObj = file;
+            setDataSource(prev => [...prev]);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    return (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input 
+                type="file" 
+                ref={inputRef}
+                hidden 
+                accept="image/*" 
+                onChange={handleFileChange} 
+            />
+            <Button icon={<UploadOutlined />} onClick={() => inputRef.current?.click()}>
+                Chọn ảnh
+            </Button>
+            {record.url && (
+                <img 
+                    src={record.url} 
+                    alt="Preview" 
+                    style={{ width: 40, height: 20, objectFit: 'cover', borderRadius: 2 }} 
+                />
+            )}
+        </div>
+    );
+};
+
 // --- Component hỗ trợ chọn phim ---
 const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache }) => {
     const [keyword, setKeyword] = useState('');
@@ -121,45 +162,9 @@ export default function BannerTable() {
                     </span>
                 </Space>
             ),
-            renderFormItem: (_, __, record) => {
-                const inputRef = useRef(null);
-
-                const handleFileChange = (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        const base64 = ev.target.result;
-                        record.url = base64;
-                        record.fileObj = file;
-                        setDataSource(prev => [...prev]);
-                    };
-                    reader.readAsDataURL(file);
-                };
-
-                return (
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <input 
-                            type="file" 
-                            ref={inputRef}
-                            hidden 
-                            accept="image/*" 
-                            onChange={handleFileChange} 
-                        />
-                        <Button icon={<UploadOutlined />} onClick={() => inputRef.current?.click()}>
-                            Chọn ảnh
-                        </Button>
-                        {record.url && (
-                            <img 
-                                src={record.url} 
-                                alt="Preview" 
-                                style={{ width: 40, height: 20, objectFit: 'cover', borderRadius: 2 }} 
-                            />
-                        )}
-                    </div>
-                );
-            }
+            renderFormItem: (_, { value }, record) => (
+                <BannerImageUploader value={value} record={record} setDataSource={setDataSource} />
+            )
         },
         {
             title: 'Movie ID',
