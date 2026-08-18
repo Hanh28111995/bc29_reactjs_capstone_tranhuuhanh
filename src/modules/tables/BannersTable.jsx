@@ -7,7 +7,7 @@ import { fetchSearchMovieAPI } from 'services/movie';
 import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import './index.scss';
 
-// --- Component con độc lập xử lý chọn file ảnh (Tránh lỗi Hook #321) ---
+// --- Component con độc lập xử lý chọn file ảnh ---
 const BannerImageUploader = ({ value, record, setDataSource }) => {
     const inputRef = useRef(null);
 
@@ -18,6 +18,7 @@ const BannerImageUploader = ({ value, record, setDataSource }) => {
         const reader = new FileReader();
         reader.onload = (ev) => {
             const base64 = ev.target.result;
+            // Gán trực tiếp vào record và đồng thời cập nhật state
             record.url = base64;
             record.fileObj = file;
             setDataSource(prev => [...prev]);
@@ -49,7 +50,7 @@ const BannerImageUploader = ({ value, record, setDataSource }) => {
 };
 
 // --- Component hỗ trợ chọn phim ---
-const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache }) => {
+const MovieIdSelect = ({ value, onChange, setMovieTitleCache }) => {
     const [keyword, setKeyword] = useState('');
     const [options, setOptions] = useState([]);
     const [searching, setSearching] = useState(false);
@@ -66,7 +67,6 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
                 setOptions(list.map(m => ({
                     value: m.id_movie || m._id,
                     label: m.title,
-                    _title: m.title
                 })));
                 setMovieTitleCache(prev => ({ ...prev, ...Object.fromEntries(list.map(m => [m.id_movie || m._id, m.title])) }));
             } finally { setSearching(false); }
@@ -93,6 +93,9 @@ export default function BannerTable() {
     const [deleteIds, setDeleteIds] = useState([]);
     const [updatedIds, setUpdatedIds] = useState([]);
     const [movieTitleCache, setMovieTitleCache] = useState({});
+    
+    // Thêm formRef để lấy dữ liệu từ các dòng đang edit trực tiếp
+    const formRef = useRef();
 
     const { state: rawData, loading, refetch } = useAsync({
         service: getBannerListAPI,
@@ -104,24 +107,28 @@ export default function BannerTable() {
     }, [rawData]);
 
     const handleSaveAll = async () => {
-        if (editableKeys.length > 0) {
-            return message.warning("Vui lòng nhấn 'Lưu' hoặc 'Hủy' trên các dòng đang sửa trước!");
-        }
+        // Lấy toàn bộ dữ liệu mới nhất kể cả dòng đang bật chế độ sửa (editing)
+        const tableFormValues = formRef.current?.getFieldsValue() || {};
+        
+        // Merge dữ liệu từ form vào dataSource hiện tại
+        const latestDataSource = dataSource.map(item => {
+            const rowFormValues = tableFormValues[item._id];
+            return rowFormValues ? { ...item, ...rowFormValues } : item;
+        });
 
         try {
             const promises = [];
             deleteIds.forEach(id => promises.push(deleteBannerAPI(id)));
-console.log("Appending file for banner:", dataSource);
-            dataSource.forEach(item => {
+
+            latestDataSource.forEach(item => {
                 const isNew = item._id?.toString().startsWith('new_');
-                if (isNew || updatedIds.includes(item._id)) {
+                // Nếu là dòng mới hoặc nằm trong danh sách đã chỉnh sửa
+                if (isNew || updatedIds.includes(item._id) || editableKeys.includes(item._id)) {
                     const formData = new FormData();
                     formData.append("movie_id", item.movie_id || "");
                     
                     if (item.fileObj) {
-                        // Sửa thành "file" để khớp với req.file ở phía backend
                         formData.append("file", item.fileObj);
-                        console.log("Appending file for banner:", formData);
                     } else if (item.url && !item.url.startsWith('data:')) {
                         formData.append("url", item.url);
                     }
@@ -141,6 +148,7 @@ console.log("Appending file for banner:", dataSource);
             refetch();
             setDeleteIds([]);
             setUpdatedIds([]);
+            setEditableRowKeys([]);
         } catch (e) {
             notification.error({ message: 'Lỗi', description: 'Lưu thất bại. Vui lòng kiểm tra lại hệ thống.' });
         }
@@ -177,7 +185,6 @@ console.log("Appending file for banner:", dataSource);
                 <MovieIdSelect 
                     value={value} 
                     onChange={onChange} 
-                    movieTitleCache={movieTitleCache} 
                     setMovieTitleCache={setMovieTitleCache} 
                 />
             )
@@ -227,6 +234,7 @@ console.log("Appending file for banner:", dataSource);
                 <EditableProTable
                     className="custom-editable-table"
                     rowKey="_id"
+                    formRef={formRef} // Truyền formRef vào đây để lấy giá trị realtime đang nhập
                     loading={loading}
                     columns={columns}
                     value={dataSource}
@@ -264,7 +272,7 @@ console.log("Appending file for banner:", dataSource);
                         size="large"
                         icon={<SaveOutlined />}
                         onClick={handleSaveAll}
-                        disabled={loading || (deleteIds.length === 0 && updatedIds.length === 0 && !dataSource.some(item => item._id?.toString().startsWith('new_')))}
+                        disabled={loading}
                     >
                         LƯU TẤT CẢ THAY ĐỔI
                     </Button>
