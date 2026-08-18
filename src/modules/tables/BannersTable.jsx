@@ -1,13 +1,11 @@
 import { EditableProTable } from '@ant-design/pro-components';
-import { Button, App, Card, Input, Popconfirm, Space, Image, AutoComplete, Spin } from 'antd';
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Button, App, Card, Popconfirm, Space, Image, AutoComplete, Spin } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAsync, safeArray } from '../../hooks/useAsync';
 import { getBannerListAPI, addBannerAPI, updateBannerAPI, deleteBannerAPI } from 'services/banner';
 import { fetchSearchMovieAPI } from 'services/movie';
 import { DeleteOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import './index.scss';
-
-const { Search } = Input;
 
 // --- Component hỗ trợ chọn phim ---
 const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache }) => {
@@ -51,7 +49,6 @@ export default function BannerTable() {
     const { notification, message } = App.useApp();
     const [editableKeys, setEditableRowKeys] = useState([]);
     const [dataSource, setDataSource] = useState([]);
-    const [searchText, setSearchText] = useState("");
     const [deleteIds, setDeleteIds] = useState([]);
     const [updatedIds, setUpdatedIds] = useState([]);
     const [movieTitleCache, setMovieTitleCache] = useState({});
@@ -64,12 +61,6 @@ export default function BannerTable() {
     useEffect(() => {
         if (rawData) setDataSource(safeArray(rawData));
     }, [rawData]);
-
-    const displayData = useMemo(() => {
-        if (!searchText) return dataSource;
-        const lower = searchText.toLowerCase();
-        return dataSource.filter(item => item.url?.toLowerCase().includes(lower) || item.movie_id?.toString().toLowerCase().includes(lower));
-    }, [dataSource, searchText]);
 
     const handleSaveAll = async () => {
         if (editableKeys.length > 0) {
@@ -130,36 +121,45 @@ export default function BannerTable() {
                     </span>
                 </Space>
             ),
-            renderFormItem: (_, { value, onChange }, record) => (
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <input 
-                        type="file" 
-                        id={`f_${record._id}`} 
-                        hidden 
-                        accept="image/*" 
-                        onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (!file) return;
-                            const reader = new FileReader();
-                            reader.onload = (ev) => {
-                                onChange(ev.target.result);
-                                record.fileObj = file; 
-                            };
-                            reader.readAsDataURL(file);
-                        }} 
-                    />
-                    <Button icon={<UploadOutlined />} onClick={() => document.getElementById(`f_${record._id}`).click()}>
-                        Chọn ảnh
-                    </Button>
-                    {value && (
-                        <img 
-                            src={value} 
-                            alt="Preview" 
-                            style={{ width: 40, height: 20, objectFit: 'cover', borderRadius: 2 }} 
+            renderFormItem: (_, __, record) => {
+                const inputRef = useRef(null);
+
+                const handleFileChange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const base64 = ev.target.result;
+                        record.url = base64;
+                        record.fileObj = file;
+                        setDataSource(prev => [...prev]);
+                    };
+                    reader.readAsDataURL(file);
+                };
+
+                return (
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <input 
+                            type="file" 
+                            ref={inputRef}
+                            hidden 
+                            accept="image/*" 
+                            onChange={handleFileChange} 
                         />
-                    )}
-                </div>
-            )
+                        <Button icon={<UploadOutlined />} onClick={() => inputRef.current?.click()}>
+                            Chọn ảnh
+                        </Button>
+                        {record.url && (
+                            <img 
+                                src={record.url} 
+                                alt="Preview" 
+                                style={{ width: 40, height: 20, objectFit: 'cover', borderRadius: 2 }} 
+                            />
+                        )}
+                    </div>
+                );
+            }
         },
         {
             title: 'Movie ID',
@@ -216,22 +216,12 @@ export default function BannerTable() {
     return (
         <div className="banner-table-container">
             <Card title="Quản lý Banner">
-                <div style={{ marginBottom: 16, width: 320 }}>
-                    <Search
-                        placeholder="Tìm kiếm theo URL hoặc ID phim..."
-                        allowClear
-                        value={searchText}
-                        onChange={e => setSearchText(e.target.value)}
-                        size="large"
-                    />
-                </div>
-
                 <EditableProTable
                     className="custom-editable-table"
                     rowKey="_id"
                     loading={loading}
                     columns={columns}
-                    value={displayData}
+                    value={dataSource}
                     onChange={setDataSource}
                     recordCreatorProps={{
                         position: 'bottom',
