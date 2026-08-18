@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
@@ -23,17 +23,68 @@ function debounce(func, wait) {
 
 function MovieTable() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState(''); // State cho ô input gõ liên tục mượt mà
-  const [keyword, setKeyword] = useState('');         // State lưu từ khóa đã debounce để gọi API
+  const [searchTerm, setSearchTerm] = useState(''); // State cho ô input gõ liên tục
+  const [keyword, setKeyword] = useState('');        // State lưu từ khóa hiện tại
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
+  
+  // 🔥 State riêng biệt lưu danh sách phim hiển thị lên bảng
+  const [movieList, setMovieList] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+
   const { notification } = App.useApp();
 
-  // Tạo hàm debounce gọi sau 500ms dừng gõ
-  const debouncedSetKeyword = useMemo(
+  // 1. Gọi API danh sách mặc định (có phân trang) khi KHÔNG có keyword
+  const { data: responseContent, loading: isLoadingList } = useAsync({
+    dependencies: [pagination.page, pagination.limit],
+    queryKey: ['movies', pagination.page, pagination.limit],
+    service: () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit }),
+    enabled: !keyword, // Chỉ gọi khi không ở chế độ search
+  });
+
+  // Tự động đồng bộ data từ API danh sách vào state bảng khi fetch xong và không có keyword
+  useEffect(() => {
+    if (!keyword && responseContent) {
+      const list = Array.isArray(responseContent)
+        ? responseContent
+        : responseContent?.movies ?? responseContent?.data?.movies ?? responseContent?.data ?? [];
+      
+      const total = responseContent?.pagination?.total ?? responseContent?.data?.pagination?.total ?? list.length;
+
+      setMovieList(list);
+      setTotalItems(total);
+    }
+  }, [responseContent, keyword]);
+
+  // 2. Hàm riêng gọi API Search đặt trong onChange / debounce
+  const handleSearchAPI = async (titleKeyword) => {
+    if (!titleKeyword) {
+      // Nếu xóa trắng ô search, trả về phân trang ban đầu
+      setPagination((prev) => ({ ...prev, page: 1 }));
+      return;
+    }
+
+    try {
+      // Gọi trực tiếp fetchSearchMovieAPI khi người dùng tìm kiếm
+      const res = await fetchSearchMovieAPI({ title: titleKeyword, page: 1, limit: 20 });
+      const searchResult = Array.isArray(res)
+        ? res
+        : res?.movies ?? res?.data?.movies ?? res?.data ?? [];
+
+      // Cập nhật thẳng vào state bảng
+      setMovieList(searchResult);
+      setTotalItems(searchResult.length);
+    } catch (error) {
+      notification.error({ message: 'Lỗi', description: 'Không thể tìm kiếm phim.' });
+    }
+  };
+
+  // Tạo hàm debounce cho input search
+  const debouncedSearch = useMemo(
     () =>
       debounce((val) => {
-        setKeyword(val.trim());
-        setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
+        const trimmed = val.trim();
+        setKeyword(trimmed);
+        handleSearchAPI(trimmed);
       }, 500),
     []
   );
@@ -41,24 +92,10 @@ function MovieTable() {
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchTerm(val);
-    debouncedSetKeyword(val);
+    debouncedSearch(val);
   };
 
-  // Sử dụng useAsync linh hoạt:
-  // - Khi có từ khóa: Dùng fetchSearchMovieAPI (chỉ truyền { title })
-  // - Khi không có từ khóa: Dùng fetchMovieListAPI (có phân trang page, limit)
-  const { data: responseContent, loading: isLoading } = useAsync({
-    dependencies: [pagination.page, pagination.limit, keyword],
-    queryKey: ['movies', pagination.page, pagination.limit, keyword],
-    service: () => {
-      if (keyword) {
-        return fetchSearchMovieAPI({ title: keyword, page: 1, limit: 20 });
-      }
-      return fetchMovieListAPI({ page: pagination.page, limit: pagination.limit });
-    },    
-  });
-
-  // Sử dụng useAsyncMutation chuẩn của dự án để xóa phim và tự động invalidate cache
+  // Sử dụng useAsyncMutation chuẩn của dự án để xóa phim
   const { mutateAsync: deleteMovie, isPending: isDeleting } = useAsyncMutation({
     service: (id) => deleteMovieAPI(id),
     invalidateQueries: [['movies']],
@@ -70,26 +107,16 @@ function MovieTable() {
     },
   });
 
-  // Bóc tách dữ liệu linh hoạt
-  const movielist = Array.isArray(responseContent)
-    ? responseContent
-    : responseContent?.movies ?? responseContent?.data?.movies ?? responseContent?.data ?? [];
-    
-  // Nếu đang search (vì API search trả về list không phân trang), tổng số item chính là chiều dài mảng kết quả
-  const paginationMeta = keyword
-    ? { total: movielist.length, totalPages: 1 }
-    : (responseContent?.pagination ?? responseContent?.data?.pagination ?? { total: movielist.length, totalPages: 1 });
-
   const handleDelete = async (id) => {
     await deleteMovie(id);
   };
 
- const columns = [
+  const columns = [
     {
       title: 'Mã',
       dataIndex: 'id_movie',
       key: 'id_movie',
-      width: '10%', // Giảm nhẹ xuống
+      width: '10%',
     },
     {
       title: 'Ảnh',
@@ -104,7 +131,7 @@ function MovieTable() {
       title: 'Tên phim',
       dataIndex: 'title',
       key: 'title',
-      width: '35%', // 👈 Thêm width cố định thay vì để trống
+      width: '35%',
       ellipsis: true, 
     },
     {
@@ -151,16 +178,16 @@ function MovieTable() {
         tableLayout="fixed"
         rowKey="id_movie"
         columns={columns}
-        dataSource={movielist}
-        loading={isLoading || isDeleting}
+        dataSource={movieList} // 👈 Đưa state movieList vào bảng
+        loading={isLoadingList || isDeleting}
         bordered
         pagination={
           keyword 
-            ? false // Ẩn phân trang trên Table khi đang search theo title vì API trả về danh sách đầy đủ không phân trang
+            ? false // Ẩn phân trang khi đang search
             : { 
                 current: pagination.page,
                 pageSize: pagination.limit,
-                total: paginationMeta.total,
+                total: totalItems,
                 size: 'small',
                 showTotal: (total) => `${total} phim`,
                 onChange: (page, limit) => setPagination({ page, limit }),
