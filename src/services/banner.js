@@ -18,7 +18,7 @@ const addBannerAPI = (data) => {
 
 const updateBannerAPI = ( Id, data) => {
   return request({
-    url: `/admin/banner/update${Id}`,
+    url: `/admin/banner/update/${Id}`,
     method: "PUT",
     data,
   });
