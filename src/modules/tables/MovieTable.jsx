@@ -158,7 +158,7 @@ function MovieTable() {
           pageSize: pagination.limit,
           total: paginationMeta.total,
           size: 'small',
-          showTotal: (total) => `Tổng ${total} phim`,
+          showTotal: (total) => `${total} phim`,
           onChange: (page, limit) => setPagination({ page, limit }),
         }}
       />

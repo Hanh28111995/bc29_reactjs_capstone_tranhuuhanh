@@ -8,7 +8,7 @@ import { fetchSearchMovieAPI } from 'services/movie';
 import './index.scss';
 
 // ===============================
-// ===== MovieIdSelect component (ĐỊNH NGHĨA Ở CẤP MODULE để không bị re-mount mỗi lần BannerTable re-render) =====
+// ===== MovieIdSelect component =====
 // ===============================
 const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache }) => {
     const [keyword, setKeyword] = useState('');
@@ -43,38 +43,54 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
             try {
                 const res = await fetchSearchMovieAPI({ title: debounced, page: 1, limit: 50 });
                 if (cancel || reqId !== latestReqRef.current) return;
-                const list = safeArray(res?.movies ?? res?.data ?? res);
-                // Build options: value = id_movie, label = title
-                const newOptions = list.map(m => ({
-                    value: m.id_movie,
-                    label: (
-                        <Space size={12} align="center">
-                            {m.banner && (
-                                <Image
-                                    src={m.banner}
-                                    alt={m.title}
-                                    width={40}
-                                    height={22}
-                                    style={{ objectFit: 'cover', borderRadius: 3 }}
-                                    preview={false}
-                                    fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-                                />
-                            )}
-                            <div style={{ lineHeight: 1.2 }}>
-                                <div style={{ fontWeight: 500 }}>{m.title}</div>
-                                <div style={{ color: '#888', fontSize: 11 }}>id: {m.id_movie}</div>
-                            </div>
-                        </Space>
-                    ),
-                    title: m.title,
-                    // Lưu phụ để hiển thị khi không edit
-                    _title: m.title,
-                }));
+                
+                // ===== Bóc tách mảng movies chính xác từ các dạng cấu trúc response BE =====
+                const list = safeArray(
+                    res?.movies ?? 
+                    res?.data?.movies ?? 
+                    res?.data?.data?.movies ?? 
+                    res?.data ?? 
+                    res
+                );
+
+                // Build options: value = id_movie (hoặc _id), label = giao diện hiển thị
+                const newOptions = list.map(m => {
+                    const movieId = m.id_movie || m._id;
+                    return {
+                        value: movieId,
+                        label: (
+                            <Space size={12} align="center">
+                                {m.banner && (
+                                    <Image
+                                        src={m.banner}
+                                        alt={m.title}
+                                        width={40}
+                                        height={22}
+                                        style={{ objectFit: 'cover', borderRadius: 3 }}
+                                        preview={false}
+                                        fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+                                    />
+                                )}
+                                <div style={{ lineHeight: 1.2 }}>
+                                    <div style={{ fontWeight: 500 }}>{m.title}</div>
+                                    <div style={{ color: '#888', fontSize: 11 }}>id: {movieId}</div>
+                                </div>
+                            </Space>
+                        ),
+                        title: m.title,
+                        _title: m.title,
+                    };
+                });
+
                 setOptions(newOptions);
-                // Update cache
+
+                // Update cache title
                 setMovieTitleCache(prev => {
                     const next = { ...prev };
-                    list.forEach(m => { next[m.id_movie] = m.title; });
+                    list.forEach(m => { 
+                        const movieId = m.id_movie || m._id;
+                        next[movieId] = m.title; 
+                    });
                     return next;
                 });
             } catch (err) {
@@ -91,8 +107,6 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
     // Khi value thay đổi → tự động fetch title để cache nếu chưa có
     useEffect(() => {
         if (!value || movieTitleCache[value]) return;
-        // Không biết title → search theo id_movie qua API search (regex title có thể không ra,
-        // tạm thời gán fallback = value, UI sẽ hiển thị value đến khi user chọn lại)
         setMovieTitleCache(prev => prev[value] ? prev : { ...prev, [value]: value });
     }, [value, movieTitleCache, setMovieTitleCache]);
 
@@ -122,7 +136,6 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
                     <div style={{ textAlign: 'center', padding: 8 }}><Spin size="small" /> Đang tìm...</div>
                 ) : keyword ? 'Không tìm thấy phim nào' : 'Nhập tên phim để tìm kiếm'
             }
-            showSearch
         />
     );
 };
@@ -144,15 +157,12 @@ export default function BannerTable() {
 
     const data = safeArray(rawData);
 
-    // Đồng bộ dữ liệu gốc + build cache title phim khi fetch thành công
+    // Đồng bộ dữ liệu gốc
     useEffect(() => {
         if (data && data.length > 0) {
             setDataSource(data);
             setDeleteIds([]);
             setUpdatedIds([]);
-            // Lưu trữ movie_id hiện có để lookup hiển thị
-            // Lưu ý: BE route searchMovies chỉ có title nên ta sẽ fetch cache từng cái khi cần
-            // Hoặc nếu có route get movie by id thì dùng, tạm thời ta tìm kiếm dynamic
         }
     }, [data]);
 
@@ -225,7 +235,6 @@ export default function BannerTable() {
             title: 'Phim (Movie ID)',
             dataIndex: 'movie_id',
             width: '25%',
-            // ===== SỬA: bỏ valueType: 'select' (sẽ render ProFormSelect mặc định), dùng renderFormItem ở mức CỘT =====
             renderFormItem: (_, { value, onChange }) => (
                 <MovieIdSelect
                     value={value}
@@ -235,7 +244,6 @@ export default function BannerTable() {
                 />
             ),
             formItemProps: { rules: [{ required: true, message: 'Vui lòng chọn phim cho banner' }] },
-            // Khi không edit → hiển thị title kèm id
             render: (text) => renderMovieId(text),
         },
         {
@@ -275,10 +283,8 @@ export default function BannerTable() {
         try {
             const promises = [];
 
-            // 1. Xử lý các ID bị xóa
             deleteIds.forEach(id => promises.push(deleteBannerAPI(id)));
 
-            // 2. Xử lý các dòng mới thêm (bắt đầu bằng new_)
             dataSource
                 .filter(item => item._id?.toString().startsWith('new_'))
                 .forEach(item => {
@@ -286,7 +292,6 @@ export default function BannerTable() {
                     promises.push(addBannerAPI(rest));
                 });
 
-            // 3. Xử lý các dòng bị chỉnh sửa (update)
             updatedIds.forEach(id => {
                 const item = dataSource.find(d => d._id === id);
                 if (item && !deleteIds.includes(id)) {
@@ -299,15 +304,14 @@ export default function BannerTable() {
             await Promise.all(promises);
             notification.success({ message: "Thành công", description: "Dữ liệu banner đã được cập nhật thành công." });
 
-            refetch(); // Làm mới lại dữ liệu từ server
+            refetch();
         } catch (error) {
             console.error(error);
             notification.error({ message: "Lỗi", description: "Có lỗi xảy ra khi lưu thay đổi, vui lòng thử lại." });
         }
     };
 
-    // Dùng refetch khi mutation thành công: invalidate cache
-    const _unused = useAsyncMutation; // Giữ import nếu cần cho các tính năng nâng cao sau này
+    const _unused = useAsyncMutation;
 
     return (
         <div className="banner-table-container">
