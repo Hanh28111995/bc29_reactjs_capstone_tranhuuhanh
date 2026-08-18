@@ -20,14 +20,12 @@ function PromotionTable() {
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
   const { notification } = App.useApp();
 
-  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách khuyến mãi
+  
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, keyword],
-    service: () => getPromotionListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
-    placeholderData: (previousData) => previousData,
+    service: () => getPromotionListAPI({ page: pagination.page, limit: pagination.limit, keyword }),    
   });
-
-  // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache
+  
   const { mutateAsync: deletePromotion, isPending: isDeleting } = useAsyncMutation({
     service: (id) => deletePromotionAPI(id),
     invalidateQueries: [['getPromotionListAPI']],

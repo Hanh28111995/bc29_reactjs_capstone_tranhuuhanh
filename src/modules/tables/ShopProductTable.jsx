@@ -23,7 +23,6 @@ export default function ShopProductTable() {
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, keyword],
     service: () => getShopProductListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
-    placeholderData: (previousData) => previousData,
   });
 
   // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache

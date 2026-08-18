@@ -24,8 +24,7 @@ function MovieTable() {
   // Sử dụng useAsync chuẩn của dự án để fetch danh sách phim
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, keyword],
-    service: () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
-    placeholderData: (previousData) => previousData,
+    service: () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, keyword }),    
   });
 
   // Sử dụng useAsyncMutation chuẩn của dự án để xóa phim và tự động invalidate cache

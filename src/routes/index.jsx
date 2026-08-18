@@ -179,7 +179,7 @@ export default function Router() {
               element: <PromotionManagement />,
             },
             {
-              path: "/admin/shop-product-management",
+              path: "/admin/shop-management",
               element: <ShopProductManagement />,
             },            
             {

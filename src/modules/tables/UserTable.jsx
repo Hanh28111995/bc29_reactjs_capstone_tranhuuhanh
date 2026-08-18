@@ -18,8 +18,7 @@ export default function UserTable() {
   // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách người dùng
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, keyword],
-    service: () => userListApi({ page: pagination.page, limit: pagination.limit, keyword }),
-    placeholderData: (previousData) => previousData,
+    service: () => userListApi({ page: pagination.page, limit: pagination.limit, keyword }),    
   });
 
   // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache

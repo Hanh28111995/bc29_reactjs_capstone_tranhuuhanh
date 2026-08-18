@@ -16,8 +16,7 @@ export default function BranchesTable() {
     const [searchText, setSearchText] = useState("");
     const [deleteIds, setDeleteIds] = useState([]);
     const [updatedIds, setUpdatedIds] = useState([]); 
-
-    // Lấy dữ liệu an toàn thông qua useAsync wrapper
+    
     const { state: rawData, loading, refetch } = useAsync({
         service: getAllBranches,
         queryKey: ['branches'],

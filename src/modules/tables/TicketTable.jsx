@@ -24,8 +24,7 @@ export default function TicketTable() {
         limit: pagination.limit,
         status: statusFilter,
         keyword,
-      }),
-    placeholderData: (previousData) => previousData,
+      }),    
   });
 
   // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa vé và tự động làm mới cache
