@@ -32,6 +32,7 @@ const items = [
   ]),
   getItem('Tools', 'tools', <ToolOutlined />, [
     getItem('Schedule Generator', '/admin/tools/schedule-generator'),
+    getItem('Banner Collection', '/admin/tools/banner-generator'),    
   ]),
 ];
 
