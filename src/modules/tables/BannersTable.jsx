@@ -10,23 +10,26 @@ import './index.scss';
 // --- Khai báo Map toàn cục lưu file theo _id của dòng ---
 const globalFileMap = {};
 
-const BannerImageUploader = ({ record }) => {
+// --- Component con xử lý upload và preview trực tiếp ---
+const BannerImageUploader = ({ record, setDataSource }) => {
     const inputRef = useRef(null);
-    const [previewUrl, setPreviewUrl] = useState(record.url);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Lưu thẳng vào Map toàn cục theo _id của dòng hiện tại
+        // 1. Lưu thẳng vào Map toàn cục theo _id của dòng
         globalFileMap[record._id] = file;
         console.log(`✅ Đã lưu file cho row [${record._id}]:`, file);
 
+        // 2. Đọc file và cập nhật trực tiếp vào record.url
         const reader = new FileReader();
         reader.onload = (ev) => {
             const base64Url = ev.target.result;
-            setPreviewUrl(base64Url);
-            record.url = base64Url; // Cập nhật preview trực tiếp
+            record.url = base64Url; // Gán trực tiếp vào record của dòng
+            
+            // Trigger render lại toàn bộ bảng để ảnh preview cập nhật tức thì
+            setDataSource(prev => [...prev]);
         };
         reader.readAsDataURL(file);
     };
@@ -41,11 +44,12 @@ const BannerImageUploader = ({ record }) => {
                 onChange={handleFileChange} 
             />
             <Button icon={<UploadOutlined />} onClick={() => inputRef.current?.click()}>
-                Chọn ảnh
+                Chọn ảnh mới
             </Button>
-            {previewUrl && (
+            {/* Sử dụng trực tiếp record.url để ảnh preview luôn bám sát giá trị mới nhất */}
+            {record.url && (
                 <img 
-                    src={previewUrl} 
+                    src={record.url} 
                     alt="Preview" 
                     style={{ width: 40, height: 20, objectFit: 'cover', borderRadius: 2 }} 
                 />
