@@ -31,7 +31,7 @@ function MovieTable() {
   const [keyword, setKeyword] = useState(""); // State lưu từ khóa hiện tại
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
 
-  // 🔥 State riêng biệt lưu danh sách phim hiển thị lên bảng
+  // State riêng biệt lưu danh sách phim hiển thị lên bảng
   const [movieList, setMovieList] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -49,14 +49,17 @@ function MovieTable() {
   // Tự động đồng bộ data từ API danh sách vào state bảng khi fetch xong và không có keyword
   useEffect(() => {
     if (!keyword && responseContent) {
+      // Hỗ trợ cả 2 dạng: API trả về trực tiếp mảng hoặc bọc trong content.movies
       const list = Array.isArray(responseContent)
         ? responseContent
-        : (responseContent?.movies ??
-          responseContent?.data?.movies ??
-          responseContent?.data ??
-          []);
+        : (responseContent?.content?.movies ??
+           responseContent?.movies ??
+           responseContent?.data?.movies ??
+           responseContent?.data ??
+           []);
 
       const total =
+        responseContent?.content?.pagination?.total ??
         responseContent?.pagination?.total ??
         responseContent?.data?.pagination?.total ??
         list.length;
@@ -66,16 +69,16 @@ function MovieTable() {
     }
   }, [responseContent, keyword]);
 
-  // 2. Hàm riêng gọi API Search đặt trong onChange / debounce
+  // 2. Hàm riêng gọi API Search
   const handleSearchAPI = async (titleKeyword) => {
     if (!titleKeyword) {
-      // Nếu xóa trắng ô search, trả về phân trang ban đầu
+      // Nếu xóa trắng ô search, reset lại keyword và trả về phân trang ban đầu
+      setKeyword("");
       setPagination((prev) => ({ ...prev, page: 1 }));
       return;
     }
 
     try {
-      // Gọi trực tiếp fetchSearchMovieAPI khi người dùng tìm kiếm
       const res = await fetchSearchMovieAPI({
         title: titleKeyword,
         page: 1,
@@ -106,6 +109,13 @@ function MovieTable() {
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchTerm(val);
+    
+    // Nếu người dùng bấm nút clear (xóa trắng) trên ô input Antd
+    if (!val) {
+      setKeyword("");
+      setSearchTerm("");
+    }
+
     debouncedSearch(val);
   };
 
@@ -133,7 +143,7 @@ function MovieTable() {
       title: "Mã",
       dataIndex: "id_movie",
       key: "id_movie",
-      width: "10%",
+      width: "15%",
     },
     {
       title: "Ảnh",
@@ -152,7 +162,7 @@ function MovieTable() {
       title: "Tên phim",
       dataIndex: "title",
       key: "title",
-      width: "35%",
+      width: "30%",
       ellipsis: true,
     },
     {
@@ -166,32 +176,35 @@ function MovieTable() {
       title: "Hành động",
       key: "action",
       width: "15%",
-      render: (_, record) => (
-        <div className="action-btns">
-          <Button
-            type="text"
-            icon={<EditOutlined style={{ color: "#1677ff" }} />}
-            onClick={() =>
-              navigate(`/admin/movie-management/${record.id_movie}/update`)
-            }
-          />
-          <Button
-            type="text"
-            icon={<CarryOutOutlined style={{ color: "#52c41a" }} />}
-            onClick={() =>
-              navigate(
-                `/admin/movie-management/${record.id_movie}/edit-showtime`,
-              )
-            }
-          />
-          <Popconfirm
-            title="Xóa?"
-            onConfirm={() => handleDelete(record.id_movie)}
-          >
-            <Button type="text" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </div>
-      ),
+      render: (_, record) => {
+        const movieId = record.id_movie;
+        return (
+          <div className="action-btns">
+            <Button
+              type="text"
+              icon={<EditOutlined style={{ color: "#1677ff" }} />}
+              onClick={() =>
+                navigate(`/admin/movie-management/${movieId}/update`)
+              }
+            />
+            <Button
+              type="text"
+              icon={<CarryOutOutlined style={{ color: "#52c41a" }} />}
+              onClick={() =>
+                navigate(
+                  `/admin/movie-management/${movieId}/edit-showtime`,
+                )
+              }
+            />
+            <Popconfirm
+              title="Xóa?"
+              onConfirm={() => handleDelete(movieId)}
+            >
+              <Button type="text" danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </div>
+        );
+      },
     },
   ];
 
