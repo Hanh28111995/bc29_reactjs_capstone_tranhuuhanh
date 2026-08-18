@@ -117,8 +117,10 @@ export default function BannerTable() {
                 if (isNew || updatedIds.includes(item._id)) {
                     const formData = new FormData();
                     formData.append("movie_id", item.movie_id || "");
+                    
                     if (item.fileObj) {
-                        formData.append("File", item.fileObj);
+                        // Sửa thành "file" để khớp với req.file ở phía backend
+                        formData.append("file", item.fileObj);
                     } else if (item.url && !item.url.startsWith('data:')) {
                         formData.append("url", item.url);
                     }
