@@ -42,20 +42,12 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
             setSearching(true);
             try {
                 const res = await fetchSearchMovieAPI({ title: debounced, page: 1, limit: 20 });
-                if (cancel || reqId !== latestReqRef.current) return;
-                
-                // ===== Bóc tách mảng movies chính xác từ các dạng cấu trúc response BE =====
-                const list = safeArray(
-                    res?.movies ?? 
-                    res?.data?.movies ?? 
-                    res?.data?.data?.movies ?? 
-                    res?.data ?? 
-                    res
-                );
+                if (cancel || reqId !== latestReqRef.current) return;                                
+                const list = res?.content?.movies ?? [];
 
                 // Build options: value = id_movie (hoặc _id), label = giao diện hiển thị
                 const newOptions = list.map(m => {
-                    const movieId = m.id_movie || m._id;
+                    const movieId = m.id_movie;
                     return {
                         value: movieId,
                         label: (

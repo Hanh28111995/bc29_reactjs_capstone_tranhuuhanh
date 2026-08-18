@@ -221,7 +221,7 @@ function MovieTable() {
         tableLayout="fixed"
         rowKey="id_movie"
         columns={columns}
-        dataSource={movieList} // 👈 Đưa state movieList vào bảng
+        dataSource={Array.isArray(movieList) ? movieList : []}
         loading={isLoadingList || isDeleting}
         bordered
         pagination={
