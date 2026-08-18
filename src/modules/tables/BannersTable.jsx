@@ -235,7 +235,7 @@ export default function BannerTable() {
                         >
                             <Button type="text" icon={<DeleteOutlined style={{ color: 'red' }} />} />
                         </Popconfirm>
-                    </div>
+                    </div>,
                 ];
             }
         }
