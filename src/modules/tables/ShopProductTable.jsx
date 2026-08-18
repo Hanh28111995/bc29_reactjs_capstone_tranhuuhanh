@@ -22,13 +22,14 @@ export default function ShopProductTable() {
   // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách sản phẩm
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, keyword],
+    queryKey: ['shopProducts', pagination.page, pagination.limit, keyword],
     service: () => getShopProductListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
   });
 
   // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache
   const { mutateAsync: deleteProduct, isPending: isDeleting } = useAsyncMutation({
     service: (id) => deleteShopProductAPI(id),
-    invalidateQueries: [['getShopProductListAPI']],
+    invalidateQueries: [['shopProducts']],
     onSuccess: () => {
       notification.success({ message: 'Thành công', description: 'Đã xóa sản phẩm!' });
     },

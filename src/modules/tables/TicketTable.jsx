@@ -18,6 +18,7 @@ export default function TicketTable() {
   // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách vé (kèm statusFilter và keyword)
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, statusFilter, keyword],
+    queryKey: ['tickets', pagination.page, pagination.limit, statusFilter, keyword],
     service: () =>
       fetchAllTicketsAPI({
         page: pagination.page,
@@ -30,7 +31,7 @@ export default function TicketTable() {
   // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa vé và tự động làm mới cache
   const { mutateAsync: deleteTicket, isPending: isDeleting } = useAsyncMutation({
     service: (id) => deleteTicketAPI(id),
-    invalidateQueries: [['fetchAllTicketsAPI']],
+    invalidateQueries: [['tickets']],
     onSuccess: () => {
       notification.success({ message: 'Thành công', description: 'Đã xóa vé!' });
     },

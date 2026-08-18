@@ -23,12 +23,13 @@ function PromotionTable() {
   
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, keyword],
+    queryKey: ['promotions', pagination.page, pagination.limit, keyword],
     service: () => getPromotionListAPI({ page: pagination.page, limit: pagination.limit, keyword }),    
   });
   
   const { mutateAsync: deletePromotion, isPending: isDeleting } = useAsyncMutation({
     service: (id) => deletePromotionAPI(id),
-    invalidateQueries: [['getPromotionListAPI']],
+    invalidateQueries: [['promotions']],
     onSuccess: () => {
       notification.success({ message: 'Thành công', description: 'Đã xóa chương trình khuyến mãi!' });
     },
