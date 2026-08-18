@@ -85,6 +85,7 @@ function MovieTable() {
         limit: 20,
       });
       const searchResult = res?.content?.movies ?? [];
+      console.log("Search API result:", searchResult);
       setMovieList(searchResult);
       setTotalItems(res?.content?.pagination?.total ?? searchResult.length);
     } catch (error) {
