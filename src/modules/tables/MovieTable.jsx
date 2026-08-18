@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
-import { fetchMovieListAPI, deleteMovieAPI } from 'services/movie';
+import { fetchMovieListAPI, deleteMovieAPI, fetchSearchMovieAPI } from 'services/movie';
 import { formatDate3 } from '../../utils/common';
 import {
   EditOutlined,
