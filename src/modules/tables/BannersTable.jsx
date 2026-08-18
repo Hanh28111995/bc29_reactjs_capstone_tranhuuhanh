@@ -43,7 +43,7 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
             try {
                 const res = await fetchSearchMovieAPI({ title: debounced, page: 1, limit: 20 });
                 if (cancel || reqId !== latestReqRef.current) return;                                
-                const list = res?.content?.movies ?? [];
+                const list = res?.data?.content?.movies ?? [];
 
                 // Build options: value = id_movie (hoặc _id), label = giao diện hiển thị
                 const newOptions = list.map(m => {
