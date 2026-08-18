@@ -44,11 +44,21 @@ function MovieTable() {
   // Tự động đồng bộ data từ API danh sách vào state bảng khi fetch xong và không có keyword
   useEffect(() => {
     if (!keyword && responseContent) {
-      const list = Array.isArray(responseContent)
-        ? responseContent
-        : responseContent?.movies ?? responseContent?.data?.movies ?? responseContent?.data ?? [];
-      
-      const total = responseContent?.pagination?.total ?? responseContent?.data?.pagination?.total ?? list.length;
+      // 🔥 Bóc tách cực kỳ an toàn cho danh sách mặc định
+      let list = [];
+      if (Array.isArray(responseContent)) {
+        list = responseContent;
+      } else if (Array.isArray(responseContent?.movies)) {
+        list = responseContent.movies;
+      } else if (Array.isArray(responseContent?.data?.movies)) {
+        list = responseContent.data.movies;
+      } else if (Array.isArray(responseContent?.data)) {
+        list = responseContent.data;
+      }
+
+      const total = responseContent?.pagination?.total 
+        ?? responseContent?.data?.pagination?.total 
+        ?? list.length;
 
       setMovieList(list);
       setTotalItems(total);
@@ -63,17 +73,26 @@ function MovieTable() {
       return;
     }
 
-    try {
-      // Gọi trực tiếp fetchSearchMovieAPI khi người dùng tìm kiếm
+  try {
       const res = await fetchSearchMovieAPI({ title: titleKeyword, page: 1, limit: 20 });
-      const searchResult = Array.isArray(res)
-        ? res
-        : res?.movies ?? res?.data?.movies ?? res?.data ?? [];
+      
+      // 🔥 Bóc tách cực kỳ an toàn, đảm bảo searchResult LUÔN LÀ MẢNG
+      let searchResult = [];
+      if (Array.isArray(res)) {
+        searchResult = res;
+      } else if (Array.isArray(res?.movies)) {
+        searchResult = res.movies;
+      } else if (Array.isArray(res?.data?.movies)) {
+        searchResult = res.data.movies;
+      } else if (Array.isArray(res?.data)) {
+        searchResult = res.data;
+      }
 
-      // Cập nhật thẳng vào state bảng
       setMovieList(searchResult);
       setTotalItems(searchResult.length);
     } catch (error) {
+      setMovieList([]); // Nếu lỗi, ép về mảng rỗng để Table không bị crash
+      setTotalItems(0);
       notification.error({ message: 'Lỗi', description: 'Không thể tìm kiếm phim.' });
     }
   };
