@@ -41,7 +41,7 @@ const MovieIdSelect = ({ value, onChange, movieTitleCache, setMovieTitleCache })
             }
             setSearching(true);
             try {
-                const res = await fetchSearchMovieAPI({ title: debounced, page: 1, limit: 50 });
+                const res = await fetchSearchMovieAPI({ title: debounced});
                 if (cancel || reqId !== latestReqRef.current) return;
                 
                 // ===== Bóc tách mảng movies chính xác từ các dạng cấu trúc response BE =====

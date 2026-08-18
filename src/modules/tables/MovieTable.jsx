@@ -1,8 +1,8 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
-import { fetchMovieListAPI, deleteMovieAPI } from 'services/movie';
+import { fetchMovieListAPI, fetchSearchMovieAPI, deleteMovieAPI } from 'services/movie';
 import { formatDate3 } from '../../utils/common';
 import {
   EditOutlined,
@@ -10,10 +10,9 @@ import {
   CarryOutOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import { removeVietnameseTones } from 'constants/common';
 import './index.scss';
 
-// Hàm debounce tự viết (Không cần cài thư viện)
+// Hàm debounce tự viết
 function debounce(func, wait) {
   let timeout;
   return function (...args) {
@@ -24,8 +23,8 @@ function debounce(func, wait) {
 
 function MovieTable() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState(''); // State riêng cho ô input gõ liên tục không bị giật
-  const [keyword, setKeyword] = useState('');         // State dùng cho dependencies gọi API/lọc
+  const [searchTerm, setSearchTerm] = useState(''); // State cho ô input gõ liên tục mượt mà
+  const [keyword, setKeyword] = useState('');         // State lưu từ khóa đã debounce để gọi API
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
   const { notification } = App.useApp();
 
@@ -33,24 +32,30 @@ function MovieTable() {
   const debouncedSetKeyword = useMemo(
     () =>
       debounce((val) => {
-        setKeyword(val);
+        setKeyword(val.trim());
         setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
       }, 500),
     []
   );
 
-  // Xử lý khi người dùng nhập liệu vào ô input
   const handleSearchChange = (e) => {
     const val = e.target.value;
-    setSearchTerm(val);       // Cập nhật ngay lập tức vào UI input để mượt mà
-    debouncedSetKeyword(val); // Trì hoãn việc cập nhật keyword và gọi API
+    setSearchTerm(val);
+    debouncedSetKeyword(val);
   };
 
-  // Sử dụng useAsync chuẩn của dự án để fetch danh sách phim
+  // Sử dụng useAsync linh hoạt:
+  // - Khi có từ khóa: Dùng fetchSearchMovieAPI (chỉ truyền { title })
+  // - Khi không có từ khóa: Dùng fetchMovieListAPI (có phân trang page, limit)
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, keyword],
     queryKey: ['movies', pagination.page, pagination.limit, keyword],
-    service: () => fetchMovieListAPI({ page: pagination.page, limit: pagination.limit, keyword }),    
+    service: () => {
+      if (keyword) {
+        return fetchSearchMovieAPI({ title: keyword });
+      }
+      return fetchMovieListAPI({ page: pagination.page, limit: pagination.limit });
+    },    
   });
 
   // Sử dụng useAsyncMutation chuẩn của dự án để xóa phim và tự động invalidate cache
@@ -65,19 +70,15 @@ function MovieTable() {
     },
   });
 
-  const movieData = Array.isArray(responseContent)
+  // Bóc tách dữ liệu linh hoạt
+  const movielist = Array.isArray(responseContent)
     ? responseContent
-    : responseContent?.movies ?? responseContent?.data ?? [];
+    : responseContent?.movies ?? responseContent?.data?.movies ?? responseContent?.data ?? [];
     
-  const paginationMeta = responseContent?.pagination ?? { total: movieData.length, totalPages: 1 };
-
-  const movielist = useMemo(() => {
-    if (!keyword) return movieData;
-    const key = removeVietnameseTones(keyword).toLowerCase().trim();
-    return movieData.filter((ele) =>
-      removeVietnameseTones(ele.tenPhim || ele.title || '').toLowerCase().includes(key)
-    );
-  }, [movieData, keyword]);
+  // Nếu đang search (vì API search trả về list không phân trang), tổng số item chính là chiều dài mảng kết quả
+  const paginationMeta = keyword
+    ? { total: movielist.length, totalPages: 1 }
+    : (responseContent?.pagination ?? responseContent?.data?.pagination ?? { total: movielist.length, totalPages: 1 });
 
   const handleDelete = async (id) => {
     await deleteMovie(id);
@@ -131,7 +132,6 @@ function MovieTable() {
   return (    
     <div className="movie-table-container">
       <div className="table-header-actions">
-        {/* Dùng Input thuần thay cho Search kèm theo cơ chế debounce tự viết */}
         <Input
           placeholder="Nhập tên phim để tìm kiếm..."
           allowClear
@@ -153,14 +153,18 @@ function MovieTable() {
         dataSource={movielist}
         loading={isLoading || isDeleting}
         bordered
-        pagination={{ 
-          current: pagination.page,
-          pageSize: pagination.limit,
-          total: paginationMeta.total,
-          size: 'small',
-          showTotal: (total) => `${total} phim`,
-          onChange: (page, limit) => setPagination({ page, limit }),
-        }}
+        pagination={
+          keyword 
+            ? false // Ẩn phân trang trên Table khi đang search theo title vì API trả về danh sách đầy đủ không phân trang
+            : { 
+                current: pagination.page,
+                pageSize: pagination.limit,
+                total: paginationMeta.total,
+                size: 'small',
+                showTotal: (total) => `${total} phim`,
+                onChange: (page, limit) => setPagination({ page, limit }),
+              }
+        }
       />
     </div>
   );
