@@ -251,7 +251,7 @@ export default function Header() {
       <div className="noti-icon">
         <a className="navbar-brand" href="/">
           <img
-            src=""
+            src="./assets/images/h_ticket_cinema_logo.png"
             alt="Movie Cybersoft"
             width="120"
             height="45"
