@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
 import {
   Button, DatePicker, Form, Input,
-  Image, App, Card, Row, Col, Space
+  Image, App, Card, Row, Col, Space, Switch
 } from "antd";
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
-// Giả định đường dẫn service tương ứng của bạn
-import { addPromotionAPI, updatePromotionAPI,  getPromotionDetailAPI } from "services/promotion";
+import { addPromotionAPI, updatePromotionAPI, getPromotionDetailAPI } from "services/promotion";
 import { ArrowLeftOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
 import "./index.scss";
 
+// 1. Thêm isHighlight vào giá trị mặc định
 const DEFAULT_VALUES = {
   title: "",
   content: "",
   startDate: null,
   endDate: null,
+  isHighlight: false, 
 };
 
 export default function PromotionForm() {
@@ -29,7 +30,6 @@ export default function PromotionForm() {
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
 
-  // Lấy chi tiết promotion nếu là chế độ edit
   const { state: promoDetail, loading } = useAsync({
     service: () => (params.promoId ? getPromotionDetailAPI(params.promoId) : Promise.resolve(null)),
     dependencies: [params.promoId],
@@ -43,6 +43,7 @@ export default function PromotionForm() {
           ...promoDetail,
           startDate: promoDetail.startDate ? dayjs(promoDetail.startDate) : null,
           endDate: promoDetail.endDate ? dayjs(promoDetail.endDate) : null,
+          isHighlight: promoDetail.isHighlight ?? false, // Đồng bộ giá trị highlight từ API
         };
         form.setFieldsValue(normalized);
         setOriginalData(normalized);
@@ -59,7 +60,7 @@ export default function PromotionForm() {
   }, [promoDetail, params.promoId, form]);
 
   const onValuesChange = (_, allValues) => {
-    if (!params.promoId || params.promoId === "create") {
+    if (!params.promoId || params.promoId !== "create") {
       const hasInput = Object.keys(allValues).some(key => allValues[key] !== DEFAULT_VALUES[key]);
       setIsChanged(hasInput || !!file);
       return;
@@ -90,6 +91,7 @@ export default function PromotionForm() {
         ...values,
         startDate: values.startDate ? values.startDate.format('YYYY-MM-DD') : null,
         endDate: values.endDate ? values.endDate.format('YYYY-MM-DD') : null,
+        isHighlight: values.isHighlight ? true : false, // Đảm bảo truyền giá trị boolean lên server
       };
 
       Object.keys(payload).forEach(key => {
@@ -154,6 +156,11 @@ export default function PromotionForm() {
                 </Form.Item>
               </Col>
             </Row>
+
+            {/* 2. Thêm Form.Item cho Switch Toggle Highlight */}
+            <Form.Item label="Nổi bật (Highlight)" name="isHighlight" valuePropName="checked">
+              <Switch checkedChildren="Bật" unCheckedChildren="Tắt" />
+            </Form.Item>
 
             <Form.Item label="Nội dung chi tiết" name="content" rules={[{ required: true, message: 'Vui lòng nhập nội dung!' }]}>
               <Input.TextArea rows={6} placeholder="Nhập nội dung ưu đãi..." />

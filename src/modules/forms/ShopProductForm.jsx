@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
   Button, Form, Input, InputNumber, Switch,
-  Image, App, Card, Row, Col, Space, Divider, Table
+  Image, App, Card, Row, Col, Space, Divider
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
-import { addShopProductAPI, updateShopProductAPI } from "services/shopProduct";
-import { ArrowLeftOutlined, SaveOutlined, UploadOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { addShopProductAPI, updateShopProductAPI, getShopProductDetailAPI } from "services/shopProduct";
+import { ArrowLeftOutlined, SaveOutlined, UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import "./index.scss";
-import { getShopProductDetailAPI } from "services/shopProduct";
 
+// 1. Thêm highlight vào giá trị mặc định
 const DEFAULT_VALUES = {
   title: "",
   price: 0,
@@ -20,6 +20,7 @@ const DEFAULT_VALUES = {
   expiryDays: null,
   options: [],
   active: true,
+  highlight: false, // Mặc định là tắt highlight
 };
 
 export default function ShopProductForm() {
@@ -42,8 +43,12 @@ export default function ShopProductForm() {
   useEffect(() => {
     if (params.productId && params.productId !== "create") {
       if (productDetail) {
-        form.setFieldsValue(productDetail);
-        setOriginalData(productDetail);
+        const normalized = {
+          ...productDetail,
+          highlight: productDetail.highlight ?? false, // Đồng bộ giá trị highlight từ API
+        };
+        form.setFieldsValue(normalized);
+        setOriginalData(normalized);
         setImg(productDetail.banner);
         setIsChanged(false);
       }
@@ -71,7 +76,7 @@ export default function ShopProductForm() {
   const productMutation = useAsyncMutation({
     service: (formData) =>
       params.productId && params.productId !== "create"
-        ? updateShopProductAPI( params.productId , formData)
+        ? updateShopProductAPI(params.productId, formData)
         : addShopProductAPI(formData),
     invalidateQueries: [["shop-products"]],
   });
@@ -82,11 +87,11 @@ export default function ShopProductForm() {
       const payload = {
         ...values,
         options: values.options || [],
+        highlight: values.highlight ? true : false, // Đảm bảo truyền giá trị boolean lên server
       };
 
       Object.keys(payload).forEach(key => {
         if (payload[key] !== null && payload[key] !== undefined) {
-          // Nếu là mảng hoặc object (như options), cần JSON.stringify khi gửi qua FormData
           if (key === 'options') {
             formData.append(key, JSON.stringify(payload[key]));
           } else {
@@ -233,6 +238,11 @@ export default function ShopProductForm() {
 
             <Form.Item label="Trạng thái hoạt động" name="active" valuePropName="checked">
               <Switch checkedChildren="Đang bán" unCheckedChildren="Ngừng bán" />
+            </Form.Item>
+
+            {/* 2. Thêm Form.Item cho Switch Toggle Highlight */}
+            <Form.Item label="Nổi bật (Highlight)" name="highlight" valuePropName="checked">
+              <Switch checkedChildren="Bật" unCheckedChildren="Tắt" />
             </Form.Item>
           </Col>
         </Row>

@@ -77,7 +77,7 @@ function PromotionTable() {
       dataIndex: 'title',
       key: 'title',
       ellipsis: true,
-    },
+    },  
     {
       title: 'Thời gian',
       key: 'duration',
