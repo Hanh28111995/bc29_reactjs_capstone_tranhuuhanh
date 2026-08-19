@@ -5,6 +5,9 @@ import "./index.scss";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { useAsync } from "hooks/useAsync";
+import { getBannerListAPI } from "services/banner";
+import { useNavigate } from "react-router-dom";
 
 export default function HeroPage() {
   const bannerSliderRef = useRef(null);
@@ -63,6 +66,21 @@ export default function HeroPage() {
     arrows: false,
     swipe: false,
   };
+
+  const nav = useNavigate();
+  const { state: rawBanner } = useAsync({
+    dependencies: [],
+    service: () => getBannerListAPI(),
+  });
+  const banner = Array.isArray(rawBanner) ? rawBanner.slice(0, 3) : [];
+  const bannerList = banner?.map((item, index) => (
+    <div key={index} className="banner-slide">
+      <a href={`/movie/detail/${item.movie_id}`}>
+        <img src={item.url} alt="NEW MOVIE" />
+      </a>
+    </div>
+  ));
+
   return (
     <>
       <SEO
@@ -99,30 +117,7 @@ export default function HeroPage() {
           <div className="hero-banner">
             <div className="child-slider-wrapper">
               <Slider ref={bannerSliderRef} {...settings_child}>
-                <div className="banner-slide">
-                  <a href="#">
-                    <img
-                      src="https://media.lottecinemavn.com/Media/WebAdmin/2c51c67cfda94d5b8a8cb4149942ea40.jpg"
-                      alt="Amazing Day"
-                    />
-                  </a>
-                </div>
-                <div className="banner-slide">
-                  <a href="#">
-                    <img
-                      src="https://media.lottecinemavn.com/Media/WebAdmin/2c51c67cfda94d5b8a8cb4149942ea40.jpg"
-                      alt="Amazing Day"
-                    />
-                  </a>
-                </div>
-                <div className="banner-slide">
-                  <a href="#">
-                    <img
-                      src="https://media.lottecinemavn.com/Media/WebAdmin/2c51c67cfda94d5b8a8cb4149942ea40.jpg"
-                      alt="Amazing Day"
-                    />
-                  </a>
-                </div>
+                {bannerList}
               </Slider>
             </div>
           </div>
@@ -261,7 +256,6 @@ export default function HeroPage() {
         <div className="event-section">
           <h2 className="event-title">EVENT</h2>
           <div className="event-grid">
-
             <div className="item-large">
               <div className="item-tall">
                 <div className="event-item">
@@ -297,9 +291,9 @@ export default function HeroPage() {
                   />
                 </div>
               </div>
-            </div>   
-                 
-              <div className="item-x-large">
+            </div>
+
+            <div className="item-x-large">
               <div className="item-nm">
                 <div className="event-item ">
                   <img
@@ -315,20 +309,17 @@ export default function HeroPage() {
                     alt="HDBank Promo"
                   />
                 </div>
-              
-            </div>    
-            </div>         
+              </div>
+            </div>
             <div className="item-wrap-large">
               <div className="event-item ">
                 <img
                   src="https://media.lottecinemavn.com/Media/Event/f353e37e868a425ea171d41d9a9bab0b.png"
                   alt="Thue"
-                  style={{objectPosition: "left"}}
+                  style={{ objectPosition: "left" }}
                 />
               </div>
             </div>
-       
-           
           </div>
         </div>
       </section>

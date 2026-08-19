@@ -163,7 +163,7 @@ export default function Header() {
           </div>
         </>
       )}
-      <div className="header-top">
+      <div className="header-top" style={{ backgroundColor: "#dad2b4" }}>
         {!userState.userInfor ? (
           <div className="d-flex align-items-center justify-content-end">
             <button
@@ -248,14 +248,12 @@ export default function Header() {
           </div>
         )}
       </div>
-      <div className="noti-icon">
+      <div className="noti-icon d-flex justify-content-center">
         <a className="navbar-brand" href="/">
           <img
-            src="./assets/images/h_ticket_cinema_logo.png"
-            alt="Movie Cybersoft"
-            width="120"
-            height="45"
-            style={{ height: "45px", marginLeft: "10%" }}
+            src="./src/assets/images/h_ticket_cinema_logo.png"
+            alt="Movie"            
+            style={{ height: "100px", marginBottom: "15px", transform: "scaleX(1.3)" }}
           />
         </a>
       </div>
