@@ -37,6 +37,7 @@ export default function PromotionForm() {
   });
 
   useEffect(() => {
+    console.log(params)
     if (params.promoId && params.promoId !== "create") {
       if (promoDetail) {
         const normalized = {
@@ -140,7 +141,7 @@ export default function PromotionForm() {
         <Row gutter={[24, 0]}>
           {/* Cột trái: Thông tin nội dung */}
           <Col xs={24} lg={16}>
-            <Form.Item label="Tiêu đề khuyến mãi" name="title" rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}>
+            <Form.Item label="Tiêu đề" name="title" rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}>
               <Input placeholder="Nhập tiêu đề chương trình" size="large" />
             </Form.Item>
 
@@ -169,7 +170,7 @@ export default function PromotionForm() {
 
           {/* Cột phải: Banner hình ảnh */}
           <Col xs={24} lg={8}>
-            <Form.Item label="Banner Khuyến Mãi" required>
+            <Form.Item label="Banner " required>
               <div style={{ marginBottom: '0.625rem' }}>
                 <input type="file" id="promo-img" hidden onChange={handleChangeImage} accept="image/*" />
                 <Button
