@@ -72,6 +72,10 @@ export default function HeroPage() {
     dependencies: [],
     service: () => getBannerListAPI(),
   });
+  const { state: rawTrailer } = useAsync({
+    dependencies: [],
+    service: () => getBannerListAPI(),
+  });
   const banner = Array.isArray(rawBanner) ? rawBanner.slice(0, 3) : [];
   const bannerList = banner?.map((item, index) => (
     <div key={index} className="banner-slide">

@@ -18,7 +18,6 @@ const BannerImageUploader = ({ record }) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Lưu thẳng vào Map toàn cục theo _id của dòng hiện tại
         globalFileMap[record._id] = file;
         console.log(`✅ Đã lưu file cho row [${record._id}]:`, file);
 
@@ -26,7 +25,7 @@ const BannerImageUploader = ({ record }) => {
         reader.onload = (ev) => {
             const base64Url = ev.target.result;
             setPreviewUrl(base64Url);
-            record.url = base64Url; // Cập nhật preview trực tiếp
+            record.url = base64Url; 
         };
         reader.readAsDataURL(file);
     };
@@ -118,13 +117,16 @@ export default function BannerTable() {
             dataSource.forEach(item => {
                 const isNew = item._id?.toString().startsWith('new_');
                 const rowFormValues = tableFormValues[item._id] || {};
-                const currentMovieId = rowFormValues.movie_id !== undefined ? rowFormValues.movie_id : item._id;
+                
+                // Lấy giá trị mới từ form hoặc giữ nguyên giá trị cũ trong dataSource
+                const currentMovieId = rowFormValues.movie_id !== undefined ? rowFormValues.movie_id : item.movie_id;
+                const currentHighlight = rowFormValues.highlight !== undefined ? rowFormValues.highlight : (item.highlight || false);
 
                 if (isNew || updatedIds.includes(item._id) || editableKeys.includes(item._id)) {
                     const formData = new FormData();
                     formData.append("movie_id", currentMovieId || "");
+                    formData.append("highlight", currentHighlight); // Đẩy giá trị boolean lên backend
                     
-                    // Lấy file trực tiếp từ globalFileMap dựa vào _id của dòng
                     const targetFile = globalFileMap[item._id];
 
                     if (targetFile) {
@@ -133,9 +135,7 @@ export default function BannerTable() {
                         formData.append("url", item.url);
                     }
 
-                    // --- DEBUG CONSOLE.LOG ---
                     console.log(`=== PAYLOAD CHO ROW: ${item._id} ===`);
-                    console.log("Lấy từ globalFileMap:", targetFile);
                     for (let pair of formData.entries()) {
                         console.log(`   - ${pair[0]}:`, pair[1]);
                     }
@@ -153,7 +153,6 @@ export default function BannerTable() {
             await Promise.all(promises);
             notification.success({ message: 'Thành công', description: 'Cập nhật banner thành công.' });
             
-            // Xóa sạch map sau khi lưu thành công
             Object.keys(globalFileMap).forEach(k => delete globalFileMap[k]);
 
             refetch();
@@ -170,7 +169,7 @@ export default function BannerTable() {
         {
             title: 'Banner',
             dataIndex: 'url',
-            width: '40%',
+            width: '35%',
             render: (text) => (
                 <Space>
                     <Image 
@@ -196,9 +195,21 @@ export default function BannerTable() {
         {
             title: 'Movie ID',
             dataIndex: 'movie_id',
-            width: '30%',
+            width: '25%',
             renderFormItem: (_, { value, onChange }) => (
                 <MovieIdSelect value={value} onChange={onChange} />
+            )
+        },
+        {
+            title: 'Highlight',
+            dataIndex: 'highlight',
+            valueType: 'switch', // Sử dụng Switch tự động của ProComponents khi Edit
+            width: '15%',
+            render: (val) => (
+                // Hiển thị trạng thái text/badge khi ở chế độ xem bình thường
+                <span style={{ color: val ? '#52c41a' : '#8c8c8c', fontWeight: val ? 'bold' : 'normal' }}>
+                    {val ? 'Bật' : 'Tắt'}
+                </span>
             )
         },
         {
@@ -226,7 +237,7 @@ export default function BannerTable() {
                                     setDeleteIds(prev => [...new Set([...prev, record._id])]);
                                     setUpdatedIds(prev => prev.filter(id => id !== record._id));
                                 }
-                                delete globalFileMap[record._id]; // Xóa file trong map nếu xóa dòng
+                                delete globalFileMap[record._id];
                                 setDataSource(prev => prev.filter(i => i._id !== record._id));
                                 message.info("Đã xóa tạm thời.");
                             }}
@@ -258,7 +269,8 @@ export default function BannerTable() {
                         record: () => ({ 
                             _id: `new_${Date.now()}`, 
                             url: '', 
-                            movie_id: ''
+                            movie_id: '',
+                            highlight: false // Giá trị mặc định khi tạo mới
                         })
                     }}
                     editable={{

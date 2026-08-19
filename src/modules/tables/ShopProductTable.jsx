@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Table, Input, Button, Image, App, Popconfirm, Badge } from 'antd';
+import { Table, Input, Button, Image, App, Popconfirm, Badge, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import {
@@ -62,7 +62,7 @@ export default function ShopProductTable() {
       title: 'Ảnh',
       dataIndex: 'banner',
       key: 'banner',
-      width: '15%',
+      width: '12%',
       render: (text) => (
         <Image src={text} style={{ width: 60, height: 60, objectFit: 'cover' }} fallback="https://via.placeholder.com/60x60?text=No+Img" />
       ),
@@ -77,7 +77,7 @@ export default function ShopProductTable() {
       title: 'Giá',
       dataIndex: 'price',
       key: 'price',
-      width: '15%',
+      width: '13%',
       render: (price) => (price ? `${price.toLocaleString('vi-VN')} đ` : '0 đ'),
     },
     {
@@ -94,6 +94,18 @@ export default function ShopProductTable() {
       width: '12%',
       render: (active) => (
         <Badge status={active ? 'success' : 'default'} text={active ? 'Đang bán' : 'Ngừng'} />
+      ),
+    },
+    {
+      title: 'Highlight',
+      dataIndex: 'highlight',
+      key: 'highlight',
+      width: '11%',
+      align: 'center',
+      render: (val) => (
+        <Tag color={val ? 'success' : 'default'}>
+          {val ? 'Bật' : 'Tắt'}
+        </Tag>
       ),
     },
     {

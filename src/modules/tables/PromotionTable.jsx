@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Table, Input, Button, Image, App, Popconfirm } from 'antd';
+import { Table, Input, Button, Image, App, Popconfirm, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import { formatDate3 } from '../../utils/common';
@@ -20,7 +20,6 @@ function PromotionTable() {
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
   const { notification } = App.useApp();
 
-  
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, keyword],
     queryKey: ['promotions', pagination.page, pagination.limit, keyword],
@@ -38,7 +37,6 @@ function PromotionTable() {
     },
   });
 
-  // Tận dụng cơ chế bóc tách dữ liệu tự động từ normalizeResult của useAsync
   const promoData = Array.isArray(responseContent)
     ? responseContent
     : responseContent?.promotions ?? responseContent?.data ?? [];
@@ -62,14 +60,14 @@ function PromotionTable() {
       title: 'Mã',
       dataIndex: '_id',
       key: '_id',
-      width: '15%',
+      width: '12%',
       render: (text) => text?.slice(-6).toUpperCase(),
     },
     {
       title: 'Banner',
       dataIndex: 'banner',
       key: 'banner',
-      width: '20%',
+      width: '18%',
       render: (text) => (
         <Image src={text} className="promo-banner" fallback="https://via.placeholder.com/120x60?text=No+Banner" />
       ),
@@ -83,11 +81,23 @@ function PromotionTable() {
     {
       title: 'Thời gian',
       key: 'duration',
-      width: '25%',
+      width: '22%',
       render: (_, record) => (
         <span>
           {record.startDate ? formatDate3(record.startDate) : '---'} đến {record.endDate ? formatDate3(record.endDate) : '---'}
         </span>
+      ),
+    },
+    {
+      title: 'Highlight',
+      dataIndex: 'highlight',
+      key: 'highlight',
+      width: '12%',
+      align: 'center',
+      render: (val) => (
+        <Tag color={val ? 'success' : 'default'}>
+          {val ? 'Bật' : 'Tắt'}
+        </Tag>
       ),
     },
     {
@@ -116,11 +126,11 @@ function PromotionTable() {
           placeholder="Tìm kiếm khuyến mãi..."
           onSearch={(val) => {
             setKeyword(val);
-            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
+            setPagination((prev) => ({ ...prev, page: 1 }));
           }}
           onChange={(e) => {
             setKeyword(e.target.value);
-            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi gõ
+            setPagination((prev) => ({ ...prev, page: 1 }));
           }}
           className="search-input"
           size="middle"
