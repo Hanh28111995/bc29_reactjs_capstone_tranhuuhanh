@@ -220,15 +220,15 @@ export default function Router() {
 
             //////  Update Group //////
             {
-              path: "/admin/ticket-management/update/:id",
+              path: "/admin/ticket-management/update/:ticketId",
               element: <UpdateTicket />,
             },
             {
-              path: "/admin/promotion-management/update/:id",
+              path: "/admin/promotion-management/update/:promoId",
               element: <UpdatePromotion />,
             },
             {
-              path: "/admin/shop-product-management/update/:id",
+              path: "/admin/shop-product-management/update/:productId",
               element: <UpdateShopProduct />,
             },
             {
