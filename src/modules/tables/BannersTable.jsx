@@ -118,11 +118,11 @@ export default function BannerTable() {
             dataSource.forEach(item => {
                 const isNew = item._id?.toString().startsWith('new_');
                 const rowFormValues = tableFormValues[item._id] || {};
-                const currentMovieId = rowFormValues._id !== undefined ? rowFormValues._id : item._id;
+                const currentMovieId = rowFormValues.movie_id !== undefined ? rowFormValues.movie_id : item._id;
 
                 if (isNew || updatedIds.includes(item._id) || editableKeys.includes(item._id)) {
                     const formData = new FormData();
-                    formData.append("_id", currentMovieId || "");
+                    formData.append("movie_id", currentMovieId || "");
                     
                     // Lấy file trực tiếp từ globalFileMap dựa vào _id của dòng
                     const targetFile = globalFileMap[item._id];
@@ -195,7 +195,7 @@ export default function BannerTable() {
         },
         {
             title: 'Movie ID',
-            dataIndex: '_id',
+            dataIndex: 'movie_id',
             width: '30%',
             renderFormItem: (_, { value, onChange }) => (
                 <MovieIdSelect value={value} onChange={onChange} />
@@ -258,7 +258,7 @@ export default function BannerTable() {
                         record: () => ({ 
                             _id: `new_${Date.now()}`, 
                             url: '', 
-                            _id: ''
+                            movie_id: ''
                         })
                     }}
                     editable={{

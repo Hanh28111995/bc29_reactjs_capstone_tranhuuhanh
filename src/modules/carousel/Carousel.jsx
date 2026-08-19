@@ -2,8 +2,9 @@ import { Row, Col} from 'antd';
 import React from "react";
 import { Carousel as CarouselAntd } from "antd";
 import { useAsync } from "hooks/useAsync";
+import { getBannerListAPI } from 'services/banner';
 import "./index.scss";
-import { fetchMoviebannerAPI } from 'services/general';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 // import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 // Sửa lại Arrow: Sử dụng rem và xóa các thuộc tính trùng lặp
@@ -53,14 +54,15 @@ import { fetchMoviebannerAPI } from 'services/general';
 // };
 
 export default function Carousel() {
+  const nav = useNavigate();
   const { state: rawBanner } = useAsync({
     dependencies: [],
-    service: () => fetchMoviebannerAPI(),
+    service: () => getBannerListAPI(),
   });
   const banner = Array.isArray(rawBanner) ? rawBanner : [];
 
   const bannerList = banner?.map((item, index) => (
-    <div key={index} style={{ height: "60rem" }}>
+    <div key={index} style={{ height: "60rem" }} onClick={() => {nav(`/movie/detail/${item.movie_id}`)}}>
       <div style={{
         width: "100%",
         height: "100%",
@@ -70,8 +72,7 @@ export default function Carousel() {
         justifyContent: "center"
       }}>
         <img
-          src={item.banner?.replace(/ /g, "%20")}
-          alt={item.title || `banner-${index}`}
+          src={item.url}          
           width={939}
           height={528}
           loading={index === 0 ? "eager" : "lazy"}
