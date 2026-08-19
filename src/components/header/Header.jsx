@@ -16,6 +16,7 @@ import {
   markAllNotificationsAsReadAPI,
   fetchChangeStatusNotificationAPI,
 } from "services/notificationAndHistory";
+import logoImage from '../../assets/images/h_ticket_cinema_logo.png';
 import "./index.scss";
 import { useEffect, useState } from "react";
 
@@ -251,8 +252,8 @@ export default function Header() {
       <div className="noti-icon d-flex justify-content-center">
         <a className="navbar-brand" href="/">
           <img
-            src="./src/assets/images/h_ticket_cinema_logo.png"
-            alt="Movie"            
+            src={logoImage}
+            alt="HTheaterLogo"            
             style={{ height: "100px", marginBottom: "15px", transform: "scaleX(1.3)" }}
           />
         </a>
