@@ -24,7 +24,7 @@ const addPromotionAPI = (data) => {
 
 const updatePromotionAPI = ( Id, data) => {
   return request({
-    url: `/admin/promotion/update${Id}`,
+    url: `/admin/promotion/update/${Id}`,
     method: "PUT",
     data,
   });

@@ -7,6 +7,8 @@ import "slick-carousel/slick/slick-theme.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useAsync } from "hooks/useAsync";
 import { getBannerListAPI } from "services/banner";
+import { getShopProductListAPI } from "services/shopProduct";
+import { getPromotionListAPI } from "services/promotion";
 import { useNavigate } from "react-router-dom";
 
 export default function HeroPage() {
@@ -68,23 +70,43 @@ export default function HeroPage() {
   };
 
   const nav = useNavigate();
+
   const { state: rawBanner } = useAsync({
     dependencies: [],
     service: () => getBannerListAPI(),
   });
-  const { state: rawTrailer } = useAsync({
+  const { state: rawNewPromotion } = useAsync({
     dependencies: [],
-    service: () => getBannerListAPI(),
+    service: () => getPromotionListAPI(),
   });
-  const banner = Array.isArray(rawBanner) ? rawBanner.slice(0, 3) : [];
+  const { state: rawNewProduct } = useAsync({
+    dependencies: [],
+    service: () => getShopProductListAPI(),
+  });
+
+  const banner = Array.isArray(rawBanner)
+    ? rawBanner.filter((item) => item.highlight === true)
+    : [];
+
+  const promotion = Array.isArray(rawNewPromotion)
+    ? rawNewPromotion.filter((item) => item.highlight === true)
+    : [];
+
   const bannerList = banner?.map((item, index) => (
-    <div key={index} className="banner-slide">
-      <a href={`/movie/detail/${item.movie_id}`}>
-        <img src={item.url} alt="NEW MOVIE" />
+    <div key={index} className="trailer-card">
+      <a href={`/movie/detail/${item._id}`}>
+        <img src={item.url} alt="Trailer" />
       </a>
     </div>
   ));
 
+  const newList = promotion?.map((item, index) => (
+    <div key={index} className="banner-slide">
+      <a href={`/promotion/${item._id}`}>
+        <img src={item.url} alt="NEW MOVIE" />
+      </a>
+    </div>
+  ));
   return (
     <>
       <SEO
@@ -121,7 +143,7 @@ export default function HeroPage() {
           <div className="hero-banner">
             <div className="child-slider-wrapper">
               <Slider ref={bannerSliderRef} {...settings_child}>
-                {bannerList}
+                {newList}
               </Slider>
             </div>
           </div>
@@ -165,27 +187,7 @@ export default function HeroPage() {
           <div className="movie-trailer">
             <div className="child-slider-wrapper">
               <Slider ref={trailerSliderRef} {...settings_child}>
-                <div className="trailer-card">
-                  <img
-                    src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
-                    alt="Trailer"
-                  />
-                  <button className="btn-play">▶ Play</button>
-                </div>
-                <div className="trailer-card">
-                  <img
-                    src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
-                    alt="Trailer"
-                  />
-                  <button className="btn-play">▶ Play</button>
-                </div>
-                <div className="trailer-card">
-                  <img
-                    src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
-                    alt="Trailer"
-                  />
-                  <button className="btn-play">▶ Play</button>
-                </div>
+                {bannerList}
               </Slider>
             </div>
           </div>
