@@ -30,7 +30,7 @@ import "./index.scss";
 // --- Khai báo Map toàn cục lưu file theo _id của dòng ---
 const globalFileMap = {};
 
-const BannerImageUploader = ({ record }) => {
+const BannerImageUploader = ({ record, onUrlChange }) => {
   const inputRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState(record.url);
 
@@ -45,7 +45,9 @@ const BannerImageUploader = ({ record }) => {
     reader.onload = (ev) => {
       const base64Url = ev.target.result;
       setPreviewUrl(base64Url);
-      record.url = base64Url;
+      record.url = base64Url; 
+      // Gọi callback để cập nhật ngay vào dataSource của bảng
+      onUrlChange?.(base64Url);
     };
     reader.readAsDataURL(file);
   };
@@ -153,9 +155,8 @@ export default function BannerTable() {
       dataSource.forEach((item) => {
         const isNew = item._id?.toString().startsWith("new_");
 
-        // Lấy trực tiếp từ dataSource vì onSave đã cập nhật dữ liệu chuẩn vào đây
         const currentMovieId = item.movie_id;
-        const currentHighlight = item.highlight ?? false; // Đảm bảo lấy đúng true/false của Switch
+        const currentHighlight = Boolean(item.highlight); // Lấy giá trị boolean chuẩn xác từ dataSource
 
         if (
           isNew ||
@@ -164,7 +165,7 @@ export default function BannerTable() {
         ) {
           const formData = new FormData();
           formData.append("movie_id", currentMovieId || "");
-          formData.append("highlight", currentHighlight); // Lúc này sẽ nhận đúng giá trị true/false
+          formData.append("highlight", currentHighlight);
 
           const targetFile = globalFileMap[item._id];
 
@@ -174,10 +175,12 @@ export default function BannerTable() {
             formData.append("url", item.url);
           }
 
-          console.log(`=== PAYLOAD CHO ROW: ${item._id} ===`);
-          for (let pair of formData.entries()) {
-            console.log(`  - ${pair[0]}:`, pair[1]);
-          }
+          console.log(`=== PAYLOAD CHO ROW: ${item._id} ===`, {
+            movie_id: currentMovieId,
+            highlight: currentHighlight,
+            hasFile: !!targetFile,
+            url: item.url
+          });
 
           if (isNew) {
             promises.push(addBannerAPI(formData));
@@ -229,7 +232,15 @@ export default function BannerTable() {
         const record = formRef.current?.getFieldValue(recordPath) || {};
         if (!record._id && config.record) Object.assign(record, config.record);
 
-        return <BannerImageUploader record={record} />;
+        return (
+          <BannerImageUploader 
+            record={record} 
+            onUrlChange={(newUrl) => {
+              // Cập nhật trực tiếp URL vào dataSource ngay khi chọn ảnh xong
+              setDataSource(prev => prev.map(item => item._id === record._id ? { ...item, url: newUrl } : item));
+            }}
+          />
+        );
       },
     },
     {
@@ -244,16 +255,17 @@ export default function BannerTable() {
       title: "Highlight",
       dataIndex: "highlight",
       width: "15%",
-      // Tự chủ động render Switch để kiểm soát chính xác giá trị true/false khi bật/tắt hoặc tạo mới
-      renderFormItem: (_, { value, onChange }) => (
+      // Sử dụng Switch thuần, cập nhật thẳng state dataSource khi người dùng gạt
+      renderFormItem: (_, { value, onChange, record }) => (
         <Switch
           checked={Boolean(value)}
           onChange={(checked) => {
-            onChange(checked); // Bắn trực tiếp giá trị boolean chuẩn xác vào form state
+            onChange(checked); // Báo cho form biết
+            // Cập nhật ngay lập tức vào dataSource để đồng bộ tuyệt đối
+            setDataSource(prev => prev.map(item => item._id === record._id ? { ...item, highlight: checked } : item));
           }}
         />
       ),
-      // Ép kiểu Boolean tường minh để chặn đứng việc nhận nhầm giá trị rác thành "Bật"
       render: (val) => {
         const isHighlight = Boolean(val);
         return (
@@ -340,14 +352,12 @@ export default function BannerTable() {
             type: "multiple",
             editableKeys,
             onChange: setEditableRowKeys,
-            // Bắt sự kiện khi bấm nút Lưu trên từng dòng để cập nhật dữ liệu vào dataSource
             onSave: async (key, row) => {
               if (!key.toString().startsWith("new_")) {
                 setUpdatedIds((prev) => [...new Set([...prev, key])]);
               }
-              // Cập nhật lại state dataSource với dữ liệu dòng mới nhất (bao gồm cả trạng thái switch highlight)
               setDataSource((prev) =>
-                prev.map((item) => (item._id === key ? row : item)),
+                prev.map((item) => (item._id === key ? { ...item, ...row } : item)),
               );
               message.info(
                 "Đã ghi nhận dòng. Nhấn LƯU TẤT CẢ để gửi lên server.",
