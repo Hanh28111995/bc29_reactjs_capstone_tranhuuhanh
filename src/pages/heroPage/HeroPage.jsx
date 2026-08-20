@@ -78,11 +78,7 @@ export default function HeroPage() {
   const { state: rawNewPromotion } = useAsync({
     dependencies: [],
     service: () => getPromotionListAPI(),
-  });
-  const { state: rawNewProduct } = useAsync({
-    dependencies: [],
-    service: () => getShopProductListAPI(),
-  });
+  });  
 
   const banner = Array.isArray(rawBanner)
     ? rawBanner.filter((item) => item.highlight === true)
@@ -103,7 +99,7 @@ export default function HeroPage() {
   const newList = promotion?.map((item, index) => (
     <div key={index} className="banner-slide">
       <a href={`/promotion/${item._id}`}>
-        <img src={item.url} alt="NEW MOVIE" />
+        <img src={item.banner} alt="NEW MOVIE" />
       </a>
     </div>
   ));
