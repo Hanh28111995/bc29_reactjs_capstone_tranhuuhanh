@@ -90,16 +90,16 @@ export default function HeroPage() {
   const isLoading = bannerLoading || promoLoading;
   const isError = bannerIsError || promoIsError;
 
-  if (isLoading) {
-    return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "50vh" }}
-      >
-        <Spin size="large" />
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div
+  //       className="d-flex justify-content-center align-items-center"
+  //       style={{ minHeight: "50vh" }}
+  //     >
+  //       <Spin size="large" />
+  //     </div>
+  //   );
+  // }
   
   if (isError) {
     return (
