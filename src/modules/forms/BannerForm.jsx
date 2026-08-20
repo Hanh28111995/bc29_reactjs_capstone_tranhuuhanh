@@ -20,16 +20,18 @@ export default function BannerForm({ initialValues, onSuccess, loading }) {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const res = await fetchMovieListAPI();
-        setMovieList(res.data?.content.movies);
+        const res = await fetchMovieListAPI();        
+        const moviesData = res.data?.content?.movies || [];
+        setMovieList(Array.isArray(moviesData) ? moviesData : []);
       } catch (error) {
         message.error("Không thể tải danh sách phim");
+        setMovieList([]);
       }
     };
     fetchMovies();
   }, []);
 
-  const movieOptions = movieList.map((movie) => ({
+const movieOptions = (movieList || []).map((movie) => ({
     value: `${movie._id}`,
     label: `${movie.title}`,
   }));
