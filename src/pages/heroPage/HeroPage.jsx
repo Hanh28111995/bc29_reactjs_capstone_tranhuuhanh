@@ -118,20 +118,20 @@ export default function HeroPage() {
     : [];
 
   console.log("Banner sau khi lọc (highlight=true):", banner);
-  console.log("Promotion sau khi lọc (highlight=true):", promotion);
-
- const bannerList = banner?.map((item, index) => (
-    <div key={item._id || index} className="trailer-card">
-      <a href={`/movie/detail/${item._id}`}>
-        <img src={item.url} alt="Trailer" />
-      </a>
-    </div>
-  ));
+  console.log("Promotion sau khi lọc (highlight=true):", promotion); 
 
   const newList = promotion?.map((item, index) => (
     <div key={item._id || index} className="banner-slide">
       <a href={`/promotion/${item._id}`}>
         <img src={item.banner} alt="News" />
+      </a>
+    </div>
+  ));
+
+  const bannerList = banner?.map((item, index) => (
+    <div key={item._id || index} className="trailer-card">
+      <a href={`/movie/detail/${item.movie_id}`}>
+        <img src={item.url} alt="Trailer" />
       </a>
     </div>
   ));
