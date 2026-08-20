@@ -240,27 +240,33 @@ export default function BannerTable() {
         <MovieIdSelect value={value} onChange={onChange} />
       ),
     },
-{
+    {
       title: "Highlight",
       dataIndex: "highlight",
-      valueType: "switch",
       width: "15%",
-      // Thêm fieldProps để Ant Design ProComponents hiểu đây là Switch nhận giá trị qua checked
-      fieldProps: () => {
-        return {
-          valuePropName: 'checked',
-        };
-      },
-      render: (val) => (
-        <span
-          style={{
-            color: val ? "#52c41a" : "#8c8c8c",
-            fontWeight: val ? "bold" : "normal",
+      // Tự chủ động render Switch để kiểm soát chính xác giá trị true/false khi bật/tắt hoặc tạo mới
+      renderFormItem: (_, { value, onChange }) => (
+        <Switch
+          checked={Boolean(value)}
+          onChange={(checked) => {
+            onChange(checked); // Bắn trực tiếp giá trị boolean chuẩn xác vào form state
           }}
-        >
-          {val ? "Bật" : "Tắt"}
-        </span>
+        />
       ),
+      // Ép kiểu Boolean tường minh để chặn đứng việc nhận nhầm giá trị rác thành "Bật"
+      render: (val) => {
+        const isHighlight = Boolean(val);
+        return (
+          <span
+            style={{
+              color: isHighlight ? "#52c41a" : "#8c8c8c",
+              fontWeight: isHighlight ? "bold" : "normal",
+            }}
+          >
+            {isHighlight ? "Bật" : "Tắt"}
+          </span>
+        );
+      },
     },
     {
       title: "Thao tác",
