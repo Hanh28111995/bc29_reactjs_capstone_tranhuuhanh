@@ -48,6 +48,7 @@ const fetchPromotionDetailAPI = (id) => {
   });
 };
 
+
 const fetchShopFilterAPI = (filters) => {
   return request({
     url: `/general/shop/all`,

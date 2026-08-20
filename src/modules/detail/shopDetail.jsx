@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Spin, Select, InputNumber, Button, message } from "antd";
 import { useAsync } from "../../hooks/useAsync";
 import { LoadingContext } from "../../contexts/loading.context";
-import { fetchShopProductAPI } from "services/general";
+import { fetchShopProductDetailAPI } from "services/general";
+
 
 export default function ShopDetail() {
   const param = useParams(); // Hoặc id_shop tùy thuộc route của bạn
@@ -20,7 +21,7 @@ export default function ShopDetail() {
     isError,
     error,
   } = useAsync({
-    service: () => fetchShopProductAPI(param.id),
+    service: () => fetchShopProductDetailAPI(param.id),
     condition: !!param.id,
     dependencies: [param.id],
     queryKey: ["shopDetail", param.id],
