@@ -7,7 +7,6 @@ import "slick-carousel/slick/slick-theme.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useAsync } from "hooks/useAsync";
 import { getBannerListAPI } from "services/banner";
-import { getShopProductListAPI } from "services/shopProduct";
 import { getPromotionListAPI } from "services/promotion";
 import { useNavigate } from "react-router-dom";
 
@@ -78,7 +77,10 @@ export default function HeroPage() {
   const { state: rawNewPromotion } = useAsync({
     dependencies: [],
     service: () => getPromotionListAPI(),
-  });  
+  });
+
+  console.log("Check rawBanner:", rawBanner);
+  console.log("Check rawNewPromotion:", rawNewPromotion);
 
   const banner = Array.isArray(rawBanner)
     ? rawBanner.filter((item) => item.highlight === true)
@@ -87,6 +89,9 @@ export default function HeroPage() {
   const promotion = Array.isArray(rawNewPromotion)
     ? rawNewPromotion.filter((item) => item.highlight === true)
     : [];
+
+  console.log("Banner sau khi lọc (highlight=true):", banner);
+  console.log("Promotion sau khi lọc (highlight=true):", promotion);
 
   const bannerList = banner?.map((item, index) => (
     <div key={index} className="trailer-card">
@@ -99,7 +104,7 @@ export default function HeroPage() {
   const newList = promotion?.map((item, index) => (
     <div key={index} className="banner-slide">
       <a href={`/promotion/${item._id}`}>
-        <img src={item.banner} alt="NEW MOVIE" />
+        <img src={item.banner} alt="News" />
       </a>
     </div>
   ));
