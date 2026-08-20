@@ -108,24 +108,21 @@ export default function BannerTable() {
     }, [rawData]);
 
     const handleSaveAll = async () => {
-        const tableFormValues = formRef.current?.getFieldsValue() || {};
-        
         try {
             const promises = [];
             deleteIds.forEach(id => promises.push(deleteBannerAPI(id)));
 
             dataSource.forEach(item => {
                 const isNew = item._id?.toString().startsWith('new_');
-                const rowFormValues = tableFormValues[item._id] || {};
                 
-                // Lấy giá trị mới từ form hoặc giữ nguyên giá trị cũ trong dataSource
-                const currentMovieId = rowFormValues.movie_id !== undefined ? rowFormValues.movie_id : item.movie_id;
-                const currentHighlight = rowFormValues.highlight !== undefined ? rowFormValues.highlight : (item.highlight || false);
+                // Lấy trực tiếp từ dataSource vì onSave đã cập nhật dữ liệu chuẩn vào đây
+                const currentMovieId = item.movie_id;
+                const currentHighlight = item.highlight ?? false; // Đảm bảo lấy đúng true/false của Switch
 
                 if (isNew || updatedIds.includes(item._id) || editableKeys.includes(item._id)) {
                     const formData = new FormData();
                     formData.append("movie_id", currentMovieId || "");
-                    formData.append("highlight", currentHighlight); // Đẩy giá trị boolean lên backend
+                    formData.append("highlight", currentHighlight); // Lúc này sẽ nhận đúng giá trị true/false
                     
                     const targetFile = globalFileMap[item._id];
 
@@ -137,7 +134,7 @@ export default function BannerTable() {
 
                     console.log(`=== PAYLOAD CHO ROW: ${item._id} ===`);
                     for (let pair of formData.entries()) {
-                        console.log(`   - ${pair[0]}:`, pair[1]);
+                        console.log(`  - ${pair[0]}:`, pair[1]);
                     }
 
                     if (isNew) {
@@ -178,10 +175,7 @@ export default function BannerTable() {
                         height={40} 
                         style={{ objectFit: 'cover', borderRadius: 4 }} 
                         fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-                    />
-                    <span style={{ fontSize: '11px', color: '#888' }}>
-                        {text?.startsWith('data:') ? 'Ảnh tạm' : 'Ảnh server'}
-                    </span>
+                    />                    
                 </Space>
             ),
             renderFormItem: (_, config) => {
@@ -206,7 +200,6 @@ export default function BannerTable() {
             valueType: 'switch', // Sử dụng Switch tự động của ProComponents khi Edit
             width: '15%',
             render: (val) => (
-                // Hiển thị trạng thái text/badge khi ở chế độ xem bình thường
                 <span style={{ color: val ? '#52c41a' : '#8c8c8c', fontWeight: val ? 'bold' : 'normal' }}>
                     {val ? 'Bật' : 'Tắt'}
                 </span>
@@ -270,17 +263,20 @@ export default function BannerTable() {
                             _id: `new_${Date.now()}`, 
                             url: '', 
                             movie_id: '',
-                            highlight: false // Giá trị mặc định khi tạo mới
+                            highlight: false 
                         })
                     }}
                     editable={{
                         type: 'multiple',
                         editableKeys,
                         onChange: setEditableRowKeys,
-                        onSave: (key) => {
+                        // Bắt sự kiện khi bấm nút Lưu trên từng dòng để cập nhật dữ liệu vào dataSource
+                        onSave: async (key, row) => {
                             if (!key.toString().startsWith('new_')) {
                                 setUpdatedIds(prev => [...new Set([...prev, key])]);
                             }
+                            // Cập nhật lại state dataSource với dữ liệu dòng mới nhất (bao gồm cả trạng thái switch highlight)
+                            setDataSource(prev => prev.map(item => item._id === key ? row : item));
                             message.info("Đã ghi nhận dòng. Nhấn LƯU TẤT CẢ để gửi lên server.");
                         },
                         saveText: 'Lưu',
