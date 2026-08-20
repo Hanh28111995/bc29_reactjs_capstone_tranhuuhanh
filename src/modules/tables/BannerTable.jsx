@@ -82,7 +82,7 @@ export default function BannerTable() {
           <Button 
             type="text" 
             icon={<EditOutlined style={{ color: '#1677ff' }} />} 
-            onClick={() => navigate(`/admin/banner-management/update/${record._id}`)} 
+            onClick={() => navigate(`/admin/banner-generator/update/${record._id}`)} 
           />
           <Popconfirm title="Xóa banner này?" onConfirm={() => handleDelete(record._id)}>
             <Button type="text" danger icon={<DeleteOutlined />} />
