@@ -34,7 +34,6 @@ const PaymentResult = lazy(() => import("pages/payment/PaymentResult"));
 
 // --- Tool & Other Pages ---
 const ScheduleGenerator = lazy(() => import("pages/toolManagement/ScheduleGenerator"));
-const BannerCreate = lazy(() => import("pages/toolManagement/BannerCreate"));
 const PageNotFound = lazy(() => import("pages/PageNotFound/PageNotFound"));
 
 // --- Theater Management Pages ---
@@ -61,6 +60,9 @@ const UpdateShopProduct = lazy(() => import("pages/admin/shopManagement/UpdateSh
 
 const UpdateShowTime = lazy(() => import("pages/admin/showtimeManagement/UpdateShowTime"));
 const UpdateTheater = lazy(() => import("pages/admin/theaterManagement/UpdateTheater"));
+
+const UpdateBanner = lazy(() => import("pages/admin/bannerManagement/UpdateBanner"));
+const BannerManagement = lazy(() => import("pages/admin/bannerManagement/BannerManagement"));
 
 export default function Router() {
   const routing = useRoutes([
@@ -189,8 +191,8 @@ export default function Router() {
             },
             {
               path: "/admin/tools/banner-generator",
-              element: <BannerCreate />,
-            },
+              element: <BannerManagement />,
+            },            
 
             //////  Create Group //////
             {
@@ -216,6 +218,10 @@ export default function Router() {
             {
               path: "/admin/shop-product-management/create",
               element: <UpdateShopProduct />,
+            },
+            {
+              path: "/admin/tools/banner-generator/create",
+              element: <UpdateBanner />,
             },
 
             //////  Update Group //////
@@ -246,6 +252,10 @@ export default function Router() {
             {
               path: "/admin/showtimes/:id/update",
               element: <UpdateShowTime />,
+            },
+            {
+              path: "/admin/tools/banner-generator/update/:id",
+              element: <UpdateBanner />,
             },
             ////// Update & Create thao tac chung trong Table
             {

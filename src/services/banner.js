@@ -7,6 +7,12 @@ const getBannerListAPI = () => {
   });
 };
 
+const getBannerDetailAPI = (id) =>{
+  return request({
+    url: `/admin/banner/${id}`,
+    method: "GET",    
+  })
+}
 
 const addBannerAPI = (data) => {
   return request({
@@ -15,6 +21,7 @@ const addBannerAPI = (data) => {
     data,
   });
 };
+
 
 const updateBannerAPI = ( Id, data) => {
   return request({
@@ -33,6 +40,7 @@ const deleteBannerAPI = (Id) => {
 
 export {
   getBannerListAPI,
+  getBannerDetailAPI,
   addBannerAPI,
   updateBannerAPI,
   deleteBannerAPI,  

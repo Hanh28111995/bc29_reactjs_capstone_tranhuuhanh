@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Table, Input, Button, Image, App, Popconfirm, Badge, Tag } from 'antd';
+import { Table, Input, Button, Image, App, Popconfirm, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import {
@@ -8,118 +8,108 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import { removeVietnameseTones } from 'constants/common';
+import {
+  getBannerListAPI,
+  deleteBannerAPI,
+} from 'services/banner';
 import './index.scss';
-import { deleteShopProductAPI, getShopProductListAPI } from 'services/shopProduct';
 
 const { Search } = Input;
 
-export default function ShopProductTable() {
+export default function BannerTable() {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
   const { notification } = App.useApp();
 
-  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách sản phẩm
+  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách banner
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, keyword],
-    queryKey: ['shopProducts', pagination.page, pagination.limit, keyword],
-    service: () => getShopProductListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
+    queryKey: ['banners', pagination.page, pagination.limit, keyword],
+    service: () => getBannerListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
   });
 
-  // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache
-  const { mutateAsync: deleteProduct, isPending: isDeleting } = useAsyncMutation({
-    service: (id) => deleteShopProductAPI(id),
-    invalidateQueries: [['shopProducts']],
+  // 2. Sử dụng useAsyncMutation chuẩn để xóa banner và tự động refresh cache
+  const { mutateAsync: deleteBanner, isPending: isDeleting } = useAsyncMutation({
+    service: (id) => deleteBannerAPI(id),
+    invalidateQueries: [['banners']],
     onSuccess: () => {
-      notification.success({ message: 'Thành công', description: 'Đã xóa sản phẩm!' });
+      notification.success({ message: 'Thành công', description: 'Đã xóa banner!' });
     },
     onError: () => {
-      notification.error({ message: 'Lỗi', description: 'Không thể xóa sản phẩm.' });
+      notification.error({ message: 'Lỗi', description: 'Không thể xóa banner.' });
     },
   });
 
-  // Tận dụng cơ chế bóc tách dữ liệu tự động từ normalizeResult của useAsync
-  const productData = Array.isArray(responseContent)
+  // Bóc tách dữ liệu linh hoạt từ response API
+  const bannerData = Array.isArray(responseContent)
     ? responseContent
-    : responseContent?.shops ?? responseContent?.data ?? [];
-    
-  const paginationMeta = responseContent?.pagination ?? { total: productData.length, totalPages: 1 };
+    : responseContent?.banners ?? responseContent?.data ?? [];
 
-  const productList = useMemo(() => {
-    if (!keyword) return productData;
+  const paginationMeta = responseContent?.pagination ?? { total: bannerData.length, totalPages: 1 };
+
+  const bannerList = useMemo(() => {
+    if (!keyword) return bannerData;
     const key = removeVietnameseTones(keyword).toLowerCase().trim();
-    return productData.filter((ele) =>
-      removeVietnameseTones(ele.title || '').toLowerCase().includes(key)
+    return bannerData.filter((ele) =>
+      removeVietnameseTones(ele.movie_id?.toString() || '').toLowerCase().includes(key)
     );
-  }, [productData, keyword]);
+  }, [bannerData, keyword]);
 
   const handleDelete = async (id) => {
-    await deleteProduct(id);
+    await deleteBanner(id);
   };
 
   const columns = [
     {
-      title: 'Ảnh',
-      dataIndex: 'banner',
-      key: 'banner',
-      width: '12%',
+      title: 'Banner',
+      dataIndex: 'url',
+      key: 'url',
+      width: '35%',
       render: (text) => (
-        <Image src={text} style={{ width: 60, height: 60, objectFit: 'cover' }} fallback="https://via.placeholder.com/60x60?text=No+Img" />
+        <Image
+          src={text}
+          width={100}
+          height={50}
+          style={{ objectFit: 'cover', borderRadius: 4 }}
+          fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+        />
       ),
     },
     {
-      title: 'Sản phẩm',
-      dataIndex: 'title',
-      key: 'title',
+      title: 'Movie ID',
+      dataIndex: 'movie_id',
+      key: 'movie_id',
+      width: '25%',
       ellipsis: true,
-    },
-    {
-      title: 'Giá',
-      dataIndex: 'price',
-      key: 'price',
-      width: '13%',
-      render: (price) => (price ? `${price.toLocaleString('vi-VN')} đ` : '0 đ'),
-    },
-    {
-      title: 'Tồn kho',
-      dataIndex: 'stock',
-      key: 'stock',
-      width: '10%',
-      render: (stock) => (stock !== undefined && stock !== null ? stock : <span style={{color: '#999'}}>Vô hạn</span>),
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'active',
-      key: 'active',
-      width: '12%',
-      render: (active) => (
-        <Badge status={active ? 'success' : 'default'} text={active ? 'Đang bán' : 'Ngừng'} />
-      ),
     },
     {
       title: 'Highlight',
       dataIndex: 'highlight',
       key: 'highlight',
-      width: '11%',
+      width: '15%',
       align: 'center',
-      render: (val) => (
-        <Tag color={val ? 'success' : 'default'}>
-          {val ? 'Bật' : 'Tắt'}
-        </Tag>
-      ),
+      render: (val) => {
+        const isHighlight = Boolean(val);
+        return (
+          <Tag color={isHighlight ? 'success' : 'default'}>
+            {isHighlight ? 'Bật' : 'Tắt'}
+          </Tag>
+        );
+      },
     },
     {
       title: 'Hành động',
       key: 'action',
-      width: '12%',
+      width: '15%',
       render: (_, record) => (
         <div className="action-btns">
-          <Button 
-            type="text" 
-            icon={<EditOutlined style={{ color: '#1677ff' }} />} 
-            onClick={() => navigate(`/admin/shop-management/update/${record._id}`)} 
+          <Button
+            type="text"
+            icon={<EditOutlined style={{ color: '#1677ff' }} />}
+            onClick={() => navigate(`/admin/banner-management/update/${record._id}`)}
           />
-          <Popconfirm title="Xóa sản phẩm này?" onConfirm={() => handleDelete(record._id)}>
+          <Popconfirm title="Xóa banner này?" onConfirm={() => handleDelete(record._id)}>
             <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </div>
@@ -128,28 +118,28 @@ export default function ShopProductTable() {
   ];
 
   return (
-    <div className="shop-table-container">
+    <div className="banner-table-container">
       <div className="table-header-actions">
         <Search
-          placeholder="Tìm kiếm sản phẩm..."
+          placeholder="Tìm kiếm theo mã phim..."
           onSearch={(val) => {
             setKeyword(val);
-            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
+            setPagination((prev) => ({ ...prev, page: 1 }));
           }}
           onChange={(e) => {
             setKeyword(e.target.value);
-            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi gõ
+            setPagination((prev) => ({ ...prev, page: 1 }));
           }}
           className="search-input"
           size="middle"
         />
-        <Button 
-          className='add-btn' 
-          type="primary" 
-          icon={<PlusOutlined />} 
-          onClick={() => navigate('/admin/shop-management/create')}
+        <Button
+          className="add-btn"
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => navigate('/admin/banner-management/create')}
         >
-          THÊM SẢN PHẨM
+          THÊM BANNER MỚI
         </Button>
       </div>
 
@@ -158,15 +148,15 @@ export default function ShopProductTable() {
         tableLayout="fixed"
         rowKey="_id"
         columns={columns}
-        dataSource={productList}
+        dataSource={bannerList}
         loading={isLoading || isDeleting}
         bordered
-        pagination={{ 
+        pagination={{
           current: pagination.page,
           pageSize: pagination.limit,
           total: paginationMeta.total,
           size: 'small',
-          showTotal: (total) => `Tổng ${total} sản phẩm`,
+          showTotal: (total) => `Tổng ${total} banner`,
           onChange: (page, limit) => setPagination({ page, limit }),
         }}
       />
