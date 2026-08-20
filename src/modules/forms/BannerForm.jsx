@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Form,
-  Button,
-  Switch,
-  Upload,
-  message,
-  AutoComplete,
-} from "antd";
+import { Form, Button, Switch, Upload, message, AutoComplete } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { updateBannerAPI, addBannerAPI } from "services/banner"; // Đã thêm lại import
 import { fetchMovieListAPI } from "services/general";
@@ -20,8 +13,8 @@ export default function BannerForm({ initialValues, onSuccess, loading }) {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const res = await fetchMovieListAPI();        
-        const moviesData = res.data?.content?.movies || [];
+        const res = await fetchMovieListAPI();
+        const moviesData = res.data?.content || [];
         setMovieList(Array.isArray(moviesData) ? moviesData : []);
       } catch (error) {
         message.error("Không thể tải danh sách phim");
@@ -31,7 +24,7 @@ export default function BannerForm({ initialValues, onSuccess, loading }) {
     fetchMovies();
   }, []);
 
-const movieOptions = (movieList || []).map((movie) => ({
+  const movieOptions = (movieList || []).map((movie) => ({
     value: `${movie._id}`,
     label: `${movie.title}`,
   }));
@@ -54,7 +47,7 @@ const movieOptions = (movieList || []).map((movie) => ({
     const formData = new FormData();
     formData.append("movie_id", values.movie_id);
     formData.append("highlight", values.highlight ? "true" : "false");
-    
+
     if (fileList.length > 0 && fileList[0].originFileObj) {
       formData.append("url", fileList[0].originFileObj);
     } else if (previewImage) {
@@ -96,7 +89,11 @@ const movieOptions = (movieList || []).map((movie) => ({
         />
       </Form.Item>
 
-      <Form.Item name="highlight" label="Banner Nổi Bật" valuePropName="checked">
+      <Form.Item
+        name="highlight"
+        label="Banner Nổi Bật"
+        valuePropName="checked"
+      >
         <Switch />
       </Form.Item>
 
@@ -111,7 +108,11 @@ const movieOptions = (movieList || []).map((movie) => ({
           <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
         </Upload>
         {previewImage && fileList.length === 0 && (
-          <img src={previewImage} alt="preview" style={{ width: 100, marginTop: 10 }} />
+          <img
+            src={previewImage}
+            alt="preview"
+            style={{ width: 100, marginTop: 10 }}
+          />
         )}
       </Form.Item>
 
