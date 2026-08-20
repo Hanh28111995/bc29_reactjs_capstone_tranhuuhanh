@@ -65,9 +65,7 @@ export default function HeroPage() {
     slidesToScroll: 1,
     arrows: false,
     swipe: false,
-  };
-
-  const nav = useNavigate();
+  };  
 
   const { state: rawBanner } = useAsync({
     dependencies: [],
@@ -143,7 +141,8 @@ export default function HeroPage() {
           <div className="hero-banner">
             <div className="child-slider-wrapper">
               <Slider ref={bannerSliderRef} {...settings_child}>
-                {newList}
+                {/* {newList} */}
+                {bannerList}
               </Slider>
             </div>
           </div>
@@ -187,7 +186,7 @@ export default function HeroPage() {
           <div className="movie-trailer">
             <div className="child-slider-wrapper">
               <Slider ref={trailerSliderRef} {...settings_child}>
-                {bannerList}
+                {/* {bannerList} */}
               </Slider>
             </div>
           </div>
