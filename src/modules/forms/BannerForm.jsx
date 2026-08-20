@@ -9,7 +9,7 @@ import {
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { updateBannerAPI, addBannerAPI } from "services/banner"; // Đã thêm lại import
-import { getMovieListAPI } from "services/movie";
+import { fetchMovieListAPI } from "services/general";
 
 export default function BannerForm({ initialValues, onSuccess, loading }) {
   const [form] = Form.useForm();
@@ -20,8 +20,8 @@ export default function BannerForm({ initialValues, onSuccess, loading }) {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const res = await getMovieListAPI();
-        setMovieList(res.data?.content || res.data || []);
+        const res = await fetchMovieListAPI();
+        setMovieList(res.data?.content.movies);
       } catch (error) {
         message.error("Không thể tải danh sách phim");
       }
@@ -30,8 +30,8 @@ export default function BannerForm({ initialValues, onSuccess, loading }) {
   }, []);
 
   const movieOptions = movieList.map((movie) => ({
-    value: movie.maPhim?.toString() || movie._id?.toString(),
-    label: `${movie.maPhim || movie._id} - ${movie.title || movie.tenPhim}`,
+    value: `${movie._id}`,
+    label: `${movie.title}`,
   }));
 
   useEffect(() => {
