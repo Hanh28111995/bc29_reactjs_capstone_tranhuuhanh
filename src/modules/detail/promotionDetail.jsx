@@ -18,10 +18,10 @@ export default function PromotionDetail() {
     isError,
     error,
   } = useAsync({
-    service: () => fetchPromotionDetailAPI(param.promotionId),
-    condition: !!param.promotionId,
-    dependencies: [param.promotionId],
-    queryKey: ["promotionDetail", param.promotionId],
+    service: () => fetchPromotionDetailAPI(param.id),
+    condition: !!param.id,
+    dependencies: [param.id],
+    queryKey: ["promotionDetail", param.id],
   });
 
   if (isLoading) {

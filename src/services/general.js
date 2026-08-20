@@ -56,7 +56,7 @@ const fetchShopFilterAPI = (filters) => {
   });
 };
 
-const fetchShopProductAPI = (id) => {
+const fetchShopProductDetailAPI = (id) => {
   return request({
     url: `/general/shop/${id}`,
     method: "GET",
@@ -104,5 +104,5 @@ export {
   fetchShowtimesAPI,
   fetchBranchesAPI,
   fetchShopFilterAPI,
-  fetchShopProductAPI
+  fetchShopProductDetailAPI
 };

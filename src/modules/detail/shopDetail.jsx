@@ -6,7 +6,7 @@ import { LoadingContext } from "../../contexts/loading.context";
 import { fetchShopProductAPI } from "services/general";
 
 export default function ShopDetail() {
-  const { shopId } = useParams(); // Hoặc id_shop tùy thuộc route của bạn
+  const param = useParams(); // Hoặc id_shop tùy thuộc route của bạn
   const navigate = useNavigate();
   const [loadingState] = useContext(LoadingContext) || [{}];
 
@@ -20,10 +20,10 @@ export default function ShopDetail() {
     isError,
     error,
   } = useAsync({
-    service: () => fetchShopProductAPI(shopId),
-    condition: !!shopId,
-    dependencies: [shopId],
-    queryKey: ["shopDetail", shopId],
+    service: () => fetchShopProductAPI(param.id),
+    condition: !!param.id,
+    dependencies: [param.id],
+    queryKey: ["shopDetail", param.id],
   });
 
   // Xử lý thay đổi giá trị option
