@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Form, Button, Switch, Upload, message, AutoComplete } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { updateBannerAPI, addBannerAPI } from "services/banner"; // Đã thêm lại import
+import { useParams } from "react-router-dom";
+import { updateBannerAPI, addBannerAPI, getBannerDetailAPI } from "services/banner";
 import { fetchMovieListAPI } from "services/general";
 
-export default function BannerForm({ initialValues, onSuccess, loading }) {
+export default function BannerForm({ onSuccess, loading }) {
   const [form] = Form.useForm();
+  const params = useParams();
+  const bannerId = params.bannerId || params.id; // Lấy id từ URL nếu có
+
   const [fileList, setFileList] = useState([]);
   const [previewImage, setPreviewImage] = useState("");
   const [movieList, setMovieList] = useState([]);
+  const [initialValues, setInitialValues] = useState(null);
 
+  // 1. Gọi API lấy danh sách phim cho AutoComplete
   useEffect(() => {
     const fetchMovies = async () => {
       try {
@@ -24,24 +30,38 @@ export default function BannerForm({ initialValues, onSuccess, loading }) {
     fetchMovies();
   }, []);
 
+  // 2. Kiểm tra nếu có id trên URL thì gọi API lấy chi tiết banner để update
+  useEffect(() => {
+    const fetchBannerDetail = async () => {
+      if (bannerId && bannerId !== "create") {
+        try {
+          const res = await getBannerDetailAPI(bannerId);
+          const bannerData = res.data?.content || res.data;
+          if (bannerData) {
+            setInitialValues(bannerData);
+            form.setFieldsValue({
+              movie_id: bannerData.movie_id?.toString(),
+              highlight: bannerData.highlight,
+            });
+            setPreviewImage(bannerData.url || "");
+          }
+        } catch (error) {
+          message.error("Không thể tải chi tiết banner");
+        }
+      } else {
+        form.resetFields();
+        setInitialValues(null);
+        setFileList([]);
+        setPreviewImage("");
+      }
+    };
+    fetchBannerDetail();
+  }, [bannerId, form]);
+
   const movieOptions = (movieList || []).map((movie) => ({
     value: `${movie._id}`,
     label: `${movie.title}`,
   }));
-
-  useEffect(() => {
-    if (initialValues) {
-      form.setFieldsValue({
-        movie_id: initialValues.movie_id?.toString(),
-        highlight: initialValues.highlight,
-      });
-      setPreviewImage(initialValues.url || "");
-    } else {
-      form.resetFields();
-      setFileList([]);
-      setPreviewImage("");
-    }
-  }, [initialValues, form]);
 
   const handleSubmit = async (values) => {
     const formData = new FormData();
@@ -55,8 +75,8 @@ export default function BannerForm({ initialValues, onSuccess, loading }) {
     }
 
     try {
-      if (initialValues && initialValues._id) {
-        await updateBannerAPI(initialValues._id, formData);
+      if (bannerId && bannerId !== "create") {
+        await updateBannerAPI(bannerId, formData);
         message.success("Cập nhật banner thành công!");
       } else {
         await addBannerAPI(formData);
@@ -118,7 +138,7 @@ export default function BannerForm({ initialValues, onSuccess, loading }) {
 
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={loading} block>
-          {initialValues ? "Cập nhật" : "Thêm mới"}
+          {bannerId && bannerId !== "create" ? "Cập nhật" : "Thêm mới"}
         </Button>
       </Form.Item>
     </Form>
