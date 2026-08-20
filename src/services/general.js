@@ -6,9 +6,16 @@ const normalizeCinemaBranch = (item) => {
   return branch ? { ...item, branch } : item;
 };
 
-const fetchMoviebannerAPI = () => {
+const fetchShowBannerAPI = () => {
   return request({
     url: `/general/showBanners`,
+    method: "GET",
+  });
+};
+
+const fetchShowPromotionAPI = () => {
+  return request({
+    url: `/general/promotion/all`,
     method: "GET",
   });
 };
@@ -16,13 +23,6 @@ const fetchMoviebannerAPI = () => {
 const fetchMovieListAPI = () => {
   return request({
     url: `/general/movie/all`,
-    method: "GET",
-  });
-};
-
-const fetchPromotionListAPI = () => {
-  return request({
-    url: `/general/promotion/all`,
     method: "GET",
   });
 };
@@ -95,9 +95,9 @@ const fetchBranchesAPI = (filters) => {
 };
 
 export {
-  fetchMoviebannerAPI,
+  fetchShowBannerAPI,
   fetchMovieListAPI,
-  fetchPromotionListAPI,
+  fetchShowPromotionAPI,
   fetchPromotionDetailAPI,
   fetchMovieDetailAPI,
   fetchLocationListAPI,

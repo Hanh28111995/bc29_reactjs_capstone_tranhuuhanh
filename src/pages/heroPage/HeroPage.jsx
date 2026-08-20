@@ -6,9 +6,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useAsync } from "hooks/useAsync";
-import { getBannerListAPI } from "services/banner";
-import { getPromotionListAPI } from "services/promotion";
 import { useNavigate } from "react-router-dom";
+import { fetchShowBannerAPI, fetchShowPromotionAPI } from "services/general";
 
 export default function HeroPage() {
   const bannerSliderRef = useRef(null);
@@ -72,11 +71,11 @@ export default function HeroPage() {
 
   const { state: rawBanner } = useAsync({
     dependencies: [],
-    service: () => getBannerListAPI(),
+    service: () => fetchShowBannerAPI(),
   });
   const { state: rawNewPromotion } = useAsync({
     dependencies: [],
-    service: () => getPromotionListAPI(),
+    service: () => fetchShowPromotionAPI(),
   });
 
   console.log("Check rawBanner:", rawBanner);
