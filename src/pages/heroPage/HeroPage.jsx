@@ -8,6 +8,7 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useAsync } from "hooks/useAsync";
 import { useNavigate } from "react-router-dom";
 import { fetchShowBannerAPI, fetchShowPromotionAPI } from "services/general";
+import { Spin } from "antd";
 
 export default function HeroPage() {
   const bannerSliderRef = useRef(null);
@@ -65,19 +66,48 @@ export default function HeroPage() {
     slidesToScroll: 1,
     arrows: false,
     swipe: false,
-  };  
+  };
 
-  const { state: rawBanner } = useAsync({
-    dependencies: [],
+  const {
+    state: rawBanner = [],
+    loading: bannerLoading,
+    isError: bannerIsError,
+  } = useAsync({
     service: () => fetchShowBannerAPI(),
-  });
-  const { state: rawNewPromotion } = useAsync({
-    dependencies: [],
-    service: () => fetchShowPromotionAPI(),
+    queryKey: ["banners"],
   });
 
-  console.log("Check rawBanner:", rawBanner);
-  console.log("Check rawNewPromotion:", rawNewPromotion);
+  // 2. Tách biệt các biến cho Promotion
+  const {
+    state: rawNewPromotion = [],
+    loading: promoLoading,
+    isError: promoIsError,
+  } = useAsync({
+    service: () => fetchShowPromotionAPI(),
+    queryKey: ["promotions"],
+  });
+
+  const isLoading = bannerLoading || promoLoading;
+  const isError = bannerIsError || promoIsError;
+
+  if (isLoading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "50vh" }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
+  
+  if (isError) {
+    return (
+      <div className="text-center mt-5">
+        <p>Đã có lỗi khi tải dữ liệu trang chủ.</p>        
+      </div>
+    );
+  }
 
   const banner = Array.isArray(rawBanner)
     ? rawBanner.filter((item) => item.highlight === true)
@@ -90,8 +120,8 @@ export default function HeroPage() {
   console.log("Banner sau khi lọc (highlight=true):", banner);
   console.log("Promotion sau khi lọc (highlight=true):", promotion);
 
-  const bannerList = banner?.map((item, index) => (
-    <div key={index} className="trailer-card">
+ const bannerList = banner?.map((item, index) => (
+    <div key={item._id || index} className="trailer-card">
       <a href={`/movie/detail/${item._id}`}>
         <img src={item.url} alt="Trailer" />
       </a>
@@ -99,12 +129,13 @@ export default function HeroPage() {
   ));
 
   const newList = promotion?.map((item, index) => (
-    <div key={index} className="banner-slide">
+    <div key={item._id || index} className="banner-slide">
       <a href={`/promotion/${item._id}`}>
-        <img src={item.url} alt="News" />
+        <img src={item.banner} alt="News" />
       </a>
     </div>
   ));
+
   return (
     <>
       <SEO
@@ -141,8 +172,7 @@ export default function HeroPage() {
           <div className="hero-banner">
             <div className="child-slider-wrapper">
               <Slider ref={bannerSliderRef} {...settings_child}>
-                {/* {newList} */}
-                {bannerList}
+                {newList}
               </Slider>
             </div>
           </div>
@@ -186,7 +216,7 @@ export default function HeroPage() {
           <div className="movie-trailer">
             <div className="child-slider-wrapper">
               <Slider ref={trailerSliderRef} {...settings_child}>
-                {/* {bannerList} */}
+                {bannerList}
               </Slider>
             </div>
           </div>
