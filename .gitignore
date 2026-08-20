@@ -11,3 +11,9 @@ build
 
 # Local account data / secrets
 Account/
+.vercel
+node_modules
+dist
+build
+.kiro
+.vscode
