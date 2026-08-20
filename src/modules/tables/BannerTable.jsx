@@ -99,7 +99,7 @@ export default function BannerTable() {
           className='add-btn' 
           type="primary" 
           icon={<PlusOutlined />} 
-          onClick={() => navigate('/admin/banner-generator/create')}
+          onClick={() => navigate('/admin/tools/banner-generator/create')}
         >
           THÊM BANNER
         </Button>
