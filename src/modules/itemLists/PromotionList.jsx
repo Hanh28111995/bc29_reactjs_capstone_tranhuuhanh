@@ -4,8 +4,9 @@ import { LoadingContext } from "../../contexts/loading.context";
 import { useAsync } from "../../hooks/useAsync";
 import { Spin } from "antd";
 import dayjs from "dayjs";
-import { fetchPromotionListAPI } from "services/general";
+
 import "./index.scss";
+import { fetchShowPromotionAPI } from "services/general";
 
 export default function PromotionList() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function PromotionList() {
     isError,
     error,
   } = useAsync({
-    service: () => fetchPromotionListAPI(),
+    service: () => fetchShowPromotionAPI(),
     queryKey: ["promotions"], // Đã sửa lại queryKey cho đúng
   });
   
