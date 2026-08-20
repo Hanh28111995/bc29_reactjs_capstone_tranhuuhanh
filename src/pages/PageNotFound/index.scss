@@ -1,0 +1,109 @@
+/* Page 404 - Rem Optimized (1rem = 10px) */
+
+.bg404 {
+  color: #444;
+  background-image: url('../../../public/404_img/blueprint.png');
+  height: 100vh;
+}
+
+div#da-wrapper {
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  position: relative;
+  min-width: 32rem; /* 320px */
+}
+
+div#da-content {
+  clear: both;
+  padding-bottom: 5.8rem; /* 58px */
+}
+
+div#da-wrapper .da-container {
+  width: 96%;
+  margin: auto;
+}
+
+div#da-error-wrapper {
+  width: 32rem; /* 320px */
+  padding: 3rem 0; /* 30px */
+  margin: auto;
+  position: relative;
+}
+
+/* Typography */
+div#da-wrapper .da-hompage h5 {
+  font-size: 1.5rem; /* 15px */
+  color: #444;
+}
+
+div#da-error-wrapper .da-error-heading {
+  color: #e15656;
+  text-align: center;
+  font-size: 1.8rem; /* 18px */
+  font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+/* Error Pin (Cái ghim) */
+div#da-error-wrapper #da-error-pin {
+  width: 3.8rem; /* 38px */
+  height: 3.8rem;
+  display: block;
+  margin: 0 auto -2.7rem auto; /* margin-bottom: -27px */
+  z-index: 10;
+  position: relative;
+  background: url('../../../public/404_img/error-pin.png') no-repeat center center;
+  background-size: contain;
+}
+
+/* Error Code Hanging Board (Biển treo số 404) */
+div#da-error-wrapper #da-error-code {
+  width: 100%;
+  height: 28.2rem; /* 282px */
+  padding: 12.7rem 1.6rem 0 1.6rem; /* 127px 16px 0 16px */
+  position: relative;
+  margin: auto;
+  margin-bottom: 2rem; /* 20px */
+  z-index: 5;
+  line-height: 1;
+  font-size: 3.2rem; /* 32px */
+  text-align: center;
+  background: url('../../../public/404_img/error-hanger.png') no-repeat center center;
+  background-size: 100% 100%;
+  transform-origin: center top;
+  animation: error-swing 2s ease-in-out infinite alternate;
+}
+
+div#da-error-wrapper #da-error-code span {
+  font-size: 9.6rem; /* 96px */
+  display: block;
+}
+
+/* Arrows Animation */
+div#da-wrapper .fa-chevron-right {
+  position: absolute;
+  left: 0;
+  animation: arrowRight 1s linear infinite;
+}
+
+div#da-wrapper .fa-chevron-left {
+  position: absolute;
+  right: 0;
+  animation: arrowLeft 1s linear infinite;
+}
+
+/* KEYFRAMES (Đã gộp gọn và dùng rem cho transform) */
+@keyframes error-swing {
+  0% { transform: rotate(1deg); }
+  100% { transform: rotate(-2deg); }
+}
+
+@keyframes arrowRight {
+  0% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(2rem); } /* 20px */
+}
+
+@keyframes arrowLeft {
+  0% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-2rem); } /* -20px */
+}

@@ -1,0 +1,154 @@
+.Calendar {
+  .ant-row {
+    width: 100%;
+  }
+
+  .ant-carousel {
+    .slick-next,
+    .slick-prev {
+      &::before {
+        content: "";
+      }
+    }
+  }
+
+  .table {
+    margin-bottom: 0;
+
+    td {
+      cursor: pointer;
+    }
+
+    .yesterday {
+      color: gray !important;
+      pointer-events: none !important;
+    }
+
+    .today {
+      color: #fff !important;
+      position: relative;
+      z-index: 2;
+
+      &::after {
+        background-color: rgba(46, 46, 46, 0.8) !important;
+        left: 50% !important;
+        bottom: 0.5rem; /* 5px */
+      }
+    }
+
+    .active,
+    .inactive {
+      color: #fff;
+      position: relative;
+      z-index: 2;
+
+      &::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        width: 3rem; /* 30px */
+        height: 3rem; /* 30px */
+        left: 50% !important;
+        bottom: 0.5rem; /* 8px */
+        transform: translateX(-50%) !important;
+        z-index: -1;
+      }
+    }
+
+    .active::after {
+      background-color: burlywood;
+    }
+
+    .inactive {
+      color: black;
+      &::after {
+        background-color: transparent;
+      }
+    }
+  }
+
+  .month {
+    font-weight: bold;
+
+    em {
+      font-size: 3.4rem; /* 34px */
+      margin: 0 1.5rem 0 0; /* 15px */
+      border-bottom: 0.2rem solid #231f20; /* 2px */
+      font-family: "Linux Libertine";
+      color: #231f20;
+      font-weight: bold;
+      font-style: normal;
+      display: inline-block; // Đảm bảo border-bottom hiển thị đúng
+    }
+  }
+
+  /* Responsive Mobile */
+  @media only screen and (max-width: 500px) {
+    /* 500px */
+    min-width: 30rem; /* 300px */
+    width: 100%;
+
+    table {
+      th,
+      td {
+        padding: 0.2rem; /* 2px */
+      }
+
+      .inactive,
+      .active {
+        &::after {
+          width: 2.5rem !important; /* 25px */
+          height: 2.5rem !important; /* 25px */
+          bottom: 0.2rem !important; /* 2px */
+        }
+      }
+    }
+  }
+}
+
+.Showtime {
+  .nav-pills .nav-link.active {
+    background-color: #dad2b4;
+  }
+
+  a {
+    color: black;
+  }
+
+  .box_select {
+    display: inline-block; // Đảm bảo padding và margin hoạt động tốt trên thẻ a
+    border-radius: 1rem; /* 10px */
+    border: 0.1rem burlywood solid; /* 1px */
+    margin-right: 0.5rem; /* 5px */
+    margin-bottom: 0.5rem; /* 5px */
+    text-align: center;
+    padding: 0.7rem 1rem 0; /* padding-top 7px, thêm padding ngang để cân đối */
+    height: 3.5rem; /* 35px - Tùy chỉnh cho khớp với nút Đặt vé */
+    text-decoration: none;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #dad2b4;
+    }
+  }
+}
+@media only screen and (max-width: 375px) {
+  .Calendar {
+    margin-top: 3rem;
+
+    .ant-row .ant-col {
+      max-width: 100% !important;
+      .ant-carousel .slick-slider .slick-arrow {
+        display: none !important;        
+      }
+      th, tr{
+        font-size: 1rem;
+      }
+    }
+  }
+  .Calendar table .inactive::after, .Calendar table .active::after {
+        width: 2rem !important;
+        height: 2rem !important;
+        bottom: 0.2rem !important;
+    }
+}

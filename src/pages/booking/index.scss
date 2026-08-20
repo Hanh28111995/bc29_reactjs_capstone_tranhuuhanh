@@ -1,0 +1,168 @@
+.bookingPage {
+  width: 100%;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding: 3rem 0;
+
+  .booking-wrapper {
+    display: flex;
+    gap: 3rem;
+    max-width: 120rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Cột Sidebar Thông tin phim */
+  .booking-sidebar {
+    flex: 0 0 30rem;
+    background: #fff;
+    padding: 2.5rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.08);
+    height: fit-content;
+
+    .movie-banner {
+      width: 100%;
+      border-radius: 0.6rem;
+      margin-bottom: 2rem;
+      object-fit: cover;
+    }
+
+    .info-item {
+      margin-bottom: 2rem;
+
+      label {
+        display: block;
+        font-size: 1.4rem;
+        color: #777;
+        margin-bottom: 0.5rem;
+      }
+
+      .highlight {
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+
+        span {
+          font-weight: 600;
+          color: #555;
+        }
+      }
+    }
+
+    .info-summary {
+      border-top: 0.1rem dashed #ddd;
+      padding-top: 2rem;
+      margin-top: 2rem;
+
+      p {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+      }
+
+      .total-price {
+        font-size: 1.8rem;
+        b {
+          color: #e50914;
+        }
+      }
+    }
+
+    .btn-submit-booking {
+      width: 100%;
+      background-color: #17a2b8;
+      color: #fff;
+      border: none;
+      padding: 1.2rem;
+      border-radius: 0.4rem;
+      font-weight: bold;
+      font-size: 1.6rem;
+      cursor: pointer;
+      transition: background 0.3s;
+
+      &:hover {
+        background-color: #138496;
+      }
+    }
+  }
+
+  /* Cột Sơ đồ ghế */
+  .booking-seats-area {
+    flex: 1;
+    background: #fff;
+    padding: 3rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.05);
+    text-align: center;
+  }
+
+  /* Responsive cho điện thoại */
+  @media only screen and (max-width: 768px) {
+    /* 768px */
+    .booking-wrapper {
+      flex-direction: column-reverse;
+    }
+
+    .booking-sidebar {
+      flex: 1;
+      width: 100%;
+      order: 2; /* Sidebar nằm dưới */
+    }
+
+    .booking-seats-area {
+      order: 1; /* Sơ đồ ghế nằm trên */
+      padding: 1.5rem;
+      overflow-x: auto; /* Cho phép cuộn ngang nếu rạp quá rộng */
+    }
+  }
+}
+
+.screen {
+  /* 50px -> 5rem */
+  border-top: 5rem solid rgb(255, 159, 95);
+  border-left: 5rem solid transparent;
+  border-right: 5rem solid transparent;
+  height: 10rem;
+  width: 80%;
+  filter: drop-shadow(0.4rem 3rem 2rem rgba(255, 255, 255, 0.5));
+  font-size: 2.5rem;
+  color: #fff;
+  position: relative; // Thêm để .wthree định vị chuẩn
+
+  .wthree {
+    font-size: 0.5em;
+    color: #000;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.7rem;
+    word-spacing: 1rem;
+    position: absolute;
+    bottom: 6rem;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    text-align: center;
+  }
+}
+
+.col-9 {
+  ul {
+    list-style-type: none;
+    li {
+      display: inline-block;
+      margin-left: 2rem;
+    }
+  }
+}
+
+/* Mobile nhỏ (500px) */
+@media screen and (max-width: 500px) {
+  .bookingPage {
+    padding: 0 !important;
+    .seatRender {
+      padding: 0 !important;
+      border: none !important;
+    }
+  }
+}

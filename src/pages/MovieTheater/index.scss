@@ -1,0 +1,47 @@
+.nav-theater {
+    color: gray;
+    border: solid 1px #856307;
+    background-color: whitesmoke;
+}
+
+.nav-theater:hover {
+    color: #856307;
+}
+
+.nav-pills .active {
+    background-color: #856307 !important;
+    color: antiquewhite !important;
+}
+
+.nav-pills a {
+    text-decoration: none;
+}
+
+.header-table {
+    font-weight: bold !important;
+    // text-align: center;
+    background-color: transparent !important;
+}
+
+tr.ant-table-row:hover td {
+    background-color: #dad2b4 !important;
+}
+
+.nav-item {
+    margin-top: 5px;
+}
+
+.list-theater {
+    .nav-item {
+        a{
+            font-size: 14px;
+        }
+        @media screen and (max-width: 500px) {
+            a{
+                font-size: 10px;
+            }
+        }
+    }
+    
+    
+}

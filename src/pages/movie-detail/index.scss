@@ -1,0 +1,25 @@
+.detailPage {
+  .forPC {
+    display: block;
+  }
+  .forPhone {
+    display: none;
+  }
+  .ant-row {
+    border-radius: 5px;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .detailPage {
+    .forPC {
+      display: none;
+    }
+    .forPhone {
+      display: block;
+    }
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+}

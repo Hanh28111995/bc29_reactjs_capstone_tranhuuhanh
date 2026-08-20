@@ -1,0 +1,13 @@
+.vercel
+node_modules
+dist
+build
+.kiro
+.vscode
+
+# macOS system files
+.DS_Store
+**/ .DS_Store
+
+# Local account data / secrets
+Account/

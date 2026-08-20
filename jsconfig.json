@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "paths": {
+        "pages/*": ["./src/pages/*"],
+        "services/*": ["./src/services/*"],
+        "guards/*": ["./src/guards/*"],
+        "modules/*": ["./src/modules/*"],
+        "hooks/*": ["./src/hooks/*"]
+      }
+    }
+  }

@@ -1,0 +1,18 @@
+{
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNew": "No new notifications",
+    "seeAll": "See all"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "hello": "Hello"
+  },
+  "language": {
+    "en": "English",
+    "vi": "Vietnamese"
+  }
+}
