@@ -10,13 +10,13 @@ import { addPromotionAPI, updatePromotionAPI, getPromotionDetailAPI } from "serv
 import { ArrowLeftOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
 import "./index.scss";
 
-// 1. Thêm isHighlight vào giá trị mặc định
+// 1. Thêm highlight vào giá trị mặc định
 const DEFAULT_VALUES = {
   title: "",
   content: "",
   startDate: null,
   endDate: null,
-  isHighlight: false, 
+  highlight: false, 
 };
 
 export default function PromotionForm() {
@@ -44,7 +44,7 @@ export default function PromotionForm() {
           ...promoDetail,
           startDate: promoDetail.startDate ? dayjs(promoDetail.startDate) : null,
           endDate: promoDetail.endDate ? dayjs(promoDetail.endDate) : null,
-          isHighlight: promoDetail.isHighlight ?? false, // Đồng bộ giá trị highlight từ API
+          highlight: promoDetail.highlight ?? false, // Đồng bộ giá trị highlight từ API
         };
         form.setFieldsValue(normalized);
         setOriginalData(normalized);
@@ -92,7 +92,7 @@ export default function PromotionForm() {
         ...values,
         startDate: values.startDate ? values.startDate.format('YYYY-MM-DD') : null,
         endDate: values.endDate ? values.endDate.format('YYYY-MM-DD') : null,
-        isHighlight: values.isHighlight ? true : false, // Đảm bảo truyền giá trị boolean lên server
+        highlight: values.highlight ? true : false, // Đảm bảo truyền giá trị boolean lên server
       };
 
       Object.keys(payload).forEach(key => {
@@ -159,7 +159,7 @@ export default function PromotionForm() {
             </Row>
 
             {/* 2. Thêm Form.Item cho Switch Toggle Highlight */}
-            <Form.Item label="Nổi bật (Highlight)" name="isHighlight" valuePropName="checked">
+            <Form.Item label="Nổi bật (Highlight)" name="highlight" valuePropName="checked">
               <Switch checkedChildren="Bật" unCheckedChildren="Tắt" />
             </Form.Item>
 
