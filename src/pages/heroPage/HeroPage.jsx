@@ -104,7 +104,7 @@ export default function HeroPage() {
   const newList = promotion?.map((item, index) => (
     <div key={index} className="banner-slide">
       <a href={`/promotion/${item._id}`}>
-        <img src={item.banner} alt="News" />
+        <img src={item.url} alt="News" />
       </a>
     </div>
   ));
