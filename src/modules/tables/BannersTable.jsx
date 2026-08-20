@@ -240,13 +240,17 @@ export default function BannerTable() {
         <MovieIdSelect value={value} onChange={onChange} />
       ),
     },
-    {
+{
       title: "Highlight",
       dataIndex: "highlight",
+      valueType: "switch",
       width: "15%",
-      renderFormItem: (_, { value, onChange }) => (
-        <Switch checked={!!value} onChange={(checked) => onChange(checked)} />
-      ),
+      // Thêm fieldProps để Ant Design ProComponents hiểu đây là Switch nhận giá trị qua checked
+      fieldProps: () => {
+        return {
+          valuePropName: 'checked',
+        };
+      },
       render: (val) => (
         <span
           style={{
