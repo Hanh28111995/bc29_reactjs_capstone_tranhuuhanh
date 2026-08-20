@@ -106,20 +106,7 @@ export default function BannerTable() {
 
   return (
     <div className="banner-table-container">
-      <div className="table-header-actions">
-        <Search
-          placeholder="Tìm kiếm banner..."
-          onSearch={(val) => {
-            setKeyword(val);
-            setPagination((prev) => ({ ...prev, page: 1 }));
-          }}
-          onChange={(e) => {
-            setKeyword(e.target.value);
-            setPagination((prev) => ({ ...prev, page: 1 }));
-          }}
-          className="search-input"
-          size="middle"
-        />
+      <div className="table-header-actions">        
         <Button 
           className='add-btn' 
           type="primary" 
