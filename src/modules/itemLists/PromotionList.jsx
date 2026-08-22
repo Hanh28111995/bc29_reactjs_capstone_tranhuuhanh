@@ -71,7 +71,7 @@ export default function PromotionList() {
                 </h5> */}
                 
                 {/* Hiển thị ngày tháng an toàn hơn (phòng trường hợp schema cho phép null/undefined) */}
-                <p className="promotion-release text-muted mb-0">
+                <p className="promotion-release text-muted mb-0 text-center">
                   {ele.startDate ? dayjs(ele.startDate).format('DD/MM/YYYY') : "Đang cập nhật"} 
                   {" - "} 
                   {ele.endDate ? dayjs(ele.endDate).format('DD/MM/YYYY') : "Không thời hạn"}
