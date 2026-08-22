@@ -100,11 +100,11 @@ export default function HeroPage() {
   //     </div>
   //   );
   // }
-  
+
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải dữ liệu trang chủ.</p>        
+        <p>Đã có lỗi khi tải dữ liệu trang chủ.</p>
       </div>
     );
   }
@@ -118,7 +118,7 @@ export default function HeroPage() {
     : [];
 
   console.log("Banner sau khi lọc (highlight=true):", banner);
-  console.log("Promotion sau khi lọc (highlight=true):", promotion); 
+  console.log("Promotion sau khi lọc (highlight=true):", promotion);
 
   const newList = promotion?.map((item, index) => (
     <div key={item._id || index} className="banner-slide">
@@ -294,10 +294,13 @@ export default function HeroPage() {
             <div className="item-large">
               <div className="item-tall">
                 <div className="event-item">
-                  <img
-                    src="https://media.lottecinemavn.com/Media/Event/661fe46e894748bfbfbdff864789fd4a.png"
-                    alt="Quyền lợi thành viên"
-                  />
+                  {promotion
+                    .filter((item) => item._id === "6a894891772982422acdfa34")
+                    .map((item) => (
+                      <a key={item._id} href={`/promotion/${item._id}`}>
+                        <img src={item.banner} alt="Quyền lợi thành viên" />
+                      </a>
+                    ))}
                 </div>
               </div>
               <div className="item-nm">
@@ -306,6 +309,7 @@ export default function HeroPage() {
                     src="https://media.lottecinemavn.com/Media/WebAdmin/b5fe97ebdaab46299ce539027fff755c.jpg"
                     alt="Family Day"
                   />
+                  
                 </div>
               </div>
             </div>

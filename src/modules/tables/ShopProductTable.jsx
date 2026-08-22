@@ -64,7 +64,7 @@ export default function ShopProductTable() {
       key: 'banner',
       width: '12%',
       render: (text) => (
-        <Image src={text} style={{ width: 60, height: 60, objectFit: 'cover' }} fallback="https://via.placeholder.com/60x60?text=No+Img" />
+        <Image src={text} className="movie-banner" fallback="https://via.placeholder.com/60x60?text=No+Img" />
       ),
     },
     {

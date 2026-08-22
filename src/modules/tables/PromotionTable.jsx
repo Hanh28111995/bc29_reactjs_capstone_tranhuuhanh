@@ -60,8 +60,7 @@ function PromotionTable() {
       title: 'Mã',
       dataIndex: '_id',
       key: '_id',
-      width: '12%',
-      render: (text) => text?.slice(-6).toUpperCase(),
+      width: '12%',      
     },
     {
       title: 'Banner',
@@ -69,7 +68,7 @@ function PromotionTable() {
       key: 'banner',
       width: '18%',
       render: (text) => (
-        <Image src={text} className="promo-banner" fallback="https://via.placeholder.com/120x60?text=No+Banner" />
+        <Image src={text} className="movie-banner" fallback="https://via.placeholder.com/120x60?text=No+Banner" />
       ),
     },
     {
