@@ -295,7 +295,7 @@ export default function HeroPage() {
               <div className="item-tall">
                 <div className="event-item">
                   {promotion
-                    .filter((item) => item._id === "6a894891772982422acdfa34")
+                    ?.filter((item) => item._id === "6a894891772982422acdfa34")
                     .map((item) => (
                       <a key={item._id} href={`/promotion/${item._id}`}>
                         <img src={item.banner} alt="Quyền lợi thành viên" />
@@ -309,7 +309,6 @@ export default function HeroPage() {
                     src="https://media.lottecinemavn.com/Media/WebAdmin/b5fe97ebdaab46299ce539027fff755c.jpg"
                     alt="Family Day"
                   />
-                  
                 </div>
               </div>
             </div>
