@@ -9,8 +9,8 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import { removeVietnameseTones } from 'constants/common';
-import './index.scss';
 import { deletePromotionAPI, getPromotionListAPI } from 'services/promotion';
+import './index.scss';
 
 const { Search } = Input;
 
@@ -157,7 +157,7 @@ function PromotionTable() {
           pageSize: pagination.limit,
           total: paginationMeta.total,
           size: 'small',
-          showTotal: (total) => `Tổng ${total} chương trình`,
+          showTotal: (total) => `${total} chương trình`,
           onChange: (page, limit) => setPagination({ page, limit }),
         }}
       />
