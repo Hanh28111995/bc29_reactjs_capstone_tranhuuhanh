@@ -203,9 +203,6 @@ export default function Header() {
           </div>
         ) : (
           <div className="ml-auto d-flex align-items-center justify-content-end pl-2">
-            <p className="my-0">
-              {t("auth.hello")} {userState.userInfor?.user_inf?.username}
-            </p>
             <div
               style={{
                 fontSize: "1rem",
@@ -213,6 +210,9 @@ export default function Header() {
                 textAlign: "center",
               }}
             >
+              <p className="my-0">
+                {t("auth.hello")} {userState.userInfor?.user_inf?.username}
+              </p>
               <button
                 onClick={handleLogout}
                 className="btn-more-infor my-2 my-sm-0 mr-2"
