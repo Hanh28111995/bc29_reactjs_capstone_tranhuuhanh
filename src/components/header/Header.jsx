@@ -16,7 +16,7 @@ import {
   markAllNotificationsAsReadAPI,
   fetchChangeStatusNotificationAPI,
 } from "services/notificationAndHistory";
-import logoImage from '../../assets/images/h_ticket_cinema_logo.png';
+import logoImage from "../../assets/images/h_ticket_cinema_logo.png";
 import "./index.scss";
 import { useEffect, useState } from "react";
 
@@ -202,21 +202,14 @@ export default function Header() {
             </button>
           </div>
         ) : (
-          <div className="ml-auto d-flex align-items-center justify-content-between pl-2">
-            <button
-              className="btn mx-2"
-              id="showNotificationBtn"
-              onClick={handleOpenNotifications}
-            >
-              <i className="fa fa-bell" style={{ fontSize: "2.5rem" }} />
-              <p className="numNotificationItem">
-                {notifications.filter((item) => !item.status).length}
-              </p>
-            </button>
+          <div className="ml-auto d-flex align-items-center justify-content-end pl-2">
+            <p className="my-0">
+              {t("auth.hello")} {userState.userInfor?.user_inf?.username}
+            </p>
             <div
               style={{
                 fontSize: "1rem",
-                flexDirection: "column",
+                flexDirection: "row",
                 textAlign: "center",
               }}
             >
@@ -242,9 +235,16 @@ export default function Header() {
               >
                 {t(`language.${i18n.language === "en" ? "vi" : "en"}`)}
               </button>
-              <p className="my-0">
-                {t("auth.hello")} {userState.userInfor?.user_inf?.username}
-              </p>
+              <button
+                className="btn mx-2"
+                id="showNotificationBtn"
+                onClick={handleOpenNotifications}
+              >
+                <i className="fa fa-bell" style={{ fontSize: "2.5rem" }} />
+                <p className="numNotificationItem">
+                  {notifications.filter((item) => !item.status).length}
+                </p>
+              </button>
             </div>
           </div>
         )}
@@ -253,8 +253,12 @@ export default function Header() {
         <a className="navbar-brand" href="/">
           <img
             src={logoImage}
-            alt="HTheaterLogo"            
-            style={{ height: "100px", marginBottom: "15px", transform: "scaleX(1.3)" }}
+            alt="HTheaterLogo"
+            style={{
+              height: "100px",
+              marginBottom: "15px",
+              transform: "scaleX(1.3)",
+            }}
           />
         </a>
       </div>
