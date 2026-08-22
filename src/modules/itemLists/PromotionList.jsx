@@ -46,11 +46,11 @@ export default function PromotionList() {
   }  
 
   return (
-    <div className="container-fluid my-5 movie-list-container">            
-      <div className="row mt-3 w-lg-75 movie-list-row">
+    <div className="container-fluid my-5 promotion-list-container">            
+      <div className="row mt-3 w-lg-75 promotion-list-row">
         {promotionList.map((ele) => (
           <div className="col-3 mb-4" key={ele._id}>
-            <div className="card movie-card h-100" onClick={() => navigate(`/promotion/${ele._id}`)} style={{ cursor: "pointer" }}>
+            <div className="card promotion-card" onClick={() => navigate(`/promotion/${ele._id}`)} style={{ cursor: "pointer" }}>
               <div className="card-header-wrapper">
                 {/* Đã sửa tag thành title */}
                 <img 
@@ -66,12 +66,12 @@ export default function PromotionList() {
               </div>
               <div className="card-body-custom p-3">
                 {/* Bổ sung hiển thị Title vì Model có trường này */}
-                <h5 className="card-title text-truncate" title={ele.title}>
+                {/* <h5 className="card-title text-truncate" title={ele.title}>
                   {ele.title}
-                </h5>
+                </h5> */}
                 
                 {/* Hiển thị ngày tháng an toàn hơn (phòng trường hợp schema cho phép null/undefined) */}
-                <p className="movie-release text-muted mb-0">
+                <p className="promotion-release text-muted mb-0">
                   {ele.startDate ? dayjs(ele.startDate).format('DD/MM/YYYY') : "Đang cập nhật"} 
                   {" - "} 
                   {ele.endDate ? dayjs(ele.endDate).format('DD/MM/YYYY') : "Không thời hạn"}
