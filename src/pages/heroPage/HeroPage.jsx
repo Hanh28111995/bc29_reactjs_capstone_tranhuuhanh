@@ -294,7 +294,7 @@ export default function HeroPage() {
             <div className="item-large">
               <div className="item-tall">
                 <div className="event-item">
-                  {promotion
+                  {rawNewPromotion
                     ?.filter((item) => item._id === "6a894891772982422acdfa34")
                     .map((item) => (
                       <a key={item._id} href={`/promotion/${item._id}`}>
