@@ -208,9 +208,18 @@ export default function Header() {
                 fontSize: "1rem",
                 flexDirection: "row",
                 textAlign: "center",
+                display: "flex",
               }}
             >
-              <p className="my-0">
+              <p
+                className="my-0"
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  display: "flex",
+                  margin: "0 5rem",
+                }}
+              >
                 {t("auth.hello")} {userState.userInfor?.user_inf?.username}
               </p>
               <button
