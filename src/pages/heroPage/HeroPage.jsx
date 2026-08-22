@@ -305,28 +305,37 @@ export default function HeroPage() {
               </div>
               <div className="item-nm">
                 <div className="event-item ">
-                  <img
-                    src="https://media.lottecinemavn.com/Media/WebAdmin/b5fe97ebdaab46299ce539027fff755c.jpg"
-                    alt="Family Day"
-                  />
+                  {rawNewPromotion
+                    ?.filter((item) => item._id === "6a894ac39a7896668a7e4c99")
+                    .map((item) => (
+                      <a key={item._id} href={`/promotion/${item._id}`}>
+                        <img src={item.banner} alt="FAMILY DAY THỨ 4 ƯU ĐÃI" />
+                      </a>
+                    ))}
                 </div>
               </div>
             </div>
             <div className="item-large">
               <div className="item-nm">
                 <div className="event-item ">
-                  <img
-                    src="https://media.lottecinemavn.com/Media/Event/34b1a121f2cc4c5995a17e19e77b47d9.jpg"
-                    alt="Thứ 2 ưu đãi"
-                  />
+                  {rawNewPromotion
+                    ?.filter((item) => item._id === "6a894bb09a7896668a7e4c9d")
+                    .map((item) => (
+                      <a key={item._id} href={`/promotion/${item._id}`}>
+                        <img src={item.banner} alt="THỨ 2 ƯU ĐÃI" />
+                      </a>
+                    ))}
                 </div>
               </div>
               <div className="item-tall">
                 <div className="event-item">
-                  <img
-                    src="https://media.lottecinemavn.com/Media/Event/2554633691be4e729fa8242bafe8b4f4.jpg"
-                    alt="HDBank Promo"
-                  />
+                   {rawNewPromotion
+                    ?.filter((item) => item._id === "6a86b033303e867b13f7b2c5")
+                    .map((item) => (
+                      <a key={item._id} href={`/promotion/${item._id}`}>
+                        <img src={item.banner} alt="Mua 02 vé xem phim 2D với giá 95,000đ" />
+                      </a>
+                    ))}
                 </div>
               </div>
             </div>
@@ -334,28 +343,36 @@ export default function HeroPage() {
             <div className="item-x-large">
               <div className="item-nm">
                 <div className="event-item ">
-                  <img
-                    src="https://media.lottecinemavn.com/Media/Event/d56d841488374e8fb5af9c0d72d24033.jpg"
-                    alt="Thứ 2 ưu đãi"
-                  />
+                  {rawNewPromotion
+                    ?.filter((item) => item._id === "6a86b25b303e867b13f7b2d2")
+                    .map((item) => (
+                      <a key={item._id} href={`/promotion/${item._id}`}>
+                        <img src={item.banner} alt="Spider-man (Merchandise)" />
+                      </a>
+                    ))}
                 </div>
               </div>
               <div className="item-tall">
                 <div className="event-item">
-                  <img
-                    src="https://media.lottecinemavn.com/Media/Event/e74980bb21b747259157c8138dcd086d.jpg"
-                    alt="HDBank Promo"
-                  />
+                  {rawNewPromotion
+                    ?.filter((item) => item._id === "6a8955fae2eabfe092cb4c74")
+                    .map((item) => (
+                      <a key={item._id} href={`/promotion/${item._id}`}>
+                        <img src={item.banner} alt="Nạp L-Coin nhân đôi ưu đãi" />
+                      </a>
+                    ))}
                 </div>
               </div>
             </div>
             <div className="item-wrap-large">
               <div className="event-item ">
-                <img
-                  src="https://media.lottecinemavn.com/Media/Event/f353e37e868a425ea171d41d9a9bab0b.png"
-                  alt="Thue"
-                  style={{ objectPosition: "left" }}
-                />
+                {rawNewPromotion
+                    ?.filter((item) => item._id === "6a895744e2eabfe092cb4c81")
+                    .map((item) => (
+                      <a key={item._id} href={`/promotion/${item._id}`}>
+                        <img src={item.banner} alt="Thuê rạp" />
+                      </a>
+                    ))}
               </div>
             </div>
           </div>
