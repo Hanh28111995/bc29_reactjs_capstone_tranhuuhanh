@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Table, Input, Button, Image, App, Popconfirm, Tag } from 'antd';
+import React, { useState } from 'react';
+import { Table, Button, Image, App, Popconfirm, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import { formatDate3 } from '../../utils/common';
@@ -8,22 +8,19 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import { removeVietnameseTones } from 'constants/common';
 import { deletePromotionAPI, getPromotionListAPI } from 'services/promotion';
 import './index.scss';
 
-const { Search } = Input;
-
 function PromotionTable() {
   const navigate = useNavigate();
-  const [keyword, setKeyword] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
   const { notification } = App.useApp();
 
+  // Đã loại bỏ 'keyword' khỏi dependencies và queryKey
   const { data: responseContent, loading: isLoading } = useAsync({
-    dependencies: [pagination.page, pagination.limit, keyword],
-    queryKey: ['promotions', pagination.page, pagination.limit, keyword],
-    service: () => getPromotionListAPI({ page: pagination.page, limit: pagination.limit, keyword }),    
+    dependencies: [pagination.page, pagination.limit],
+    queryKey: ['promotions', pagination.page, pagination.limit],
+    service: () => getPromotionListAPI({ page: pagination.page, limit: pagination.limit }),    
   });
   
   const { mutateAsync: deletePromotion, isPending: isDeleting } = useAsyncMutation({
@@ -42,14 +39,6 @@ function PromotionTable() {
     : responseContent?.promotions ?? responseContent?.data ?? [];
     
   const paginationMeta = responseContent?.pagination ?? { total: promoData.length, totalPages: 1 };
-
-  const promotionList = useMemo(() => {
-    if (!keyword) return promoData;
-    const key = removeVietnameseTones(keyword).toLowerCase().trim();
-    return promoData.filter((ele) =>
-      removeVietnameseTones(ele.title || '').toLowerCase().includes(key)
-    );
-  }, [promoData, keyword]);
 
   const handleDelete = async (id) => {
     await deletePromotion(id);
@@ -120,20 +109,7 @@ function PromotionTable() {
 
   return (
     <div className="promotion-table-container">
-      <div className="table-header-actions">
-        <Search
-          placeholder="Tìm kiếm khuyến mãi..."
-          onSearch={(val) => {
-            setKeyword(val);
-            setPagination((prev) => ({ ...prev, page: 1 }));
-          }}
-          onChange={(e) => {
-            setKeyword(e.target.value);
-            setPagination((prev) => ({ ...prev, page: 1 }));
-          }}
-          className="search-input"
-          size="middle"
-        />
+      <div className="table-header-actions">      
         <Button 
           className='add-btn' 
           type="primary" 
@@ -149,7 +125,7 @@ function PromotionTable() {
         tableLayout="fixed"
         rowKey="_id"
         columns={columns}
-        dataSource={promotionList}
+        dataSource={promoData} // Dùng trực tiếp promoData phân trang từ server trả về
         loading={isLoading || isDeleting}
         bordered
         pagination={{ 

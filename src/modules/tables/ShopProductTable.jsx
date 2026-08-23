@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Table, Input, Button, Image, App, Popconfirm, Badge, Tag } from 'antd';
+import React, { useState } from 'react';
+import { Table, Button, Image, App, Popconfirm, Badge, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import {
@@ -7,23 +7,19 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import { removeVietnameseTones } from 'constants/common';
 import './index.scss';
 import { deleteShopProductAPI, getShopProductListAPI } from 'services/shopProduct';
 
-const { Search } = Input;
-
 export default function ShopProductTable() {
   const navigate = useNavigate();
-  const [keyword, setKeyword] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
   const { notification } = App.useApp();
 
-  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách sản phẩm
+  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách sản phẩm theo phân trang
   const { data: responseContent, loading: isLoading } = useAsync({
-    dependencies: [pagination.page, pagination.limit, keyword],
-    queryKey: ['shopProducts', pagination.page, pagination.limit, keyword],
-    service: () => getShopProductListAPI({ page: pagination.page, limit: pagination.limit, keyword }),
+    dependencies: [pagination.page, pagination.limit],
+    queryKey: ['shopProducts', pagination.page, pagination.limit],
+    service: () => getShopProductListAPI({ page: pagination.page, limit: pagination.limit }),
   });
 
   // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache
@@ -44,14 +40,6 @@ export default function ShopProductTable() {
     : responseContent?.shops ?? responseContent?.data ?? [];
     
   const paginationMeta = responseContent?.pagination ?? { total: productData.length, totalPages: 1 };
-
-  const productList = useMemo(() => {
-    if (!keyword) return productData;
-    const key = removeVietnameseTones(keyword).toLowerCase().trim();
-    return productData.filter((ele) =>
-      removeVietnameseTones(ele.title || '').toLowerCase().includes(key)
-    );
-  }, [productData, keyword]);
 
   const handleDelete = async (id) => {
     await deleteProduct(id);
@@ -130,19 +118,6 @@ export default function ShopProductTable() {
   return (
     <div className="shop-table-container">
       <div className="table-header-actions">
-        <Search
-          placeholder="Tìm kiếm sản phẩm..."
-          onSearch={(val) => {
-            setKeyword(val);
-            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi tìm kiếm
-          }}
-          onChange={(e) => {
-            setKeyword(e.target.value);
-            setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi gõ
-          }}
-          className="search-input"
-          size="middle"
-        />
         <Button 
           className='add-btn' 
           type="primary" 
@@ -158,7 +133,7 @@ export default function ShopProductTable() {
         tableLayout="fixed"
         rowKey="_id"
         columns={columns}
-        dataSource={productList}
+        dataSource={productData}
         loading={isLoading || isDeleting}
         bordered
         pagination={{ 
