@@ -25,7 +25,7 @@ const registerApi = (data) => {
   });
 };
 
-const userListApi = (params) => {
+const fetchUserListAPI = (params) => {
   return request({
     url: `/admin/user/all`,
     method: "GET",
@@ -33,14 +33,14 @@ const userListApi = (params) => {
   });
 };
 
-const userDetailApi = (tk) => {
+const fetchUserDetailApi = (tk) => {
   return request({
     url: `admin/user/${tk}`,
     method: "GET",
   });
 };
 
-const addUserApi = (data) => {
+const fetchAddUserApi = (data) => {
   return request({
     url: "/admin/user/add",
     method: "POST",
@@ -48,17 +48,25 @@ const addUserApi = (data) => {
   });
 };
 
-const updateUserApi = (data) => {
+const fetchUpdateUserApi = (data) => {
   return request({
     url: "/admin/user/user-edit",
     method: "PUT",
     data,
   });
 };
-const deleteUserApi = (tk) => {
+const fetchDeleteUserApi = (tk) => {
   return request({
     url: `admin/user/delete/${tk}`,
     method: "DELETE",
+  });
+};
+
+const fetchSearchUserAPI = (params) => {
+  return request({
+    url: `/admin/user/search`,
+    method: "GET",
+    params,
   });
 };
 
@@ -82,11 +90,12 @@ export {
   loginAPI,
   logoutAPI,
   registerApi,
-  refreshTokenAPI,
-  userListApi,
-  userDetailApi,
-  addUserApi,
-  updateUserApi,
-  deleteUserApi,
+  refreshTokenAPI,  
   loginGoogleAPI,
+  fetchAddUserApi,
+  fetchDeleteUserApi,
+  fetchUpdateUserApi,
+  fetchUserDetailApi,
+  fetchUserListAPI,
+  fetchSearchUserAPI
 };

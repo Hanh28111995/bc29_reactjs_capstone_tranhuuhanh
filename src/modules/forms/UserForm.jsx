@@ -11,7 +11,7 @@ import {
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
-import { userDetailApi, updateUserApi, addUserApi } from "services/user";
+import { fetchAddUserApi, fetchUpdateUserApi, fetchUserDetailApi } from "services/user";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -30,7 +30,7 @@ export default function UserForm() {
 
   // Lấy dữ liệu chi tiết khi có ID trên URL (params.tk)
   const { state: userDetailRaw, loading } = useAsync({
-    service: () => (params.tk ? userDetailApi(params.tk) : Promise.resolve(null)),
+    service: () => (params.tk ? fetchUserDetailApi(params.tk) : Promise.resolve(null)),
     dependencies: [params.tk],
     condition: !!params.tk && params.tk !== "create",
   });
@@ -58,7 +58,7 @@ export default function UserForm() {
 
   const userMutation = useAsyncMutation({
     service: (payload) =>
-      userDetail?._id ? updateUserApi(payload) : addUserApi(payload),
+      userDetail?._id ? fetchUpdateUserApi(payload) : fetchAddUserApi(payload),
     invalidateQueries: [["users"]],
   });
 
