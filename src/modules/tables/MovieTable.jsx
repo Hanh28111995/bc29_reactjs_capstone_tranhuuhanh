@@ -53,7 +53,8 @@ function MovieTable() {
       const list = responseContent?.movies || [];
 
       const total = responseContent?.pagination?.totalPages || 1;
-      
+      console.log(total)
+
       setMovieList(list);
       setTotalItems(total);
     }
