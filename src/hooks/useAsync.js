@@ -4,7 +4,7 @@ import { LoadingContext } from "../contexts/loading.context";
 
 const normalizeResult = (result) => {
   const content = result?.data?.content;
-  console.log(content)
+  console.log(content);
 
   if (Array.isArray(content)) {
     return content;
