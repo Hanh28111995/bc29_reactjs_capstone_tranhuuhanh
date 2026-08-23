@@ -225,7 +225,7 @@ function MovieTable() {
             : {
                 current: pagination.page,
                 pageSize: pagination.limit,
-                total: totalItems*8,
+                total: totalItems,
                 size: "small",
                 showTotal: (total) => `${total} phim`,
                 onChange: (page, limit) => setPagination({ page, limit }),
