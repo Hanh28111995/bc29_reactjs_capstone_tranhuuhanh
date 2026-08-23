@@ -50,10 +50,13 @@ function MovieTable() {
   useEffect(() => {
     if (!keyword && responseContent) {
       // Hỗ trợ cả 2 dạng: API trả về trực tiếp mảng hoặc bọc trong content.movies
-      
-      const list = responseContent;
-        
+      console.log(responseContent);
+      const list = Array.isArray(responseContent)
+        ? responseContent?.movies
+        : [];
+
       const total = responseContent?.pagination?.totalPages ?? 1;
+      console.log(list);
 
       setMovieList(list);
       setTotalItems(total);
@@ -220,7 +223,7 @@ function MovieTable() {
         tableLayout="fixed"
         rowKey="id_movie"
         columns={columns}
-        dataSource={movieList}
+        dataSource={Array.isArray(movieList) ? movieList : []}
         loading={isLoadingList || isDeleting}
         bordered
         pagination={
