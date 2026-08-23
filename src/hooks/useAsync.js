@@ -3,17 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoadingContext } from "../contexts/loading.context";
 
 const normalizeResult = (result) => {
-  const content = result?.data?.content;
-
-  if (Array.isArray(content)) {
-    return content;
-  }
-
-  if (content && typeof content === "object") {
-    const arr = Object.values(content).find((v) => Array.isArray(v));
-    return arr !== undefined ? arr : content;
-  }
-
+  const content = result?.data?.content  ;
   return content;
 };
 
