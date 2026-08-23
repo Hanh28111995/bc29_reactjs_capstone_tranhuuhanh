@@ -236,7 +236,7 @@ $mobile-breakpoint: 500px;
   }
 }
 
-.movie-table-container, .promotion-table-container, .shop-table-container {
+.movie-table-container, .promotion-table-container, .shop-table-container, .user-table-container {
   @include table-container-base;
 
   .table-header-actions {

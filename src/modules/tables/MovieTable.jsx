@@ -50,6 +50,7 @@ function MovieTable() {
   useEffect(() => {
     if (!keyword && responseContent) {
       // Hỗ trợ cả 2 dạng: API trả về trực tiếp mảng hoặc bọc trong content.movies
+      console.log(responseContent)
       const list = Array.isArray(responseContent)
         ? responseContent?.movies
         : [];
