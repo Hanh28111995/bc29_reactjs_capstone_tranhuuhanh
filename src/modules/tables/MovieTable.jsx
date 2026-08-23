@@ -51,18 +51,10 @@ function MovieTable() {
     if (!keyword && responseContent) {
       // Hỗ trợ cả 2 dạng: API trả về trực tiếp mảng hoặc bọc trong content.movies
       const list = Array.isArray(responseContent)
-        ? responseContent
-        : (responseContent?.content?.movies ??
-           responseContent?.movies ??
-           responseContent?.data?.movies ??
-           responseContent?.data ??
-           []);
+        ? responseContent?.movies
+        : [];
 
-      const total =
-        responseContent?.content?.pagination?.total ??
-        responseContent?.pagination?.total ??
-        responseContent?.data?.pagination?.total ??
-        list.length;
+      const total = responseContent?.pagination?.totalPages ?? 1;
 
       setMovieList(list);
       setTotalItems(total);
@@ -109,7 +101,7 @@ function MovieTable() {
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchTerm(val);
-    
+
     // Nếu người dùng bấm nút clear (xóa trắng) trên ô input Antd
     if (!val) {
       setKeyword("");
@@ -191,15 +183,10 @@ function MovieTable() {
               type="text"
               icon={<CarryOutOutlined style={{ color: "#52c41a" }} />}
               onClick={() =>
-                navigate(
-                  `/admin/movie-management/${movieId}/edit-showtime`,
-                )
+                navigate(`/admin/movie-management/${movieId}/edit-showtime`)
               }
             />
-            <Popconfirm
-              title="Xóa?"
-              onConfirm={() => handleDelete(movieId)}
-            >
+            <Popconfirm title="Xóa?" onConfirm={() => handleDelete(movieId)}>
               <Button type="text" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           </div>
