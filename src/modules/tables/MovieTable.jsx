@@ -51,10 +51,8 @@ function MovieTable() {
     if (!keyword && responseContent) {
       // Hỗ trợ cả 2 dạng: API trả về trực tiếp mảng hoặc bọc trong content.movies
       console.log(responseContent)
-      const list = Array.isArray(responseContent)
-        ? responseContent?.movies
-        : [];
-
+      const list = responseContent;
+        
       const total = responseContent?.pagination?.totalPages ?? 1;
 
       setMovieList(list);
@@ -222,7 +220,7 @@ function MovieTable() {
         tableLayout="fixed"
         rowKey="id_movie"
         columns={columns}
-        dataSource={Array.isArray(movieList) ? movieList : []}
+        dataSource={movieList}
         loading={isLoadingList || isDeleting}
         bordered
         pagination={
