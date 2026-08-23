@@ -177,7 +177,7 @@ function MovieTable() {
       key: "action",
       width: "15%",
       render: (_, record) => {
-        const movieId = record.id_movie;
+        const movieId = record._id;
         return (
           <div className="action-btns">
             <Button
