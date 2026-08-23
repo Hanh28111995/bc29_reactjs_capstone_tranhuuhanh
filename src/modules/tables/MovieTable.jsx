@@ -48,15 +48,11 @@ function MovieTable() {
 
   // Tự động đồng bộ data từ API danh sách vào state bảng khi fetch xong và không có keyword
   useEffect(() => {
-    if (!keyword && responseContent) {
-      // Hỗ trợ cả 2 dạng: API trả về trực tiếp mảng hoặc bọc trong content.movies
-      const list = responseContent?.movies || [];
-
-      const total = responseContent?.pagination?.totalPages || 1;
-      console.log(total)
-
+    if (!keyword && responseContent) {      
+      const list = responseContent?.movies || [];            
+      const totalRecord = responseContent?.pagination?.total || 0; 
       setMovieList(list);
-      setTotalItems(total);
+      setTotalItems(totalRecord); 
     }
   }, [responseContent, keyword]);
 
@@ -229,7 +225,7 @@ function MovieTable() {
             : {
                 current: pagination.page,
                 pageSize: pagination.limit,
-                total: totalItems,
+                total: totalItems*8,
                 size: "small",
                 showTotal: (total) => `${total} phim`,
                 onChange: (page, limit) => setPagination({ page, limit }),
