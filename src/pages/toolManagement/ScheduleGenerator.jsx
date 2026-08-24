@@ -47,13 +47,13 @@ export default function ScheduleGenerator() {
   }, [schedule?._id]);
 
   const movies = useMemo(() => {
-    const list = Array.isArray(rawMovies) ? rawMovies : [];
+    const list = Array.isArray(rawMovies) ? rawMovies?.movies : [];
     return [...list]
       .filter((m) => m.releaseDate)
       .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)));
   }, [rawMovies]);
 
-  const theaters = Array.isArray(rawTheaters) ? rawTheaters : [];
+  const theaters = Array.isArray(rawTheaters) ? rawTheaters?.theaters : [];
 
   const handleGenerate = async () => {
     if (selectedMovies.length === 0)
