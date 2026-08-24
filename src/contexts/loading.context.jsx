@@ -4,16 +4,15 @@ import styled from "styled-components"; // Hoặc đường dẫn file styled c�
 
 const WrapperSpin = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: transparent; /* Nền trong suốt tuyệt đối */
-  pointer-events: none;          /* Cho phép click chuột xuyên qua màn hình loading */
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  pointer-events: none;
   z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+  transform: translateZ(0);
 `;
 
 const LoadingContext = createContext(null);
@@ -39,7 +38,7 @@ const LoadingProvider = (props) => {
       countRef.current = Math.max(0, countRef.current - 1);
     }
     const active = countRef.current > 0;
-        
+
     spinRef.current?.(active);
   }, []);
 

@@ -4,25 +4,21 @@ import {
   Form,
   Input,
   Select,
-  notification,
-  Space,
+  App,
   Card,
-  Typography,
+  Space,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
 import { fetchAddUserApi, fetchUpdateUserApi, fetchUserDetailApi } from "services/user";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
-
-const { Title } = Typography;
+import "./index.scss";
 
 export default function UserForm() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const params = useParams();
-
-  // 1. Antd 5 Notification Hook
-  const [api, contextHolder] = notification.useNotification();
+  const { notification } = App.useApp();
 
   const [isChanged, setIsChanged] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -30,7 +26,7 @@ export default function UserForm() {
 
   // Lấy dữ liệu chi tiết khi có ID trên URL (params.tk)
   const { state: userDetailRaw, loading } = useAsync({
-    service: () => (params.tk ? fetchUserDetailApi(params.tk) : Promise.resolve(null)),
+    service: () => (params.tk && params.tk !== "create" ? fetchUserDetailApi(params.tk) : Promise.resolve(null)),
     dependencies: [params.tk],
     condition: !!params.tk && params.tk !== "create",
   });
@@ -38,17 +34,29 @@ export default function UserForm() {
   // API trả về content: { users: {...} } hoặc object trực tiếp
   const userDetail = userDetailRaw?.users ?? userDetailRaw?.user ?? userDetailRaw;
 
-  // 2. Đồng bộ dữ liệu vào Form
+  // Đồng bộ dữ liệu vào Form
   useEffect(() => {
-    if (userDetail) {
-      form.setFieldsValue(userDetail);
-      setOriginalData(userDetail);
+    if (params.tk && params.tk !== "create") {
+      if (userDetail) {
+        form.setFieldsValue(userDetail);
+        setOriginalData(userDetail);
+        setIsChanged(false);
+      }
+    } else {
+      form.setFieldsValue({ role: "customer" });
+      setOriginalData({});
+      setIsChanged(false);
+      setIsChangingPassword(false);
     }
-  }, [userDetail, form]);
+  }, [userDetail, params.tk, form]);
 
-  // 3. Theo dõi thay đổi của form để enable nút Save
+  // Theo dõi thay đổi của form để enable nút Save
   const onValuesChange = (_, allValues) => {
-    // So sánh dữ liệu hiện tại với dữ liệu gốc
+    if (!params.tk || params.tk === "create") {
+      const hasInput = Object.keys(allValues).some((key) => Boolean(allValues[key]));
+      setIsChanged(hasInput);
+      return;
+    }
     const hasChanged = Object.keys(allValues).some((key) => {
       if (key === "password" && isChangingPassword) return true;
       return String(allValues[key] || "") !== String(originalData[key] || "");
@@ -62,7 +70,7 @@ export default function UserForm() {
     invalidateQueries: [["users"]],
   });
 
-  // 4. Xử lý lưu dữ liệu
+  // Xử lý lưu dữ liệu
   const handleSave = async (values) => {
     try {
       let payload = { ...values };
@@ -77,28 +85,24 @@ export default function UserForm() {
 
       await userMutation.mutateAsync(payload);
 
-      api.success({
-        message: "Thành công",
-        description: "Thông tin người dùng đã được cập nhật!",
+      notification.success({
+        message: userDetail?._id ? "Cập nhật thành công!" : "Thêm người dùng mới thành công!",
       });
 
-      // Đợi một chút rồi điều hướng về danh sách
-      setTimeout(() => navigate("/admin/user-management"), 1000);
-
+      navigate("/admin/user-management");
     } catch (error) {
-      const serverMessage = error.response?.data?.message || "Có lỗi xảy ra";
+      const serverMessage = error.response?.data?.message || error.response?.data?.content || "Có lỗi xảy ra";
 
       if (error.response?.status === 400 || error.response?.status === 409) {
-        api.error({
+        notification.error({
           message: "Lỗi dữ liệu",
           description: serverMessage,
         });
 
-        // Hiển thị lỗi ngay tại field tương ứng nếu server trả về field name trong message
         const fieldName = serverMessage.toLowerCase().includes("email") ? "email" : "username";
         form.setFields([{ name: fieldName, errors: [serverMessage] }]);
       } else {
-        api.error({
+        notification.error({
           message: "Lỗi hệ thống",
           description: "Không thể kết nối đến máy chủ, vui lòng thử lại sau.",
         });
@@ -107,17 +111,20 @@ export default function UserForm() {
   };
 
   return (
-    <Card loading={loading || userMutation.isLoading} className="movie-form-card">
-      {/* Cần thiết cho Antd 5 Notification */}
-      {contextHolder}
-
-      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
-        <Title level={4} style={{ margin: 0 }}>
-          {userDetail ? `Chỉnh sửa: ${userDetail.username}` : "Thêm người dùng mới"}
-        </Title>
-      </div>
-
+    <Card
+      className="movie-form-card"
+      loading={loading} // Chỉ hiện loading Card khi đang fetch dữ liệu ban đầu, tránh bị giật layout khi submit
+      title={
+        <Space>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
+          <span>
+            {params.tk && params.tk !== "create"
+              ? `Chỉnh sửa: ${userDetail?.username || ""}`
+              : "Thêm người dùng mới"}
+          </span>
+        </Space>
+      }
+    >
       <Form
         form={form}
         layout="vertical"
@@ -130,7 +137,7 @@ export default function UserForm() {
           name="username"
           rules={[{ required: true, message: "Tài khoản không được để trống" }]}
         >
-          <Input placeholder="Nhập tên tài khoản" disabled={!!userDetail} />
+          <Input placeholder="Nhập tên tài khoản" size="large" disabled={!!userDetail} />
         </Form.Item>
 
         {userDetail ? (
@@ -146,13 +153,16 @@ export default function UserForm() {
                   noStyle
                   rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới' }]}
                 >
-                  <Input.Password placeholder="Nhập mật khẩu mới" />
+                  <Input.Password placeholder="Nhập mật khẩu mới" size="large" />
                 </Form.Item>
-                <Button size="small" onClick={() => {
-                  setIsChangingPassword(false);
-                  form.setFieldsValue({ password: undefined });
-                  setIsChanged(false);
-                }}>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setIsChangingPassword(false);
+                    form.setFieldsValue({ password: undefined });
+                    setIsChanged(false);
+                  }}
+                >
                   Hủy đổi mật khẩu
                 </Button>
               </Space>
@@ -164,7 +174,7 @@ export default function UserForm() {
             name="password"
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
           >
-            <Input.Password placeholder="Nhập mật khẩu" />
+            <Input.Password placeholder="Nhập mật khẩu" size="large" />
           </Form.Item>
         )}
 
@@ -172,25 +182,13 @@ export default function UserForm() {
           label="Số điện thoại"
           name="userphone"
           rules={[
-            {
-              required: true,
-              message: 'Vui lòng nhập số điện thoại'
-            },
-            {
-              pattern: /^[0-9]+$/,
-              message: 'Số điện thoại chỉ được chứa các ký tự số',
-            },
-            {
-              min: 9,
-              message: 'Số điện thoại phải có ít nhất 9 ký tự',
-            },
-            {
-              max: 12,
-              message: 'Số điện thoại không được vượt quá 12 ký tự',
-            }
+            { required: true, message: 'Vui lòng nhập số điện thoại' },
+            { pattern: /^[0-9]+$/, message: 'Số điện thoại chỉ được chứa các ký tự số' },
+            { min: 9, message: 'Số điện thoại phải có ít nhất 9 ký tự' },
+            { max: 12, message: 'Số điện thoại không được vượt quá 12 ký tự' }
           ]}
         >
-          <Input placeholder="Ví dụ: 090..." maxLength={12} />
+          <Input placeholder="Ví dụ: 090..." maxLength={12} size="large" />
         </Form.Item>
 
         <Form.Item
@@ -201,14 +199,18 @@ export default function UserForm() {
             { type: 'email', message: 'Email không đúng định dạng' }
           ]}
         >
-          <Input placeholder="example@mail.com" />
+          <Input placeholder="example@mail.com" size="large" />
         </Form.Item>
 
         <Form.Item label="Loại người dùng" name="role" rules={[{ required: true }]}>
-          <Select placeholder="Chọn loại khách hàng">
-            <Select.Option value="customer">Khách hàng</Select.Option>
-            <Select.Option value="admin">Quản trị viên</Select.Option>
-          </Select>
+          <Select
+            placeholder="Chọn loại khách hàng"
+            size="large"
+            options={[
+              { value: "customer", label: "Khách hàng" },
+              { value: "admin", label: "Quản trị viên" }
+            ]}
+          />
         </Form.Item>
 
         <Form.Item style={{ marginTop: 32 }}>
@@ -216,11 +218,13 @@ export default function UserForm() {
             htmlType="submit"
             type="primary"
             icon={<SaveOutlined />}
+            loading={userMutation.isLoading} // Chuyển loading sang nút Submit để mượt giao diện, không bị kéo dãn Card
             disabled={!isChanged}
             size="large"
             block
+            className="submit-btn"
           >
-            LƯU THÔNG TIN
+            {params.tk && params.tk !== "create" ? "CẬP NHẬT NGƯỜI DÙNG" : "TẠO NGƯỜI DÙNG MỚI"}
           </Button>
         </Form.Item>
       </Form>
