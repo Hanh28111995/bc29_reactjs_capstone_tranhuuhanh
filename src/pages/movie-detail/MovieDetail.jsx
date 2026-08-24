@@ -119,6 +119,10 @@ function MovieCarousel({ movies, currentId, onSelect }) {
 export default function MovieDetail() {
   const navigate = useNavigate();
   const param = useParams();
+
+  // =========================
+  // STATE
+  // =========================
   const [selectedRegionName, setSelectedRegionName] = useState(null);
   const [selectCity, setSelectCity] = useState(null);
   const [selectedCinemaName, setSelectedCinemaName] = useState(null);
@@ -126,7 +130,12 @@ export default function MovieDetail() {
   const [localDate, setLocalDate] = useState(null);
   const [movieDetail, setMovieDetail] = useState(null);
   const [movieList, setMovieList] = useState([]);
+  const [dataShowTimes, setDataShowTimes] = useState([]);
+  const [loadingInternal, setLoadingInternal] = useState(false);
 
+  // =========================
+  // LOAD MOVIE LIST
+  // =========================
   useEffect(() => {
     fetchMovieListAPI().then((res) => {
       const list = res?.data?.content || res?.data || [];
@@ -134,6 +143,9 @@ export default function MovieDetail() {
     });
   }, []);
 
+  // =========================
+  // LOAD AREAS
+  // =========================
   const {
     state: rawAreasList = [],
     loading: IsLoading,
@@ -143,6 +155,236 @@ export default function MovieDetail() {
     queryKey: ["areas-list"],
   });
 
+  const areasList = safeArray(rawAreasList);
+
+  const spans = {
+    col1: 6,
+    col2: 6,
+    col3: 6,
+  };
+
+  const activeRegionData = areasList?.find(
+    (region) => region.vungMien === selectedRegionName,
+  );
+
+  // =========================
+  // HELPERS
+  // =========================
+  const normalizeDateForApi = (dateStr) => {
+    if (!dateStr) return dateStr;
+
+    const m = String(dateStr).match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+
+    if (!m) return dateStr;
+
+    const [, d, mo, y] = m;
+
+    return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(
+      2,
+      "0",
+    )}`;
+  };
+
+  const loadBranchesByLocation = async (location) => {
+    try {
+      const res = await fetchBranchesAPI({ location });
+
+      const data =
+        res.data?.content ||
+        res.data?.data ||
+        res.data ||
+        [];
+
+      const list = Array.isArray(data) ? data : [];
+
+      const unique = Array.from(
+        new Map(
+          list
+            .filter((x) => x?.branch)
+            .map((x) => [
+              String(x.branch).trim(),
+              {
+                branch: String(x.branch).trim(),
+              },
+            ]),
+        ).values(),
+      );
+
+      setBranches(unique);
+    } catch (err) {
+      console.error("Lỗi lấy danh sách chi nhánh:", err);
+      setBranches([]);
+    }
+  };
+
+  // =========================
+  // GEO LOCATION
+  // =========================
+  const { decision } = useGeoLocationSelect({
+    locations: areasList,
+
+    cinemasProvider: async () => {
+      const res = await fetchBranchesAPI();
+
+      const data =
+        res.data?.content ||
+        res.data?.data ||
+        res.data ||
+        [];
+
+      return Array.isArray(data) ? data : [];
+    },
+
+    askOnMount: true,
+
+    onSelect: ({ regionName, district }) => {
+      setSelectedRegionName(regionName || null);
+      setSelectCity(district || null);
+
+      setBranches([]);
+      setSelectedCinemaName(null);
+      setDataShowTimes([]);
+
+      if (district) {
+        loadBranchesByLocation(district);
+      }
+    },
+
+    title: "Chia sẻ vị trí",
+    content:
+      "Bạn có muốn chia sẻ vị trí để tự động chọn khu vực không?",
+  });
+
+  // =========================
+  // FALLBACK LOCATION
+  // =========================
+  useEffect(() => {
+    if (decision !== "denied") return;
+
+    if (
+      !selectedRegionName &&
+      Array.isArray(areasList) &&
+      areasList.length > 0
+    ) {
+      const preferredRegion =
+        areasList.find(
+          (r) => r?.vungMien === "TP.HCM",
+        ) ||
+        areasList.find((r) =>
+          String(r?.vungMien || "")
+            .toLowerCase()
+            .includes("hcm"),
+        ) ||
+        areasList[0];
+
+      const regionName =
+        preferredRegion?.vungMien || null;
+
+      const firstCity =
+        preferredRegion?.cumRap?.[0] || null;
+
+      setSelectedRegionName(regionName);
+      setSelectCity(firstCity);
+
+      setBranches([]);
+      setSelectedCinemaName(null);
+      setDataShowTimes([]);
+
+      if (firstCity) {
+        loadBranchesByLocation(firstCity);
+      }
+    }
+  }, [
+    areasList,
+    selectedRegionName,
+    decision,
+  ]);
+
+  // =========================
+  // MOVIE DETAIL
+  // =========================
+  useEffect(() => {
+    const fetchMovie = async () => {
+      if (!param.movieId) return;
+
+      try {
+        const res = await fetchMovieDetailAPI(
+          param.movieId,
+        );
+
+        setMovieDetail(
+          res.data?.content ||
+            res.data ||
+            null,
+        );
+      } catch (err) {
+        console.error(
+          "Lỗi lấy chi tiết phim:",
+          err,
+        );
+      }
+    };
+
+    fetchMovie();
+  }, [param.movieId]);
+
+  // =========================
+  // SHOWTIMES
+  // =========================
+  useEffect(() => {
+    const fetchData = async () => {
+      if (
+        !selectedCinemaName ||
+        !localDate ||
+        !param.movieId ||
+        !selectedRegionName
+      ) {
+        setDataShowTimes([]);
+        return;
+      }
+
+      setDataShowTimes([]);
+      setLoadingInternal(true);
+
+      try {
+        const res = await fetchShowtimesAPI({
+          branch: selectedCinemaName,
+          date: normalizeDateForApi(localDate),
+          idMovie: param.movieId,
+          location: selectedRegionName,
+        });
+
+        const data =
+          res.data?.content ||
+          res.data ||
+          [];
+
+        setDataShowTimes(
+          Array.isArray(data) ? data : [],
+        );
+      } catch (err) {
+        console.error(
+          "Lỗi lấy suất chiếu:",
+          err,
+        );
+
+        setDataShowTimes([]);
+      } finally {
+        setLoadingInternal(false);
+      }
+    };
+
+    fetchData();
+  }, [
+    selectedCinemaName,
+    localDate,
+    param.movieId,
+    selectedRegionName,
+  ]);
+
+  // =========================
+  // LOADING / ERROR
+  // =========================
   if (IsLoading) {
     return (
       <div
@@ -157,143 +399,16 @@ export default function MovieDetail() {
   if (IsError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải dữ liệu trang chủ.</p>
+        <p>
+          Đã có lỗi khi tải dữ liệu trang chủ.
+        </p>
       </div>
     );
   }
 
-  const areasList = safeArray(rawAreasList);
-  const spans = { col1: 6, col2: 6, col3: 6 };
-
-  const activeRegionData = areasList?.find(
-    (region) => region.vungMien === selectedRegionName,
-  );
-
-  const [dataShowTimes, setDataShowTimes] = useState([]);
-  const [loadingInternal, setLoadingInternal] = useState(false);
-
-  const normalizeDateForApi = (dateStr) => {
-    if (!dateStr) return dateStr;
-    const m = String(dateStr).match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-    if (!m) return dateStr;
-    const [, d, mo, y] = m;
-    return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-  };
-
-  const loadBranchesByLocation = async (location) => {
-    try {
-      const res = await fetchBranchesAPI({ location });
-      const data = res.data?.content || res.data?.data || res.data || [];
-      const list = Array.isArray(data) ? data : [];
-      const unique = Array.from(
-        new Map(
-          list
-            .filter((x) => x?.branch)
-            .map((x) => [
-              String(x.branch).trim(),
-              { branch: String(x.branch).trim() },
-            ]),
-        ).values(),
-      );
-      setBranches(unique);
-    } catch (err) {
-      setBranches([]);
-    }
-  };
-
-  const { decision } = useGeoLocationSelect({
-    locations: areasList,
-    cinemasProvider: async () => {
-      const res = await fetchBranchesAPI();
-      const data = res.data?.content || res.data?.data || res.data || [];
-      return Array.isArray(data) ? data : [];
-    },
-    askOnMount: true,
-    onSelect: ({ regionName, district }) => {
-      setSelectedRegionName(regionName || null);
-      setSelectCity(district || null);
-      setBranches([]);
-      setSelectedCinemaName(null);
-      if (district) {
-        loadBranchesByLocation(district);
-      }
-    },
-    title: "Chia sẻ vị trí",
-    content: "Bạn có muốn chia sẻ vị trí để tự động chọn khu vực không?",
-  });
-
-  useEffect(() => {
-    if (decision !== "denied") return;
-    if (
-      !selectedRegionName &&
-      Array.isArray(areasList) &&
-      areasList.length > 0
-    ) {
-      const preferredRegion =
-        areasList.find((r) => r?.vungMien === "TP.HCM") ||
-        areasList.find((r) =>
-          String(r?.vungMien || "")
-            .toLowerCase()
-            .includes("hcm"),
-        ) ||
-        areasList[0];
-      const firstRegion = preferredRegion;
-      const regionName = firstRegion?.vungMien || null;
-      const firstCity = firstRegion?.cumRap?.[0] || null;
-
-      setSelectedRegionName(regionName);
-      setSelectCity(firstCity);
-      setBranches([]);
-      setSelectedCinemaName(null);
-
-      if (firstCity) {
-        loadBranchesByLocation(firstCity);
-      }
-    }
-  }, [areasList, selectedRegionName, decision]);
-
-  useEffect(() => {
-    const fetchMovie = async () => {
-      if (param.movieId) {
-        try {
-          const res = await fetchMovieDetailAPI(param.movieId);
-          setMovieDetail(res.data?.content || res.data || null);
-        } catch (err) {
-          console.error("Lỗi lấy chi tiết phim:", err);
-        }
-      }
-    };
-    fetchMovie();
-  }, [param.movieId]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (
-        selectedCinemaName &&
-        localDate &&
-        param.movieId &&
-        selectedRegionName
-      ) {
-        setLoadingInternal(true); // Chỉ loading nội bộ component này
-        try {
-          const res = await fetchShowtimesAPI({
-            branch: selectedCinemaName,
-            date: normalizeDateForApi(localDate),
-            idMovie: param.movieId,
-            location: selectedRegionName,
-          });
-          setLoadingInternal(false);
-          setDataShowTimes(res.data?.content || res.data || []);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoadingInternal(false);
-        }
-      }
-    };
-
-    fetchData();
-  }, [selectedCinemaName, localDate, param.movieId, selectedRegionName]);
+  // =========================
+  // RENDER
+  // =========================
 
   return (
     <div className="detailPage py-3 container" style={{ flex: "1" }}>
