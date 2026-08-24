@@ -125,6 +125,7 @@ export default function MovieForm() {
     <Card
       className="movie-form-card"
       // loading={loading || movieMutation.isLoading}
+      loading={true}
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
