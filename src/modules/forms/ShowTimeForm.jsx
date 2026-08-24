@@ -48,19 +48,27 @@ export default function ShowtimeForm() {
 
   const isEditMode = !!params.id && params.id !== "undefined";
 
-  const { state: rawMovies } = useAsync({ service: fetchMovieListAPI, queryKey: ["movies_list"] });
-  const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI, queryKey: ["theaters_list"] });
+  const { state: rawMovies } = useAsync({
+    service: fetchMovieListAPI,
+    queryKey: ["movies_list"],
+  });
+  const { state: rawTheaters } = useAsync({
+    service: fetchTheaterListAPI,
+    queryKey: ["theaters_list"],
+  });
 
   const movies = safeArray(rawMovies?.movies);
-  const theaters = safeArray(rawTheaters);
-  const { state: rawBranches } = useAsync({ service: getAllBranches, queryKey: ["branches_list"] });
+  const theaters = safeArray(rawTheaters?.theaters);
+  const { state: rawBranches } = useAsync({
+    service: getAllBranches,
+    queryKey: ["branches_list"],
+  });
   const branches = useMemo(() => {
-    if (!rawBranches) return [];
-    if (Array.isArray(rawBranches)) return rawBranches;
+    if (!rawBranches?.cinemas) return [];
+    if (Array.isArray(rawBranches?.cinemas)) return rawBranches?.cinemas;
     return (
-      rawBranches?.branches ??
-      rawBranches?.branch ??
-      Object.values(rawBranches).find(Array.isArray) ??
+      rawBranches?.cinemas?.branch ??
+      Object.values(rawBranches?.branch).find(Array.isArray) ??
       []
     );
   }, [rawBranches]);
