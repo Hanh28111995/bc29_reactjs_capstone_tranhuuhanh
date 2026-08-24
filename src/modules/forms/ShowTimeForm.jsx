@@ -48,11 +48,12 @@ export default function ShowtimeForm() {
 
   const isEditMode = !!params.id && params.id !== "undefined";
 
-  const { state: rawMovies } = useAsync({ service: fetchMovieListAPI });
-  const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI });
+  const { state: rawMovies } = useAsync({ service: fetchMovieListAPI, queryKey: ["movies_list"] });
+  const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI, queryKey: ["theaters_list"] });
+
   const movies = safeArray(rawMovies?.movies);
   const theaters = safeArray(rawTheaters);
-  const { state: rawBranches } = useAsync({ service: getAllBranches });
+  const { state: rawBranches } = useAsync({ service: getAllBranches, queryKey: ["branches_list"] });
   const branches = useMemo(() => {
     if (!rawBranches) return [];
     if (Array.isArray(rawBranches)) return rawBranches;
