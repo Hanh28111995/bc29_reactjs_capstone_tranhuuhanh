@@ -24,19 +24,21 @@ export default function MovieForm() {
   const params = useParams();
   const { notification } = App.useApp();
 
+  const isCreateMode = !params.movieId || params.movieId === "create";
+
   const [img, setImg] = useState("");
   const [file, setFile] = useState(null);
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
 
   const { state: movieDetail, loading } = useAsync({
-    service: () => (params.movieId ? fetchMovieDetailAPI(params.movieId) : Promise.resolve(null)),
+    service: () => (!isCreateMode ? fetchMovieDetailAPI(params.movieId) : Promise.resolve(null)),
     dependencies: [params.movieId],
-    condition: !!params.movieId && params.movieId !== "create",
+    condition: !isCreateMode,
   });
 
   useEffect(() => {
-    if (params.movieId && params.movieId !== "create") {
+    if (!isCreateMode) {
       if (movieDetail) {
         const normalized = {
           ...movieDetail,
@@ -55,21 +57,29 @@ export default function MovieForm() {
       setOriginalData(null);
       setImg("");
       setFile(null);
-      setIsChanged(false);
+      // Ở chế độ tạo mới, bật sẵn nút Lưu nếu có tiêu đề hoặc cho phép bấm thoải mái
+      setIsChanged(true); 
     }
-  }, [movieDetail, params.movieId, form]);
+  }, [movieDetail, params.movieId, form, isCreateMode]);
 
   const onValuesChange = (_, allValues) => {
-    if (!params.movieId || params.movieId === "create") {
-      const hasInput = Object.keys(allValues).some(key => allValues[key] !== DEFAULT_VALUES[key]);
-      setIsChanged(hasInput || !!file);
+    if (isCreateMode) {
+      // Ở chế độ tạo mới, chỉ cần có nhập Tiêu đề là cho phép bấm nút Tạo
+      setIsChanged(!!allValues.title?.trim() || !!file);
       return;
     }
+
+    // Ở chế độ chỉnh sửa, so sánh với dữ liệu gốc ban đầu
     const hasChanged = Object.keys(allValues).some(key => {
       const currentVal = allValues[key];
       const originalVal = originalData?.[key];
-      if (key === 'releaseDate') return !dayjs(currentVal).isSame(originalVal, 'day');
-      if (Array.isArray(currentVal)) return JSON.stringify(currentVal) !== JSON.stringify(originalVal);
+      if (key === 'releaseDate') {
+        if (!currentVal && !originalVal) return false;
+        return !dayjs(currentVal).isSame(originalVal, 'day');
+      }
+      if (Array.isArray(currentVal)) {
+        return JSON.stringify(currentVal) !== JSON.stringify(originalVal);
+      }
       return currentVal !== originalVal;
     });
     setIsChanged(hasChanged || !!file);
@@ -77,11 +87,9 @@ export default function MovieForm() {
 
   const movieMutation = useAsyncMutation({
     service: (formData) =>
-      params.movieId && params.movieId !== "create"
+      !isCreateMode
         ? updateMovieUploadImage(formData)
         : addMovieUploadImage(formData),
-    // LƯU Ý: Đồng bộ key này khớp chính xác với queryKey bên MovieTable của bạn 
-    // (Ví dụ nếu bảng Movie dùng ["movies"] thì ở đây phải là [["movies"]])
     invalidateQueries: [["movies-list"]], 
   });
 
@@ -101,13 +109,18 @@ export default function MovieForm() {
       });
 
       if (file) formData.append("File", file, file.name);
-      if (params.movieId && params.movieId !== "create") formData.append("id_movie", params.movieId);
+      if (!isCreateMode) formData.append("id_movie", params.movieId);
 
       await movieMutation.mutateAsync(formData);
-      notification.success({ message: params.movieId && params.movieId !== "create" ? "Cập nhật thành công!" : "Thêm phim mới thành công!" });
+      notification.success({ 
+        message: !isCreateMode ? "Cập nhật thành công!" : "Thêm phim mới thành công!" 
+      });
       navigate("/admin/movie-management");
     } catch (error) {
-      notification.error({ message: "Lỗi", description: error.response?.data?.content || "Có lỗi xảy ra khi lưu phim." });
+      notification.error({ 
+        message: "Lỗi", 
+        description: error.response?.data?.content || "Có lỗi xảy ra khi lưu phim." 
+      });
     }
   };
 
@@ -130,7 +143,7 @@ export default function MovieForm() {
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
-          <span>{params.movieId && params.movieId !== "create" ? "Chỉnh sửa phim" : "Thêm phim mới"}</span>
+          <span>{!isCreateMode ? "Chỉnh sửa phim" : "Thêm phim mới"}</span>
         </Space>
       }
     >
@@ -138,21 +151,21 @@ export default function MovieForm() {
         <Row gutter={[24, 0]}>
           {/* Cột trái: Thông tin chính */}
           <Col xs={24} lg={16}>
-            <Form.Item label="Tên Phim" name="title" rules={[{ required: true }]}>
+            <Form.Item label="Tên Phim" name="title" rules={[{ required: true, message: "Vui lòng nhập tên phim!" }]}>
               <Input placeholder="Nhập tên phim" size="large" />
             </Form.Item>
 
-            <Form.Item label="Trailer URL" name="trailer" rules={[{ required: true }]}>
+            <Form.Item label="Trailer URL" name="trailer" rules={[{ required: true, message: "Vui lòng nhập link trailer!" }]}>
               <Input placeholder="https://youtube.com/..." size="large" />
             </Form.Item>
 
-            <Form.Item label="Mô tả" name="describe" rules={[{ required: true }]}>
+            <Form.Item label="Mô tả" name="describe" rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}>
               <Input.TextArea rows={4} placeholder="Nội dung phim..." />
             </Form.Item>
 
             <Row gutter={16}>
               <Col xs={24} sm={12}>
-                <Form.Item label="Ngày khởi chiếu" name="releaseDate" rules={[{ required: true }]}>
+                <Form.Item label="Ngày khởi chiếu" name="releaseDate" rules={[{ required: true, message: "Vui lòng chọn ngày chiếu!" }]}>
                   <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" size="large" />
                 </Form.Item>
               </Col>
@@ -163,11 +176,11 @@ export default function MovieForm() {
               </Col>
             </Row>
 
-            <Form.Item label="Đạo diễn" name="director" rules={[{ required: true }]}>
+            <Form.Item label="Đạo diễn" name="director" rules={[{ required: true, message: "Vui lòng nhập tên đạo diễn!" }]}>
               <Input placeholder="Tên đạo diễn" size="large" />
             </Form.Item>
 
-            <Form.Item label="Thể loại" name="genre" rules={[{ required: true }]}>
+            <Form.Item label="Thể loại" name="genre" rules={[{ required: true, message: "Vui lòng chọn ít nhất một thể loại!" }]}>
               <Select mode="multiple" options={GenreList} placeholder="Chọn thể loại" size="large" />
             </Form.Item>
           </Col>
@@ -222,8 +235,9 @@ export default function MovieForm() {
             disabled={!isChanged}
             block
             className="submit-btn"
+            size="large"
           >
-            {params.movieId && params.movieId !== "create" ? "CẬP NHẬT PHIM" : "TẠO PHIM MỚI"}
+            {!isCreateMode ? "CẬP NHẬT PHIM" : "TẠO PHIM MỚI"}
           </Button>
         </Form.Item>
       </Form>

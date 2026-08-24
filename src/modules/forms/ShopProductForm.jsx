@@ -15,7 +15,6 @@ import {
 } from "@ant-design/icons";
 import "./index.scss";
 
-// 1. Thêm highlight vào giá trị mặc định
 const DEFAULT_VALUES = {
   title: "",
   price: 0,
@@ -26,7 +25,7 @@ const DEFAULT_VALUES = {
   expiryDays: null,
   options: [],
   active: true,
-  highlight: false, // Mặc định là tắt highlight
+  highlight: false,
 };
 
 export default function ShopProductForm() {
@@ -49,18 +48,28 @@ export default function ShopProductForm() {
   useEffect(() => {
     if (params.productId && params.productId !== "create") {
       if (productDetail) {
+        // Chuẩn hóa dữ liệu từ API để khớp form (đặc biệt là options)
         const normalized = {
           ...productDetail,
-          highlight: productDetail.highlight ?? false, // Đồng bộ giá trị highlight từ API
+          stock: productDetail.stock ?? null,
+          limitPerCustomer: productDetail.limitPerCustomer ?? 0,
+          expiryDays: productDetail.expiryDays ?? null,
+          active: productDetail.active ?? true,
+          highlight: productDetail.highlight ?? false,
+          options: (productDetail.options || []).map(opt => ({
+            ...opt,
+            // Đảm bảo choices luôn ở dạng mảng chuẩn để Form.List hiển thị đúng
+            choices: Array.isArray(opt.choices) ? opt.choices : (opt.choices ? String(opt.choices).split(',').map(s => s.trim()) : [])
+          }))
         };
         form.setFieldsValue(normalized);
         setOriginalData(normalized);
-        setImg(productDetail.banner);
+        setImg(productDetail.banner || "");
         setIsChanged(false);
       }
     } else {
       form.setFieldsValue(DEFAULT_VALUES);
-      setOriginalData(null);
+      setOriginalData(DEFAULT_VALUES);
       setImg("");
       setFile(null);
       setIsChanged(false);
@@ -68,15 +77,10 @@ export default function ShopProductForm() {
   }, [productDetail, params.productId, form]);
 
   const onValuesChange = (_, allValues) => {
-    if (!params.productId || params.productId === "create") {
-      const hasInput = Object.keys(allValues).some(key => JSON.stringify(allValues[key]) !== JSON.stringify(DEFAULT_VALUES[key]));
-      setIsChanged(hasInput || !!file);
-      return;
-    }
-    const hasChanged = Object.keys(allValues).some(key => {
-      return JSON.stringify(allValues[key]) !== JSON.stringify(originalData?.[key]);
-    });
-    setIsChanged(hasChanged || !!file);
+    if (!originalData) return;
+    const hasChanged = 
+      JSON.stringify(allValues) !== JSON.stringify(originalData) || !!file;
+    setIsChanged(hasChanged);
   };
 
   const productMutation = useAsyncMutation({
@@ -84,7 +88,7 @@ export default function ShopProductForm() {
       params.productId && params.productId !== "create"
         ? updateShopProductAPI(params.productId, formData)
         : addShopProductAPI(formData),
-    invalidateQueries: [["shop-products"]],
+    invalidateQueries: [["shop-products-list"]],
   });
 
   const handleSave = async (values) => {
@@ -93,7 +97,8 @@ export default function ShopProductForm() {
       const payload = {
         ...values,
         options: values.options || [],
-        highlight: values.highlight ? true : false,
+        active: Boolean(values.active),
+        highlight: Boolean(values.highlight),
       };
 
       Object.keys(payload).forEach(key => {

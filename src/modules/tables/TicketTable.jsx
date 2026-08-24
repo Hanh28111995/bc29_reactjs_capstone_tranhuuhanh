@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
 export default function TicketTable() {
-  const [searchTerm, setSearchTerm] = useState(""); // Giá trị gõ phím liên tục
-  const [keyword, setKeyword] = useState(""); // Từ khóa chính thức gọi API (sau debounce)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState(undefined);
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
 
@@ -19,7 +19,6 @@ export default function TicketTable() {
   const { notification } = App.useApp();
   const navigate = useNavigate();
 
-  // 1. Gọi API danh sách vé bình thường (khi không search hoặc khi phân trang/lọc trạng thái)
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit, statusFilter],
     queryKey: ["tickets-list", pagination.page, pagination.limit, statusFilter],
@@ -29,10 +28,9 @@ export default function TicketTable() {
         limit: pagination.limit,
         status: statusFilter,
       }),
-    enabled: !keyword, // Chỉ gọi khi không ở chế độ search
+    enabled: !keyword,
   });
 
-  // Đồng bộ dữ liệu khi ở trạng thái bình thường
   useEffect(() => {
     if (!keyword && responseContent) {
       const list = Array.isArray(responseContent)
@@ -46,7 +44,6 @@ export default function TicketTable() {
     }
   }, [responseContent, keyword]);
 
-  // 2. Xử lý Search với Debounce ngầm giống hệt MovieTable
   useEffect(() => {
     if (!keyword) {
       setIsSearching(false);
@@ -60,7 +57,7 @@ export default function TicketTable() {
           keyword: keyword,
           status: statusFilter,
           page: 1,
-          limit: 50, // Hoặc truyền limit theo phân trang hiện tại
+          limit: 50,
         });
 
         const list = Array.isArray(res)
@@ -83,7 +80,6 @@ export default function TicketTable() {
     return () => clearTimeout(timer);
   }, [keyword, statusFilter]);
 
-  // Hàm xử lý khi gõ ô Input tìm kiếm
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchTerm(val);
@@ -97,7 +93,6 @@ export default function TicketTable() {
     }
   };
 
-  // 3. Sử dụng useAsyncMutation chuẩn để xóa vé
   const { mutateAsync: deleteTicket, isPending: isDeleting } = useAsyncMutation(
     {
       service: (id) => deleteTicketAPI(id),
@@ -108,11 +103,9 @@ export default function TicketTable() {
           description: "Đã xóa vé!",
         });
 
-        // Nếu đang search, lọc trực tiếp trên state cho mượt
         if (keyword) {
           setTicketList((prev) => prev.filter((item) => item._id !== id));
         } else {
-          // Tự động lùi trang thông minh nếu xóa hết item cuối cùng của trang
           if (ticketList.length === 1 && pagination.page > 1) {
             setPagination((prev) => ({ ...prev, page: prev.page - 1 }));
           }
@@ -138,21 +131,21 @@ export default function TicketTable() {
     },
     {
       title: "Ghế",
-      dataIndex: "seats",
-      key: "seats",
-      render: (seats) =>
-        Array.isArray(seats)
-          ? seats.map((s) => s.seatNumber || s.name).join(", ")
+      dataIndex: "seatName", // Sửa từ "seats" thành "seatName" khớp API
+      key: "seatName",
+      render: (seatName) =>
+        Array.isArray(seatName) && seatName.length > 0
+          ? seatName.map((s) => s.seatNumber || s.name).join(", ")
           : "---",
     },
     {
       title: "Tổng tiền",
-      dataIndex: "seats",
+      dataIndex: "seatName", // Dùng seatName để tính tiền khớp cấu trúc dữ liệu
       key: "total",
       width: "13%",
-      render: (seats) => {
-        const totalMoney = Array.isArray(seats)
-          ? seats.reduce((t, s) => t + (s.price || 0), 0)
+      render: (seatName) => {
+        const totalMoney = Array.isArray(seatName)
+          ? seatName.reduce((t, s) => t + (s.price || 0), 0)
           : 0;
         return `${totalMoney.toLocaleString("vi-VN")} đ`;
       },
@@ -161,14 +154,22 @@ export default function TicketTable() {
       title: "Thanh toán",
       dataIndex: "paymentMethod",
       key: "paymentMethod",
-      width: "12%",
-      render: (text) => <Tag>{text || "---"}</Tag>,
+      width: "14%",
+      render: (method) => {
+        const methodMap = {
+          cash: { label: "Tiền mặt", color: "default" },
+          momo: { label: "MoMo", color: "magenta" },
+          vnpay: { label: "VNPay", color: "blue" },
+        };
+        const current = methodMap[method] || { label: method || "---", color: "default" };
+        return <Tag color={current.color}>{current.label}</Tag>;
+      },
     },
     {
       title: "Trạng thái",
       dataIndex: "paymentStatus",
       key: "paymentStatus",
-      width: "10%",
+      width: "12%",
       render: (text) => (
         <Tag
           color={
@@ -261,7 +262,7 @@ export default function TicketTable() {
         bordered
         pagination={
           keyword
-            ? false // Ẩn phân trang khi đang search giống hệt MovieTable
+            ? false
             : {
                 pageSize: pagination.limit,
                 current: pagination.page,

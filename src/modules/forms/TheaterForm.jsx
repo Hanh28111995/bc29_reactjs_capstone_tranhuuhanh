@@ -21,13 +21,15 @@ export default function TheaterForm() {
 
   const [isChanged, setIsChanged] = useState(false);
   const [listGhe, setListGhe] = useState([]);
+  const [originalSeats, setOriginalSeats] = useState([]);
+  const [originalData, setOriginalData] = useState(null);
   const [isResettingSeats, setIsResettingSeats] = useState(false);
 
   // State để chốt giá trị gửi về Backend
   const [SeatRow, setSeatRow] = useState(null);
   const [SeatCol, setSeatCol] = useState(null);
 
-  // State hiển thị số ghế tạm thời trên giao diện (Thay thế useWatch)
+  // State hiển thị số ghế tạm thời trên giao diện
   const [tempTotal, setTempTotal] = useState({ rows: 10, cols: 10 });
 
   const { state: rawSeatsDB } = useAsync({
@@ -46,10 +48,8 @@ export default function TheaterForm() {
     condition: !!params.theaterId,
   });
 
-  // API trả về content: { theater: {...} }, useAsync trả về object đó
   const theaterDetail = theaterDetailRaw?.theater ?? theaterDetailRaw;
 
-  // Theo dõi cinemaName để filter branch
   const selectedCinema = Form.useWatch('cinemaName', form);
 
   const branchOptions = useMemo(() => {
@@ -65,22 +65,32 @@ export default function TheaterForm() {
   // Khởi tạo và đồng bộ dữ liệu Form
   useEffect(() => {
     if (params.theaterId && theaterDetail) {
-      // Chế độ CHỈNH SỬA
       form.setFieldsValue(theaterDetail);
       setListGhe(theaterDetail.seats || []);
+      setOriginalSeats(theaterDetail.seats || []);
+      setOriginalData(theaterDetail);
       setSeatRow(theaterDetail.totalSeat?.rows);
       setSeatCol(theaterDetail.totalSeat?.cols);
       setTempTotal({
         rows: theaterDetail.totalSeat?.rows || 0,
         cols: theaterDetail.totalSeat?.cols || 0
       });
+      setIsResettingSeats(false);
     } else if (!params.theaterId) {
-      // Chế độ THÊM MỚI
       form.resetFields();
       setListGhe([]);
+      setOriginalSeats([]);
+      setOriginalData({
+        name: "",
+        cinemaName: undefined,
+        branch: undefined,
+        description: "",
+        totalSeat: { rows: 0, cols: 0 }
+      });
       setSeatRow(0); 
       setSeatCol(0);
       setTempTotal({ rows: 0, cols: 0 });
+      setIsResettingSeats(false);
     }
     setIsChanged(false);
   }, [theaterDetail, params.theaterId, form]);
@@ -89,13 +99,39 @@ export default function TheaterForm() {
     form.setFieldValue('branch', undefined);
   };
 
-  // Cập nhật hiển thị tổng số ghế khi đang nhập liệu
+  // Hàm kiểm tra tổng hợp trạng thái thay đổi
+  const checkIsChanged = (currentValues, currentSeats, isReset) => {
+    if (isReset) return true;
+    if (!params.theaterId) {
+      // Create mode
+      const hasInput = Object.keys(currentValues).some(
+        key => currentValues[key] !== undefined && currentValues[key] !== ""
+      );
+      return hasInput || currentSeats.length > 0;
+    }
+
+    // Edit mode
+    const hasFormChanged = Object.keys(currentValues).some(key => {
+      if (key === 'totalSeat') {
+        return (
+          currentValues.totalSeat?.rows !== originalData?.totalSeat?.rows ||
+          currentValues.totalSeat?.cols !== originalData?.totalSeat?.cols
+        );
+      }
+      return currentValues[key] !== originalData?.[key];
+    });
+
+    const hasSeatsChanged = JSON.stringify(currentSeats) !== JSON.stringify(originalSeats);
+
+    return hasFormChanged || hasSeatsChanged;
+  };
+
   const handleFormChange = (_, allValues) => {
-    setIsChanged(true);
     setTempTotal({
       rows: allValues.totalSeat?.rows || 0,
       cols: allValues.totalSeat?.cols || 0
     });
+    setIsChanged(checkIsChanged(allValues, listGhe, isResettingSeats));
   };
 
   const handleSeatUpdate = (type, payload) => {
@@ -115,11 +151,11 @@ export default function TheaterForm() {
       });
 
       setListGhe(updatedSeats);
-      setIsChanged(true);
+      const currentValues = form.getFieldsValue();
+      setIsChanged(checkIsChanged(currentValues, updatedSeats, isResettingSeats));
     }
   };
 
-  // Hàm "Lưu" (nhỏ) để chốt sơ đồ hàng/cột
   const handleConfirmLayout = () => {
     const rows = form.getFieldValue(['totalSeat', 'rows']);
     const cols = form.getFieldValue(['totalSeat', 'cols']);
@@ -131,7 +167,9 @@ export default function TheaterForm() {
     setSeatRow(rows);
     setSeatCol(cols);
     setIsResettingSeats(true);
-    setIsChanged(true);
+    
+    const currentValues = form.getFieldsValue();
+    setIsChanged(checkIsChanged(currentValues, listGhe, true));
 
     notification.info({
       message: "Xác nhận thay đổi",
@@ -144,7 +182,7 @@ export default function TheaterForm() {
       params.theaterId
         ? updateTheaterAPI(params.theaterId, payload)
         : addTheaterAPI(payload),
-    invalidateQueries: [["theaters"]],
+    invalidateQueries: [["theaters-list"]],
   });
 
   const handleSave = async (values) => {
@@ -155,7 +193,6 @@ export default function TheaterForm() {
           rows: SeatRow,
           cols: SeatCol,
         },
-        // Nếu chốt quy mô mới, gửi mảng rỗng để Backend tạo ghế mới
         seats: isResettingSeats ? [] : listGhe,
       };
 
@@ -166,7 +203,7 @@ export default function TheaterForm() {
       console.log(error);
       notification.error({
         message: "Lỗi hệ thống",
-        description: error.message || "Không thể lưu dữ liệu phòng chiếu.",
+        description: error.response?.data?.message || error.message || "Không thể lưu dữ liệu phòng chiếu.",
       });
     }
   };
@@ -276,7 +313,7 @@ export default function TheaterForm() {
             <SeatsRendering
               data={listGhe}
               onAction={handleSeatUpdate}
-              mode={userState.userInfor?.user_inf.role}
+              mode={userState.userInfor?.user_inf?.role}
               selectedSeats={[]}
             />
           )}

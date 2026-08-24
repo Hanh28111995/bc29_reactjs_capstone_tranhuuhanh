@@ -1,19 +1,12 @@
-import React, { useEffect } from "react";
 import {
-  Button,
-  Form,
-  Select,
-  Card,
-  Space,
-  App,
-  Descriptions,
-  Tag,
-  Divider,
+  Button, Form, Select, Space, Card, Divider,
+  Descriptions, Tag, App
 } from "antd";
-import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
 import { fetchTicketByIdAPI, updateTicketAPI } from "services/ticket";
+import { SaveOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
 export default function TicketForm() {
@@ -21,6 +14,8 @@ export default function TicketForm() {
   const { ticketId } = useParams();
   const [form] = Form.useForm();
   const { notification } = App.useApp();
+
+  const [isChanged, setIsChanged] = useState(false);
 
   const {
     state: response,
@@ -36,7 +31,7 @@ export default function TicketForm() {
 
   const updateTicketMutation = useAsyncMutation({
     service: (values) => updateTicketAPI(ticketId, values),
-    invalidateQueries: [["ticket", ticketId]],
+    invalidateQueries: [["ticket", ticketId], ["tickets-list"]],
   });
 
   // Lấy dữ liệu ticket an toàn
@@ -48,8 +43,16 @@ export default function TicketForm() {
         paymentStatus: ticket.paymentStatus,
         paymentMethod: ticket.paymentMethod,
       });
+      setIsChanged(false);
     }
   }, [ticket, form]);
+
+  const handleFormChange = (_, allValues) => {
+    const hasChanged = 
+      allValues.paymentStatus !== ticket?.paymentStatus ||
+      allValues.paymentMethod !== ticket?.paymentMethod;
+    setIsChanged(hasChanged);
+  };
 
   const handleSave = async (values) => {
     try {
@@ -58,8 +61,8 @@ export default function TicketForm() {
       navigate(-1);
     } catch (error) {
       notification.error({
-        message: "Lỗi",
-        description: error.response?.data?.message || "Không thể cập nhật",
+        message: "Lỗi hệ thống",
+        description: error.response?.data?.message || error.message || "Không thể cập nhật vé.",
       });
     }
   };
@@ -68,14 +71,15 @@ export default function TicketForm() {
   const seats = ticket?.seatName || [];
   const totalPrice = seats.reduce((t, s) => t + (s.price || 0), 0);
 
-  // Xử lý hiển thị an toàn cho Object (Tránh lỗi #31)
+  // Xử lý hiển thị an toàn cho Object (Tránh lỗi render Object)
   const movieDisplay =
     typeof ticket?.id_movie === "object"
-      ? ticket.id_movie.title
+      ? ticket.id_movie?.title
       : ticket?.id_movie;
+      
   const theaterDisplay =
     typeof ticket?.id_theater === "object"
-      ? ticket.id_theater.name
+      ? ticket.id_theater?.name
       : ticket?.id_theater;
 
   if (isError) {
@@ -99,7 +103,7 @@ export default function TicketForm() {
             onClick={() => navigate(-1)}
             type="text"
           />
-          <span>Chi tiết vé {ticket?._id}</span>
+          <span>Chi tiết vé {ticket?._id || ticketId}</span>
         </Space>
       }
     >
@@ -130,7 +134,7 @@ export default function TicketForm() {
             </Descriptions.Item>
 
             <Descriptions.Item label="Mã giao dịch">
-              <code style={{ color: "#0958d9" }}>{ticket.transactionId}</code>
+              <code style={{ color: "#0958d9" }}>{ticket.transactionId || "—"}</code>
             </Descriptions.Item>
 
             <Descriptions.Item label="Ghế đã đặt" span={2}>
@@ -164,7 +168,12 @@ export default function TicketForm() {
 
           <Divider orientation="left">Quản lý trạng thái</Divider>
 
-          <Form form={form} layout="vertical" onFinish={handleSave}>
+          <Form 
+            form={form} 
+            layout="vertical" 
+            onFinish={handleSave}
+            onValuesChange={handleFormChange}
+          >
             <div
               style={{
                 display: "grid",
@@ -199,8 +208,9 @@ export default function TicketForm() {
               <Button
                 type="primary"
                 htmlType="submit"
-                icon={<SaveOutlined />}
+                disabled={!isChanged}
                 size="large"
+                icon={<SaveOutlined />}
                 block
               >
                 LƯU THÔNG TIN CẬP NHẬT

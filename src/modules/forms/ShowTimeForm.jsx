@@ -43,6 +43,7 @@ export default function ShowtimeForm() {
   const userState = useSelector((state) => state.userReducer);
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
+  const [originalSeats, setOriginalSeats] = useState([]); // Thêm lưu vết ghế gốc để so sánh thay đổi
   const [selectedCinema, setSelectedCinema] = useState(null);
   const [seats, setSeats] = useState([]);
 
@@ -83,24 +84,16 @@ export default function ShowtimeForm() {
   useEffect(() => {
     if (!isEditMode || !data) return;
 
-    // API trả về content.showtimes — useAsync unwrap content thành object { showtimes: {...} }
     const showtimeDetail =
       data?.showtimes ??
       data?.showtime ??
       (Array.isArray(data) ? data[0] : data);
     if (!showtimeDetail) return;
 
-    // cinema là object riêng biệt ở top-level, branch lấy từ cinema.branch hoặc theater.branch
-    const cinemaName =
-      showtimeDetail.cinema?.cinemaName ||
-      showtimeDetail.theater?.cinemaName ||
-      showtimeDetail.theater?.branch;
-
     const dataForForm = {
       movie: showtimeDetail.id_movie?._id || showtimeDetail.id_movie,
       theater: showtimeDetail.theater?._id || showtimeDetail.theater,
       cinema: showtimeDetail.cinema?._id || showtimeDetail.cinema,
-      // Bỏ suffix timezone để giữ nguyên giờ hiển thị từ DB
       startTime: showtimeDetail.startTime
         ? dayjs(
             showtimeDetail.startTime.replace(/Z$/, "").replace(/\+07:00$/, ""),
@@ -111,12 +104,13 @@ export default function ShowtimeForm() {
     form.setFieldsValue(dataForForm);
     setOriginalData(dataForForm);
     setSelectedCinema(showtimeDetail.cinema?._id || showtimeDetail.cinema);
-    // Lấy seats từ showtime (có color, price, isBooked) — không dùng theater.seats
+    
     const showtimeSeats =
       showtimeDetail.seats?.filter((s) => s.color) ??
       showtimeDetail.seats ??
       [];
     setSeats(showtimeSeats);
+    setOriginalSeats(showtimeSeats); // Lưu bản gốc để so sánh thay đổi ghế
     setIsChanged(false);
   }, [data, isEditMode, form]);
 
@@ -124,7 +118,6 @@ export default function ShowtimeForm() {
 
   const filteredTheaters = useMemo(() => {
     if (!selectedCinema) return [];
-    // Thử match theo cinema._id trực tiếp trên theater, hoặc fallback qua branch string
     const selectedBranch = branches.find((b) => b._id === selectedCinema);
     if (!selectedBranch) return [];
     return theaters.filter(
@@ -134,10 +127,34 @@ export default function ShowtimeForm() {
     );
   }, [theaters, branches, selectedCinema]);
 
+  // Hàm kiểm tra tổng hợp xem Form hoặc Ghế có thay đổi so với ban đầu hay không
+  const checkIsChanged = (currentFormValues, currentSeats) => {
+    if (!isEditMode) {
+      // Create mode: Chỉ cần có chọn ít nhất 1 trường hoặc có ghế là bật nút
+      const hasInput = Object.keys(currentFormValues).some(
+        (key) => currentFormValues[key] !== DEFAULT_VALUES[key]
+      );
+      return hasInput || currentSeats.length > 0;
+    }
+
+    // Edit mode: So sánh Form values
+    const hasFormChanged = Object.keys(currentFormValues).some((key) => {
+      if (key === "startTime") {
+        return !dayjs(currentFormValues[key]).isSame(originalData?.startTime);
+      }
+      return currentFormValues[key] !== originalData?.[key];
+    });
+
+    // So sánh Seats thay đổi
+    const hasSeatsChanged = JSON.stringify(currentSeats) !== JSON.stringify(originalSeats);
+
+    return hasFormChanged || hasSeatsChanged;
+  };
+
   const handleSeatAction = (type, updatedSeat) => {
     if (type !== "admin") return;
-    setSeats((prev) =>
-      prev.map((s) =>
+    setSeats((prev) => {
+      const newSeats = prev.map((s) =>
         s._id === updatedSeat._id
           ? {
               ...s,
@@ -145,23 +162,16 @@ export default function ShowtimeForm() {
               isBooked: updatedSeat.isBooked,
             }
           : s,
-      ),
-    );
-    setIsChanged(true);
+      );
+      // Kiểm tra trạng thái thay đổi dựa trên form hiện tại và danh sách ghế mới
+      const currentValues = form.getFieldsValue();
+      setIsChanged(checkIsChanged(currentValues, newSeats));
+      return newSeats;
+    });
   };
 
   const onValuesChange = (_, allValues) => {
-    if (!isEditMode) {
-      setIsChanged(true);
-      return;
-    }
-    const hasChanged = Object.keys(allValues).some((key) => {
-      if (key === "startTime") {
-        return !dayjs(allValues[key]).isSame(originalData?.startTime);
-      }
-      return allValues[key] !== originalData?.[key];
-    });
-    setIsChanged(hasChanged);
+    setIsChanged(checkIsChanged(allValues, seats));
   };
 
   const showtimeMutation = useAsyncMutation({
@@ -278,6 +288,8 @@ export default function ShowtimeForm() {
                 onChange={(value) => {
                   setSelectedCinema(value);
                   form.setFieldValue("theater", undefined);
+                  const currentValues = form.getFieldsValue();
+                  setIsChanged(checkIsChanged(currentValues, seats));
                 }}
                 options={cinemaList.map((b) => ({
                   label: `${b.cinemaName} - ${b.branch}`,
