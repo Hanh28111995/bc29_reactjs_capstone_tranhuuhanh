@@ -47,9 +47,7 @@ export default function ShopProduct(props) {
     queryKey: ["locations"],
   });
 
-  const locations = Array.isArray(rawLocations)
-    ? rawLocations
-    : [];
+  const locations = Array.isArray(rawLocations) ? rawLocations : [];
 
   // =========================
   // BRANCHES
@@ -64,9 +62,7 @@ export default function ShopProduct(props) {
     queryKey: ["branches"],
   });
 
-  const allBranches = Array.isArray(rawBranches)
-    ? rawBranches
-    : [];
+  const allBranches = Array.isArray(rawBranches) ? rawBranches : [];
 
   // =========================
   // PRODUCTS
@@ -77,14 +73,11 @@ export default function ShopProduct(props) {
     isError: isProductsError,
     error: productsError,
   } = useAsync({
-    service: () =>
-      fetchShopFilterAPI(appliedFilters),
+    service: () => fetchShopFilterAPI(appliedFilters),
     queryKey: ["shop-products", appliedFilters],
   });
 
-  const promotionList = Array.isArray(
-    rawPromotionList,
-  )
+  const promotionList = Array.isArray(rawPromotionList)
     ? rawPromotionList
     : rawPromotionList?.data?.content ||
       rawPromotionList?.data ||
@@ -95,22 +88,14 @@ export default function ShopProduct(props) {
   // GỘP LOADING
   // =========================
   const isLoading =
-    isLocationsLoading ||
-    isBranchesLoading ||
-    isProductsLoading;
+    isLocationsLoading || isBranchesLoading || isProductsLoading;
 
   // =========================
   // GỘP ERROR
   // =========================
-  const isError =
-    isLocationsError ||
-    isBranchesError ||
-    isProductsError;
+  const isError = isLocationsError || isBranchesError || isProductsError;
 
-  const error =
-    locationsError ||
-    branchesError ||
-    productsError;
+  const error = locationsError || branchesError || productsError;
 
   // =========================
   // GLOBAL LOADING
@@ -132,15 +117,12 @@ export default function ShopProduct(props) {
   // =========================
   const filteredBranches = filters.area
     ? allBranches.filter((branch) => {
-        const selectedArea = locations.find(
-          (loc) => loc._id === filters.area,
-        );
+        const selectedArea = locations.find((loc) => loc._id === filters.area);
 
         if (!selectedArea) return false;
 
-        return selectedArea.cumRap?.some(
-          (area) =>
-            branch.address?.includes(area),
+        return selectedArea.cumRap?.some((area) =>
+          branch.address?.includes(area),
         );
       })
     : allBranches;
@@ -154,21 +136,23 @@ export default function ShopProduct(props) {
     });
   };
 
-  // =========================
-  // ERROR
-  // =========================
+  if (isLoading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "50vh" }}
+      >
+        <p>Đang tải dữ liệu...</p>
+      </div>
+    );
+  }
+
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>
-          Đã có lỗi khi tải danh sách
-          promotion.
-        </p>
+        <p>Đã có lỗi khi tải danh sách promotion.</p>
 
-        <p>
-          {error?.message ||
-            "Vui lòng thử lại sau."}
-        </p>
+        <p>{error?.message || "Vui lòng thử lại sau."}</p>
       </div>
     );
   }
@@ -214,12 +198,10 @@ export default function ShopProduct(props) {
                     theater: undefined,
                   })
                 }
-                options={locations.map(
-                  (loc) => ({
-                    label: loc.vungMien,
-                    value: loc._id,
-                  }),
-                )}
+                options={locations.map((loc) => ({
+                  label: loc.vungMien,
+                  value: loc._id,
+                }))}
               />
             </div>
           </Col>
@@ -249,12 +231,10 @@ export default function ShopProduct(props) {
                     theater: value,
                   })
                 }
-                options={filteredBranches.map(
-                  (branch) => ({
-                    label: branch.branch,
-                    value: branch._id,
-                  }),
-                )}
+                options={filteredBranches.map((branch) => ({
+                  label: branch.branch,
+                  value: branch._id,
+                }))}
               />
             </div>
           </Col>
@@ -404,17 +384,10 @@ export default function ShopProduct(props) {
       <div className="row mt-3 w-lg-75 movie-list-row">
         {Array.isArray(promotionList) &&
           promotionList.map((ele) => (
-            <div
-              className="col-3 mb-4"
-              key={ele._id}
-            >
+            <div className="col-3 mb-4" key={ele._id}>
               <div
                 className="card movie-card h-100"
-                onClick={() =>
-                  navigate(
-                    `/promotion/${ele._id}`,
-                  )
-                }
+                onClick={() => navigate(`/promotion/${ele._id}`)}
                 style={{
                   cursor: "pointer",
                 }}
@@ -423,10 +396,7 @@ export default function ShopProduct(props) {
                   <img
                     className="card-img-top"
                     src={ele.banner}
-                    alt={
-                      ele.title ||
-                      ele.tag
-                    }
+                    alt={ele.title || ele.tag}
                     width={300}
                     height={200}
                     style={{
@@ -438,29 +408,17 @@ export default function ShopProduct(props) {
                 </div>
 
                 <div className="card-body-custom p-3">
-                  <h5
-                    className="card-title text-truncate"
-                    title={ele.title}
-                  >
-                    {ele.title ||
-                      "Sản phẩm"}
+                  <h5 className="card-title text-truncate" title={ele.title}>
+                    {ele.title || "Sản phẩm"}
                   </h5>
 
                   <p className="movie-release text-muted mb-0">
                     {ele.startDate
-                      ? dayjs(
-                          ele.startDate,
-                        ).format(
-                          "DD/MM/YYYY",
-                        )
+                      ? dayjs(ele.startDate).format("DD/MM/YYYY")
                       : "Đang cập nhật"}{" "}
                     -{" "}
                     {ele.endDate
-                      ? dayjs(
-                          ele.endDate,
-                        ).format(
-                          "DD/MM/YYYY",
-                        )
+                      ? dayjs(ele.endDate).format("DD/MM/YYYY")
                       : "Không thời hạn"}
                   </p>
                 </div>
