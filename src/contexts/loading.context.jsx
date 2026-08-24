@@ -18,7 +18,7 @@ const WrapperSpin = styled.div`
 const LoadingContext = createContext(null);
 
 const GlobalSpinner = ({ spinRef }) => {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   spinRef.current = setVisible;
   return visible ? (
     <WrapperSpin>
@@ -42,7 +42,7 @@ const LoadingProvider = (props) => {
     spinRef.current?.(active);
   }, []);
 
-  const value = useRef([{ isLoading: true }, setState]);
+  const value = useRef([{ isLoading: false }, setState]);
 
   return (
     <LoadingContext.Provider value={value.current}>

@@ -125,9 +125,9 @@ export const useAsyncMutation = ({
   });
 
   // Ở v5, mutation.isLoading đổi tên thành mutation.isPending
-  useEffect(() => {
-    setLoadingState({ isLoading: mutation.isPending });
-  }, [mutation.isPending, setLoadingState]);
+  // useEffect(() => {
+  //   setLoadingState({ isLoading: mutation.isPending });
+  // }, [mutation.isPending, setLoadingState]);
 
   return {
     mutate: mutation.mutate,
