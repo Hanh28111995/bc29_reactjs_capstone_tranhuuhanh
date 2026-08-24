@@ -42,7 +42,7 @@ const LoadingProvider = (props) => {
     spinRef.current?.(active);
   }, []);
 
-  const value = useRef([{ isLoading: false }, setState]);
+  const value = useRef([{ isLoading: true }, setState]);
 
   return (
     <LoadingContext.Provider value={value.current}>
