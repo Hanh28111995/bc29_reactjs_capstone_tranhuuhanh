@@ -19,7 +19,7 @@ export default function TheaterTable() {
     service: fetchTheaterListAPI,
     queryKey: ["theaters_list"],
   });
-  const data = safeArray(rawData.theaters);
+  const data = safeArray(rawData?.theaters);
 
   const theaterList = useMemo(() => {
     if (!keyword) return data;
