@@ -12,30 +12,8 @@ export default function MovieList(props) {
   const [movieListType, setMovieListType] = useState("SHOWING");
 
   const movieList = Array.isArray(rawMovieList) ? rawMovieList : [];
+  
 
-  useEffect(() => {
-    setLoadingState({ isLoading });
-  }, [isLoading, setLoadingState]);
-
-  if (isLoading) {
-    return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "50vh" }}
-      >
-        <Spin size="large" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải danh sách phim.</p>
-        <p>{error?.message || "Vui lòng thử lại sau."}</p>
-      </div>
-    );
-  }
 
   const filteredMovies = movieList.filter((ele) =>
     movieListType === "SHOWING" ? ele.showing === true : ele.coming === true,
