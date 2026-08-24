@@ -237,21 +237,33 @@ $mobile-breakpoint: 500px;
 
 .movie-table-container {
   @include table-container-base;
+  
+  // --- GIỚI HẠN TUYỆT ĐỐI KHUNG BÊN NGOÀI, CHẶN TRÀN (OVERFLOW) ---
+  width: 100%;
+  max-width: 100%;       // Không bao giờ được vượt quá khung cha thực tế của nó
+  box-sizing: border-box;
+  overflow: hidden;      // Cực kỳ quan trọng: Cắt bỏ mọi thành phần con cố tình phình to đẩy tràn ra ngoài
+  
+  // Nếu vẫn muốn có thanh cuộn ngang an toàn khi màn hình quá nhỏ thay vì vỡ layout:
+  // overflow-x: auto; 
 
   .table-header-actions {
     @include header-actions-base;
     flex-direction: column;
     align-items: stretch;
+    width: 100%;         // Ép header bám khít khung, không tự dãn
 
     .search-input {
       max-width: 100%;
       width: 100%;
-      align-self: stretch;
+      min-width: 0;      // Bắt buộc: Chống flexbox tự động đẩy phình to (flex item overflow bug)
+      box-sizing: border-box;
 
       .ant-input-search,
       .ant-input-affix-wrapper,
       .ant-input {
         width: 100% !important;
+        box-sizing: border-box;
       }
 
       input.ant-input {
@@ -263,12 +275,24 @@ $mobile-breakpoint: 500px;
     .add-btn {
       width: 100%;
       margin-left: 0;
+      box-sizing: border-box;
     }
   }
 
+  // --- GIỚI HẠN BẢNG BÊN TRONG ---
   .custom-table {
     @include custom-table-base;
-    min-width: 700px; // BỔ SUNG: Đảm bảo bảng giữ nguyên tỷ lệ phần trăm hoàn hảo, không bị bóp méo trên màn hình hẹp
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed; // Đảm bảo bảng tuân thủ tuyệt đối theo phần trăm cột đã định nghĩa
+
+    // Ép mọi ô cell không được tự ý phình to đẩy vỡ bảng
+    .ant-table-cell {
+      box-sizing: border-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap; // Tránh chữ dài làm dãn cột ngang (trừ cột nào cần xuống dòng thì override lại)
+    }
 
     .movie-banner {
       width: 4.5rem;   
