@@ -19,10 +19,10 @@ export default function BranchesTable() {
     
     const { state: rawData, loading, refetch } = useAsync({
         service: getAllBranches,
-        queryKey: ['branches'],
+        queryKey: ['branches_list'],
     });
     
-    const data = safeArray(rawData);
+    const data = safeArray(rawData?.cinemas);
 
     // Đồng bộ dữ liệu gốc vào local state khi fetch thành công
     useEffect(() => {

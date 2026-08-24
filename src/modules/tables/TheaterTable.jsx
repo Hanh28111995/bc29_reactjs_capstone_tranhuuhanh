@@ -17,8 +17,9 @@ export default function TheaterTable() {
   const { state: rawData, loading } = useAsync({
     dependencies: [toggle],
     service: fetchTheaterListAPI,
+    queryKey: ["theaters_list"],
   });
-  const data = safeArray(rawData);
+  const data = safeArray(rawData.theaters);
 
   const theaterList = useMemo(() => {
     if (!keyword) return data;
