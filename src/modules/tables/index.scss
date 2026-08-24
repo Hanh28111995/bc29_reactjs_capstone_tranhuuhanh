@@ -236,6 +236,7 @@ $mobile-breakpoint: 500px;
 }
 
 .movie-table-container {
+  max-width: 95vw;
   @include table-container-base;
   
   // --- GIỚI HẠN TUYỆT ĐỐI KHUNG BÊN NGOÀI, CHẶN TRÀN (OVERFLOW) ---
