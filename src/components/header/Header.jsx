@@ -278,7 +278,7 @@ export default function Header() {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse " id="collapsibleNavId">
+        <div className="navbar-collapse " id="collapsibleNavId">
           <ul className="navbar-nav mx-auto mt-2 mt-lg-0">
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/movie-search">
