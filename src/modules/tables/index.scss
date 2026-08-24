@@ -6,7 +6,7 @@ $mobile-breakpoint: 500px;
   min-width: 0;
   box-sizing: border-box;
   padding: 1.25rem;
-  overflow-x: auto; // BỔ SUNG: Tránh tràn khung khi bảng có cấu hình phần trăm cố định trên màn hình nhỏ
+  overflow: hidden; // Chặn triệt để việc nội dung con phình to đẩy tràn ra ngoài
 
   @media screen and (max-width: $mobile-breakpoint) {
     padding: 0;
@@ -19,6 +19,7 @@ $mobile-breakpoint: 500px;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  box-sizing: border-box;
 
   .search-box,
   .search-input,
@@ -26,11 +27,15 @@ $mobile-breakpoint: 500px;
     max-width: 25rem;
     flex: 1;
     width: 100%;
+    min-width: 0; // Chống flexbox tự động phình to
     margin-bottom: 0.5rem;
+    box-sizing: border-box;
 
     .ant-input-search .ant-input,
     .ant-input {
       font-size: 1.1rem;
+      width: 100% !important;
+      box-sizing: border-box;
     }
   }
 
@@ -42,6 +47,7 @@ $mobile-breakpoint: 500px;
     font-weight: 600;
     margin-left: auto;
     margin-bottom: 0.5rem;
+    box-sizing: border-box;
 
     @media (max-width: $mobile-breakpoint) {
       width: 100%;
@@ -68,10 +74,13 @@ $mobile-breakpoint: 500px;
 
 @mixin custom-table-base {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 
   .ant-table-cell {
     text-align: center !important;
     padding: 0.8rem 0.5rem !important;
+    box-sizing: border-box;
   }
 
   .ant-table-thead > tr > th {
@@ -116,6 +125,7 @@ $mobile-breakpoint: 500px;
     gap: 0.5rem;
     justify-content: center;
     width: 100%;
+    box-sizing: border-box;
 
     .ant-btn {
       font-size: 1.3rem;
@@ -193,18 +203,22 @@ $mobile-breakpoint: 500px;
     @include custom-table-base;
   }
 
+  // Đặc thù SeatType
   .color-input-custom {
     width: 100%;
     height: 2.2rem;
     cursor: pointer;
     border: 1px solid #d9d9d9;
     border-radius: 0.25rem;
+    box-sizing: border-box;
   }
 
+  // Nút Save All dưới cùng
   .save-all-wrapper {
     margin-top: 1.5rem;
     display: flex;
     justify-content: flex-end;
+    box-sizing: border-box;
 
     .btn-save-all {
       height: 3.5rem;
@@ -236,76 +250,41 @@ $mobile-breakpoint: 500px;
 }
 
 .movie-table-container {
-  max-width: 95vw;
   @include table-container-base;
-  
-  // --- GIỚI HẠN TUYỆT ĐỐI KHUNG BÊN NGOÀI, CHẶN TRÀN (OVERFLOW) ---
-  width: 100%;
-  max-width: 100%;       // Không bao giờ được vượt quá khung cha thực tế của nó
-  box-sizing: border-box;
-  overflow: hidden;      // Cực kỳ quan trọng: Cắt bỏ mọi thành phần con cố tình phình to đẩy tràn ra ngoài
-  
-  // Nếu vẫn muốn có thanh cuộn ngang an toàn khi màn hình quá nhỏ thay vì vỡ layout:
-  // overflow-x: auto; 
 
   .table-header-actions {
     @include header-actions-base;
     flex-direction: column;
-    align-items: stretch;
-    width: 100%;         // Ép header bám khít khung, không tự dãn
+    align-items: flex-start;
+    width: 100%;
 
     .search-input {
       max-width: 100%;
       width: 100%;
-      min-width: 0;      // Bắt buộc: Chống flexbox tự động đẩy phình to (flex item overflow bug)
-      box-sizing: border-box;
+      min-width: 0;
 
       .ant-input-search,
       .ant-input-affix-wrapper,
       .ant-input {
         width: 100% !important;
-        box-sizing: border-box;
       }
-
-      input.ant-input {
-        width: 100% !important;
-        min-width: 0;
-      }
-    }
-
-    .add-btn {
-      width: 100%;
-      margin-left: 0;
-      box-sizing: border-box;
     }
   }
 
-  // --- GIỚI HẠN BẢNG BÊN TRONG ---
   .custom-table {
     @include custom-table-base;
-    width: 100%;
-    max-width: 100%;
-    table-layout: fixed; // Đảm bảo bảng tuân thủ tuyệt đối theo phần trăm cột đã định nghĩa
 
-    // Ép mọi ô cell không được tự ý phình to đẩy vỡ bảng
-    .ant-table-cell {
-      box-sizing: border-box;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap; // Tránh chữ dài làm dãn cột ngang (trừ cột nào cần xuống dòng thì override lại)
-    }
-
+    // Đặc thù Banner phim
     .movie-banner {
-      width: 4.5rem;   
-      height: 6.5rem;  
+      width: 15rem;
+      height: auto;
       border-radius: 0.2rem;
       object-fit: cover;
+      margin: auto;
       display: block;
-      margin: 0 auto;  
 
       @media (max-width: $mobile-breakpoint) {
         width: 2.5rem;
-        height: 3.5rem;
       }
     }
   }
