@@ -219,6 +219,7 @@ function MovieTable() {
         dataSource={Array.isArray(movieList) ? movieList : []}
         loading={isLoadingList || isDeleting}
         bordered
+        scroll={{ x: '100%' }}
         pagination={
           keyword
             ? false // Ẩn phân trang khi đang search

@@ -6,6 +6,7 @@ $mobile-breakpoint: 500px;
   min-width: 0;
   box-sizing: border-box;
   padding: 1.25rem;
+  overflow-x: auto; // BỔ SUNG: Tránh tràn khung khi bảng có cấu hình phần trăm cố định trên màn hình nhỏ
 
   @media screen and (max-width: $mobile-breakpoint) {
     padding: 0;
@@ -192,7 +193,6 @@ $mobile-breakpoint: 500px;
     @include custom-table-base;
   }
 
-  // Đặc thù SeatType
   .color-input-custom {
     width: 100%;
     height: 2.2rem;
@@ -201,7 +201,6 @@ $mobile-breakpoint: 500px;
     border-radius: 0.25rem;
   }
 
-  // Nút Save All dưới cùng
   .save-all-wrapper {
     margin-top: 1.5rem;
     display: flex;
@@ -236,7 +235,7 @@ $mobile-breakpoint: 500px;
   }
 }
 
-.movie-table-container, .promotion-table-container, .shop-table-container, .user-table-container {
+.movie-table-container {
   @include table-container-base;
 
   .table-header-actions {
@@ -269,6 +268,7 @@ $mobile-breakpoint: 500px;
 
   .custom-table {
     @include custom-table-base;
+    min-width: 700px; // BỔ SUNG: Đảm bảo bảng giữ nguyên tỷ lệ phần trăm hoàn hảo, không bị bóp méo trên màn hình hẹp
 
     .movie-banner {
       width: 4.5rem;   
