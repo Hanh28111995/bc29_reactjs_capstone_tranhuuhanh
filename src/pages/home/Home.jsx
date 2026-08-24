@@ -4,6 +4,7 @@ import MovieList from "modules/itemLists/MovieList";
 import "./index.scss";
 import { fetchMovieListAPI } from "services/general";
 import { getBannerListAPI } from "services/banner";
+import { useAsync } from "hooks/useAsync";
 
 export default function Home() {
   const {
