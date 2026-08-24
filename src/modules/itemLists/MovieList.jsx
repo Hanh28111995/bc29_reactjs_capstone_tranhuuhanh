@@ -1,27 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoadingContext } from "../../contexts/loading.context";
-import { useAsync } from "../../hooks/useAsync";
 import { Radio, Spin } from "antd";
 import dayjs from "dayjs";
-import { fetchMovieListAPI } from "services/general";
 import "./index.scss";
 
-export default function MovieList() {
+export default function MovieList(props) {
   const navigate = useNavigate();
+  const rawMovieList = props.rawMovieList;
   const [, setLoadingState] = useContext(LoadingContext);
   const [movieListType, setMovieListType] = useState("SHOWING");
 
-  const {
-    state: rawMovieList = [],
-    loading: isLoading,
-    isError,
-    error,
-  } = useAsync({
-    service: () => fetchMovieListAPI(),
-    queryKey: ["movies"],
-  });
-  
   const movieList = Array.isArray(rawMovieList) ? rawMovieList : [];
 
   useEffect(() => {
@@ -30,7 +19,10 @@ export default function MovieList() {
 
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "50vh" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "50vh" }}
+      >
         <Spin size="large" />
       </div>
     );
@@ -46,7 +38,7 @@ export default function MovieList() {
   }
 
   const filteredMovies = movieList.filter((ele) =>
-    movieListType === "SHOWING" ? ele.showing === true : ele.coming === true
+    movieListType === "SHOWING" ? ele.showing === true : ele.coming === true,
   );
 
   return (
@@ -63,12 +55,14 @@ export default function MovieList() {
             <Radio.Button value="a" onClick={() => setMovieListType("SHOWING")}>
               Phim đang chiếu
             </Radio.Button>
-            <Radio.Button value="b" onClick={() => setMovieListType("COMMING-SOON")}>
+            <Radio.Button
+              value="b"
+              onClick={() => setMovieListType("COMMING-SOON")}
+            >
               Phim sắp chiếu
             </Radio.Button>
           </Radio.Group>
         </div>
-        
       </div>
 
       {/* Thêm class movie-list-row để kiểm soát flex-nowrap */}
@@ -77,16 +71,30 @@ export default function MovieList() {
           <div className="col-3" key={ele._id}>
             <div className="card movie-card">
               <div className="card-header-wrapper">
-                <img className="card-img-top" src={ele.banner} alt={ele.tenPhim} width={300} height={350} loading="lazy" decoding="async" />
+                <img
+                  className="card-img-top"
+                  src={ele.banner}
+                  alt={ele.tenPhim}
+                  width={300}
+                  height={350}
+                  loading="lazy"
+                  decoding="async"
+                />
 
                 {/* Lớp này sẽ hiện khi Hover (PC) hoặc Active (Touch) */}
                 <div className="overlay"></div>
 
                 <div className="btn-cover">
-                  <button className="btn-more-infor" onClick={() => navigate(`/movie/detail/${ele._id}`)}>
+                  <button
+                    className="btn-more-infor"
+                    onClick={() => navigate(`/movie/detail/${ele._id}`)}
+                  >
                     CHI TIẾT
                   </button>
-                  <button className="btn-more-infor" onClick={() => navigate(`/movie/selectT/${ele._id}`)}>
+                  <button
+                    className="btn-more-infor"
+                    onClick={() => navigate(`/movie/selectT/${ele._id}`)}
+                  >
                     ĐẶT VÉ
                   </button>
                 </div>
@@ -95,7 +103,8 @@ export default function MovieList() {
               <div className="card-body-custom">
                 <h3 className="movie-title">{ele.tenPhim}</h3>
                 <h4 className="movie-release">
-                  <span>Khởi chiếu:</span> {dayjs(ele.releaseDate).format('DD/MM/YYYY')}
+                  <span>Khởi chiếu:</span>{" "}
+                  {dayjs(ele.releaseDate).format("DD/MM/YYYY")}
                 </h4>
               </div>
             </div>

@@ -1,15 +1,55 @@
-import React from 'react'
-import Carousel from 'modules/carousel/Carousel'
-import MovieList from 'modules/itemLists/MovieList'
-import './index.scss'
-import SEO from 'components/SEO';
+import React from "react";
+import Carousel from "modules/carousel/Carousel";
+import MovieList from "modules/itemLists/MovieList";
+import "./index.scss";
+import { fetchMovieListAPI } from "services/general";
+import { getBannerListAPI } from "services/banner";
 
-export default function Home() {  
+export default function Home() {
+  const {
+    state: rawBanner = [],
+    loading: isBannerLoading,
+    isError: isBannerError,
+  } = useAsync({
+    service: () => getBannerListAPI(),
+    queryKey: ["banners-list"],
+  });
 
-  return (    
-      <div className='homePage'>
-        <Carousel />
-        <MovieList />
-      </div>    
-  )
+  const {
+    state: rawMovieList = [],
+    loading: isMovieLoading,
+    isError: isMovieError,
+  } = useAsync({
+    service: () => fetchMovieListAPI(),
+    queryKey: ["movies-list"],
+  });
+
+  const isLoading = isBannerLoading || isMovieLoading;
+  const isError = isBannerError || isMovieError;
+
+  if (isLoading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "50vh" }}
+      >
+        <p>Đang tải dữ liệu...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center mt-5">
+        <p>Đã có lỗi khi tải dữ liệu trang chủ.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="homePage">
+      <Carousel rawBanner={rawBanner} rawMovieList={rawMovieList} />
+      <MovieList />
+    </div>
+  );
 }
