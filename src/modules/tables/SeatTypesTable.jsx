@@ -3,7 +3,13 @@ import { Button, App, Popconfirm, Space, Tag, Card } from 'antd';
 import { useAsync, safeArray } from '../../hooks/useAsync';
 import React, { useState, useEffect } from 'react';
 import { DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
-import { getAllSeatTypesApi, updateSeatTypeApi, addOneSeatTypeApi, deleteOneSeatTypeApi } from 'services/seatType';
+import { 
+    getAllSeatTypesApi, 
+    updateSeatTypeApi, 
+    addOneSeatTypeApi, 
+    deleteOneSeatTypeApi 
+} from 'services/seatType';
+import { useQueryClient } from '@tanstack/react-query';
 import './index.scss'; 
 
 export default function SeatTypeTable() {
@@ -11,12 +17,15 @@ export default function SeatTypeTable() {
     const [dataSource, setDataSource] = useState([]);
     const [deleteIds, setDeleteIds] = useState([]);
     const [updatedIds, setUpdatedIds] = useState([]);
+    const [isSaving, setIsSaving] = useState(false);
+    
     const { message, notification } = App.useApp();
+    const queryClient = useQueryClient();
 
-    // Sử dụng useAsync chuẩn của dự án kết hợp queryKey để dễ dàng refetch
-    const { state: rawData, loading, refetch } = useAsync({
+    // Sử dụng useAsync với queryKey chuẩn để dễ dàng invalidate toàn cục
+    const { state: rawData, loading } = useAsync({
         service: getAllSeatTypesApi,
-        queryKey: ['seatTypes'],
+        queryKey: ['seattypes-list'],
     });
     
     const data = safeArray(rawData);
@@ -147,12 +156,18 @@ export default function SeatTypeTable() {
 
             if (promises.length === 0) return message.warning("Không có thay đổi nào để lưu!");
 
+            setIsSaving(true);
             await Promise.all(promises);
+            
             notification.success({ message: "Thành công", description: "Dữ liệu loại ghế đã được cập nhật." });
             
-            refetch(); // Làm mới dữ liệu chuẩn xác từ server
+            // Invalidate query key chuẩn v5 để tự động làm mới cache toàn hệ thống
+            queryClient.invalidateQueries({ queryKey: ['seattypes-list'] });
+            
         } catch (error) {
-            notification.error({ message: "Lỗi", description: "Vui lòng thử lại" });
+            notification.error({ message: "Lỗi", description: error.response?.data?.content || "Vui lòng thử lại" });
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -195,7 +210,8 @@ export default function SeatTypeTable() {
                         className="btn-save-all"
                         icon={<SaveOutlined />}
                         onClick={handleSaveAll}
-                        disabled={loading || (deleteIds.length === 0 && updatedIds.length === 0 && !dataSource.some(item => item._id?.toString().startsWith('new_')))}
+                        loading={isSaving}
+                        disabled={loading || isSaving || (deleteIds.length === 0 && updatedIds.length === 0 && !dataSource.some(item => item._id?.toString().startsWith('new_')))}
                     >
                         LƯU TẤT CẢ THAY ĐỔI
                     </Button>

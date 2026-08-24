@@ -4,22 +4,25 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAsync, safeArray } from '../../hooks/useAsync';
 import { getAllBranches, deleteOneBranchApi, addOneBranchApi, updateBranhesApi } from 'services/branches';
 import { DeleteOutlined, EditOutlined, SaveOutlined, SearchOutlined } from '@ant-design/icons';
+import { useQueryClient } from '@tanstack/react-query';
 import './index.scss'; 
 
 const { Search } = Input;
 
 export default function BranchesTable() {
     const { notification, message } = App.useApp();
+    const queryClient = useQueryClient();
 
     const [editableKeys, setEditableRowKeys] = useState([]);
     const [dataSource, setDataSource] = useState([]);
     const [searchText, setSearchText] = useState("");
     const [deleteIds, setDeleteIds] = useState([]);
     const [updatedIds, setUpdatedIds] = useState([]); 
+    const [isSaving, setIsSaving] = useState(false);
     
-    const { state: rawData, loading, refetch } = useAsync({
+    const { state: rawData, loading } = useAsync({
         service: getAllBranches,
-        queryKey: ['branches_list'],
+        queryKey: ['branches-list'],
     });
     
     const data = safeArray(rawData?.cinemas);
@@ -59,6 +62,30 @@ export default function BranchesTable() {
             setUpdatedIds((prev) => [...new Set([...prev, key])]);
         }
         message.info("Đã ghi nhận thay đổi dòng. Nhấn LƯU TẤT CẢ để cập nhật server.");
+    };
+
+    // 💡 Xử lý cập nhật dataSource an toàn, tránh mất dữ liệu khi đang lọc (search)
+    const handleTableChange = (updatedList) => {
+        if (searchText) {
+            // Nếu đang search, EditableProTable trả về danh sách đã lọc. 
+            // Ta phải merge các item thay đổi ngược lại vào mảng gốc dataSource đầy đủ.
+            setDataSource(prevDataSource => {
+                const updatedMap = new Map(updatedList.map(item => [item._id, item]));
+                
+                // Cập nhật các item cũ và giữ lại các item không hiển thị trong khung search
+                const merged = prevDataSource.map(item => updatedMap.get(item._id) || item);
+                
+                // Thêm các item mới tạo (nếu có nằm trong danh sách lọc)
+                updatedList.forEach(item => {
+                    if (!prevDataSource.some(p => p._id === item._id)) {
+                        merged.push(item);
+                    }
+                });
+                return merged;
+            });
+        } else {
+            setDataSource(updatedList);
+        }
     };
 
     const columns = [
@@ -139,17 +166,23 @@ export default function BranchesTable() {
 
             if (promises.length === 0) return message.warning("Không có thay đổi nào để lưu!");
 
+            setIsSaving(true);
             await Promise.all(promises);
+            
             notification.success({ message: 'Thành công', description: 'Hệ thống chi nhánh đã được cập nhật thành công.' });
             
-            refetch(); // Làm mới dữ liệu sạch từ server
+            // Invalidate query key chuẩn toàn cục
+            queryClient.invalidateQueries({ queryKey: ['branches-list'] });
+            
         } catch (error) {
-            notification.error({ message: 'Lỗi', description: 'Lưu thất bại. Vui lòng kiểm tra lại hệ thống.' });
+            notification.error({ message: 'Lỗi', description: error.response?.data?.content || 'Lưu thất bại. Vui lòng kiểm tra lại hệ thống.' });
+        } finally {
+            setIsSaving(false);
         }
     };
 
     return (
-        <div className="branches-management-container">
+        <div className="movie-management-container">
             <Card title="Quản lý chi nhánh rạp">
                 <div className="table-header-toolbar">
                     <div className="search-box">
@@ -170,9 +203,7 @@ export default function BranchesTable() {
                     loading={loading}
                     columns={columns}
                     value={displayData}
-                    onChange={(updatedList) => {
-                        setDataSource(updatedList);
-                    }}
+                    onChange={handleTableChange}
                     recordCreatorProps={{
                         position: 'bottom',
                         creatorButtonText: "Thêm chi nhánh mới",
@@ -205,7 +236,8 @@ export default function BranchesTable() {
                         size="large"
                         icon={<SaveOutlined />}
                         onClick={handleSaveAll}
-                        disabled={loading || (deleteIds.length === 0 && updatedIds.length === 0 && !dataSource.some(item => item._id?.toString().startsWith('new_')))}
+                        loading={isSaving}
+                        disabled={loading || isSaving || (deleteIds.length === 0 && updatedIds.length === 0 && !dataSource.some(item => item._id?.toString().startsWith('new_')))}
                     >
                         LƯU TẤT CẢ THAY ĐỔI
                     </Button>

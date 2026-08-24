@@ -10,7 +10,6 @@ import { addPromotionAPI, updatePromotionAPI, getPromotionDetailAPI } from "serv
 import { ArrowLeftOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
 import "./index.scss";
 
-// 1. Thêm highlight vào giá trị mặc định
 const DEFAULT_VALUES = {
   title: "",
   content: "",
@@ -37,14 +36,13 @@ export default function PromotionForm() {
   });
 
   useEffect(() => {
-    console.log(params)
     if (params.promoId && params.promoId !== "create") {
       if (promoDetail) {
         const normalized = {
           ...promoDetail,
           startDate: promoDetail.startDate ? dayjs(promoDetail.startDate) : null,
           endDate: promoDetail.endDate ? dayjs(promoDetail.endDate) : null,
-          highlight: promoDetail.highlight ?? false, // Đồng bộ giá trị highlight từ API
+          highlight: promoDetail.highlight ?? false,
         };
         form.setFieldsValue(normalized);
         setOriginalData(normalized);
@@ -61,15 +59,18 @@ export default function PromotionForm() {
   }, [promoDetail, params.promoId, form]);
 
   const onValuesChange = (_, allValues) => {
-    if (!params.promoId || params.promoId !== "create") {
+    // Sửa lại điều kiện chuẩn để phân biệt Create và Update
+    if (!params.promoId || params.promoId === "create") {
       const hasInput = Object.keys(allValues).some(key => allValues[key] !== DEFAULT_VALUES[key]);
       setIsChanged(hasInput || !!file);
       return;
     }
+
     const hasChanged = Object.keys(allValues).some(key => {
       const currentVal = allValues[key];
       const originalVal = originalData?.[key];
       if (key === 'startDate' || key === 'endDate') {
+        if (!currentVal && !originalVal) return false;
         return !dayjs(currentVal).isSame(originalVal, 'day');
       }
       return currentVal !== originalVal;
@@ -82,7 +83,7 @@ export default function PromotionForm() {
       params.promoId && params.promoId !== "create"
         ? updatePromotionAPI(params.promoId, formData)
         : addPromotionAPI(formData),
-    invalidateQueries: [["promotions"]],
+    invalidateQueries: [["promotions-list"]], // Khớp chuẩn queryKey bên bảng danh sách
   });
 
   const handleSave = async (values) => {
@@ -92,7 +93,7 @@ export default function PromotionForm() {
         ...values,
         startDate: values.startDate ? values.startDate.format('YYYY-MM-DD') : null,
         endDate: values.endDate ? values.endDate.format('YYYY-MM-DD') : null,
-        highlight: values.highlight ? true : false, // Đảm bảo truyền giá trị boolean lên server
+        highlight: values.highlight ? true : false,
       };
 
       Object.keys(payload).forEach(key => {
@@ -139,7 +140,6 @@ export default function PromotionForm() {
     >
       <Form form={form} layout="vertical" onFinish={handleSave} onValuesChange={onValuesChange}>
         <Row gutter={[24, 0]}>
-          {/* Cột trái: Thông tin nội dung */}
           <Col xs={24} lg={16}>
             <Form.Item label="Tiêu đề" name="title" rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}>
               <Input placeholder="Nhập tiêu đề chương trình" size="large" />
@@ -158,7 +158,6 @@ export default function PromotionForm() {
               </Col>
             </Row>
 
-            {/* 2. Thêm Form.Item cho Switch Toggle Highlight */}
             <Form.Item label="Nổi bật (Highlight)" name="highlight" valuePropName="checked">
               <Switch checkedChildren="Bật" unCheckedChildren="Tắt" />
             </Form.Item>
@@ -168,9 +167,8 @@ export default function PromotionForm() {
             </Form.Item>
           </Col>
 
-          {/* Cột phải: Banner hình ảnh */}
           <Col xs={24} lg={8}>
-            <Form.Item label="Banner " required>
+            <Form.Item label="Banner" required>
               <div style={{ marginBottom: '0.625rem' }}>
                 <input type="file" id="promo-img" hidden onChange={handleChangeImage} accept="image/*" />
                 <Button

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Button, Image, App, Popconfirm, Badge, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
@@ -6,26 +6,45 @@ import {
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
+  DownOutlined,
 } from '@ant-design/icons';
 import './index.scss';
 import { deleteShopProductAPI, getShopProductListAPI } from 'services/shopProduct';
 
 export default function ShopProductTable() {
   const navigate = useNavigate();
-  const [pagination, setPagination] = useState({ page: 1, limit: 8 });
   const { notification } = App.useApp();
 
-  // 1. Sử dụng useAsync chuẩn của dự án để fetch danh sách sản phẩm theo phân trang
+  // Quản lý limit hiển thị ban đầu (8 item) thay cho phân trang số trang
+  const [limit, setLimit] = useState(8);
+  const [productList, setProductList] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+
+  // 1. Gọi API lấy danh sách sản phẩm theo limit hiện tại (luôn lấy từ trang 1 với số lượng = limit)
   const { data: responseContent, loading: isLoading } = useAsync({
-    dependencies: [pagination.page, pagination.limit],
-    queryKey: ['shopProducts', pagination.page, pagination.limit],
-    service: () => getShopProductListAPI({ page: pagination.page, limit: pagination.limit }),
+    dependencies: [limit],
+    queryKey: ['shop-products-list', limit],
+    service: () => getShopProductListAPI({ page: 1, limit }),
   });
+
+  // Đồng bộ dữ liệu từ API vào state local để hỗ trợ Load More mượt mà
+  useEffect(() => {
+    if (responseContent) {
+      const list = Array.isArray(responseContent)
+        ? responseContent
+        : responseContent?.shops ?? responseContent?.data ?? [];
+        
+      const totalRecord = responseContent?.pagination?.total || list.length;
+      
+      setProductList(list);
+      setTotalItems(totalRecord);
+    }
+  }, [responseContent]);
 
   // 2. Sử dụng useAsyncMutation chuẩn của dự án để xóa và tự động làm mới cache
   const { mutateAsync: deleteProduct, isPending: isDeleting } = useAsyncMutation({
     service: (id) => deleteShopProductAPI(id),
-    invalidateQueries: [['shopProducts']],
+    invalidateQueries: [['shop-products-list']],
     onSuccess: () => {
       notification.success({ message: 'Thành công', description: 'Đã xóa sản phẩm!' });
     },
@@ -34,15 +53,13 @@ export default function ShopProductTable() {
     },
   });
 
-  // Tận dụng cơ chế bóc tách dữ liệu tự động từ normalizeResult của useAsync
-  const productData = Array.isArray(responseContent)
-    ? responseContent
-    : responseContent?.shops ?? responseContent?.data ?? [];
-    
-  const paginationMeta = responseContent?.pagination ?? { total: productData.length, totalPages: 1 };
-
   const handleDelete = async (id) => {
     await deleteProduct(id);
+  };
+
+  // Hàm xử lý khi bấm nút Load More (tăng limit lên thêm 8 item mỗi lần bấm)
+  const handleLoadMore = () => {
+    setLimit((prevLimit) => prevLimit + 8);
   };
 
   const columns = [
@@ -108,16 +125,24 @@ export default function ShopProductTable() {
             onClick={() => navigate(`/admin/shop-management/update/${record._id}`)} 
           />
           <Popconfirm title="Xóa sản phẩm này?" onConfirm={() => handleDelete(record._id)}>
-            <Button type="text" danger icon={<DeleteOutlined />} />
+            <Button 
+              type="text" 
+              danger 
+              icon={<DeleteOutlined />} 
+              disabled={isDeleting} // Khóa nút khi đang xóa tránh double click
+            />
           </Popconfirm>
         </div>
       ),
     },
   ];
 
+  // Kiểm tra xem còn dữ liệu ở phía server để load tiếp hay không
+  const hasMore = productList.length < totalItems;
+
   return (
-    <div className="shop-management-container">
-      <div className="table-header-actions">
+    <div className="movie-management-container">
+      <div className="table-header-actions" style={{ justifyContent: 'flex-end', marginBottom: 16 }}>
         <Button 
           className='add-btn' 
           type="primary" 
@@ -133,18 +158,33 @@ export default function ShopProductTable() {
         tableLayout="fixed"
         rowKey="_id"
         columns={columns}
-        dataSource={productData}
+        dataSource={productList}
         loading={isLoading || isDeleting}
         bordered
-        pagination={{ 
-          current: pagination.page,
-          pageSize: pagination.limit,
-          total: paginationMeta.total,
-          size: 'small',
-          showTotal: (total) => `Tổng ${total} sản phẩm`,
-          onChange: (page, limit) => setPagination({ page, limit }),
-        }}
+        scroll={{ x: '100%' }}
+        pagination={false} // Tắt phân trang truyền thống
       />
+
+      {/* Khu vực nút Load More */}
+      {totalItems > 8 && (
+        <div style={{ textAlign: 'center', marginTop: 20, marginBottom: 20 }}>
+          {hasMore ? (
+            <Button 
+              onClick={handleLoadMore} 
+              loading={isLoading}
+              icon={<DownOutlined />}
+              size="large"
+              style={{ minWidth: 200 }}
+            >
+              Xem thêm ({productList.length}/{totalItems})
+            </Button>
+          ) : (
+            <span style={{ color: '#8c8c8c', fontStyle: 'italic' }}>
+              Đã hiển thị tất cả {totalItems} sản phẩm.
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -10,64 +10,71 @@ import {
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
 import { getShowTimeToday, getShowTimeUpcoming, getAllShowTimes, deleteOneShowTime } from 'services/showtime';
-import "./index.scss"
-
-const { Search } = Input;
+import { useAsync, useAsyncMutation } from '../../hooks/useAsync'; // Chuẩn hóa hook của dự án
+import "./index.scss";
 
 export default function ShowtimeTable() {
     const navigate = useNavigate();
-    const [keyword, setKeyword] = useState("");
-    const [pagination, setPagination] = useState({ page: 1, limit: 10 });
-    const [paginationMeta, setPaginationMeta] = useState({ total: 0, totalPages: 1 });
-    const [showtimeList, setShowtimeList] = useState([]);
-    const [loading, setLoading] = useState(false);
     const { notification } = App.useApp();
 
-    const fetchData = async (params = {}) => {
-        setLoading(true);
-        try {
-            const res = await getAllShowTimes({ page: pagination.page, limit: pagination.limit, ...params });
-            const content = res.data.content;
-            const data = Array.isArray(content.showtimes) ? content.showtimes : (Array.isArray(content) ? content : []);
-            const meta = content.pagination ?? {};
-            setShowtimeList(data);
-            setPaginationMeta({ total: meta.total ?? data.length, totalPages: meta.totalPages ?? 1 });
-        } catch {
-            notification.error({ message: "Lỗi tải dữ liệu" });
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [keyword, setKeyword] = useState("");
+    const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+    const [activeFilter, setActiveFilter] = useState("all"); // Quản lý trạng thái đang xem: 'all' | 'today' | 'upcoming'
 
+    const [showtimeList, setShowtimeList] = useState([]);
+    const [paginationMeta, setPaginationMeta] = useState({ total: 0 });
+
+    // 1. Gọi API lấy dữ liệu linh hoạt dựa theo tab filter đang chọn và phân trang
+    const { data: responseContent, loading: isLoading } = useAsync({
+        dependencies: [pagination.page, pagination.limit, activeFilter],
+        queryKey: ['showtimes-list', pagination.page, pagination.limit, activeFilter],
+        service: () => {
+            if (activeFilter === 'today') return getShowTimeToday();
+            if (activeFilter === 'upcoming') return getShowTimeUpcoming();
+            return getAllShowTimes({ page: pagination.page, limit: pagination.limit, keyword });
+        },
+    });
+
+    // 2. Đồng bộ dữ liệu trả về từ API vào state của bảng
     useEffect(() => {
-        fetchData({ page: pagination.page, limit: pagination.limit });
-    }, [pagination]);
+        if (responseContent) {
+            const content = responseContent.data?.content ?? responseContent.content ?? responseContent;
+            
+            // Xử lý linh hoạt cấu trúc trả về (mảng thuần hoặc object bọc phân trang)
+            const data = Array.isArray(content?.showtimes) 
+                ? content.showtimes 
+                : (Array.isArray(content) ? content : (content?.data ?? []));
+                
+            const meta = content?.pagination ?? {};
 
-    const handleFilter = async (service) => {
-        setLoading(true);
-        try {
-            const res = await service();
-            const content = res.data.content;
-            const data = Array.isArray(content)
-                ? content
-                : Object.values(content ?? {}).find(v => Array.isArray(v)) ?? [];
+            // Nếu đang dùng filter Today/Upcoming mà API trả về mảng danh sách
             setShowtimeList(data);
-            setPaginationMeta({ total: data.length, totalPages: 1 });
-        } catch {
-            notification.error({ message: "Lỗi tải dữ liệu" });
-        } finally {
-            setLoading(false);
+            setPaginationMeta({
+                total: meta.total ?? data.length,
+            });
         }
-    };
+    }, [responseContent]);
+
+    // 3. Xử lý Xóa suất chiếu với useAsyncMutation chuẩn
+    const { mutateAsync: deleteShowtime, isPending: isDeleting } = useAsyncMutation({
+        service: (id) => deleteOneShowTime(id),
+        invalidateQueries: [['showtimes-list']],
+        onSuccess: () => {
+            notification.success({ message: "Xóa suất chiếu thành công" });
+        },
+        onError: (error) => {
+            notification.error({ message: "Xóa thất bại", description: error.response?.data?.message });
+        },
+    });
 
     const handleDelete = async (id) => {
-        try {
-            await deleteOneShowTime(id);
-            notification.success({ message: "Xóa suất chiếu thành công" });
-            fetchData({ page: pagination.page, limit: pagination.limit });
-        } catch (error) {
-            notification.error({ message: "Xóa thất bại", description: error.response?.data?.message });
-        }
+        await deleteShowtime(id);
+    };
+
+    // Các hàm chuyển đổi bộ lọc
+    const handleFilterChange = (filterType) => {
+        setActiveFilter(filterType);
+        setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi đổi bộ lọc
     };
 
     const columns = [
@@ -77,8 +84,8 @@ export default function ShowtimeTable() {
             key: 'movieTitle',
             width: '25%',
             render: (text) => (
-                <p style={{ color: 'blue', fontWeight: 'bold' }}>
-                    {text}
+                <p style={{ color: 'blue', fontWeight: 'bold', margin: 0 }}>
+                    {text || '---'}
                 </p>
             ),
         },
@@ -86,7 +93,7 @@ export default function ShowtimeTable() {
             title: 'Phòng Chiếu',
             dataIndex: ['theater', 'name'],
             key: 'theaterName',
-            render: (text) => <Tag color="volcano" className="branch-tag">{text}</Tag>,
+            render: (text) => <Tag color="volcano" className="branch-tag">{text || '---'}</Tag>,
         },
         {
             title: 'Thời gian',
@@ -96,7 +103,7 @@ export default function ShowtimeTable() {
             sorter: (a, b) => dayjs(a.startTime).unix() - dayjs(b.startTime).unix(),
             render: (date) => (
                 <Space>
-                    {dayjs(date?.replace('Z', '').replace('+07:00', '')).format('DD/MM/YYYY - HH:mm')}
+                    {date ? dayjs(date.replace('Z', '').replace('+07:00', '')).format('DD/MM/YYYY - HH:mm') : '---'}
                 </Space>
             ),
         },
@@ -132,7 +139,7 @@ export default function ShowtimeTable() {
                         cancelText="Hủy"
                         okButtonProps={{ danger: true }}
                     >
-                        <Button type="text" danger icon={<DeleteOutlined />} />
+                        <Button type="text" danger icon={<DeleteOutlined />} disabled={isDeleting} />
                     </Popconfirm>
                 </Space>
             ),
@@ -140,7 +147,7 @@ export default function ShowtimeTable() {
     ];
 
     return (
-        <div className="showtime-management-container">
+        <div className="movie-management-container">
             <Card
                 title={
                     <Space>
@@ -150,34 +157,35 @@ export default function ShowtimeTable() {
                 }
             >
                 <div className="table-header">
-                    <Search
+                    <Input
                         className="search-box"
-                        placeholder="Tìm theo tên phim hoặc phòng chiếu..."
-                        onSearch={setKeyword}
+                        placeholder="Tìm theo tên phim..."
+                        value={keyword}
                         onChange={(e) => setKeyword(e.target.value)}
+                        onPressEnter={() => setPagination(p => ({ ...p, page: 1 }))}
                         allowClear
-                        enterButton={<Button icon={<SearchOutlined />}></Button>}
                         size="large"
+                        style={{ width: 300 }}
                     />
-                    <Space className='ml-auto'>
+                    <Space className='ml-auto' wrap>
                         <Button
-                            type="default"
+                            type={activeFilter === 'today' ? 'primary' : 'default'}
                             icon={<CalendarOutlined />}
-                            onClick={() => handleFilter(getShowTimeToday)}
+                            onClick={() => handleFilterChange('today')}
                         >
-                            SUẤT CHIẾU HÔM NAY
+                            HÔM NAY
                         </Button>
                         <Button
-                            type="default"
+                            type={activeFilter === 'upcoming' ? 'primary' : 'default'}
                             icon={<CalendarOutlined />}
-                            onClick={() => handleFilter(getShowTimeUpcoming)}
+                            onClick={() => handleFilterChange('upcoming')}
                         >
-                            SUẤT CHIẾU SẮP ĐẾN
+                            SẮP ĐẾN
                         </Button>
                         <Button
-                            type="default"
+                            type={activeFilter === 'all' ? 'primary' : 'default'}
                             icon={<CalendarOutlined />}
-                            onClick={() => { setPagination({ page: 1, limit: pagination.limit }); }}
+                            onClick={() => handleFilterChange('all')}
                         >
                             TẤT CẢ
                         </Button>
@@ -197,17 +205,21 @@ export default function ShowtimeTable() {
                     rowKey="_id"
                     columns={columns}
                     dataSource={showtimeList}
-                    loading={loading}
+                    loading={isLoading || isDeleting}
                     bordered
-                    pagination={{ 
-                        current: pagination.page,
-                        pageSize: pagination.limit,
-                        total: paginationMeta.total,
-                        showTotal: (total) => `Tổng ${total} suất chiếu`,
-                        showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50'],
-                        onChange: (page, limit) => setPagination({ page, limit }),
-                    }}
+                    pagination={
+                        activeFilter !== 'all' 
+                            ? false // Ẩn phân trang nếu đang xem danh sách lọc (Hôm nay / Sắp đến) vì thường API trả về dạng danh sách đầy đủ không phân trang
+                            : {
+                                current: pagination.page,
+                                pageSize: pagination.limit,
+                                total: paginationMeta.total,
+                                showTotal: (total) => `Tổng ${total} suất chiếu`,
+                                showSizeChanger: true,
+                                pageSizeOptions: ['10', '20', '50'],
+                                onChange: (page, limit) => setPagination({ page, limit }),
+                            }
+                    }
                 />
             </Card>
         </div>

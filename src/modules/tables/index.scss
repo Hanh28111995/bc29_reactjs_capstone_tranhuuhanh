@@ -6,7 +6,7 @@ $mobile-breakpoint: 500px;
   min-width: 0;
   box-sizing: border-box;
   padding: 1.25rem;
-  overflow: auto; 
+  overflow: auto;
 
   @media screen and (max-width: $mobile-breakpoint) {
     padding: 0;
@@ -169,20 +169,7 @@ $mobile-breakpoint: 500px;
   }
 }
 
-
-.seat-type-container,
-.branches-management-container,
-.theater-management-container,
-.movie-management-container,
-.showtime-management-container,
-.banner-management-container,
-.movie-management-container,
-.movie-management-container,
-.seattype-container,
-.shop-management-container,
-.ticket-mmanagement-container,
-.user-management-container,
-.movie-table-container {
+.movie-management-container {
   @include table-container-base;
 
   .table-header-actions {

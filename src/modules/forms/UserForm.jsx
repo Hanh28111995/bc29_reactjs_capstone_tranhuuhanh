@@ -52,11 +52,13 @@ export default function UserForm() {
 
   // Theo dõi thay đổi của form để enable nút Save
   const onValuesChange = (_, allValues) => {
+    // Sửa lại điều kiện kiểm tra Create vs Update cho chính xác tuyệt đối
     if (!params.tk || params.tk === "create") {
       const hasInput = Object.keys(allValues).some((key) => Boolean(allValues[key]));
       setIsChanged(hasInput);
       return;
     }
+
     const hasChanged = Object.keys(allValues).some((key) => {
       if (key === "password" && isChangingPassword) return true;
       return String(allValues[key] || "") !== String(originalData[key] || "");
@@ -67,7 +69,7 @@ export default function UserForm() {
   const userMutation = useAsyncMutation({
     service: (payload) =>
       userDetail?._id ? fetchUpdateUserApi(payload) : fetchAddUserApi(payload),
-    invalidateQueries: [["users"]],
+    invalidateQueries: [["users-list"]],
   });
 
   // Xử lý lưu dữ liệu
@@ -113,7 +115,7 @@ export default function UserForm() {
   return (
     <Card
       className="movie-form-card"
-      loading={loading} // Chỉ hiện loading Card khi đang fetch dữ liệu ban đầu, tránh bị giật layout khi submit
+      loading={loading}
       title={
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
@@ -218,7 +220,7 @@ export default function UserForm() {
             htmlType="submit"
             type="primary"
             icon={<SaveOutlined />}
-            loading={userMutation.isLoading} // Chuyển loading sang nút Submit để mượt giao diện, không bị kéo dãn Card
+            loading={userMutation.isLoading}
             disabled={!isChanged}
             size="large"
             block

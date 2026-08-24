@@ -80,7 +80,9 @@ export default function MovieForm() {
       params.movieId && params.movieId !== "create"
         ? updateMovieUploadImage(formData)
         : addMovieUploadImage(formData),
-    invalidateQueries: [["movies"]],
+    // LƯU Ý: Đồng bộ key này khớp chính xác với queryKey bên MovieTable của bạn 
+    // (Ví dụ nếu bảng Movie dùng ["movies"] thì ở đây phải là [["movies"]])
+    invalidateQueries: [["movies-list"]], 
   });
 
   const handleSave = async (values) => {
@@ -105,7 +107,7 @@ export default function MovieForm() {
       notification.success({ message: params.movieId && params.movieId !== "create" ? "Cập nhật thành công!" : "Thêm phim mới thành công!" });
       navigate("/admin/movie-management");
     } catch (error) {
-      notification.error({ message: "Lỗi", description: error.response?.data?.content });
+      notification.error({ message: "Lỗi", description: error.response?.data?.content || "Có lỗi xảy ra khi lưu phim." });
     }
   };
 
@@ -134,7 +136,7 @@ export default function MovieForm() {
     >
       <Form form={form} layout="vertical" onFinish={handleSave} onValuesChange={onValuesChange}>
         <Row gutter={[24, 0]}>
-          {/* Cột trái: Thông tin chính - 65% trên desktop, 100% trên mobile */}
+          {/* Cột trái: Thông tin chính */}
           <Col xs={24} lg={16}>
             <Form.Item label="Tên Phim" name="title" rules={[{ required: true }]}>
               <Input placeholder="Nhập tên phim" size="large" />
@@ -170,7 +172,7 @@ export default function MovieForm() {
             </Form.Item>
           </Col>
 
-          {/* Cột phải: Hình ảnh & Trạng thái - 35% trên desktop, 100% trên mobile */}
+          {/* Cột phải: Hình ảnh & Trạng thái */}
           <Col xs={24} lg={8}>
             <Form.Item label="Hình ảnh (Banner)">
               <div style={{ marginBottom: '0.625rem' }}>

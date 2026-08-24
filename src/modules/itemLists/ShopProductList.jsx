@@ -74,7 +74,7 @@ export default function ShopProduct(props) {
     error: productsError,
   } = useAsync({
     service: () => fetchShopFilterAPI(appliedFilters),
-    queryKey: ["shop-products", appliedFilters],
+    queryKey: ["shop-products-list", appliedFilters],
   });
 
   const promotionList = Array.isArray(rawPromotionList)

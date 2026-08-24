@@ -30,9 +30,10 @@ export default function BannerForm() {
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
 
-  // 1. Gọi API lấy danh sách phim cho AutoComplete sử dụng useAsync
+  // 1. Gọi API lấy danh sách phim cho AutoComplete
   const { state: movieListState } = useAsync({
     service: fetchMovieListAPI,
+    queryKey: ["movies-list"],
   });
   const movieList = movieListState?.data?.content || movieListState?.content || (Array.isArray(movieListState) ? movieListState : []);
 
@@ -82,7 +83,8 @@ export default function BannerForm() {
       bannerId && bannerId !== "create"
         ? updateBannerAPI(bannerId, formData)
         : addBannerAPI(formData),
-    invalidateQueries: [["banners"]],
+    // QueryKey chuẩn xác để làm mới danh sách banner sau khi thêm/sửa
+    invalidateQueries: [["banners-list"]],
   });
 
   const handleSave = async (values) => {
@@ -94,7 +96,6 @@ export default function BannerForm() {
       if (file) {
         formData.append("url", file, file.name);
       } else if (img && !file && bannerId && bannerId !== "create") {
-        // Trường hợp giữ nguyên ảnh cũ nếu API yêu cầu truyền lại URL cũ hoặc bạn có thể bỏ qua nếu backend tự xử lý
         formData.append("url", img);
       }
 
@@ -119,7 +120,7 @@ export default function BannerForm() {
     reader.onload = (e) => {
       setImg(e.target.result);
       setFile(fileUploaded);
-      setIsChanged(true);
+      setIsChanged(true); // Đảm bảo kích hoạt trạng thái thay đổi khi upload ảnh mới
     };
   };
 
@@ -154,7 +155,6 @@ export default function BannerForm() {
         onValuesChange={onValuesChange}
       >
         <Row gutter={[24, 0]}>
-          {/* Cột trái: Thông tin cấu hình banner */}
           <Col xs={24} lg={16}>
             <Form.Item
               name="movie_id"
@@ -180,7 +180,6 @@ export default function BannerForm() {
             </Form.Item>
           </Col>
 
-          {/* Cột phải: Upload & Xem trước hình ảnh Banner */}
           <Col xs={24} lg={8}>
             <Form.Item label="Hình ảnh Banner">
               <div style={{ marginBottom: '0.625rem' }}>

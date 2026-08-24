@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Table, Input, Button, Image, App, Popconfirm } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "../../hooks/useAsync";
@@ -14,107 +14,98 @@ import {
   CarryOutOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
+import { useQueryClient } from "@tanstack/react-query";
 import "./index.scss";
-
-// Hàm debounce tự viết
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
-  };
-}
 
 function MovieTable() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState(""); // State cho ô input gõ liên tục
-  const [keyword, setKeyword] = useState(""); // State lưu từ khóa hiện tại
+  const queryClient = useQueryClient();
+  const { notification } = App.useApp();
+
+  const [searchTerm, setSearchTerm] = useState(""); 
+  const [keyword, setKeyword] = useState(""); 
   const [pagination, setPagination] = useState({ page: 1, limit: 8 });
 
-  // State riêng biệt lưu danh sách phim hiển thị lên bảng
   const [movieList, setMovieList] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
-
-  const { notification } = App.useApp();
+  const [isSearching, setIsSearching] = useState(false);
 
   // 1. Gọi API danh sách mặc định (có phân trang) khi KHÔNG có keyword
   const { data: responseContent, loading: isLoadingList } = useAsync({
     dependencies: [pagination.page, pagination.limit],
-    queryKey: ["movies", pagination.page, pagination.limit],
+    queryKey: ["movies-list", pagination.page, pagination.limit],
     service: () =>
       fetchMovieListAPI({ page: pagination.page, limit: pagination.limit }),
-    enabled: !keyword, // Chỉ gọi khi không ở chế độ search
+    enabled: !keyword, 
   });
 
-  // Tự động đồng bộ data từ API danh sách vào state bảng khi fetch xong và không có keyword
+  // Tự động đồng bộ data từ API danh sách vào state bảng khi không search
   useEffect(() => {
     if (!keyword && responseContent) {      
-      const list = responseContent?.movies || [];            
+      const list = responseContent?.movies || [];          
       const totalRecord = responseContent?.pagination?.total || 0; 
       setMovieList(list);
       setTotalItems(totalRecord); 
     }
   }, [responseContent, keyword]);
 
-  // 2. Hàm riêng gọi API Search
-  const handleSearchAPI = async (titleKeyword) => {
-    if (!titleKeyword) {
-      // Nếu xóa trắng ô search, reset lại keyword và trả về phân trang ban đầu
-      setKeyword("");
-      setPagination((prev) => ({ ...prev, page: 1 }));
+  // 2. Xử lý Search với Debounce an toàn sử dụng useEffect chuẩn React
+  useEffect(() => {
+    if (!keyword) {
+      setIsSearching(false);
       return;
     }
 
-    try {
-      const res = await fetchSearchMovieAPI({
-        title: titleKeyword,
-        page: 1,
-        limit: 20,
-      });
-      const searchResult = res.data.content.movies ?? [];
-      setMovieList(searchResult);
-      setTotalItems(res.data.content.pagination.total ?? searchResult.length);
-    } catch (error) {
-      notification.error({
-        message: "Lỗi",
-        description: "Không thể tìm kiếm phim.",
-      });
-    }
-  };
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetchSearchMovieAPI({
+          title: keyword,
+          page: 1,
+          limit: 20,
+        });
+        const searchResult = res.data?.content?.movies ?? res.data?.movies ?? [];
+        setMovieList(searchResult);
+        setTotalItems(res.data?.content?.pagination?.total ?? searchResult.length);
+      } catch (error) {
+        notification.error({
+          message: "Lỗi",
+          description: "Không thể tìm kiếm phim.",
+        });
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
 
-  // Tạo hàm debounce cho input search
-  const debouncedSearch = useMemo(
-    () =>
-      debounce((val) => {
-        const trimmed = val.trim();
-        setKeyword(trimmed);
-        handleSearchAPI(trimmed);
-      }, 500),
-    [],
-  );
+    return () => clearTimeout(timer);
+  }, [keyword]);
 
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchTerm(val);
-
-    // Nếu người dùng bấm nút clear (xóa trắng) trên ô input Antd
-    if (!val) {
+    const trimmed = val.trim();
+    
+    if (!trimmed) {
       setKeyword("");
-      setSearchTerm("");
+      setPagination((prev) => ({ ...prev, page: 1 }));
+    } else {
+      setKeyword(trimmed);
     }
-
-    debouncedSearch(val);
   };
 
-  // Sử dụng useAsyncMutation chuẩn của dự án để xóa phim
+  // 3. Sử dụng useAsyncMutation chuẩn của dự án để xóa phim
   const { mutateAsync: deleteMovie, isPending: isDeleting } = useAsyncMutation({
     service: (id) => deleteMovieAPI(id),
-    invalidateQueries: [["movies"]],
+    invalidateQueries: [["movies-list"]],
     onSuccess: () => {
       notification.success({
         message: "Thành công",
         description: "Đã xóa phim!",
       });
+      // Nếu đang ở chế độ search mà xóa phim, ta chủ động cập nhật lại state danh sách hiển thị
+      if (keyword) {
+        setMovieList((prev) => prev.filter((item) => item._id !== id));
+      }
     },
     onError: () => {
       notification.error({ message: "Lỗi", description: "Không thể xóa." });
@@ -181,7 +172,7 @@ function MovieTable() {
                 navigate(`/admin/movie-management/${movieId}/edit-showtime`)
               }
             />
-            <Popconfirm title="Xóa?" onConfirm={() => handleDelete(movieId)}>
+            <Popconfirm title="Xóa phim này?" onConfirm={() => handleDelete(movieId)}>
               <Button type="text" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           </div>
@@ -214,10 +205,10 @@ function MovieTable() {
       <Table
         className="custom-table"
         tableLayout="fixed"
-        rowKey="id_movie"
+        rowKey="_id"
         columns={columns}
         dataSource={Array.isArray(movieList) ? movieList : []}
-        loading={isLoadingList || isDeleting}
+        loading={isLoadingList || isDeleting || isSearching}
         bordered
         scroll={{ x: '100%' }}
         pagination={

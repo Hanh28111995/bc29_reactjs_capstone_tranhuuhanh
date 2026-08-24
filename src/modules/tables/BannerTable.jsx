@@ -8,7 +8,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import './index.scss';
-import { deleteBannerAPI, getBannerListAPI , getBannerDetailAPI  } from 'services/banner';
+import { deleteBannerAPI, getBannerListAPI } from 'services/banner';
 
 export default function BannerTable() {
   const navigate = useNavigate();
@@ -18,20 +18,8 @@ export default function BannerTable() {
   // 1. Fetch danh sách banner trực tiếp theo phân trang
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit],
-    queryKey: ['banners', pagination.page, pagination.limit],
+    queryKey: ['banners-list', pagination.page, pagination.limit],
     service: () => getBannerListAPI({ page: pagination.page, limit: pagination.limit }),
-  });
-
-  // 2. Xóa banner và tự động làm mới cache
-  const { mutateAsync: deleteBanner, isPending: isDeleting } = useAsyncMutation({
-    service: (id) => deleteBannerAPI(id),
-    invalidateQueries: [['banners']],
-    onSuccess: () => {
-      notification.success({ message: 'Thành công', description: 'Đã xóa banner!' });
-    },
-    onError: () => {
-      notification.error({ message: 'Lỗi', description: 'Không thể xóa banner.' });
-    },
   });
 
   // Bóc tách dữ liệu linh hoạt từ response API
@@ -40,6 +28,24 @@ export default function BannerTable() {
     : responseContent?.banners ?? responseContent?.data ?? [];
     
   const paginationMeta = responseContent?.pagination ?? { total: bannerData.length, totalPages: 1 };
+
+  // 2. Xóa banner và tự động làm mới toàn bộ cache bắt đầu bằng 'banners-list'
+  const { mutateAsync: deleteBanner, isPending: isDeleting } = useAsyncMutation({
+    service: (id) => deleteBannerAPI(id),
+    // Dùng tiền tố 'banners-list' để React Query tự động quét sạch cache của tất cả các trang
+    invalidateQueries: [['banners-list']],
+    onSuccess: () => {
+      notification.success({ message: 'Thành công', description: 'Đã xóa banner!' });
+      
+      // Tự động lùi về trang trước nếu xóa hết sạch item ở trang cuối
+      if (bannerData.length === 1 && pagination.page > 1) {
+        setPagination((prev) => ({ ...prev, page: prev.page - 1 }));
+      }
+    },
+    onError: () => {
+      notification.error({ message: 'Lỗi', description: 'Không thể xóa banner.' });
+    },
+  });
 
   const handleDelete = async (id) => {
     await deleteBanner(id);
@@ -93,7 +99,7 @@ export default function BannerTable() {
   ];
 
   return (
-    <div className="banner-management-container">
+    <div className="movie-management-container">
       <div className="table-header-actions" style={{ justifyContent: 'flex-end', marginBottom: 16 }}>
         <Button 
           className='add-btn' 
@@ -111,6 +117,7 @@ export default function BannerTable() {
         rowKey="_id"
         columns={columns}
         dataSource={bannerData}
+        // Gộp chung loading fetch và deleting để khóa bảng khi đang xóa
         loading={isLoading || isDeleting}
         bordered
         pagination={{ 
