@@ -75,7 +75,6 @@ export default function HeroPage() {
     queryKey: ["banners"],
   });
 
-  // 2. Tách biệt các biến cho Promotion
   const {
     state: rawNewPromotion = [],
     loading: promoLoading,
@@ -94,7 +93,7 @@ export default function HeroPage() {
         className="d-flex justify-content-center align-items-center"
         style={{ minHeight: "50vh" }}
       >
-             <p>Đang tải dữ liệu...</p>
+        <p>Đang tải dữ liệu...</p>
       </div>
     );
   }
@@ -117,6 +116,14 @@ export default function HeroPage() {
 
   console.log("Banner sau khi lọc (highlight=true):", banner);
   console.log("Promotion sau khi lọc (highlight=true):", promotion);
+
+  const caroucelList = rawBanner?.map((item, index) => (
+    <div className="movie-item" key={item._id || index}>
+      <a href={`/movie/detail/${item.movie_id}`}>
+        <img src={item.url} />
+      </a>
+    </div>
+  ));
 
   const newList = promotion?.map((item, index) => (
     <div key={item._id || index} className="banner-slide">
@@ -192,19 +199,7 @@ export default function HeroPage() {
               <li>
                 <span className="rank-num">3</span>
                 <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
-              </li>
-              <li>
-                <span className="rank-num">3</span>
-                <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
-              </li>
-              <li>
-                <span className="rank-num">3</span>
-                <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
-              </li>
-              <li>
-                <span className="rank-num">3</span>
-                <span className="movie-name">THÁM TỬ LỪNG DANH CONAN</span>
-              </li>
+              </li>              
             </ol>
             <a href="#" className="btn-ticket">
               Mua vé ngay
@@ -238,49 +233,8 @@ export default function HeroPage() {
 
       <section className="movie-slider-section">
         <div className="movie-track">
-          <Slider {...settings}>
-            <div className="movie-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12301_105_100001.png"
-                alt="Movie 1"
-              />
-            </div>
-            <div className="movie-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12301_105_100001.png"
-                alt="Movie 2"
-              />
-            </div>
-            <div className="movie-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12181_105_100006.jpg"
-                alt="Spider-Man"
-              />
-            </div>
-            <div className="movie-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202608/12295_105_100003.jpg"
-                alt="Movie 4"
-              />
-            </div>
-            <div className="movie-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12203_105_100003.jpg"
-                alt="Movie 5"
-              />
-            </div>
-            <div className="movie-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12203_105_100003.jpg"
-                alt="Movie 5"
-              />
-            </div>
-            <div className="movie-item">
-              <img
-                src="https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202607/12203_105_100003.jpg"
-                alt="Movie 5"
-              />
-            </div>
+          <Slider {...settings}>           
+            {caroucelList}
           </Slider>
         </div>
       </section>
@@ -327,11 +281,14 @@ export default function HeroPage() {
               </div>
               <div className="item-tall">
                 <div className="event-item">
-                   {rawNewPromotion
+                  {rawNewPromotion
                     ?.filter((item) => item._id === "6a86b033303e867b13f7b2c5")
                     .map((item) => (
                       <a key={item._id} href={`/promotion/${item._id}`}>
-                        <img src={item.banner} alt="Mua 02 vé xem phim 2D với giá 95,000đ" />
+                        <img
+                          src={item.banner}
+                          alt="Mua 02 vé xem phim 2D với giá 95,000đ"
+                        />
                       </a>
                     ))}
                 </div>
@@ -356,7 +313,10 @@ export default function HeroPage() {
                     ?.filter((item) => item._id === "6a8955fae2eabfe092cb4c74")
                     .map((item) => (
                       <a key={item._id} href={`/promotion/${item._id}`}>
-                        <img src={item.banner} alt="Nạp L-Coin nhân đôi ưu đãi" />
+                        <img
+                          src={item.banner}
+                          alt="Nạp L-Coin nhân đôi ưu đãi"
+                        />
                       </a>
                     ))}
                 </div>
@@ -365,12 +325,12 @@ export default function HeroPage() {
             <div className="item-wrap-large">
               <div className="event-item ">
                 {rawNewPromotion
-                    ?.filter((item) => item._id === "6a895744e2eabfe092cb4c81")
-                    .map((item) => (
-                      <a key={item._id} href={`/promotion/${item._id}`}>
-                        <img src={item.banner} alt="Thuê rạp" />
-                      </a>
-                    ))}
+                  ?.filter((item) => item._id === "6a895744e2eabfe092cb4c81")
+                  .map((item) => (
+                    <a key={item._id} href={`/promotion/${item._id}`}>
+                      <img src={item.banner} alt="Thuê rạp" />
+                    </a>
+                  ))}
               </div>
             </div>
           </div>
