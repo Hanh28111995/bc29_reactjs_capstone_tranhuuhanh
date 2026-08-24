@@ -50,7 +50,7 @@ export default function ShowtimeForm() {
 
   const { state: rawMovies } = useAsync({ service: fetchMovieListAPI });
   const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI });
-  const movies = safeArray(rawMovies.movies);
+  const movies = safeArray(rawMovies?.movies);
   const theaters = safeArray(rawTheaters);
   const { state: rawBranches } = useAsync({ service: getAllBranches });
   const branches = useMemo(() => {
