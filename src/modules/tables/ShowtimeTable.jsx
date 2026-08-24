@@ -5,8 +5,7 @@ import {
     EditOutlined,
     DeleteOutlined,
     PlusOutlined,
-    CalendarOutlined,
-    SearchOutlined
+    CalendarOutlined    
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
 import { getShowTimeToday, getShowTimeUpcoming, getAllShowTimes, deleteOneShowTime } from 'services/showtime';
