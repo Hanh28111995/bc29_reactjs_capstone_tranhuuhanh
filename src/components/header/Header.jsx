@@ -262,12 +262,7 @@ export default function Header() {
         <a className="navbar-brand" href="/">
           <img
             src={logoImage}
-            alt="HTheaterLogo"
-            style={{
-              height: "100px",
-              marginBottom: "15px",
-              transform: "scaleX(1.3)",
-            }}
+            alt="HTheaterLogo"            
           />
         </a>
       </div>
