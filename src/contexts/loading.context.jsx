@@ -18,7 +18,7 @@ const WrapperSpin = styled.div`
 const LoadingContext = createContext(null);
 
 const GlobalSpinner = ({ spinRef }) => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   spinRef.current = setVisible;
   return visible ? (
     <WrapperSpin>
