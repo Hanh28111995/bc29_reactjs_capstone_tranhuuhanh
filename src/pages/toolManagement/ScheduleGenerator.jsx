@@ -29,9 +29,9 @@ export default function ScheduleGenerator() {
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const { state: rawMovies } = useAsync({ service: fetchMovieListAPI });
-  const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI });
-  const { state: scheduleData } = useAsync({ service: getScheduleListAPI });
+  const { state: rawMovies } = useAsync({ service: fetchMovieListAPI ,     queryKey: ["movies_list"],  });
+  const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI ,     queryKey: ["theaters_list"], });
+  const { state: scheduleData } = useAsync({ service: getScheduleListAPI ,     queryKey: ["scheduleData_list"],});
 
   const schedule = scheduleData?.schedule ?? scheduleData ?? null;
   const existingId = schedule?._id ?? null;
