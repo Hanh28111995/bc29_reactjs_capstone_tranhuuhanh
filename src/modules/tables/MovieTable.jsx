@@ -125,69 +125,12 @@ function MovieTable() {
     await deleteMovie(id);
   };
 
-  const columns = [
-    {
-      title: "Mã",
-      dataIndex: "id_movie",
-      key: "id_movie",
-      width: "15%",
-    },
-    {
-      title: "Ảnh",
-      dataIndex: "banner",
-      key: "banner",
-      width: "20%",
-      render: (text) => (
-        <Image
-          src={text}
-          className="movie-banner"
-          fallback="https://via.placeholder.com/60x90?text=No+Image"
-        />
-      ),
-    },
-    {
-      title: "Tên phim",
-      dataIndex: "title",
-      key: "title",
-      width: "30%",
-      ellipsis: true,
-    },
-    {
-      title: "Khởi chiếu",
-      dataIndex: "releaseDate",
-      key: "releaseDate",
-      width: "20%",
-      render: (text) => formatDate3(text),
-    },
-    {
-      title: "Hành động",
-      key: "action",
-      width: "15%",
-      render: (_, record) => {
-        const movieId = record._id;
-        return (
-          <div className="action-btns">
-            <Button
-              type="text"
-              icon={<EditOutlined style={{ color: "#1677ff" }} />}
-              onClick={() =>
-                navigate(`/admin/movie-management/${movieId}/update`)
-              }
-            />
-            <Button
-              type="text"
-              icon={<CarryOutOutlined style={{ color: "#52c41a" }} />}
-              onClick={() =>
-                navigate(`/admin/movie-management/${movieId}/edit-showtime`)
-              }
-            />
-            <Popconfirm title="Xóa?" onConfirm={() => handleDelete(movieId)}>
-              <Button type="text" danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          </div>
-        );
-      },
-    },
+ const columns = [
+    { title: "Mã", dataIndex: "id_movie", key: "id_movie", width: "12%" },
+    { title: "Ảnh", dataIndex: "banner", key: "banner", width: "18%" },
+    { title: "Tên phim", dataIndex: "title", key: "title", width: "32%", ellipsis: true },
+    { title: "Khởi chiếu", dataIndex: "releaseDate", key: "releaseDate", width: "20%" },
+    { title: "Hành động", key: "action", key: "action", width: "16%" },
   ];
 
   return (

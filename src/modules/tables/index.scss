@@ -6,7 +6,7 @@ $mobile-breakpoint: 500px;
   min-width: 0;
   box-sizing: border-box;
   padding: 1.25rem;
-  // overflow: hidden; // Chặn triệt để việc nội dung con phình to đẩy tràn ra ngoài
+  overflow: hidden; 
 
   @media screen and (max-width: $mobile-breakpoint) {
     padding: 0;
