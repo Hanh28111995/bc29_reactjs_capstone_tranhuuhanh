@@ -6,7 +6,7 @@ $mobile-breakpoint: 500px;
   min-width: 0;
   box-sizing: border-box;
   padding: 1.25rem;
-  overflow: hidden; 
+  overflow: auto; 
 
   @media screen and (max-width: $mobile-breakpoint) {
     padding: 0;
