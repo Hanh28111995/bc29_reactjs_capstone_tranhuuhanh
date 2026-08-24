@@ -149,7 +149,7 @@ export default function BranchesTable() {
     };
 
     return (
-        <div className="branches-table-container">
+        <div className="branches-management-container">
             <Card title="Quản lý chi nhánh rạp">
                 <div className="table-header-toolbar">
                     <div className="search-box">

@@ -157,7 +157,7 @@ export default function SeatTypeTable() {
     };
 
     return (
-        <div className="seat-type-container">
+        <div className="seattype-container">
             <Card title="Quản lý loại ghế & Giá vé">
                 <EditableProTable
                     tableLayout='fixed'

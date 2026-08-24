@@ -176,7 +176,7 @@ function UserTable() {
   ];
 
   return (
-    <div className="user-table-container">
+    <div className="user-management-container">
       <div className="table-header-actions">
         <Input
           placeholder="Nhập tên tài khoản hoặc email để tìm kiếm..."

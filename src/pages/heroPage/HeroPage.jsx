@@ -6,9 +6,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useAsync } from "hooks/useAsync";
-import { useNavigate } from "react-router-dom";
 import { fetchShowBannerAPI, fetchShowPromotionAPI } from "services/general";
-import { Spin } from "antd";
 
 export default function HeroPage() {
   const bannerSliderRef = useRef(null);
@@ -90,16 +88,16 @@ export default function HeroPage() {
   const isLoading = bannerLoading || promoLoading;
   const isError = bannerIsError || promoIsError;
 
-  // if (isLoading) {
-  //   return (
-  //     <div
-  //       className="d-flex justify-content-center align-items-center"
-  //       style={{ minHeight: "50vh" }}
-  //     >
-  //       <Spin size="large" />
-  //     </div>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "50vh" }}
+      >
+             <p>Đang tải dữ liệu...</p>
+      </div>
+    );
+  }
 
   if (isError) {
     return (

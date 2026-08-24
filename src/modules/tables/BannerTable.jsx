@@ -93,7 +93,7 @@ export default function BannerTable() {
   ];
 
   return (
-    <div className="banner-table-container">
+    <div className="banner-management-container">
       <div className="table-header-actions" style={{ justifyContent: 'flex-end', marginBottom: 16 }}>
         <Button 
           className='add-btn' 

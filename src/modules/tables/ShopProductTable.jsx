@@ -116,7 +116,7 @@ export default function ShopProductTable() {
   ];
 
   return (
-    <div className="shop-table-container">
+    <div className="shop-management-container">
       <div className="table-header-actions">
         <Button 
           className='add-btn' 

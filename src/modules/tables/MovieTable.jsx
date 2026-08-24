@@ -191,7 +191,7 @@ function MovieTable() {
   ];
 
   return (
-    <div className="movie-table-container">
+    <div className="movie-management-container">
       <div className="table-header-actions">
         <Input
           placeholder="Nhập tên phim để tìm kiếm..."

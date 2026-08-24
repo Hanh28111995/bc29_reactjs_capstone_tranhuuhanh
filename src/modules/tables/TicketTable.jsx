@@ -127,7 +127,7 @@ export default function TicketTable() {
   ];
 
   return (
-    <div className="movie-table-container">
+    <div className="ticket-mmanagement-container">
       <div className="table-header-actions">
         <Search
           placeholder="Tìm theo mã vé, phương thức..."

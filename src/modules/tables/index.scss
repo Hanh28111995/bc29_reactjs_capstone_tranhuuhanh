@@ -173,9 +173,19 @@ $mobile-breakpoint: 500px;
 // --- 2. ÁP DỤNG CHO TỪNG CONTAINER CỤ THỂ ---
 
 .seat-type-container,
-.branches-table-container,
+.branches-management-container,
 .theater-management-container,
-.showtime-management-container {
+.movie-management-container,
+.showtime-management-container,
+.banner-management-container,
+.movie-management-container,
+.movie-management-container,
+.seattype-container,
+.shop-management-container,
+.ticket-mmanagement-container,
+.user-management-container
+
+ {
   @include table-container-base;
 
   .table-header,
