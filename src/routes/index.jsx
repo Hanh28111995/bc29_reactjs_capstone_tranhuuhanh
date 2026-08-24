@@ -216,7 +216,7 @@ export default function Router() {
               element: <UpdatePromotion />,
             },
             {
-              path: "/admin/shop-product-management/create",
+              path: "/admin/shop-management/create",
               element: <UpdateShopProduct />,
             },
             {

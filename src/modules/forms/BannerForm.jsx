@@ -1,146 +1,230 @@
 import React, { useEffect, useState } from "react";
-import { Form, Button, Switch, Upload, message, AutoComplete } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import { useParams } from "react-router-dom";
-import { updateBannerAPI, addBannerAPI, getBannerDetailAPI } from "services/banner";
+import {
+  Button, Form, Switch, AutoComplete, Image, App, Card, Row, Col, Space
+} from "antd";
+import { ArrowLeftOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAsync, useAsyncMutation } from "hooks/useAsync";
+import {
+  updateBannerAPI,
+  addBannerAPI,
+  getBannerDetailAPI,
+} from "services/banner";
 import { fetchMovieListAPI } from "services/general";
+import "./index.scss";
 
-export default function BannerForm({ onSuccess, loading }) {
+const DEFAULT_VALUES = {
+  movie_id: undefined,
+  highlight: false,
+};
+
+export default function BannerForm() {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const params = useParams();
-  const bannerId = params.bannerId || params.id; // Lấy id từ URL nếu có
+  const bannerId = params.bannerId || params.id;
+  const { notification } = App.useApp();
 
-  const [fileList, setFileList] = useState([]);
-  const [previewImage, setPreviewImage] = useState("");
-  const [movieList, setMovieList] = useState([]);
-  const [initialValues, setInitialValues] = useState(null);
+  const [img, setImg] = useState("");
+  const [file, setFile] = useState(null);
+  const [isChanged, setIsChanged] = useState(false);
+  const [originalData, setOriginalData] = useState(null);
 
-  // 1. Gọi API lấy danh sách phim cho AutoComplete
+  // 1. Gọi API lấy danh sách phim cho AutoComplete sử dụng useAsync
+  const { state: movieListState } = useAsync({
+    service: fetchMovieListAPI,
+  });
+  const movieList = movieListState?.data?.content || movieListState?.content || (Array.isArray(movieListState) ? movieListState : []);
+
+  // 2. Gọi API lấy chi tiết banner khi update
+  const { state: bannerDetail, loading } = useAsync({
+    service: () => (bannerId && bannerId !== "create" ? getBannerDetailAPI(bannerId) : Promise.resolve(null)),
+    dependencies: [bannerId],
+    condition: !!bannerId && bannerId !== "create",
+  });
+
   useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const res = await fetchMovieListAPI();
-        const moviesData = res.data?.content || [];
-        setMovieList(Array.isArray(moviesData) ? moviesData : []);
-      } catch (error) {
-        message.error("Không thể tải danh sách phim");
-        setMovieList([]);
+    if (bannerId && bannerId !== "create") {
+      const bannerData = bannerDetail?.data?.content || bannerDetail;
+      if (bannerData) {
+        const normalized = {
+          movie_id: bannerData.movie_id?.toString(),
+          highlight: !!bannerData.highlight,
+        };
+        form.setFieldsValue(normalized);
+        setOriginalData(normalized);
+        setImg(bannerData.url || "");
+        setIsChanged(false);
       }
-    };
-    fetchMovies();
-  }, []);
-
-  // 2. Kiểm tra nếu có id trên URL thì gọi API lấy chi tiết banner để update
-  useEffect(() => {
-    const fetchBannerDetail = async () => {
-      if (bannerId && bannerId !== "create") {
-        try {
-          const res = await getBannerDetailAPI(bannerId);
-          const bannerData = res.data?.content || res.data;
-          if (bannerData) {
-            setInitialValues(bannerData);
-            form.setFieldsValue({
-              movie_id: bannerData.movie_id?.toString(),
-              highlight: bannerData.highlight,
-            });
-            setPreviewImage(bannerData.url || "");
-          }
-        } catch (error) {
-          message.error("Không thể tải chi tiết banner");
-        }
-      } else {
-        form.resetFields();
-        setInitialValues(null);
-        setFileList([]);
-        setPreviewImage("");
-      }
-    };
-    fetchBannerDetail();
-  }, [bannerId, form]);
-
-  const movieOptions = (movieList || []).map((movie) => ({
-    value: `${movie._id}`,
-    label: `${movie.title}`,
-  }));
-
-  const handleSubmit = async (values) => {
-    const formData = new FormData();
-    formData.append("movie_id", values.movie_id);
-    formData.append("highlight", values.highlight ? "true" : "false");
-
-    if (fileList.length > 0 && fileList[0].originFileObj) {
-      formData.append("url", fileList[0].originFileObj);
-    } else if (previewImage) {
-      formData.append("url", previewImage);
+    } else {
+      form.setFieldsValue(DEFAULT_VALUES);
+      setOriginalData(null);
+      setImg("");
+      setFile(null);
+      setIsChanged(false);
     }
+  }, [bannerDetail, bannerId, form]);
 
+  const onValuesChange = (_, allValues) => {
+    if (!bannerId || bannerId === "create") {
+      const hasInput = Object.keys(allValues).some(key => allValues[key] !== DEFAULT_VALUES[key]);
+      setIsChanged(hasInput || !!file);
+      return;
+    }
+    const hasChanged = Object.keys(allValues).some(key => {
+      return allValues[key] !== originalData?.[key];
+    });
+    setIsChanged(hasChanged || !!file);
+  };
+
+  const bannerMutation = useAsyncMutation({
+    service: (formData) =>
+      bannerId && bannerId !== "create"
+        ? updateBannerAPI(bannerId, formData)
+        : addBannerAPI(formData),
+    invalidateQueries: [["banners"]],
+  });
+
+  const handleSave = async (values) => {
     try {
-      if (bannerId && bannerId !== "create") {
-        await updateBannerAPI(bannerId, formData);
-        message.success("Cập nhật banner thành công!");
-      } else {
-        await addBannerAPI(formData);
-        message.success("Thêm banner thành công!");
+      const formData = new FormData();
+      formData.append("movie_id", values.movie_id);
+      formData.append("highlight", values.highlight ? "true" : "false");
+
+      if (file) {
+        formData.append("url", file, file.name);
+      } else if (img && !file && bannerId && bannerId !== "create") {
+        // Trường hợp giữ nguyên ảnh cũ nếu API yêu cầu truyền lại URL cũ hoặc bạn có thể bỏ qua nếu backend tự xử lý
+        formData.append("url", img);
       }
-      onSuccess?.();
+
+      await bannerMutation.mutateAsync(formData);
+      notification.success({
+        message: bannerId && bannerId !== "create" ? "Cập nhật banner thành công!" : "Thêm banner mới thành công!",
+      });
+      navigate(-1);
     } catch (error) {
-      message.error(error.response?.data?.message || "Có lỗi xảy ra!");
+      notification.error({
+        message: "Lỗi",
+        description: error.response?.data?.message || error.response?.data?.content || "Có lỗi xảy ra!",
+      });
     }
   };
 
+  const handleChangeImage = (event) => {
+    const fileUploaded = event.target.files[0];
+    if (!fileUploaded) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(fileUploaded);
+    reader.onload = (e) => {
+      setImg(e.target.result);
+      setFile(fileUploaded);
+      setIsChanged(true);
+    };
+  };
+
+  const movieOptions = (movieList || []).map((movie) => ({
+    value: `${movie._id || movie.id}`,
+    label: `${movie.title}`,
+  }));
+
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={handleSubmit}
-      initialValues={{ highlight: false }}
-    >
-      <Form.Item
-        name="movie_id"
-        label="Mã Phim"
-        rules={[{ required: true, message: "Vui lòng chọn phim!" }]}
-      >
-        <AutoComplete
-          options={movieOptions}
-          placeholder="Tìm kiếm phim..."
-          filterOption={(input, option) =>
-            option.label.toLowerCase().includes(input.toLowerCase())
-          }
-        />
-      </Form.Item>
-
-      <Form.Item
-        name="highlight"
-        label="Banner Nổi Bật"
-        valuePropName="checked"
-      >
-        <Switch />
-      </Form.Item>
-
-      <Form.Item label="Hình ảnh Banner">
-        <Upload
-          listType="picture"
-          maxCount={1}
-          fileList={fileList}
-          beforeUpload={() => false}
-          onChange={({ fileList: newFileList }) => setFileList(newFileList)}
-        >
-          <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
-        </Upload>
-        {previewImage && fileList.length === 0 && (
-          <img
-            src={previewImage}
-            alt="preview"
-            style={{ width: 100, marginTop: 10 }}
+    <Card
+      className="movie-form-card"
+      loading={loading || bannerMutation.isLoading}
+      title={
+        <Space>
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(-1)}
+            type="text"
           />
-        )}
-      </Form.Item>
+          <span>
+            {bannerId && bannerId !== "create"
+              ? "Chỉnh sửa Banner"
+              : "Thêm banner mới"}
+          </span>
+        </Space>
+      }
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSave}
+        onValuesChange={onValuesChange}
+      >
+        <Row gutter={[24, 0]}>
+          {/* Cột trái: Thông tin cấu hình banner */}
+          <Col xs={24} lg={16}>
+            <Form.Item
+              name="movie_id"
+              label="Chọn Phim"
+              rules={[{ required: true, message: "Vui lòng chọn phim!" }]}
+            >
+              <AutoComplete
+                options={movieOptions}
+                placeholder="Tìm kiếm và chọn phim..."
+                size="large"
+                filterOption={(input, option) =>
+                  option.label.toLowerCase().includes(input.toLowerCase())
+                }
+              />
+            </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading} block>
-          {bannerId && bannerId !== "create" ? "Cập nhật" : "Thêm mới"}
-        </Button>
-      </Form.Item>
-    </Form>
+            <Form.Item
+              name="highlight"
+              label="Banner Nổi Bật"
+              valuePropName="checked"
+            >
+              <Switch />
+            </Form.Item>
+          </Col>
+
+          {/* Cột phải: Upload & Xem trước hình ảnh Banner */}
+          <Col xs={24} lg={8}>
+            <Form.Item label="Hình ảnh Banner">
+              <div style={{ marginBottom: '0.625rem' }}>
+                <input
+                  type="file"
+                  id="banner-img-file"
+                  hidden
+                  onChange={handleChangeImage}
+                  accept="image/*"
+                />
+                <Button
+                  icon={<UploadOutlined />}
+                  onClick={() => document.getElementById('banner-img-file').click()}
+                  block
+                  size="large"
+                >
+                  Chọn ảnh banner
+                </Button>
+              </div>
+              <div className="image-preview-wrapper">
+                <Image
+                  src={img}
+                  className="preview-img"
+                  fallback="https://via.placeholder.com/400x200?text=No+Banner+Image"
+                />
+              </div>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            icon={<SaveOutlined />}
+            disabled={!isChanged}
+            block
+            className="submit-btn"
+            size="large"
+          >
+            {bannerId && bannerId !== "create" ? "CẬP NHẬT BANNER" : "TẠO BANNER MỚI"}
+          </Button>
+        </Form.Item>
+      </Form>
+    </Card>
   );
 }
