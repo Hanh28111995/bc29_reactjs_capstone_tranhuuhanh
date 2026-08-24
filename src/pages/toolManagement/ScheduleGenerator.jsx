@@ -1,11 +1,24 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Card, Row, Col, Checkbox, Button, App, Typography, Divider, Tag, Switch
+  Card,
+  Row,
+  Col,
+  Checkbox,
+  Button,
+  App,
+  Typography,
+  Divider,
+  Tag,
+  Switch,
 } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import { fetchMovieListAPI } from "services/movie";
 import { fetchTheaterListAPI } from "services/theater";
-import { createScheduleAPI, getScheduleListAPI, updateScheduleAPI } from "services/scheduleGenerator";
+import {
+  createScheduleAPI,
+  getScheduleListAPI,
+  updateScheduleAPI,
+} from "services/scheduleGenerator";
 import { useAsync } from "hooks/useAsync";
 import dayjs from "dayjs";
 
@@ -29,9 +42,18 @@ export default function ScheduleGenerator() {
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const { state: rawMovies } = useAsync({ service: fetchMovieListAPI ,     queryKey: ["movies_list"],  });
-  const { state: rawTheaters } = useAsync({ service: fetchTheaterListAPI ,     queryKey: ["theaters_list"], });
-  const { state: scheduleData } = useAsync({ service: getScheduleListAPI ,     queryKey: ["scheduleData_list"],});
+  const { state: rawMovies } = useAsync({
+    service: fetchMovieListAPI,
+    queryKey: ["movies_list"],
+  });
+  const { state: rawTheaters } = useAsync({
+    service: fetchTheaterListAPI,
+    queryKey: ["theaters_list"],
+  });
+  const { state: scheduleData } = useAsync({
+    service: getScheduleListAPI,
+    queryKey: ["scheduleData_list"],
+  });
 
   const schedule = scheduleData?.schedule ?? scheduleData ?? null;
   const existingId = schedule?._id ?? null;
@@ -47,19 +69,21 @@ export default function ScheduleGenerator() {
   }, [schedule?._id]);
 
   const movies = useMemo(() => {
-    const list = Array.isArray(rawMovies) ? rawMovies?.movies : [];
+    const list = rawMovies?.movies;
     return [...list]
       .filter((m) => m.releaseDate)
       .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)));
-  }, [rawMovies]);
+  }, [rawMovies?.movies]);
 
-  const theaters = Array.isArray(rawTheaters) ? rawTheaters?.theaters : [];
+  const theaters = rawTheaters?.theaters;
 
   const handleGenerate = async () => {
     if (selectedMovies.length === 0)
       return notification.warning({ message: "Vui lòng chọn ít nhất 1 phim" });
     if (selectedSlots.length === 0)
-      return notification.warning({ message: "Vui lòng chọn ít nhất 1 khung giờ" });
+      return notification.warning({
+        message: "Vui lòng chọn ít nhất 1 khung giờ",
+      });
     if (selectedTheaters.length === 0)
       return notification.warning({ message: "Vui lòng chọn ít nhất 1 rạp" });
     if (!scheduleTime)
@@ -102,7 +126,9 @@ export default function ScheduleGenerator() {
         <Col span={24}>
           <Title level={5}>1. Select Movie</Title>
           <Text type="secondary">Select up to 5 movies</Text>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+          <div
+            style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}
+          >
             {movies.map((m) => {
               const isSelected = selectedMovies.includes(m._id);
               const maxReached = selectedMovies.length >= 5;
@@ -111,14 +137,17 @@ export default function ScheduleGenerator() {
                   key={m._id}
                   color={isSelected ? "blue" : "default"}
                   style={{
-                    cursor: isSelected || !maxReached ? "pointer" : "not-allowed",
+                    cursor:
+                      isSelected || !maxReached ? "pointer" : "not-allowed",
                     opacity: !isSelected && maxReached ? 0.45 : 1,
                     padding: "4px 12px",
                     fontSize: 13,
                   }}
                   onClick={() => {
                     if (isSelected) {
-                      setSelectedMovies((prev) => prev.filter((id) => id !== m._id));
+                      setSelectedMovies((prev) =>
+                        prev.filter((id) => id !== m._id),
+                      );
                     } else if (!maxReached) {
                       setSelectedMovies((prev) => [...prev, m._id]);
                     }
@@ -134,7 +163,10 @@ export default function ScheduleGenerator() {
             })}
           </div>
           {selectedMovies.length > 0 && (
-            <Text type="secondary" style={{ fontSize: 12, marginTop: 4, display: "block" }}>
+            <Text
+              type="secondary"
+              style={{ fontSize: 12, marginTop: 4, display: "block" }}
+            >
               {selectedMovies.length}/5 selected
             </Text>
           )}
@@ -166,13 +198,15 @@ export default function ScheduleGenerator() {
                     setSelectedTheaters((prev) =>
                       e.target.checked
                         ? [...prev, t._id]
-                        : prev.filter((id) => id !== t._id)
+                        : prev.filter((id) => id !== t._id),
                     )
                   }
                 >
                   {t.name}
                   {t.branch && (
-                    <span style={{ color: "#aaa", fontSize: 11, marginLeft: 4 }}>
+                    <span
+                      style={{ color: "#aaa", fontSize: 11, marginLeft: 4 }}
+                    >
                       ({t.branch})
                     </span>
                   )}
@@ -205,7 +239,14 @@ export default function ScheduleGenerator() {
 
         {/* Submit */}
         <Col span={24}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 16,
+            }}
+          >
             <Switch checked={isActive} onChange={setIsActive} />
             <span>Active</span>
           </div>
