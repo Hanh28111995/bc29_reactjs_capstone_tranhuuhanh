@@ -10,7 +10,7 @@ import { fetchShowPromotionAPI } from "services/general";
 
 export default function PromotionList() {
   const navigate = useNavigate();
-  const [, setLoadingState] = useContext(LoadingContext);  
+  const [, setLoadingState] = useContext(LoadingContext);
 
   const {
     state: rawPromotionList = [],
@@ -21,7 +21,7 @@ export default function PromotionList() {
     service: () => fetchShowPromotionAPI(),
     queryKey: ["promotions"], // Đã sửa lại queryKey cho đúng
   });
-  
+
   const promotionList = Array.isArray(rawPromotionList) ? rawPromotionList : [];
 
   useEffect(() => {
@@ -30,8 +30,11 @@ export default function PromotionList() {
 
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "50vh" }}>
-        <Spin size="large" />
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "50vh" }}
+      >
+        <p>Đang tải dữ liệu...</p>
       </div>
     );
   }
@@ -43,38 +46,46 @@ export default function PromotionList() {
         <p>{error?.message || "Vui lòng thử lại sau."}</p>
       </div>
     );
-  }  
+  }
 
   return (
-    <div className="container-fluid my-5 promotion-list-container">            
+    <div className="container-fluid my-5 promotion-list-container">
       <div className="row mt-3 w-lg-75 promotion-list-row">
         {promotionList.map((ele) => (
           <div className="col-3 mb-4" key={ele._id}>
-            <div className="card promotion-card" onClick={() => navigate(`/promotion/${ele._id}`)} style={{ cursor: "pointer" }}>
+            <div
+              className="card promotion-card"
+              onClick={() => navigate(`/promotion/${ele._id}`)}
+              style={{ cursor: "pointer" }}
+            >
               <div className="card-header-wrapper">
                 {/* Đã sửa tag thành title */}
-                <img 
-                  className="card-img-top" 
-                  src={ele.banner} 
-                  alt={ele.title} 
-                  width={300} 
-                  height={200} 
+                <img
+                  className="card-img-top"
+                  src={ele.banner}
+                  alt={ele.title}
+                  width={300}
+                  height={200}
                   style={{ objectFit: "cover" }}
-                  loading="lazy" 
-                  decoding="async" 
-                />             
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
               <div className="card-body-custom p-3">
                 {/* Bổ sung hiển thị Title vì Model có trường này */}
                 {/* <h5 className="card-title text-truncate" title={ele.title}>
                   {ele.title}
                 </h5> */}
-                
+
                 {/* Hiển thị ngày tháng an toàn hơn (phòng trường hợp schema cho phép null/undefined) */}
                 <p className="promotion-release text-muted mb-0 text-center">
-                  {ele.startDate ? dayjs(ele.startDate).format('DD/MM/YYYY') : "Đang cập nhật"} 
-                  {" - "} 
-                  {ele.endDate ? dayjs(ele.endDate).format('DD/MM/YYYY') : "Không thời hạn"}
+                  {ele.startDate
+                    ? dayjs(ele.startDate).format("DD/MM/YYYY")
+                    : "Đang cập nhật"}
+                  {" - "}
+                  {ele.endDate
+                    ? dayjs(ele.endDate).format("DD/MM/YYYY")
+                    : "Không thời hạn"}
                 </p>
               </div>
             </div>
