@@ -22,7 +22,7 @@ const GlobalSpinner = ({ spinRef }) => {
   spinRef.current = setVisible;
   return visible ? (
     <WrapperSpin>
-      {/* <Spin /> */}
+      <Spin />
     </WrapperSpin>
   ) : null;
 };
