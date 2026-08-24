@@ -133,7 +133,7 @@ export default function ShopProductForm() {
 
   return (
     <Card
-      className="shop-product-form-card"
+      className="movie-form-card"
       loading={loading || productMutation.isLoading}
       title={
         <Space>

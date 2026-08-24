@@ -107,7 +107,7 @@ export default function UserForm() {
   };
 
   return (
-    <Card loading={loading || userMutation.isLoading}>
+    <Card loading={loading || userMutation.isLoading} className="movie-form-card">
       {/* Cần thiết cho Antd 5 Notification */}
       {contextHolder}
 

@@ -128,7 +128,7 @@ export default function PromotionForm() {
 
   return (
     <Card
-      className="promotion-form-card"
+      className="movie-form-card"
       loading={loading || promoMutation.isLoading}
       title={
         <Space>
