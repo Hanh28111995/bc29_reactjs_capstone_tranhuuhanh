@@ -108,7 +108,7 @@ function PromotionTable() {
   ];
 
   return (
-    <div className="promotion-table-container">
+    <div className="movie-table-container">
       <div className="table-header-actions">      
         <Button 
           className='add-btn' 
