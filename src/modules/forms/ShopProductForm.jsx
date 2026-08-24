@@ -6,7 +6,13 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
 import { addShopProductAPI, updateShopProductAPI, getShopProductDetailAPI } from "services/shopProduct";
-import { ArrowLeftOutlined, SaveOutlined, UploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import { 
+  ArrowLeftOutlined, 
+  SaveOutlined, 
+  UploadOutlined, 
+  DeleteOutlined, 
+  PlusOutlined 
+} from "@ant-design/icons";
 import "./index.scss";
 
 // 1. Thêm highlight vào giá trị mặc định
@@ -87,7 +93,7 @@ export default function ShopProductForm() {
       const payload = {
         ...values,
         options: values.options || [],
-        highlight: values.highlight ? true : false, // Đảm bảo truyền giá trị boolean lên server
+        highlight: values.highlight ? true : false,
       };
 
       Object.keys(payload).forEach(key => {
@@ -240,7 +246,6 @@ export default function ShopProductForm() {
               <Switch checkedChildren="Đang bán" unCheckedChildren="Ngừng bán" />
             </Form.Item>
 
-            {/* 2. Thêm Form.Item cho Switch Toggle Highlight */}
             <Form.Item label="Nổi bật (Highlight)" name="highlight" valuePropName="checked">
               <Switch checkedChildren="Bật" unCheckedChildren="Tắt" />
             </Form.Item>
