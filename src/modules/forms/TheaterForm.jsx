@@ -47,7 +47,7 @@ export default function TheaterForm() {
   const cinemas = useMemo(() => {
     if (!rawCinemas) return [];
     if (Array.isArray(rawCinemas)) return rawCinemas;
-    return rawCinemas.data || rawCinemas.items || rawCinemas.content || safeArray(rawCinemas);
+    return rawCinemas.cinemas;
   }, [rawCinemas]);
 
   const { state: theaterDetailRaw, loading } = useAsync({
