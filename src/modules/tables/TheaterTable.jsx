@@ -18,7 +18,7 @@ export default function TheaterTable() {
 
   // 1. Gọi API lấy toàn bộ danh sách phòng chiếu một lần duy nhất
   const { data: responseContent, loading: isLoading } = useAsync({
-    queryKey: ["theaters_list"],
+    queryKey: ["theaters-list"],
     service: () => fetchTheaterListAPI(),
   });
 
