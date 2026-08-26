@@ -38,15 +38,20 @@ export default function BranchesTable() {
   const data = safeArray(rawData?.cinemas);
 
   // Đồng bộ và chuẩn hóa dữ liệu gốc khi fetch thành công
-  useEffect(() => {
+ useEffect(() => {
     if (data && data.length > 0) {
-      const normalizedData = data.map((item) => {
+      // 1. In ra toàn bộ mảng data gốc từ API để soi xem cấu trúc thực tế thế nào
+      console.log("👉 Raw data from API (data):", data);
+
+      const normalizedData = data.map((item, index) => {
+        // 2. In chi tiết từng item.coordinates và kiểu dữ liệu của nó
+        console.log(`Item [${index}] coordinates raw:`, item.coordinates, typeof item.coordinates?.[0]);
+
         let coords = [0, 0];
         if (Array.isArray(item.coordinates) && item.coordinates.length >= 2) {
-          // Ép tường minh từng phần tử trong mảng string/number về kiểu Number
           coords = [
-            parseFloat(item.coordinates[0]) || 0,
-            parseFloat(item.coordinates[1]) || 0,
+            Number(item.coordinates[0]) || 0,
+            Number(item.coordinates[1]) || 0,
           ];
         }
         return {
@@ -54,6 +59,9 @@ export default function BranchesTable() {
           coordinates: coords,
         };
       });
+
+      console.log("👉 Normalized Data result:", normalizedData);
+
       setDataSource(normalizedData);
       setDeleteIds([]);
       setUpdatedIds([]);
