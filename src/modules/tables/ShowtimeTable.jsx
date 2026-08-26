@@ -27,7 +27,7 @@ export default function ShowtimeTable() {
     // 1. Gọi API lấy dữ liệu (đã thêm keyword vào dependencies để đồng bộ tìm kiếm)
     const { data: responseContent, loading: isLoading } = useAsync({
         dependencies: [pagination.page, pagination.limit, activeFilter, keyword],
-        queryKey: ['showtimes-list', 'all', pagination.page, pagination.limit, activeFilter, keyword],
+        queryKey: ['showtimes-list', pagination.page, pagination.limit, activeFilter, keyword],
         service: () => {
             if (activeFilter === 'today') return getShowTimeToday();
             if (activeFilter === 'upcoming') return getShowTimeUpcoming();
