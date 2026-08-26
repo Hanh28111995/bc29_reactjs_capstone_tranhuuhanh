@@ -131,27 +131,51 @@ export default function BranchesTable() {
     {
       title: "Tọa độ [Lng, Lat]",
       dataIndex: "coordinates",
-      width: "22%", // Đủ rộng để hiển thị cặp số tọa độ
-      // Khi hiển thị bình thường (không sửa): chuyển mảng thành chuỗi dễ đọc
+      width: "22%",
+      // 1. Khi hiển thị bình thường: biến mảng thành chuỗi "lng, lat"
       render: (val) => (Array.isArray(val) ? val.join(", ") : val),
-      // Khi sửa: hiển thị ô input text bình thường
+
+      // 2. Khi bắt đầu sửa: biến mảng thành chuỗi để ô input hiển thị đúng chữ "106.69, 10.75" thay vì object/mảng thô
+      renderFormItem: (schema, config, form) => {
+        const currentValue = form.getFieldValue(config.dataIndex);
+        const initialStr = Array.isArray(currentValue)
+          ? currentValue.join(", ")
+          : currentValue || "";
+
+        return (
+          <Input
+            defaultValue={initialStr}
+            placeholder="VD: 106.69, 10.75"
+            onChange={(e) => {
+              // Gán trực tiếp giá trị chuỗi người dùng đang gõ vào form
+              form.setFieldValue(config.dataIndex, e.target.value);
+            }}
+          />
+        );
+      },
+
+      // 3. Quy tắc kiểm tra đơn giản và chắc chắn không lỗi
       formItemProps: {
         rules: [
           { required: true, message: "Không được để trống" },
           {
             validator: (_, value) => {
-              // Cho phép nhập chuỗi số cách nhau bởi dấu phẩy
-              if (!value) return Promise.reject();
-              const parts = Array.isArray(value)
-                ? value
-                : String(value).split(",");
+              if (!value)
+                return Promise.reject(new Error("Không được để trống"));
+
+              // Nếu value đang là mảng (trường hợp chưa sửa mà submit), chuyển về chuỗi để check
+              const strVal = Array.isArray(value)
+                ? value.join(",")
+                : String(value);
+              const parts = strVal.split(",");
+
               if (
                 parts.length !== 2 ||
                 parts.some((p) => isNaN(Number(p.trim())))
               ) {
                 return Promise.reject(
                   new Error(
-                    "Sai định dạng! Phải gồm 2 số cách nhau bởi dấu phẩy (VD: 106.69, 10.75)",
+                    "Phải gồm 2 số cách nhau bởi dấu phẩy (VD: 106.69, 10.75)",
                   ),
                 );
               }
@@ -270,8 +294,7 @@ export default function BranchesTable() {
     } catch (error) {
       notification.error({
         message: "Lỗi",
-        description:          
-          "Lưu thất bại. Vui lòng kiểm tra lại hệ thống.",
+        description: "Lưu thất bại. Vui lòng kiểm tra lại hệ thống.",
       });
     } finally {
       setIsSaving(false);
