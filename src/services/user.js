@@ -50,7 +50,7 @@ const fetchAddUserApi = (data) => {
 
 const fetchUpdateUserApi = (data) => {
   return request({
-    url: "/admin/user/user-edit",
+    url: "/admin/user/update",
     method: "PUT",
     data,
   });
