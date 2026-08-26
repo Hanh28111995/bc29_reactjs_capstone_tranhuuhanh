@@ -43,9 +43,10 @@ export default function BranchesTable() {
       const normalizedData = data.map((item) => {
         let coords = [0, 0];
         if (Array.isArray(item.coordinates) && item.coordinates.length >= 2) {
+          // Ép tường minh từng phần tử trong mảng string/number về kiểu Number
           coords = [
-            Number(item.coordinates[0]) || 0,
-            Number(item.coordinates[1]) || 0,
+            parseFloat(item.coordinates[0]) || 0,
+            parseFloat(item.coordinates[1]) || 0,
           ];
         }
         return {
@@ -203,7 +204,7 @@ export default function BranchesTable() {
         .filter((item) => item._id?.toString().startsWith("new_"))
         .forEach((item) => {
           const { _id, ...restItem } = item;
-          
+
           // Chuẩn hóa và ép kiểu tường minh coordinates thành mảng [Lng, Lat]
           const payload = {
             ...restItem,
