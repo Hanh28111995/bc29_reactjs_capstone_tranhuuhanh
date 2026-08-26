@@ -20,14 +20,14 @@ export default function UserForm() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [originalData, setOriginalData] = useState({});
 
-  // Lấy dữ liệu chi tiết khi có ID trên URL (params.tk)
+  // Lấy dữ liệu chi tiết khi có ID trên URL (params.userId)
   const { state: userDetailRaw, loading } = useAsync({
     service: () =>
-      params.tk && params.tk !== "create"
-        ? fetchUserDetailApi(params.tk)
+      params.userId && params.userId !== "create"
+        ? fetchUserDetailApi(params.userId)
         : Promise.resolve(null),
-    dependencies: [params.tk],
-    condition: !!params.tk && params.tk !== "create",
+    dependencies: [params.userId],
+    condition: !!params.userId && params.userId !== "create",
   });
 
   // API trả về content: { users: {...} } hoặc object trực tiếp
@@ -36,7 +36,7 @@ export default function UserForm() {
 
   // Đồng bộ dữ liệu vào Form
   useEffect(() => {
-    if (params.tk && params.tk !== "create") {
+    if (params.userId && params.userId !== "create") {
       if (userDetail) {
         form.setFieldsValue(userDetail);
         setOriginalData(userDetail);
@@ -48,12 +48,12 @@ export default function UserForm() {
       setIsChanged(false);
       setIsChangingPassword(false);
     }
-  }, [userDetail, params.tk, form]);
+  }, [userDetail, params.userId, form]);
 
   // Theo dõi thay đổi của form để enable nút Save
   const onValuesChange = (_, allValues) => {
     // Sửa lại điều kiện kiểm tra Create vs Update cho chính xác tuyệt đối
-    if (!params.tk || params.tk === "create") {
+    if (!params.userId || params.userId === "create") {
       const hasInput = Object.keys(allValues).some((key) =>
         Boolean(allValues[key]),
       );
@@ -142,7 +142,7 @@ export default function UserForm() {
             type="text"
           />
           <span>
-            {params.tk && params.tk !== "create"
+            {params.userId && params.userId !== "create"
               ? `Chỉnh sửa: ${userDetail?.username || ""}`
               : "Thêm người dùng mới"}
           </span>
@@ -264,7 +264,7 @@ export default function UserForm() {
             block
             className="submit-btn"
           >
-            {params.tk && params.tk !== "create"
+            {params.userId && params.userId !== "create"
               ? "CẬP NHẬT NGƯỜI DÙNG"
               : "TẠO NGƯỜI DÙNG MỚI"}
           </Button>
