@@ -108,7 +108,7 @@ export default function MovieForm() {
         }
       });
 
-      if (file) formData.append("File", file, file.name);
+      if (file) formData.append("file", file, file.name);
       if (!isCreateMode) formData.append("id_movie", params.movieId);
 
       await movieMutation.mutateAsync(formData);
