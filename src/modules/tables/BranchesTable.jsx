@@ -37,11 +37,11 @@ export default function BranchesTable() {
 
   const data = safeArray(rawData?.cinemas);
 
-  // Đồng bộ dữ liệu gốc vào local state khi fetch thành công
+  // Đồng bộ và chuẩn hóa dữ liệu gốc khi fetch thành công
   useEffect(() => {
     if (data && data.length > 0) {
       const normalizedData = data.map((item) => {
-        let coords = [0, 0]; // Mặc định nếu không có
+        let coords = [0, 0];
         if (Array.isArray(item.coordinates) && item.coordinates.length >= 2) {
           coords = [
             Number(item.coordinates[0]) || 0,
@@ -135,16 +135,16 @@ export default function BranchesTable() {
     },
     {
       title: "Kinh độ (Lng)",
-      dataIndex: ["coordinates", 0], // Trỏ phần tử đầu của mảng
+      dataIndex: ["coordinates", 0], // Map trực tiếp vào phần tử đầu của mảng coordinates
       width: "14%",
-      valueType: "digit", // Tự động chặn chữ, chỉ cho nhập số
+      valueType: "digit",
       formItemProps: {
         rules: [{ required: true, message: "Nhập Lng" }],
       },
     },
     {
       title: "Vĩ độ (Lat)",
-      dataIndex: ["coordinates", 1], // Trỏ phần tử thứ hai của mảng
+      dataIndex: ["coordinates", 1], // Map trực tiếp vào phần tử thứ hai của mảng coordinates
       width: "14%",
       valueType: "digit",
       formItemProps: {
@@ -202,8 +202,17 @@ export default function BranchesTable() {
       dataSource
         .filter((item) => item._id?.toString().startsWith("new_"))
         .forEach((item) => {
-          const { _id, ...payload } = item;
-          // Vì dùng 2 cột Lng/Lat, payload.coordinates đã tự động là mảng số [lng, lat]
+          const { _id, ...restItem } = item;
+          
+          // Chuẩn hóa và ép kiểu tường minh coordinates thành mảng [Lng, Lat]
+          const payload = {
+            ...restItem,
+            coordinates: [
+              Number(item.coordinates?.[0]) || 0,
+              Number(item.coordinates?.[1]) || 0,
+            ],
+          };
+
           promises.push(addOneBranchApi(payload));
         });
 
@@ -211,7 +220,15 @@ export default function BranchesTable() {
       updatedIds.forEach((id) => {
         const item = dataSource.find((d) => d._id === id);
         if (item && !deleteIds.includes(id)) {
-          const payload = { ...item };
+          // Chuẩn hóa và ép kiểu tường minh coordinates thành mảng [Lng, Lat]
+          const payload = {
+            ...item,
+            coordinates: [
+              Number(item.coordinates?.[0]) || 0,
+              Number(item.coordinates?.[1]) || 0,
+            ],
+          };
+
           promises.push(updateBranhesApi(payload));
         }
       });
