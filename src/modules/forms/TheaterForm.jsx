@@ -37,10 +37,18 @@ export default function TheaterForm() {
   });
   const seatsDB = safeArray(rawSeatsDB);
 
+  // Giữ lại queryKey để hook useAsync kích hoạt gọi API chính xác
   const { state: rawCinemas } = useAsync({
     service: getAllBranches,
+    queryKey: ["branches_list"]
   });
-  const cinemas = safeArray(rawCinemas);
+  
+  // Bóc tách mảng dữ liệu an toàn phòng trường hợp API trả về dạng object chứa data/items/content
+  const cinemas = useMemo(() => {
+    if (!rawCinemas) return [];
+    if (Array.isArray(rawCinemas)) return rawCinemas;
+    return rawCinemas.data || rawCinemas.items || rawCinemas.content || safeArray(rawCinemas);
+  }, [rawCinemas]);
 
   const { state: theaterDetailRaw, loading } = useAsync({
     service: () => fetchTheaterDetailAPI(params.theaterId),
@@ -52,13 +60,22 @@ export default function TheaterForm() {
 
   const selectedCinema = Form.useWatch('cinemaName', form);
 
+  const cinemaOptions = useMemo(() => {
+    if (!Array.isArray(cinemas)) return [];
+    const uniqueNames = [...new Set(cinemas.map(item => item?.cinemaName).filter(Boolean))];
+    return uniqueNames.map(name => ({
+      label: name,
+      value: name
+    }));
+  }, [cinemas]);
+
   const branchOptions = useMemo(() => {
-    if (!selectedCinema) return [];
+    if (!selectedCinema || !Array.isArray(cinemas)) return [];
     return cinemas
-      .filter(item => item.cinemaName === selectedCinema)
+      .filter(item => item?.cinemaName === selectedCinema)
       .map(item => ({
-        label: item.branch,
-        value: item.branch
+        label: item?.branch,
+        value: item?.branch
       }));
   }, [selectedCinema, cinemas]);
 
@@ -103,14 +120,12 @@ export default function TheaterForm() {
   const checkIsChanged = (currentValues, currentSeats, isReset) => {
     if (isReset) return true;
     if (!params.theaterId) {
-      // Create mode
       const hasInput = Object.keys(currentValues).some(
         key => currentValues[key] !== undefined && currentValues[key] !== ""
       );
       return hasInput || currentSeats.length > 0;
     }
 
-    // Edit mode
     const hasFormChanged = Object.keys(currentValues).some(key => {
       if (key === 'totalSeat') {
         return (
@@ -246,10 +261,7 @@ export default function TheaterForm() {
                 showSearch
                 optionFilterProp="label"
                 onChange={handleCinemaChange}
-                options={[...new Set(cinemas.map(item => item.cinemaName))].map(name => ({
-                  label: name,
-                  value: name
-                }))}
+                options={cinemaOptions}
               />
             </Form.Item>
           </Col>
