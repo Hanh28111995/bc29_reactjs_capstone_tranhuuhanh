@@ -76,6 +76,7 @@ export default function ShowtimeForm() {
 
   const { state: data, loading } = useAsync({
     service: () => getShowTimeDetail(params.id),
+    queryKey: ["showtimes_list"],
     dependencies: [params.id],
     condition: isEditMode,
   });
@@ -104,7 +105,7 @@ export default function ShowtimeForm() {
     form.setFieldsValue(dataForForm);
     setOriginalData(dataForForm);
     setSelectedCinema(showtimeDetail.cinema?._id || showtimeDetail.cinema);
-    
+
     const showtimeSeats =
       showtimeDetail.seats?.filter((s) => s.color) ??
       showtimeDetail.seats ??
@@ -132,7 +133,7 @@ export default function ShowtimeForm() {
     if (!isEditMode) {
       // Create mode: Chỉ cần có chọn ít nhất 1 trường hoặc có ghế là bật nút
       const hasInput = Object.keys(currentFormValues).some(
-        (key) => currentFormValues[key] !== DEFAULT_VALUES[key]
+        (key) => currentFormValues[key] !== DEFAULT_VALUES[key],
       );
       return hasInput || currentSeats.length > 0;
     }
@@ -146,7 +147,8 @@ export default function ShowtimeForm() {
     });
 
     // So sánh Seats thay đổi
-    const hasSeatsChanged = JSON.stringify(currentSeats) !== JSON.stringify(originalSeats);
+    const hasSeatsChanged =
+      JSON.stringify(currentSeats) !== JSON.stringify(originalSeats);
 
     return hasFormChanged || hasSeatsChanged;
   };
