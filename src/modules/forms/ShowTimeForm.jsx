@@ -179,7 +179,7 @@ export default function ShowtimeForm() {
       isEditMode
         ? updateShowTime({ id: params.id, ...payload })
         : addNewShowTime(payload),
-    invalidateQueries: [["showtimes"]],
+    invalidateQueries: [["showtimes-list"]],
   });
 
   const handleSave = async (values) => {

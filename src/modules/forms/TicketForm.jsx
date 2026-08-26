@@ -31,7 +31,7 @@ export default function TicketForm() {
 
   const updateTicketMutation = useAsyncMutation({
     service: (values) => updateTicketAPI(ticketId, values),
-    invalidateQueries: [["ticket", ticketId], ["tickets-list"]],
+    invalidateQueries: [["tickets-list"]],
   });
 
   // Lấy dữ liệu ticket an toàn
