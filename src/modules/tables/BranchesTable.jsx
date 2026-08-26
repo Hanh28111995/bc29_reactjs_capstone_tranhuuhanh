@@ -40,11 +40,11 @@ export default function BranchesTable() {
   // Đồng bộ và chuẩn hóa dữ liệu gốc khi fetch thành công
   useEffect(() => {
     if (data && data.length > 0) {
-      const normalizedData = data.map((item) => {
-        let coords = [0, 0];
+      const normalizedData = data?.map((item) => {
+        let coords = ["0", "0"];
         let rawCoords = item.coordinates;
 
-        // Nếu backend lỡ trả về dạng chuỗi JSON (ví dụ: '["10.8, "106.9"]') thì parse nó ra mảng
+        // Nếu backend lỡ trả về dạng chuỗi JSON thì parse nó ra mảng
         if (typeof rawCoords === "string") {
           try {
             rawCoords = JSON.parse(rawCoords);
@@ -54,7 +54,11 @@ export default function BranchesTable() {
         }
 
         if (Array.isArray(rawCoords) && rawCoords.length >= 2) {
-          coords = [Number(rawCoords[0]) || 0, Number(rawCoords[1]) || 0];
+          // Xử lý chuyển về string, thay thế dấu phẩy (nếu có) thành dấu chấm và giữ nguyên giá trị tránh làm tròn
+          coords = [
+            String(rawCoords[0] ?? 0).replace(",", "."),
+            String(rawCoords[1] ?? 0).replace(",", "."),
+          ];
         }
 
         return {
@@ -145,26 +149,59 @@ export default function BranchesTable() {
     },
     {
       title: "Kinh độ (Lng)",
-      dataIndex: ["coordinates", 0], // Map trực tiếp vào phần tử đầu của mảng coordinates
+      dataIndex: ["coordinates", 0],
       width: "14%",
-      valueType: "digit",
+      align: "center", // 1. Canh giữa nội dung cột
+      // Sử dụng valueType: "text" thay vì digit để hiển thị chuẩn xác string không bị mất số 0 hoặc tự động làm tròn
+      valueType: "text", 
       formItemProps: {
-        rules: [{ required: true, message: "Nhập Lng" }],
+        rules: [
+          { required: true, message: "Nhập Lng" },
+          {
+            validator: (_, value) => {
+              if (value === undefined || value === null || value === "") {
+                return Promise.reject(new Error("Nhập Lng"));
+              }
+              // Cho phép nhập số thập phân dạng chuỗi (dùng dấu . hoặc ,)
+              const regex = /^-?\d+([.,]\d+)?$/;
+              if (!regex.test(String(value).trim())) {
+                return Promise.reject(new Error("Kinh độ phải là định dạng số hợp lệ"));
+              }
+              return Promise.resolve();
+            },
+          },
+        ],
       },
     },
     {
       title: "Vĩ độ (Lat)",
-      dataIndex: ["coordinates", 1], // Map trực tiếp vào phần tử thứ hai của mảng coordinates
+      dataIndex: ["coordinates", 1],
       width: "14%",
-      valueType: "digit",
+      align: "center", // 1. Canh giữa nội dung cột
+      valueType: "text",
       formItemProps: {
-        rules: [{ required: true, message: "Nhập Lat" }],
+        rules: [
+          { required: true, message: "Nhập Lat" },
+          {
+            validator: (_, value) => {
+              if (value === undefined || value === null || value === "") {
+                return Promise.reject(new Error("Nhập Lat"));
+              }
+              const regex = /^-?\d+([.,]\d+)?$/;
+              if (!regex.test(String(value).trim())) {
+                return Promise.reject(new Error("Vĩ độ phải là định dạng số hợp lệ"));
+              }
+              return Promise.resolve();
+            },
+          },
+        ],
       },
     },
     {
       title: "Thao tác",
       valueType: "option",
       width: "12%",
+      align: "center",
       render: (text, record, _, action) => {
         const isEditing = editableKeys.includes(record._id);
         if (isEditing) return null;
@@ -214,12 +251,12 @@ export default function BranchesTable() {
         .forEach((item) => {
           const { _id, ...restItem } = item;
 
-          // Chuẩn hóa và ép kiểu tường minh coordinates thành mảng [Lng, Lat]
+          // Khi gửi lên server, chuyển chuỗi tọa độ về dạng số (Number) để backend lưu database
           const payload = {
             ...restItem,
             coordinates: [
-              Number(item.coordinates?.[0]) || 0,
-              Number(item.coordinates?.[1]) || 0,
+              Number(String(item.coordinates?.[0] || 0).replace(",", ".")) || 0,
+              Number(String(item.coordinates?.[1] || 0).replace(",", ".")) || 0,
             ],
           };
 
@@ -230,12 +267,11 @@ export default function BranchesTable() {
       updatedIds.forEach((id) => {
         const item = dataSource.find((d) => d._id === id);
         if (item && !deleteIds.includes(id)) {
-          // Chuẩn hóa và ép kiểu tường minh coordinates thành mảng [Lng, Lat]
           const payload = {
             ...item,
             coordinates: [
-              Number(item.coordinates?.[0]) || 0,
-              Number(item.coordinates?.[1]) || 0,
+              Number(String(item.coordinates?.[0] || 0).replace(",", ".")) || 0,
+              Number(String(item.coordinates?.[1] || 0).replace(",", ".")) || 0,
             ],
           };
 
@@ -299,7 +335,7 @@ export default function BranchesTable() {
               cinemaName: "",
               branch: "",
               address: "",
-              coordinates: [0, 0], // Khởi tạo mặc định mảng 2 số tránh lỗi undefined
+              coordinates: ["0", "0"], // Khởi tạo mảng string tránh lỗi undefined
             }),
           }}
           editable={{
