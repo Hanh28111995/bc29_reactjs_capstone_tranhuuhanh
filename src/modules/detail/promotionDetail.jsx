@@ -59,7 +59,7 @@ export default function PromotionDetail() {
                 src={promotionDetail.banner} 
                 alt={promotionDetail.title} 
                 className="img-fluid rounded shadow-sm"
-                style={{ maxHeight: "450px", objectFit: "cover", width: "100%" }}
+                style={{ height: "auto", objectFit: "cover", width: "80%" }}
                 loading="lazy" 
                 decoding="async" 
               />
