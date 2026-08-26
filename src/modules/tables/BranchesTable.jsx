@@ -38,29 +38,30 @@ export default function BranchesTable() {
   const data = safeArray(rawData?.cinemas);
 
   // Đồng bộ và chuẩn hóa dữ liệu gốc khi fetch thành công
- useEffect(() => {
+  useEffect(() => {
     if (data && data.length > 0) {
-      // 1. In ra toàn bộ mảng data gốc từ API để soi xem cấu trúc thực tế thế nào
-      console.log("👉 Raw data from API (data):", data);
-
-      const normalizedData = data.map((item, index) => {
-        // 2. In chi tiết từng item.coordinates và kiểu dữ liệu của nó
-        console.log(`Item [${index}] coordinates raw:`, item.coordinates, typeof item.coordinates?.[0]);
-
+      const normalizedData = data.map((item) => {
         let coords = [0, 0];
-        if (Array.isArray(item.coordinates) && item.coordinates.length >= 2) {
-          coords = [
-            Number(item.coordinates[0]) || 0,
-            Number(item.coordinates[1]) || 0,
-          ];
+        let rawCoords = item.coordinates;
+
+        // Nếu backend lỡ trả về dạng chuỗi JSON (ví dụ: '["10.8, "106.9"]') thì parse nó ra mảng
+        if (typeof rawCoords === "string") {
+          try {
+            rawCoords = JSON.parse(rawCoords);
+          } catch (e) {
+            rawCoords = [];
+          }
         }
+
+        if (Array.isArray(rawCoords) && rawCoords.length >= 2) {
+          coords = [Number(rawCoords[0]) || 0, Number(rawCoords[1]) || 0];
+        }
+
         return {
           ...item,
           coordinates: coords,
         };
       });
-
-      console.log("👉 Normalized Data result:", normalizedData);
 
       setDataSource(normalizedData);
       setDeleteIds([]);
