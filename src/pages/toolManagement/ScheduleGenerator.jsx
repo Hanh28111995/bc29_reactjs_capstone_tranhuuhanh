@@ -68,14 +68,16 @@ export default function ScheduleGenerator() {
     if (schedule.isActive !== undefined) setIsActive(schedule.isActive);
   }, [schedule?._id]);
 
+  // ✅ Đã fix: Thêm fallback `|| []` để tránh lỗi is not iterable khi chưa có dữ liệu
   const movies = useMemo(() => {
-    const list = rawMovies?.movies;
+    const list = rawMovies?.movies || [];
     return [...list]
       .filter((m) => m.releaseDate)
       .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)));
   }, [rawMovies?.movies]);
 
-  const theaters = rawTheaters?.theaters;
+  // ✅ Đã fix: Fallback mảng rỗng cho theaters
+  const theaters = rawTheaters?.theaters || [];
 
   const handleGenerate = async () => {
     if (selectedMovies.length === 0)
