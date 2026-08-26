@@ -246,7 +246,7 @@ export default function Router() {
               element: <UpdateTheater />,
             },
             {
-              path: "/admin/user-management/:userId/edit",
+              path: "/admin/user-management/:userId/update",
               element: <UpdateUser />,
             },
             {
