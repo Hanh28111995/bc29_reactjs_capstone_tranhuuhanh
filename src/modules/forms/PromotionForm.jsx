@@ -102,7 +102,7 @@ export default function PromotionForm() {
         }
       });
 
-      if (file) formData.append("banner", file, file.name);
+      if (file) formData.append("file", file, file.name);
       if (params.promoId && params.promoId !== "create") formData.append("id", params.promoId);
 
       await promoMutation.mutateAsync(formData);
