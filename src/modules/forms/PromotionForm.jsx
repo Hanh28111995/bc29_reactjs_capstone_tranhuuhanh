@@ -107,10 +107,7 @@ export default function PromotionForm() {
       params.promoId && params.promoId !== "create"
         ? updatePromotionAPI(params.promoId, formData)
         : addPromotionAPI(formData),
-    invalidateQueries: [
-      ["promotions-list"],
-      ["promotions-detail", params.promoId],
-    ],
+    invalidateQueries: [["promotions-list"]],
   });
 
   const handleSave = async (values) => {

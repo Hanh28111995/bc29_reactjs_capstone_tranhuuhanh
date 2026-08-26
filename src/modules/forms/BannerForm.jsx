@@ -105,10 +105,7 @@ export default function BannerForm() {
       bannerId && bannerId !== "create"
         ? updateBannerAPI(bannerId, formData)
         : addBannerAPI(formData),
-    invalidateQueries: [
-      ["banners-list"], 
-      ["banners-detail", bannerId], 
-    ],
+    invalidateQueries: [["banners-list"]],
   });
 
   const handleSave = async (values) => {

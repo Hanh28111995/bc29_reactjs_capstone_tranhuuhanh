@@ -222,7 +222,7 @@ export default function TheaterForm() {
       params.theaterId
         ? updateTheaterAPI(params.theaterId, payload)
         : addTheaterAPI(payload),
-    invalidateQueries: [["theaters-list"]],
+    invalidateQueries: ["theaters-list"],
   });
 
   const handleSave = async (values) => {
