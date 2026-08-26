@@ -35,7 +35,7 @@ export default function TheaterTable() {
   const { mutateAsync: deleteTheater, isPending: isDeleting } =
     useAsyncMutation({
       service: (id) => deleteTheaterAPI(id),
-      invalidateQueries: [["theaters_list"]],
+      invalidateQueries: [["ttheaters-list"]],
       onSuccess: () => {
         notification.success({
           message: "Thành công",

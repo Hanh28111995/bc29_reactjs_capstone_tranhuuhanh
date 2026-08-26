@@ -121,7 +121,10 @@ export default function MovieForm() {
       !isCreateMode
         ? updateMovieUploadImage(formData)
         : addMovieUploadImage(formData),
-    invalidateQueries: [["movies-list"]],
+    invalidateQueries: [
+      ["movies-list"], 
+      ["movies-detail", params.movieId], 
+    ],
   });
 
   const handleSave = async (values) => {
