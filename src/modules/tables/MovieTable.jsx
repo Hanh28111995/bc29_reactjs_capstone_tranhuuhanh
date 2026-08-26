@@ -18,8 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import "./index.scss";
 
 function MovieTable() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();  
   const { notification } = App.useApp();
 
   const [searchTerm, setSearchTerm] = useState(""); 
@@ -33,7 +32,7 @@ function MovieTable() {
   // 1. Gọi API danh sách mặc định (có phân trang) khi KHÔNG có keyword
   const { data: responseContent, loading: isLoadingList } = useAsync({
     dependencies: [pagination.page, pagination.limit],
-    queryKey: ["movies-list", pagination.page, pagination.limit],
+    queryKey: ["movies-list", "admin", pagination.page, pagination.limit],
     service: () =>
       fetchMovieListAPI({ page: pagination.page, limit: pagination.limit }),
     enabled: !keyword, 

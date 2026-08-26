@@ -22,7 +22,7 @@ export default function BranchesTable() {
     
     const { state: rawData, loading } = useAsync({
         service: getAllBranches,
-        queryKey: ['branches-list'],
+        queryKey: ['branches-list', 'all' ],
     });
     
     const data = safeArray(rawData?.cinemas);

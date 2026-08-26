@@ -18,7 +18,7 @@ export default function BannerTable() {
   // 1. Fetch danh sách banner trực tiếp theo phân trang
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [pagination.page, pagination.limit],
-    queryKey: ['banners-list', pagination.page, pagination.limit],
+    queryKey: ['banners-list','all',  pagination.page, pagination.limit],
     service: () => getBannerListAPI({ page: pagination.page, limit: pagination.limit }),
   });
 

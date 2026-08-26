@@ -25,7 +25,7 @@ export default function SeatTypeTable() {
     // Sử dụng useAsync với queryKey chuẩn để dễ dàng invalidate toàn cục
     const { state: rawData, loading } = useAsync({
         service: getAllSeatTypesApi,
-        queryKey: ['seattypes-list'],
+        queryKey: ['seattypes-list', 'all'],
     });
     
     const data = safeArray(rawData);

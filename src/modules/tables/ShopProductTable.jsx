@@ -23,7 +23,7 @@ export default function ShopProductTable() {
   // 1. Gọi API lấy danh sách sản phẩm theo limit hiện tại (luôn lấy từ trang 1 với số lượng = limit)
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [limit],
-    queryKey: ['shop-products-list', limit],
+    queryKey: ['shop-products-list', 'admin',limit],
     service: () => getShopProductListAPI({ page: 1, limit }),
   });
 

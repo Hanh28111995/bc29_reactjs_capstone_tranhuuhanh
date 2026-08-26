@@ -13,7 +13,7 @@ export default function Home() {
     isError: isBannerError,
   } = useAsync({
     service: () => getBannerListAPI(),
-    queryKey: ["banners-list"],
+    queryKey: ["banners-list", "user"],
   });
 
   const {
@@ -22,7 +22,7 @@ export default function Home() {
     isError: isMovieError,
   } = useAsync({
     service: () => fetchMovieListAPI(),
-    queryKey: ["movies-list"],
+    queryKey: ["movies-list", "user" ],
   });
 
   const isLoading = isBannerLoading || isMovieLoading;
@@ -49,8 +49,8 @@ export default function Home() {
 
   return (
     <div className="homePage">
-      <Carousel rawBanner={rawBanner} rawMovieList={rawMovieList} />
-      <MovieList />
+      <Carousel rawBanner={rawBanner} />
+      <MovieList rawMovieList={rawMovieList}/>
     </div>
   );
 }
