@@ -37,6 +37,7 @@ function MovieTheater() {
   } = useAsync({
     dependencies: [],
     service: fetchLocationListAPI,
+    queryKey: ['areas-list', "active"]
   });
 
   const locations = safeArray(rawLocations);
@@ -53,6 +54,7 @@ function MovieTheater() {
   } = useAsync({
     dependencies: [],
     service: fetchBranchesAPI,
+    queryKey: ['branches-list', "active"]
   });
 
   const allCinemas = safeArray(rawCinemas);

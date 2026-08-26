@@ -13,6 +13,7 @@ import {
   EditOutlined,
   SaveOutlined,
   SearchOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import "./index.scss";
@@ -32,7 +33,7 @@ export default function BranchesTable() {
 
   const { state: rawData, loading } = useAsync({
     service: getAllBranches,
-    queryKey: ["branches-list", "all"],
+    queryKey: ["branches-list"],
   });
 
   const data = safeArray(rawData?.cinemas);
@@ -44,7 +45,6 @@ export default function BranchesTable() {
         let coords = ["0", "0"];
         let rawCoords = item.coordinates;
 
-        // Nếu backend lỡ trả về dạng chuỗi JSON thì parse nó ra mảng
         if (typeof rawCoords === "string") {
           try {
             rawCoords = JSON.parse(rawCoords);
@@ -54,7 +54,6 @@ export default function BranchesTable() {
         }
 
         if (Array.isArray(rawCoords) && rawCoords.length >= 2) {
-          // Xử lý chuyển về string, thay thế dấu phẩy (nếu có) thành dấu chấm và giữ nguyên giá trị tránh làm tròn
           coords = [
             String(rawCoords[0] ?? 0).replace(",", "."),
             String(rawCoords[1] ?? 0).replace(",", "."),
@@ -71,7 +70,7 @@ export default function BranchesTable() {
       setDeleteIds([]);
       setUpdatedIds([]);
     }
-  }, [data]);
+  }, [rawData]); // Lắng nghe rawData thay vì biến data để tránh re-run không cần thiết
 
   const displayData = useMemo(() => {
     if (!searchText) return dataSource;
@@ -90,7 +89,7 @@ export default function BranchesTable() {
       setDeleteIds((prev) => [...new Set([...prev, record._id])]);
       setUpdatedIds((prev) => prev.filter((id) => id !== record._id));
     }
-    setDataSource(dataSource.filter((item) => item._id !== record._id));
+    setDataSource((prev) => prev.filter((item) => item._id !== record._id));
     message.info("Đã xóa tạm thời. Nhấn LƯU TẤT CẢ để áp dụng.");
   };
 
@@ -99,28 +98,25 @@ export default function BranchesTable() {
     if (!isNew) {
       setUpdatedIds((prev) => [...new Set([...prev, key])]);
     }
-    message.info(
-      "Đã ghi nhận thay đổi dòng. Nhấn LƯU TẤT CẢ để cập nhật server.",
-    );
+    message.info("Đã ghi nhận thay đổi dòng. Nhấn LƯU TẤT CẢ để cập nhật server.");
   };
 
   const handleTableChange = (updatedList) => {
-    if (searchText) {
-      setDataSource((prevDataSource) => {
-        const updatedMap = new Map(updatedList.map((item) => [item._id, item]));
-        const merged = prevDataSource.map(
-          (item) => updatedMap.get(item._id) || item,
-        );
-        updatedList.forEach((item) => {
-          if (!prevDataSource.some((p) => p._id === item._id)) {
-            merged.push(item);
-          }
-        });
-        return merged;
+    setDataSource((prevDataSource) => {
+      const updatedMap = new Map(updatedList.map((item) => [item._id, item]));
+      
+      const merged = prevDataSource.map((item) => {
+        return updatedMap.has(item._id) ? updatedMap.get(item._id) : item;
       });
-    } else {
-      setDataSource(updatedList);
-    }
+
+      updatedList.forEach((item) => {
+        if (!prevDataSource.some((p) => p._id === item._id)) {
+          merged.push(item);
+        }
+      });
+
+      return merged;
+    });
   };
 
   const columns = [
@@ -151,8 +147,7 @@ export default function BranchesTable() {
       title: "Kinh độ (Lng)",
       dataIndex: ["coordinates", 0],
       width: "14%",
-      align: "center", // 1. Canh giữa nội dung cột
-      // Sử dụng valueType: "text" thay vì digit để hiển thị chuẩn xác string không bị mất số 0 hoặc tự động làm tròn
+      align: "center",
       valueType: "text", 
       formItemProps: {
         rules: [
@@ -162,7 +157,6 @@ export default function BranchesTable() {
               if (value === undefined || value === null || value === "") {
                 return Promise.reject(new Error("Nhập Lng"));
               }
-              // Cho phép nhập số thập phân dạng chuỗi (dùng dấu . hoặc ,)
               const regex = /^-?\d+([.,]\d+)?$/;
               if (!regex.test(String(value).trim())) {
                 return Promise.reject(new Error("Kinh độ phải là định dạng số hợp lệ"));
@@ -177,7 +171,7 @@ export default function BranchesTable() {
       title: "Vĩ độ (Lat)",
       dataIndex: ["coordinates", 1],
       width: "14%",
-      align: "center", // 1. Canh giữa nội dung cột
+      align: "center",
       valueType: "text",
       formItemProps: {
         rules: [
@@ -202,7 +196,7 @@ export default function BranchesTable() {
       valueType: "option",
       width: "12%",
       align: "center",
-      render: (text, record, _, action) => {
+      render: (_, record, __, action) => {
         const isEditing = editableKeys.includes(record._id);
         if (isEditing) return null;
 
@@ -250,8 +244,6 @@ export default function BranchesTable() {
         .filter((item) => item._id?.toString().startsWith("new_"))
         .forEach((item) => {
           const { _id, ...restItem } = item;
-
-          // Khi gửi lên server, chuyển chuỗi tọa độ về dạng số (Number) để backend lưu database
           const payload = {
             ...restItem,
             coordinates: [
@@ -259,7 +251,6 @@ export default function BranchesTable() {
               Number(String(item.coordinates?.[1] || 0).replace(",", ".")) || 0,
             ],
           };
-
           promises.push(addOneBranchApi(payload));
         });
 
@@ -274,7 +265,6 @@ export default function BranchesTable() {
               Number(String(item.coordinates?.[1] || 0).replace(",", ".")) || 0,
             ],
           };
-
           promises.push(updateBranhesApi(payload));
         }
       });
@@ -290,7 +280,13 @@ export default function BranchesTable() {
         description: "Hệ thống chi nhánh đã được cập nhật thành công.",
       });
 
-      queryClient.invalidateQueries({ queryKey: ["branches-list"] });
+      // Reset các state tracking thay đổi
+      setDeleteIds([]);
+      setUpdatedIds([]);
+      setEditableRowKeys([]);
+
+      // Invalidate cache để fetch lại data mới nhất từ server
+      await queryClient.invalidateQueries({ queryKey: ["branches-list"] });
     } catch (error) {
       notification.error({
         message: "Lỗi",
@@ -304,15 +300,20 @@ export default function BranchesTable() {
     }
   };
 
+  const hasChanges = 
+    deleteIds.length > 0 || 
+    updatedIds.length > 0 || 
+    dataSource.some((item) => item._id?.toString().startsWith("new_"));
+
   return (
     <div className="movie-management-container">
       <Card title="Quản lý chi nhánh rạp">
-        <div className="table-header-toolbar">
-          <div className="search-box">
+        <div className="table-header-toolbar" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="search-box" style={{ flex: 1, maxWidth: 400 }}>
             <Search
               placeholder="Tìm kiếm rạp, chi nhánh hoặc địa chỉ..."
               allowClear
-              enterButton={<Button icon={<SearchOutlined />}></Button>}
+              enterButton={<Button icon={<SearchOutlined />} />}
               size="large"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -330,13 +331,17 @@ export default function BranchesTable() {
           recordCreatorProps={{
             position: "bottom",
             creatorButtonText: "Thêm chi nhánh mới",
-            record: () => ({
-              _id: `new_${Date.now()}`,
-              cinemaName: "",
-              branch: "",
-              address: "",
-              coordinates: ["0", "0"], // Khởi tạo mảng string tránh lỗi undefined
-            }),
+            record: () => {
+              // Tự động xóa bộ lọc tìm kiếm khi thêm mới để đảm bảo dòng mới hiện lên bảng
+              if (searchText) setSearchText("");
+              return {
+                _id: `new_${Date.now()}`,
+                cinemaName: "",
+                branch: "",
+                address: "",
+                coordinates: ["0", "0"],
+              };
+            },
           }}
           editable={{
             type: "multiple",
@@ -364,15 +369,7 @@ export default function BranchesTable() {
             icon={<SaveOutlined />}
             onClick={handleSaveAll}
             loading={isSaving}
-            disabled={
-              loading ||
-              isSaving ||
-              (deleteIds.length === 0 &&
-                updatedIds.length === 0 &&
-                !dataSource.some((item) =>
-                  item._id?.toString().startsWith("new_"),
-                ))
-            }
+            disabled={loading || isSaving || !hasChanges}
           >
             LƯU TẤT CẢ THAY ĐỔI
           </Button>

@@ -20,7 +20,7 @@ export default function MovieDtail() {
     service: () => fetchMovieDetailAPI(param.movieId),
     condition: !!param.movieId,
     dependencies: [param.movieId],
-    queryKey: ["movieDetail", param.movieId],
+    queryKey: ["movieDetail", param.movieId, "active"],
   });  
 
   if (isLoading) {

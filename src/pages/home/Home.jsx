@@ -13,7 +13,7 @@ export default function Home() {
     isError: isBannerError,
   } = useAsync({
     service: () => getBannerListAPI(),
-    queryKey: ["banners-list", "user"],
+    queryKey: ["banners-list", "active"],
   });
 
   const {
@@ -22,7 +22,7 @@ export default function Home() {
     isError: isMovieError,
   } = useAsync({
     service: () => fetchMovieListAPI(),
-    queryKey: ["movies-list", "user" ],
+    queryKey: ["movies-list", "active" ],
   });
 
   const isLoading = isBannerLoading || isMovieLoading;

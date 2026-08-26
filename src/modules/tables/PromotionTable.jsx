@@ -24,7 +24,7 @@ function PromotionTable() {
   // Gọi API lấy danh sách dựa theo limit hiện tại (luôn lấy từ trang 1 với số lượng = limit)
   const { data: responseContent, loading: isLoading } = useAsync({
     dependencies: [limit],
-    queryKey: ['promotions-list', 'admin', limit],
+    queryKey: ['promotions-list', 'all', limit],
     service: () => getPromotionListAPI({ page: 1, limit }),    
   });
   

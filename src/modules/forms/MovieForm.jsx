@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 import {
-  Button, DatePicker, Form, Input, InputNumber, Switch,
-  Image, Select, App, Card, Row, Col, Space
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Switch,
+  Image,
+  Select,
+  App,
+  Card,
+  Row,
+  Col,
+  Space,
 } from "antd";
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
@@ -9,13 +20,24 @@ import { useAsync, useAsyncMutation } from "hooks/useAsync";
 import { addMovieUploadImage, updateMovieUploadImage } from "services/movie";
 import { fetchMovieDetailAPI } from "services/general";
 import { GenreList } from "enums/common";
-import { ArrowLeftOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  SaveOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import "./index.scss";
 
 const DEFAULT_VALUES = {
-  title: "", trailer: "", describe: "", releaseDate: null,
-  duration: 120, director: "", genre: [], showing: true,
-  coming: false, rating: 10,
+  title: "",
+  trailer: "",
+  describe: "",
+  releaseDate: null,
+  duration: 120,
+  director: "",
+  genre: [],
+  showing: true,
+  coming: false,
+  rating: 10,
 };
 
 export default function MovieForm() {
@@ -32,9 +54,13 @@ export default function MovieForm() {
   const [originalData, setOriginalData] = useState(null);
 
   const { state: movieDetail, loading } = useAsync({
-    service: () => (!isCreateMode ? fetchMovieDetailAPI(params.movieId) : Promise.resolve(null)),
+    service: () =>
+      !isCreateMode
+        ? fetchMovieDetailAPI(params.movieId)
+        : Promise.resolve(null),
     dependencies: [params.movieId],
     condition: !isCreateMode,
+    queryKey: ["movies-detail", params.movieId],
   });
 
   useEffect(() => {
@@ -42,10 +68,15 @@ export default function MovieForm() {
       if (movieDetail) {
         const normalized = {
           ...movieDetail,
-          releaseDate: movieDetail.releaseDate ? dayjs(movieDetail.releaseDate) : null,
+          releaseDate: movieDetail.releaseDate
+            ? dayjs(movieDetail.releaseDate)
+            : null,
           genre: movieDetail.genre
-            ? movieDetail.genre.replace(/^,/, '').split(",").map(item => item.trim())
-            : []
+            ? movieDetail.genre
+                .replace(/^,/, "")
+                .split(",")
+                .map((item) => item.trim())
+            : [],
         };
         form.setFieldsValue(normalized);
         setOriginalData(normalized);
@@ -58,7 +89,7 @@ export default function MovieForm() {
       setImg("");
       setFile(null);
       // Ở chế độ tạo mới, bật sẵn nút Lưu nếu có tiêu đề hoặc cho phép bấm thoải mái
-      setIsChanged(true); 
+      setIsChanged(true);
     }
   }, [movieDetail, params.movieId, form, isCreateMode]);
 
@@ -70,12 +101,12 @@ export default function MovieForm() {
     }
 
     // Ở chế độ chỉnh sửa, so sánh với dữ liệu gốc ban đầu
-    const hasChanged = Object.keys(allValues).some(key => {
+    const hasChanged = Object.keys(allValues).some((key) => {
       const currentVal = allValues[key];
       const originalVal = originalData?.[key];
-      if (key === 'releaseDate') {
+      if (key === "releaseDate") {
         if (!currentVal && !originalVal) return false;
-        return !dayjs(currentVal).isSame(originalVal, 'day');
+        return !dayjs(currentVal).isSame(originalVal, "day");
       }
       if (Array.isArray(currentVal)) {
         return JSON.stringify(currentVal) !== JSON.stringify(originalVal);
@@ -90,7 +121,10 @@ export default function MovieForm() {
       !isCreateMode
         ? updateMovieUploadImage(formData)
         : addMovieUploadImage(formData),
-    invalidateQueries: [["movies-list"]], 
+    invalidateQueries: [
+      ["movies-list"], 
+      ["movies-detail", params.movieId], 
+    ],
   });
 
   const handleSave = async (values) => {
@@ -98,11 +132,15 @@ export default function MovieForm() {
       const formData = new FormData();
       const payload = {
         ...values,
-        releaseDate: values.releaseDate ? values.releaseDate.format('YYYY-MM-DD') : null,
-        genre: Array.isArray(values.genre) ? values.genre.join(', ') : values.genre,
+        releaseDate: values.releaseDate
+          ? values.releaseDate.format("YYYY-MM-DD")
+          : null,
+        genre: Array.isArray(values.genre)
+          ? values.genre.join(", ")
+          : values.genre,
       };
 
-      Object.keys(payload).forEach(key => {
+      Object.keys(payload).forEach((key) => {
         if (payload[key] !== null && payload[key] !== undefined) {
           formData.append(key, payload[key]);
         }
@@ -112,14 +150,17 @@ export default function MovieForm() {
       if (!isCreateMode) formData.append("id_movie", params.movieId);
 
       await movieMutation.mutateAsync(formData);
-      notification.success({ 
-        message: !isCreateMode ? "Cập nhật thành công!" : "Thêm phim mới thành công!" 
+      notification.success({
+        message: !isCreateMode
+          ? "Cập nhật thành công!"
+          : "Thêm phim mới thành công!",
       });
       navigate("/admin/movie-management");
     } catch (error) {
-      notification.error({ 
-        message: "Lỗi", 
-        description: error.response?.data?.content || "Có lỗi xảy ra khi lưu phim." 
+      notification.error({
+        message: "Lỗi",
+        description:
+          error.response?.data?.content || "Có lỗi xảy ra khi lưu phim.",
       });
     }
   };
@@ -139,60 +180,123 @@ export default function MovieForm() {
   return (
     <Card
       className="movie-form-card"
-      loading={loading || movieMutation.isLoading}      
+      loading={loading || movieMutation.isLoading}
       title={
         <Space>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(-1)}
+            type="text"
+          />
           <span>{!isCreateMode ? "Chỉnh sửa phim" : "Thêm phim mới"}</span>
         </Space>
       }
     >
-      <Form form={form} layout="vertical" onFinish={handleSave} onValuesChange={onValuesChange}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSave}
+        onValuesChange={onValuesChange}
+      >
         <Row gutter={[24, 0]}>
           {/* Cột trái: Thông tin chính */}
           <Col xs={24} lg={16}>
-            <Form.Item label="Tên Phim" name="title" rules={[{ required: true, message: "Vui lòng nhập tên phim!" }]}>
+            <Form.Item
+              label="Tên Phim"
+              name="title"
+              rules={[{ required: true, message: "Vui lòng nhập tên phim!" }]}
+            >
               <Input placeholder="Nhập tên phim" size="large" />
             </Form.Item>
 
-            <Form.Item label="Trailer URL" name="trailer" rules={[{ required: true, message: "Vui lòng nhập link trailer!" }]}>
+            <Form.Item
+              label="Trailer URL"
+              name="trailer"
+              rules={[
+                { required: true, message: "Vui lòng nhập link trailer!" },
+              ]}
+            >
               <Input placeholder="https://youtube.com/..." size="large" />
             </Form.Item>
 
-            <Form.Item label="Mô tả" name="describe" rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}>
+            <Form.Item
+              label="Mô tả"
+              name="describe"
+              rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
+            >
               <Input.TextArea rows={4} placeholder="Nội dung phim..." />
             </Form.Item>
 
             <Row gutter={16}>
               <Col xs={24} sm={12}>
-                <Form.Item label="Ngày khởi chiếu" name="releaseDate" rules={[{ required: true, message: "Vui lòng chọn ngày chiếu!" }]}>
-                  <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" size="large" />
+                <Form.Item
+                  label="Ngày khởi chiếu"
+                  name="releaseDate"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn ngày chiếu!" },
+                  ]}
+                >
+                  <DatePicker
+                    style={{ width: "100%" }}
+                    format="DD/MM/YYYY"
+                    size="large"
+                  />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12}>
-                <Form.Item label="Thời lượng (phút)" name="duration" rules={[{ required: true }]}>
-                  <InputNumber style={{ width: '100%' }} min={1} size="large" />
+                <Form.Item
+                  label="Thời lượng (phút)"
+                  name="duration"
+                  rules={[{ required: true }]}
+                >
+                  <InputNumber style={{ width: "100%" }} min={1} size="large" />
                 </Form.Item>
               </Col>
             </Row>
 
-            <Form.Item label="Đạo diễn" name="director" rules={[{ required: true, message: "Vui lòng nhập tên đạo diễn!" }]}>
+            <Form.Item
+              label="Đạo diễn"
+              name="director"
+              rules={[
+                { required: true, message: "Vui lòng nhập tên đạo diễn!" },
+              ]}
+            >
               <Input placeholder="Tên đạo diễn" size="large" />
             </Form.Item>
 
-            <Form.Item label="Thể loại" name="genre" rules={[{ required: true, message: "Vui lòng chọn ít nhất một thể loại!" }]}>
-              <Select mode="multiple" options={GenreList} placeholder="Chọn thể loại" size="large" />
+            <Form.Item
+              label="Thể loại"
+              name="genre"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn ít nhất một thể loại!",
+                },
+              ]}
+            >
+              <Select
+                mode="multiple"
+                options={GenreList}
+                placeholder="Chọn thể loại"
+                size="large"
+              />
             </Form.Item>
           </Col>
 
           {/* Cột phải: Hình ảnh & Trạng thái */}
           <Col xs={24} lg={8}>
             <Form.Item label="Hình ảnh (Banner)">
-              <div style={{ marginBottom: '0.625rem' }}>
-                <input type="file" id="movie-img" hidden onChange={handleChangeImage} accept="image/*" />
+              <div style={{ marginBottom: "0.625rem" }}>
+                <input
+                  type="file"
+                  id="movie-img"
+                  hidden
+                  onChange={handleChangeImage}
+                  accept="image/*"
+                />
                 <Button
                   icon={<UploadOutlined />}
-                  onClick={() => document.getElementById('movie-img').click()}
+                  onClick={() => document.getElementById("movie-img").click()}
                   block
                   size="large"
                 >
@@ -210,19 +314,37 @@ export default function MovieForm() {
 
             <Row className="switch-group" gutter={16}>
               <Col span={12}>
-                <Form.Item label="Đang chiếu" name="showing" valuePropName="checked">
+                <Form.Item
+                  label="Đang chiếu"
+                  name="showing"
+                  valuePropName="checked"
+                >
                   <Switch />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Sắp chiếu" name="coming" valuePropName="checked">
+                <Form.Item
+                  label="Sắp chiếu"
+                  name="coming"
+                  valuePropName="checked"
+                >
                   <Switch />
                 </Form.Item>
               </Col>
             </Row>
 
-            <Form.Item label="Đánh giá (1-10)" name="rating" rules={[{ required: true }]}>
-              <InputNumber min={0} max={10} step={0.1} style={{ width: '100%' }} size="large" />
+            <Form.Item
+              label="Đánh giá (1-10)"
+              name="rating"
+              rules={[{ required: true }]}
+            >
+              <InputNumber
+                min={0}
+                max={10}
+                step={0.1}
+                style={{ width: "100%" }}
+                size="large"
+              />
             </Form.Item>
           </Col>
         </Row>

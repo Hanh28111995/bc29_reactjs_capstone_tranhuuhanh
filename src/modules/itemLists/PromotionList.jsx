@@ -19,7 +19,7 @@ export default function PromotionList() {
     error,
   } = useAsync({
     service: () => fetchShowPromotionAPI(),
-    queryKey: ["promotions"], // Đã sửa lại queryKey cho đúng
+    queryKey: ["promotions", "active"], // Đã sửa lại queryKey cho đúng
   });
 
   const promotionList = Array.isArray(rawPromotionList) ? rawPromotionList : [];

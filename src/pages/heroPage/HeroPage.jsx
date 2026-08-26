@@ -72,7 +72,7 @@ export default function HeroPage() {
     isError: bannerIsError,
   } = useAsync({
     service: () => fetchShowBannerAPI(),
-    queryKey: ["banners"],
+    queryKey: ["banners-list", "active"],
   });
 
   const {
@@ -81,7 +81,7 @@ export default function HeroPage() {
     isError: promoIsError,
   } = useAsync({
     service: () => fetchShowPromotionAPI(),
-    queryKey: ["promotions"],
+    queryKey: ["promotions-list", "active"],
   });
 
   const isLoading = bannerLoading || promoLoading;

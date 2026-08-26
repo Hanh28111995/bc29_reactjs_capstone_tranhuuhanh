@@ -43,28 +43,28 @@ export default function ShopProductForm() {
     service: () => (params.productId && params.productId !== "create" ? getShopProductDetailAPI(params.productId) : Promise.resolve(null)),
     dependencies: [params.productId],
     condition: !!params.productId && params.productId !== "create",
+    queryKey: ["shop-products-detail", params.productId], // <--- ĐẶT QUERY KEY CHO CHI TIẾT SẢN PHẨM
   });
 
   useEffect(() => {
     if (params.productId && params.productId !== "create") {
-      if (productDetail) {
-        // Chuẩn hóa dữ liệu từ API để khớp form (đặc biệt là options)
+      const data = productDetail?.data || productDetail;
+      if (data) {
         const normalized = {
-          ...productDetail,
-          stock: productDetail.stock ?? null,
-          limitPerCustomer: productDetail.limitPerCustomer ?? 0,
-          expiryDays: productDetail.expiryDays ?? null,
-          active: productDetail.active ?? true,
-          highlight: productDetail.highlight ?? false,
-          options: (productDetail.options || []).map(opt => ({
+          ...data,
+          stock: data.stock ?? null,
+          limitPerCustomer: data.limitPerCustomer ?? 0,
+          expiryDays: data.expiryDays ?? null,
+          active: data.active ?? true,
+          highlight: data.highlight ?? false,
+          options: (data.options || []).map(opt => ({
             ...opt,
-            // Đảm bảo choices luôn ở dạng mảng chuẩn để Form.List hiển thị đúng
             choices: Array.isArray(opt.choices) ? opt.choices : (opt.choices ? String(opt.choices).split(',').map(s => s.trim()) : [])
           }))
         };
         form.setFieldsValue(normalized);
         setOriginalData(normalized);
-        setImg(productDetail.banner || "");
+        setImg(data.banner || data.url || "");
         setIsChanged(false);
       }
     } else {
@@ -88,7 +88,10 @@ export default function ShopProductForm() {
       params.productId && params.productId !== "create"
         ? updateShopProductAPI(params.productId, formData)
         : addShopProductAPI(formData),
-    invalidateQueries: [["shop-products-list"]],
+    invalidateQueries: [
+      ["shop-products-list"],                    // <--- Làm mới danh sách sản phẩm
+      ["shop-products-detail", params.productId], // <--- Làm mới cache chi tiết sản phẩm hiện tại
+    ],
   });
 
   const handleSave = async (values) => {
@@ -111,16 +114,22 @@ export default function ShopProductForm() {
         }
       });
 
-      if (file) formData.append("banner", file, file.name);
-      if (params.productId && params.productId !== "create") formData.append("id", params.productId);
+      if (file) {
+        formData.append("banner", file, file.name);
+      } else if (img && !file && params.productId && params.productId !== "create") {
+        formData.append("banner", img);
+      }
 
       await productMutation.mutateAsync(formData);
       notification.success({ 
         message: params.productId && params.productId !== "create" ? "Cập nhật sản phẩm thành công!" : "Tạo sản phẩm mới thành công!" 
       });
-      navigate("/admin/shop-management");
+      navigate(-1);
     } catch (error) {
-      notification.error({ message: "Lỗi", description: error.response?.data?.content || error.message });
+      notification.error({ 
+        message: "Lỗi", 
+        description: error.response?.data?.message || error.response?.data?.content || error.message || "Có lỗi xảy ra!" 
+      });
     }
   };
 
@@ -226,7 +235,7 @@ export default function ShopProductForm() {
 
           {/* Cột phải: Banner và Trạng thái */}
           <Col xs={24} lg={8}>
-            <Form.Item label="Banner Sản Phẩm" required>
+            <Form.Item label="Banner Sản Phẩm">
               <div style={{ marginBottom: '0.625rem' }}>
                 <input type="file" id="shop-img" hidden onChange={handleChangeImage} accept="image/*" />
                 <Button

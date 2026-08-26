@@ -19,7 +19,7 @@ import {
   getScheduleListAPI,
   updateScheduleAPI,
 } from "services/scheduleGenerator";
-import { useAsync } from "hooks/useAsync";
+import { useAsync, useAsyncMutation } from "hooks/useAsync";
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
@@ -40,23 +40,38 @@ export default function ScheduleGenerator() {
   const [selectedTheaters, setSelectedTheaters] = useState([]);
   const [scheduleTime, setScheduleTime] = useState(null);
   const [isActive, setIsActive] = useState(true);
-  const [loading, setLoading] = useState(false);
 
   const { state: rawMovies } = useAsync({
     service: fetchMovieListAPI,
-    queryKey: ["movies_list"],
+    queryKey: ["movies_list", "active"],
   });
+  
   const { state: rawTheaters } = useAsync({
     service: fetchTheaterListAPI,
-    queryKey: ["theaters_list"],
+    queryKey: ["theaters_list", "active"],
   });
+  
   const { state: scheduleData } = useAsync({
     service: getScheduleListAPI,
-    queryKey: ["scheduleData_list"],
+    queryKey: ["scheduleData_list", "active"],
   });
 
   const schedule = scheduleData?.schedule ?? scheduleData ?? null;
   const existingId = schedule?._id ?? null;
+
+  // Sử dụng useAsyncMutation tích hợp sẵn queryKey để tự động làm mới cache sau khi gọi API
+  const scheduleMutation = useAsyncMutation({
+    service: async ({ payload, isUpdate }) => {
+      return isUpdate ? updateScheduleAPI(payload) : createScheduleAPI(payload);
+    },
+    queryKey: ["scheduleData_list", "active"],
+    onSuccess: () => {
+      notification.success({ message: "Schedule saved successfully!" });
+    },
+    onError: () => {
+      notification.error({ message: "Failed to save schedule" });
+    },
+  });
 
   // Pre-populate form từ existing schedule
   useEffect(() => {
@@ -68,7 +83,6 @@ export default function ScheduleGenerator() {
     if (schedule.isActive !== undefined) setIsActive(schedule.isActive);
   }, [schedule?._id]);
 
-  // ✅ Đã fix: Thêm fallback `|| []` để tránh lỗi is not iterable khi chưa có dữ liệu
   const movies = useMemo(() => {
     const list = rawMovies?.movies || [];
     return [...list]
@@ -76,7 +90,6 @@ export default function ScheduleGenerator() {
       .sort((a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate)));
   }, [rawMovies?.movies]);
 
-  // ✅ Đã fix: Fallback mảng rỗng cho theaters
   const theaters = rawTheaters?.theaters || [];
 
   const handleGenerate = async () => {
@@ -99,19 +112,10 @@ export default function ScheduleGenerator() {
       isActive,
     };
 
-    setLoading(true);
-    try {
-      if (existingId) {
-        await updateScheduleAPI(payload);
-      } else {
-        await createScheduleAPI(payload);
-      }
-      notification.success({ message: "Schedule generated successfully!" });
-    } catch (err) {
-      notification.error({ message: "Failed to generate schedule" });
-    } finally {
-      setLoading(false);
-    }
+    await scheduleMutation.mutateAsync({
+      payload,
+      isUpdate: Boolean(existingId),
+    });
   };
 
   return (
@@ -256,7 +260,7 @@ export default function ScheduleGenerator() {
             type="primary"
             size="large"
             icon={<CalendarOutlined />}
-            loading={loading}
+            loading={scheduleMutation.isLoading}
             onClick={handleGenerate}
             block
           >

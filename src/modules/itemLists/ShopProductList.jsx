@@ -44,7 +44,7 @@ export default function ShopProduct(props) {
     error: locationsError,
   } = useAsync({
     service: () => fetchLocationListAPI(),
-    queryKey: ["locations"],
+    queryKey: ["areas-list", "active"],
   });
 
   const locations = Array.isArray(rawLocations) ? rawLocations : [];
@@ -59,7 +59,7 @@ export default function ShopProduct(props) {
     error: branchesError,
   } = useAsync({
     service: () => fetchBranchesAPI(),
-    queryKey: ["branches"],
+    queryKey: ["branches-list", "avtive"],
   });
 
   const allBranches = Array.isArray(rawBranches) ? rawBranches : [];
@@ -74,7 +74,7 @@ export default function ShopProduct(props) {
     error: productsError,
   } = useAsync({
     service: () => fetchShopFilterAPI(appliedFilters),
-    queryKey: ["shop-products-list", appliedFilters],
+    queryKey: ["shop-products-list", "active", appliedFilters],
   });
 
   const promotionList = Array.isArray(rawPromotionList)

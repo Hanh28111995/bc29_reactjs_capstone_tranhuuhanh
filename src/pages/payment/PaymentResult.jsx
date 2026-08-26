@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Spin, Button, Result, Modal, message } from "antd";
-import {
-  fetchCancelTicketAPI,  
-  fetchTicketByIdAPI,
-} from "services/ticket";
+import { Spin, Button, Result, message } from "antd";
+import { fetchCancelTicketAPI, fetchTicketByIdAPI } from "services/ticket";
 import { useSelector } from "react-redux";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
 
@@ -15,35 +12,47 @@ export default function PaymentResult() {
   const [searchParams] = useSearchParams();
 
   const [status, setStatus] = useState(null); // 'success' | 'error'
-  const [cashModal, setCashModal] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
 
+  // Lấy params từ URL và state (phòng trường hợp mở tab mới từ window.open, ta fallback qua sessionStorage)
   const successParam = searchParams.get("status");
-  const bookingId = location.state?.booking?._id;
-  const paymentMethod = location.state?.method?.toLowerCase(); // Lấy từ state truyền sang
+  const methodParam = searchParams.get("method");
 
+  const savedPaymentState = JSON.parse(
+    sessionStorage.getItem("paymentResultState") || "null",
+  );
+
+  const bookingId =
+    location.state?.booking?._id || savedPaymentState?.booking?._id;
+  const paymentMethod = (
+    location.state?.method ||
+    methodParam ||
+    savedPaymentState?.method
+  )?.toLowerCase();
+
+  // Gọi API xác thực đơn hàng (chỉ gọi khi có bookingId và không phải tiền mặt)
   const {
     state: ticketData,
     loading: verifying,
     isError: verifyError,
   } = useAsync({
     service: () => fetchTicketByIdAPI(bookingId),
-    enabled: Boolean(bookingId && paymentMethod !== 'cash'),
-    queryKey: ['paymentResult', bookingId],
+    enabled: Boolean(bookingId && paymentMethod !== "cash"),
+    queryKey: ["paymentResult", bookingId],
   });
 
   const cancelMutation = useAsyncMutation({
     service: async ({ role, payload }) => fetchCancelTicketAPI(role, payload),
     raw: true,
     onError: (error) => {
-      console.error('Update Status Failed:', error);
-      message.error('Có lỗi xảy ra, vui lòng thử lại.');
+      console.error("Update Status Failed:", error);
+      message.error("Có lỗi xảy ra, vui lòng thử lại.");
     },
   });
 
   useEffect(() => {
-    if (paymentMethod === 'cash') {
-      setStatus(null);
+    // Nếu là thanh toán tiền mặt tại quầy (được mở qua tab mới hoặc luồng cash)
+    if (paymentMethod === "cash") {
+      setStatus("success");
       return;
     }
 
@@ -52,68 +61,71 @@ export default function PaymentResult() {
     }
 
     if (verifyError) {
-      setStatus('error');
+      setStatus("error");
       return;
     }
 
     const currentStatus = ticketData?.paymentStatus;
-    if (currentStatus === 'Completed') {
-      setStatus('success');
-    } else if (currentStatus === 'Failed' || currentStatus === 'Cancelled') {
-      setStatus('error');
+    if (currentStatus === "Completed") {
+      setStatus("success");
+    } else if (currentStatus === "Failed" || currentStatus === "Cancelled") {
+      setStatus("error");
     }
-  }, [paymentMethod, ticketData, verifying, verifyError]);  
-  
+  }, [paymentMethod, ticketData, verifying, verifyError]);
 
-  if (verifying)
+  // Đang xác thực (hiển thị loading)
+  if (verifying && paymentMethod !== "cash") {
     return (
       <div style={{ textAlign: "center", marginTop: 100 }}>
-        <Spin size="large" tip="Đang xác thực giao dịch..." />
+        <Spin
+          size="large"
+          tip="Đang xác thực giao dịch từ cổng thanh toán..."
+        />
       </div>
     );
+  }
+
+  const isSuccess =
+    successParam === "success" ||
+    status === "success" ||
+    paymentMethod === "cash";
 
   return (
-    <>
-      <div className="payment-result-container" style={{ padding: "50px" }}>
-        {/* Chỉ hiển thị kết quả khi đã có status hoặc có params từ cổng thanh toán */}
-        {successParam === "success" || status === "success" ? (
-          <Result
-            status="success"
-            title="Thanh Toán Thành Công!"
-            subTitle="Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của chúng tôi."
-            extra={[
-              <Button type="primary" key="home" onClick={() => navigate("/")}>
-                Quay lại trang chủ
-              </Button>,
-              <Button
-                key="history"
-                onClick={() => navigate("/user-management")}
-              >
-                Lịch sử đặt vé
-              </Button>,
-            ]}
-          />
-        ) : (
-          // Chỉ hiện thông báo lỗi khi thực sự thất bại, tránh hiện nhầm khi đang chờ Modal
-          (status === "error" ||
-            (successParam && successParam !== "success")) && (
-            <Result
-              status="error"
-              title="Giao dịch không thành công"
-              subTitle="Giao dịch đã bị hủy hoặc có lỗi xảy ra trong quá trình thanh toán."
-              extra={[
-                <Button
-                  type="primary"
-                  key="retry"
-                  onClick={() => navigate("/")}
-                >
-                  Quay lại trang chủ
-                </Button>,
-              ]}
-            />
-          )
-        )}
-      </div>
-    </>
+    <div className="payment-result-container" style={{ padding: "50px" }}>
+      {isSuccess ? (
+        <Result
+          status="success"
+          title={
+            paymentMethod === "cash"
+              ? "Đặt Chỗ Giữ Ghế Thành Công!"
+              : "Thanh Toán Thành Công!"
+          }
+          subTitle={
+            paymentMethod === "cash"
+              ? "Vui lòng đến rạp trước giờ chiếu để thanh toán và nhận vé."
+              : "Cảm ơn bạn đã tin tưởng sử dụng dịch vụ đặt vé xem phim của chúng tôi."
+          }
+          extra={[
+            <Button type="primary" key="home" onClick={() => navigate("/")}>
+              Quay lại trang chủ
+            </Button>,
+            <Button key="history" onClick={() => navigate("/user-management")}>
+              Lịch sử đặt vé
+            </Button>,
+          ]}
+        />
+      ) : (
+        <Result
+          status="error"
+          title="Giao dịch không thành công"
+          subTitle="Giao dịch đã bị hủy hoặc có lỗi xảy ra trong quá trình xử lý thanh toán."
+          extra={[
+            <Button type="primary" key="retry" onClick={() => navigate("/")}>
+              Quay lại trang chủ
+            </Button>,
+          ]}
+        />
+      )}
+    </div>
   );
 }

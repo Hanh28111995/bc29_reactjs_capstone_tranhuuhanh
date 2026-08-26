@@ -152,7 +152,7 @@ export default function MovieDetail() {
     isError: IsError,
   } = useAsync({
     service: () => fetchLocationListAPI(),
-    queryKey: ["areas-list"],
+    queryKey: ["areas-list", "active"],
   });
 
   const areasList = safeArray(rawAreasList);

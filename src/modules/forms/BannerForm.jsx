@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from "react";
 import {
-  Button, Form, Switch, AutoComplete, Image, App, Card, Row, Col, Space
+  Button,
+  Form,
+  Switch,
+  AutoComplete,
+  Image,
+  App,
+  Card,
+  Row,
+  Col,
+  Space,
 } from "antd";
-import { ArrowLeftOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  SaveOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
 import {
@@ -35,13 +48,20 @@ export default function BannerForm() {
     service: fetchMovieListAPI,
     queryKey: ["movies-list"],
   });
-  const movieList = movieListState?.data?.content || movieListState?.content || (Array.isArray(movieListState) ? movieListState : []);
+  const movieList =
+    movieListState?.data?.content ||
+    movieListState?.content ||
+    (Array.isArray(movieListState) ? movieListState : []);
 
   // 2. Gọi API lấy chi tiết banner khi update
   const { state: bannerDetail, loading } = useAsync({
-    service: () => (bannerId && bannerId !== "create" ? getBannerDetailAPI(bannerId) : Promise.resolve(null)),
+    service: () =>
+      bannerId && bannerId !== "create"
+        ? getBannerDetailAPI(bannerId)
+        : Promise.resolve(null),
     dependencies: [bannerId],
     condition: !!bannerId && bannerId !== "create",
+    queryKey: ["banners-detail", bannerId],
   });
 
   useEffect(() => {
@@ -68,11 +88,13 @@ export default function BannerForm() {
 
   const onValuesChange = (_, allValues) => {
     if (!bannerId || bannerId === "create") {
-      const hasInput = Object.keys(allValues).some(key => allValues[key] !== DEFAULT_VALUES[key]);
+      const hasInput = Object.keys(allValues).some(
+        (key) => allValues[key] !== DEFAULT_VALUES[key],
+      );
       setIsChanged(hasInput || !!file);
       return;
     }
-    const hasChanged = Object.keys(allValues).some(key => {
+    const hasChanged = Object.keys(allValues).some((key) => {
       return allValues[key] !== originalData?.[key];
     });
     setIsChanged(hasChanged || !!file);
@@ -83,8 +105,10 @@ export default function BannerForm() {
       bannerId && bannerId !== "create"
         ? updateBannerAPI(bannerId, formData)
         : addBannerAPI(formData),
-    // QueryKey chuẩn xác để làm mới danh sách banner sau khi thêm/sửa
-    invalidateQueries: [["banners-list"]],
+    invalidateQueries: [
+      ["banners-list"], 
+      ["banners-detail", bannerId], 
+    ],
   });
 
   const handleSave = async (values) => {
@@ -101,13 +125,19 @@ export default function BannerForm() {
 
       await bannerMutation.mutateAsync(formData);
       notification.success({
-        message: bannerId && bannerId !== "create" ? "Cập nhật banner thành công!" : "Thêm banner mới thành công!",
+        message:
+          bannerId && bannerId !== "create"
+            ? "Cập nhật banner thành công!"
+            : "Thêm banner mới thành công!",
       });
       navigate(-1);
     } catch (error) {
       notification.error({
         message: "Lỗi",
-        description: error.response?.data?.message || error.response?.data?.content || "Có lỗi xảy ra!",
+        description:
+          error.response?.data?.message ||
+          error.response?.data?.content ||
+          "Có lỗi xảy ra!",
       });
     }
   };
@@ -182,7 +212,7 @@ export default function BannerForm() {
 
           <Col xs={24} lg={8}>
             <Form.Item label="Hình ảnh Banner">
-              <div style={{ marginBottom: '0.625rem' }}>
+              <div style={{ marginBottom: "0.625rem" }}>
                 <input
                   type="file"
                   id="banner-img-file"
@@ -192,7 +222,9 @@ export default function BannerForm() {
                 />
                 <Button
                   icon={<UploadOutlined />}
-                  onClick={() => document.getElementById('banner-img-file').click()}
+                  onClick={() =>
+                    document.getElementById("banner-img-file").click()
+                  }
                   block
                   size="large"
                 >
@@ -220,7 +252,9 @@ export default function BannerForm() {
             className="submit-btn"
             size="large"
           >
-            {bannerId && bannerId !== "create" ? "CẬP NHẬT BANNER" : "TẠO BANNER MỚI"}
+            {bannerId && bannerId !== "create"
+              ? "CẬP NHẬT BANNER"
+              : "TẠO BANNER MỚI"}
           </Button>
         </Form.Item>
       </Form>

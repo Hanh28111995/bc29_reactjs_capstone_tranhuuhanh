@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  App,
-  Card,
-  Space,
-} from "antd";
+import { Button, Form, Input, Select, App, Card, Space } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
-import { fetchAddUserApi, fetchUpdateUserApi, fetchUserDetailApi } from "services/user";
+import {
+  fetchAddUserApi,
+  fetchUpdateUserApi,
+  fetchUserDetailApi,
+} from "services/user";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import "./index.scss";
 
@@ -26,13 +22,18 @@ export default function UserForm() {
 
   // Lấy dữ liệu chi tiết khi có ID trên URL (params.userId)
   const { state: userDetailRaw, loading } = useAsync({
-    service: () => (params.userId && params.userId !== "create" ? fetchUserDetailApi(params.userId) : Promise.resolve(null)),
+    service: () =>
+      params.userId && params.userId !== "create"
+        ? fetchUserDetailApi(params.userId)
+        : Promise.resolve(null),
     dependencies: [params.userId],
     condition: !!params.userId && params.userId !== "create",
+    queryKey: ["users-detail", params.userId], // <--- ĐẶT QUERY KEY CHO CHI TIẾT USER
   });
 
   // API trả về content: { users: {...} } hoặc object trực tiếp
-  const userDetail = userDetailRaw?.users ?? userDetailRaw?.user ?? userDetailRaw;
+  const userDetail =
+    userDetailRaw?.users ?? userDetailRaw?.user ?? userDetailRaw;
 
   // Đồng bộ dữ liệu vào Form
   useEffect(() => {
@@ -54,7 +55,9 @@ export default function UserForm() {
   const onValuesChange = (_, allValues) => {
     // Sửa lại điều kiện kiểm tra Create vs Update cho chính xác tuyệt đối
     if (!params.userId || params.userId === "create") {
-      const hasInput = Object.keys(allValues).some((key) => Boolean(allValues[key]));
+      const hasInput = Object.keys(allValues).some((key) =>
+        Boolean(allValues[key]),
+      );
       setIsChanged(hasInput);
       return;
     }
@@ -69,7 +72,10 @@ export default function UserForm() {
   const userMutation = useAsyncMutation({
     service: (payload) =>
       userDetail?._id ? fetchUpdateUserApi(payload) : fetchAddUserApi(payload),
-    invalidateQueries: [["users-list"]],
+    invalidateQueries: [
+      ["users-list"], // Làm mới bảng danh sách người dùng
+      ["users-detail", params.userId], // Làm mới cache chi tiết của form hiện tại
+    ],
   });
 
   // Xử lý lưu dữ liệu
@@ -88,12 +94,17 @@ export default function UserForm() {
       await userMutation.mutateAsync(payload);
 
       notification.success({
-        message: userDetail?._id ? "Cập nhật thành công!" : "Thêm người dùng mới thành công!",
+        message: userDetail?._id
+          ? "Cập nhật thành công!"
+          : "Thêm người dùng mới thành công!",
       });
 
       navigate("/admin/user-management");
     } catch (error) {
-      const serverMessage = error.response?.data?.message || error.response?.data?.content || "Có lỗi xảy ra";
+      const serverMessage =
+        error.response?.data?.message ||
+        error.response?.data?.content ||
+        "Có lỗi xảy ra";
 
       if (error.response?.status === 400 || error.response?.status === 409) {
         notification.error({
@@ -101,7 +112,9 @@ export default function UserForm() {
           description: serverMessage,
         });
 
-        const fieldName = serverMessage.toLowerCase().includes("email") ? "email" : "username";
+        const fieldName = serverMessage.toLowerCase().includes("email")
+          ? "email"
+          : "username";
         form.setFields([{ name: fieldName, errors: [serverMessage] }]);
       } else {
         notification.error({
@@ -118,7 +131,11 @@ export default function UserForm() {
       loading={loading}
       title={
         <Space>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} type="text" />
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(-1)}
+            type="text"
+          />
           <span>
             {params.userId && params.userId !== "create"
               ? `Chỉnh sửa: ${userDetail?.username || ""}`
@@ -139,7 +156,11 @@ export default function UserForm() {
           name="username"
           rules={[{ required: true, message: "Tài khoản không được để trống" }]}
         >
-          <Input placeholder="Nhập tên tài khoản" size="large" disabled={!!userDetail} />
+          <Input
+            placeholder="Nhập tên tài khoản"
+            size="large"
+            disabled={!!userDetail}
+          />
         </Form.Item>
 
         {userDetail ? (
@@ -149,13 +170,18 @@ export default function UserForm() {
                 Đổi mật khẩu mới
               </Button>
             ) : (
-              <Space direction="vertical" style={{ width: '100%' }}>
+              <Space direction="vertical" style={{ width: "100%" }}>
                 <Form.Item
                   name="password"
                   noStyle
-                  rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới' }]}
+                  rules={[
+                    { required: true, message: "Vui lòng nhập mật khẩu mới" },
+                  ]}
                 >
-                  <Input.Password placeholder="Nhập mật khẩu mới" size="large" />
+                  <Input.Password
+                    placeholder="Nhập mật khẩu mới"
+                    size="large"
+                  />
                 </Form.Item>
                 <Button
                   size="small"
@@ -184,10 +210,13 @@ export default function UserForm() {
           label="Số điện thoại"
           name="userphone"
           rules={[
-            { required: true, message: 'Vui lòng nhập số điện thoại' },
-            { pattern: /^[0-9]+$/, message: 'Số điện thoại chỉ được chứa các ký tự số' },
-            { min: 9, message: 'Số điện thoại phải có ít nhất 9 ký tự' },
-            { max: 12, message: 'Số điện thoại không được vượt quá 12 ký tự' }
+            { required: true, message: "Vui lòng nhập số điện thoại" },
+            {
+              pattern: /^[0-9]+$/,
+              message: "Số điện thoại chỉ được chứa các ký tự số",
+            },
+            { min: 9, message: "Số điện thoại phải có ít nhất 9 ký tự" },
+            { max: 12, message: "Số điện thoại không được vượt quá 12 ký tự" },
           ]}
         >
           <Input placeholder="Ví dụ: 090..." maxLength={12} size="large" />
@@ -198,19 +227,23 @@ export default function UserForm() {
           name="email"
           rules={[
             { required: true, message: "Vui lòng nhập email" },
-            { type: 'email', message: 'Email không đúng định dạng' }
+            { type: "email", message: "Email không đúng định dạng" },
           ]}
         >
           <Input placeholder="example@mail.com" size="large" />
         </Form.Item>
 
-        <Form.Item label="Loại người dùng" name="role" rules={[{ required: true }]}>
+        <Form.Item
+          label="Loại người dùng"
+          name="role"
+          rules={[{ required: true }]}
+        >
           <Select
             placeholder="Chọn loại khách hàng"
             size="large"
             options={[
               { value: "customer", label: "Khách hàng" },
-              { value: "admin", label: "Quản trị viên" }
+              { value: "admin", label: "Quản trị viên" },
             ]}
           />
         </Form.Item>
@@ -226,7 +259,9 @@ export default function UserForm() {
             block
             className="submit-btn"
           >
-            {params.userId && params.userId !== "create" ? "CẬP NHẬT NGƯỜI DÙNG" : "TẠO NGƯỜI DÙNG MỚI"}
+            {params.userId && params.userId !== "create"
+              ? "CẬP NHẬT NGƯỜI DÙNG"
+              : "TẠO NGƯỜI DÙNG MỚI"}
           </Button>
         </Form.Item>
       </Form>

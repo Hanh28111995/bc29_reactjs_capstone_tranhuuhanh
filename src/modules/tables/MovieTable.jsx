@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Input, Button, Image, App, Popconfirm } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAsync, useAsyncMutation } from "../../hooks/useAsync";
@@ -14,7 +14,6 @@ import {
   CarryOutOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { useQueryClient } from "@tanstack/react-query";
 import "./index.scss";
 
 function MovieTable() {
@@ -32,7 +31,8 @@ function MovieTable() {
   // 1. Gọi API danh sách mặc định (có phân trang) khi KHÔNG có keyword
   const { data: responseContent, loading: isLoadingList } = useAsync({
     dependencies: [pagination.page, pagination.limit],
-    queryKey: ["movies-list", "admin", pagination.page, pagination.limit],
+    // Đồng bộ chuẩn queryKey tiền tố 'movies-list' theo đúng mẫu banner
+    queryKey: ["movies-list", pagination.page, pagination.limit],
     service: () =>
       fetchMovieListAPI({ page: pagination.page, limit: pagination.limit }),
     enabled: !keyword, 
@@ -92,22 +92,29 @@ function MovieTable() {
     }
   };
 
-  // 3. Sử dụng useAsyncMutation chuẩn của dự án để xóa phim
+  // 3. Sử dụng useAsyncMutation với invalidateQueries quét tiền tố 'movies-list'
   const { mutateAsync: deleteMovie, isPending: isDeleting } = useAsyncMutation({
     service: (id) => deleteMovieAPI(id),
+    // React Query sẽ tự động quét và làm mới sạch cache của tất cả các trang
     invalidateQueries: [["movies-list"]],
     onSuccess: () => {
       notification.success({
         message: "Thành công",
         description: "Đã xóa phim!",
       });
-      // Nếu đang ở chế độ search mà xóa phim, ta chủ động cập nhật lại state danh sách hiển thị
+      
+      // Nếu đang ở chế độ search thì lọc state trực tiếp cho mượt
       if (keyword) {
         setMovieList((prev) => prev.filter((item) => item._id !== id));
+      } else {
+        // Tự động lùi về trang trước nếu xóa sạch item cuối cùng ở trang hiện tại
+        if (movieList.length === 1 && pagination.page > 1) {
+          setPagination((prev) => ({ ...prev, page: prev.page - 1 }));
+        }
       }
     },
     onError: () => {
-      notification.error({ message: "Lỗi", description: "Không thể xóa." });
+      notification.error({ message: "Lỗi", description: "Không thể xóa phim." });
     },
   });
 
@@ -218,7 +225,7 @@ function MovieTable() {
                 pageSize: pagination.limit,
                 total: totalItems,
                 size: "small",
-                showTotal: (total) => `${total} phim`,
+                showTotal: (total) => `Tổng ${total} phim`,
                 onChange: (page, limit) => setPagination({ page, limit }),
               }
         }

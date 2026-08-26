@@ -9,24 +9,25 @@ import {
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
 import { getShowTimeToday, getShowTimeUpcoming, getAllShowTimes, deleteOneShowTime } from 'services/showtime';
-import { useAsync, useAsyncMutation } from '../../hooks/useAsync'; // Chuẩn hóa hook của dự án
+import { useAsync, useAsyncMutation } from '../../hooks/useAsync';
 import "./index.scss";
 
 export default function ShowtimeTable() {
     const navigate = useNavigate();
     const { notification } = App.useApp();
 
-    const [keyword, setKeyword] = useState("");
+    const [searchTerm, setSearchTerm] = useState(""); // Giá trị hiển thị trên ô Input
+    const [keyword, setKeyword] = useState("");       // Giá trị thực tế dùng để gọi API
     const [pagination, setPagination] = useState({ page: 1, limit: 10 });
-    const [activeFilter, setActiveFilter] = useState("all"); // Quản lý trạng thái đang xem: 'all' | 'today' | 'upcoming'
+    const [activeFilter, setActiveFilter] = useState("all"); // 'all' | 'today' | 'upcoming'
 
     const [showtimeList, setShowtimeList] = useState([]);
     const [paginationMeta, setPaginationMeta] = useState({ total: 0 });
 
-    // 1. Gọi API lấy dữ liệu linh hoạt dựa theo tab filter đang chọn và phân trang
+    // 1. Gọi API lấy dữ liệu (đã thêm keyword vào dependencies để đồng bộ tìm kiếm)
     const { data: responseContent, loading: isLoading } = useAsync({
-        dependencies: [pagination.page, pagination.limit, activeFilter],
-        queryKey: ['showtimes-list', pagination.page, pagination.limit, activeFilter],
+        dependencies: [pagination.page, pagination.limit, activeFilter, keyword],
+        queryKey: ['showtimes-list', 'all', pagination.page, pagination.limit, activeFilter, keyword],
         service: () => {
             if (activeFilter === 'today') return getShowTimeToday();
             if (activeFilter === 'upcoming') return getShowTimeUpcoming();
@@ -39,14 +40,12 @@ export default function ShowtimeTable() {
         if (responseContent) {
             const content = responseContent.data?.content ?? responseContent.content ?? responseContent;
             
-            // Xử lý linh hoạt cấu trúc trả về (mảng thuần hoặc object bọc phân trang)
             const data = Array.isArray(content?.showtimes) 
                 ? content.showtimes 
                 : (Array.isArray(content) ? content : (content?.data ?? []));
                 
             const meta = content?.pagination ?? {};
 
-            // Nếu đang dùng filter Today/Upcoming mà API trả về mảng danh sách
             setShowtimeList(data);
             setPaginationMeta({
                 total: meta.total ?? data.length,
@@ -70,10 +69,25 @@ export default function ShowtimeTable() {
         await deleteShowtime(id);
     };
 
-    // Các hàm chuyển đổi bộ lọc
+    // Chuyển đổi bộ lọc
     const handleFilterChange = (filterType) => {
         setActiveFilter(filterType);
         setPagination((prev) => ({ ...prev, page: 1 })); // Reset về trang 1 khi đổi bộ lọc
+    };
+
+    // Xử lý sự kiện tìm kiếm khi nhấn Enter hoặc bấm nút clear
+    const handleSearchChange = (e) => {
+        const val = e.target.value;
+        setSearchTerm(val);
+        if (!val.trim()) {
+            setKeyword("");
+            setPagination(p => ({ ...p, page: 1 }));
+        }
+    };
+
+    const handleSearchSubmit = () => {
+        setKeyword(searchTerm.trim());
+        setPagination(p => ({ ...p, page: 1 }));
     };
 
     const columns = [
@@ -158,10 +172,10 @@ export default function ShowtimeTable() {
                 <div className="table-header">
                     <Input
                         className="search-box"
-                        placeholder="Tìm theo tên phim..."
-                        value={keyword}
-                        onChange={(e) => setKeyword(e.target.value)}
-                        onPressEnter={() => setPagination(p => ({ ...p, page: 1 }))}
+                        placeholder="Tìm theo tên phim (Nhấn Enter)..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        onPressEnter={handleSearchSubmit}
                         allowClear
                         size="large"
                         style={{ width: 300 }}
@@ -208,7 +222,7 @@ export default function ShowtimeTable() {
                     bordered
                     pagination={
                         activeFilter !== 'all' 
-                            ? false // Ẩn phân trang nếu đang xem danh sách lọc (Hôm nay / Sắp đến) vì thường API trả về dạng danh sách đầy đủ không phân trang
+                            ? false 
                             : {
                                 current: pagination.page,
                                 pageSize: pagination.limit,

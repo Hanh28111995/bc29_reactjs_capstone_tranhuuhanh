@@ -43,7 +43,7 @@ export default function ShowtimeForm() {
   const userState = useSelector((state) => state.userReducer);
   const [isChanged, setIsChanged] = useState(false);
   const [originalData, setOriginalData] = useState(null);
-  const [originalSeats, setOriginalSeats] = useState([]); // Thêm lưu vết ghế gốc để so sánh thay đổi
+  const [originalSeats, setOriginalSeats] = useState([]);
   const [selectedCinema, setSelectedCinema] = useState(null);
   const [seats, setSeats] = useState([]);
 
@@ -53,6 +53,7 @@ export default function ShowtimeForm() {
     service: fetchMovieListAPI,
     queryKey: ["movies_list"],
   });
+  
   const { state: rawTheaters } = useAsync({
     service: fetchTheaterListAPI,
     queryKey: ["theaters_list"],
@@ -60,23 +61,25 @@ export default function ShowtimeForm() {
 
   const movies = safeArray(rawMovies?.movies);
   const theaters = safeArray(rawTheaters?.theaters);
+
   const { state: rawBranches } = useAsync({
     service: getAllBranches,
     queryKey: ["branches_list"],
   });
+
   const branches = useMemo(() => {
     if (!rawBranches?.cinemas) return [];
     if (Array.isArray(rawBranches?.cinemas)) return rawBranches?.cinemas;
     return (
       rawBranches?.cinemas?.branch ??
-      Object.values(rawBranches?.branch).find(Array.isArray) ??
+      Object.values(rawBranches?.branch || {}).find(Array.isArray) ??
       []
     );
   }, [rawBranches]);
 
   const { state: data, loading } = useAsync({
     service: () => getShowTimeDetail(params.id),
-    queryKey: ["showtimes_list"],
+    queryKey: ["showtimes-detail", params.id], // Đã tách queryKey riêng biệt tránh xung đột cache
     dependencies: [params.id],
     condition: isEditMode,
   });
@@ -111,7 +114,7 @@ export default function ShowtimeForm() {
       showtimeDetail.seats ??
       [];
     setSeats(showtimeSeats);
-    setOriginalSeats(showtimeSeats); // Lưu bản gốc để so sánh thay đổi ghế
+    setOriginalSeats(showtimeSeats);
     setIsChanged(false);
   }, [data, isEditMode, form]);
 
@@ -131,22 +134,21 @@ export default function ShowtimeForm() {
   // Hàm kiểm tra tổng hợp xem Form hoặc Ghế có thay đổi so với ban đầu hay không
   const checkIsChanged = (currentFormValues, currentSeats) => {
     if (!isEditMode) {
-      // Create mode: Chỉ cần có chọn ít nhất 1 trường hoặc có ghế là bật nút
       const hasInput = Object.keys(currentFormValues).some(
         (key) => currentFormValues[key] !== DEFAULT_VALUES[key],
       );
       return hasInput || currentSeats.length > 0;
     }
 
-    // Edit mode: So sánh Form values
     const hasFormChanged = Object.keys(currentFormValues).some((key) => {
       if (key === "startTime") {
+        if (!currentFormValues[key] && !originalData?.startTime) return false;
+        if (!currentFormValues[key] || !originalData?.startTime) return true;
         return !dayjs(currentFormValues[key]).isSame(originalData?.startTime);
       }
       return currentFormValues[key] !== originalData?.[key];
     });
 
-    // So sánh Seats thay đổi
     const hasSeatsChanged =
       JSON.stringify(currentSeats) !== JSON.stringify(originalSeats);
 
@@ -165,7 +167,6 @@ export default function ShowtimeForm() {
             }
           : s,
       );
-      // Kiểm tra trạng thái thay đổi dựa trên form hiện tại và danh sách ghế mới
       const currentValues = form.getFieldsValue();
       setIsChanged(checkIsChanged(currentValues, newSeats));
       return newSeats;
@@ -181,7 +182,10 @@ export default function ShowtimeForm() {
       isEditMode
         ? updateShowTime({ id: params.id, ...payload })
         : addNewShowTime(payload),
-    invalidateQueries: [["showtimes-list"]],
+    invalidateQueries: [
+      ["showtimes_list"],
+      ["showtimes-detail", params.id],
+    ],
   });
 
   const handleSave = async (values) => {
@@ -206,7 +210,7 @@ export default function ShowtimeForm() {
       });
 
       setIsChanged(false);
-      navigate("/admin/showtimes");
+      navigate(-1);
     } catch (error) {
       notification.error({
         message: "Thao tác thất bại",
@@ -240,7 +244,7 @@ export default function ShowtimeForm() {
         initialValues={DEFAULT_VALUES}
       >
         <Row gutter={24}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               label="Chọn Phim"
               name="movie"
@@ -250,12 +254,13 @@ export default function ShowtimeForm() {
                 showSearch
                 placeholder="Tìm kiếm phim..."
                 optionFilterProp="label"
+                size="large"
                 options={movies.map((m) => ({ label: m.title, value: m._id }))}
               />
             </Form.Item>
           </Col>
 
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               label="Thời gian bắt đầu"
               name="startTime"
@@ -263,6 +268,7 @@ export default function ShowtimeForm() {
             >
               <DatePicker
                 style={{ width: "100%" }}
+                size="large"
                 showTime={{
                   format: "HH:mm",
                   defaultValue: dayjs("00:00", "HH:mm"),
@@ -277,7 +283,7 @@ export default function ShowtimeForm() {
         </Row>
 
         <Row gutter={24}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               label="Chọn Rạp"
               name="cinema"
@@ -287,6 +293,7 @@ export default function ShowtimeForm() {
                 showSearch
                 placeholder="Chọn rạp..."
                 optionFilterProp="label"
+                size="large"
                 onChange={(value) => {
                   setSelectedCinema(value);
                   form.setFieldValue("theater", undefined);
@@ -301,13 +308,14 @@ export default function ShowtimeForm() {
             </Form.Item>
           </Col>
 
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               label="Chọn Phòng Chiếu"
               name="theater"
               rules={[{ required: true, message: "Vui lòng chọn phòng chiếu" }]}
             >
               <Select
+                size="large"
                 placeholder={
                   selectedCinema
                     ? "Chọn phòng..."
@@ -338,6 +346,7 @@ export default function ShowtimeForm() {
             icon={<SaveOutlined />}
             disabled={!isChanged}
             block
+            className="submit-btn"
           >
             {isEditMode ? "CẬP NHẬT SUẤT CHIẾU" : "TẠO SUẤT CHIẾU"}
           </Button>

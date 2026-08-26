@@ -34,16 +34,15 @@ export default function TheaterForm() {
 
   const { state: rawSeatsDB } = useAsync({
     service: getAllSeatTypesApi,
+    queryKey: ["seat-types-list"],
   });
   const seatsDB = safeArray(rawSeatsDB);
 
-  // Giữ lại queryKey để hook useAsync kích hoạt gọi API chính xác
   const { state: rawCinemas } = useAsync({
     service: getAllBranches,
     queryKey: ["branches_list"]
   });
   
-  // Bóc tách mảng dữ liệu an toàn phòng trường hợp API trả về dạng object chứa data/items/content
   const cinemas = useMemo(() => {
     if (!rawCinemas) return [];
     if (Array.isArray(rawCinemas)) return rawCinemas;
@@ -52,6 +51,7 @@ export default function TheaterForm() {
 
   const { state: theaterDetailRaw, loading } = useAsync({
     service: () => fetchTheaterDetailAPI(params.theaterId),
+    queryKey: ["theater-detail", params.theaterId], // Đã thêm queryKey riêng biệt tránh xung đột cache
     dependencies: [params.theaterId],
     condition: !!params.theaterId,
   });
@@ -197,7 +197,10 @@ export default function TheaterForm() {
       params.theaterId
         ? updateTheaterAPI(params.theaterId, payload)
         : addTheaterAPI(payload),
-    invalidateQueries: [["theaters-list"]],
+    invalidateQueries: [
+      ["theaters-list"],
+      ["theater-detail", params.theaterId],
+    ],
   });
 
   const handleSave = async (values) => {
@@ -213,9 +216,8 @@ export default function TheaterForm() {
 
       await theaterMutation.mutateAsync(payload);
       notification.success({ message: params.theaterId ? "Cập nhật thành công!" : "Thêm phòng chiếu mới thành công!" });
-      navigate("/admin/theater-management");
+      navigate(-1);
     } catch (error) {
-      console.log(error);
       notification.error({
         message: "Lỗi hệ thống",
         description: error.response?.data?.message || error.message || "Không thể lưu dữ liệu phòng chiếu.",
@@ -225,6 +227,7 @@ export default function TheaterForm() {
 
   return (
     <Card
+      className="movie-form-card"
       loading={loading || theaterMutation.isLoading}
       title={
         <Space>
@@ -241,16 +244,16 @@ export default function TheaterForm() {
         initialValues={{ totalSeat: { rows: 0, cols: 0 } }}
       >
         <Row gutter={24}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               label="Tên phòng chiếu"
               name="name"
               rules={[{ required: true, message: 'Nhập tên phòng (Vd: Phòng 01)' }]}
             >
-              <Input placeholder="Nhập tên phòng chiếu..." />
+              <Input placeholder="Nhập tên phòng chiếu..." size="large" />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               label="Thuộc cụm rạp quản lý"
               name="cinemaName"
@@ -259,6 +262,7 @@ export default function TheaterForm() {
               <Select
                 placeholder="Chọn cụm rạp"
                 showSearch
+                size="large"
                 optionFilterProp="label"
                 onChange={handleCinemaChange}
                 options={cinemaOptions}
@@ -276,6 +280,7 @@ export default function TheaterForm() {
             placeholder={selectedCinema ? "Chọn chi nhánh" : "Vui lòng chọn cụm rạp trước"}
             disabled={!selectedCinema}
             showSearch
+            size="large"
             optionFilterProp="label"
             options={branchOptions}
           />
@@ -283,21 +288,21 @@ export default function TheaterForm() {
 
         <Card type="inner" title="Thiết lập sơ đồ cơ bản" style={{ marginBottom: 24 }}>
           <Row gutter={48} align="middle">
-            <Col>
+            <Col xs={24} sm={8}>
               <Form.Item label="Số hàng ngang" name={['totalSeat', 'rows']}>
-                <InputNumber min={1} max={20} />
+                <InputNumber min={1} max={20} size="large" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col>
+            <Col xs={24} sm={8}>
               <Form.Item label="Số cột dọc" name={['totalSeat', 'cols']}>
-                <InputNumber min={1} max={20} />
+                <InputNumber min={1} max={20} size="large" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
+            <Col xs={24} sm={8} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 8 }}>
               <div style={{ fontSize: '16px', fontStyle: 'italic', marginRight: '16px' }}>
                 Tổng {tempTotal.rows * tempTotal.cols} ghế
               </div>
-              <Button type="primary" onClick={handleConfirmLayout}>
+              <Button type="primary" size="large" onClick={handleConfirmLayout}>
                 <SaveOutlined /> Lưu quy mô
               </Button>
             </Col>
@@ -331,16 +336,19 @@ export default function TheaterForm() {
           )}
         </div>
 
-        <Button
-          type="primary"
-          htmlType="submit"
-          disabled={!isChanged}
-          size="large"
-          icon={<SaveOutlined />}
-          block
-        >
-          LƯU CẤU HÌNH PHÒNG CHIẾU
-        </Button>
+        <Form.Item style={{ marginTop: '24px' }}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={!isChanged}
+            size="large"
+            icon={<SaveOutlined />}
+            block
+            className="submit-btn"
+          >
+            LƯU CẤU HÌNH PHÒNG CHIẾU
+          </Button>
+        </Form.Item>
       </Form>
     </Card>
   );

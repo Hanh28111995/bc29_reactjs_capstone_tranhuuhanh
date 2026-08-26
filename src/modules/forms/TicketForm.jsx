@@ -1,6 +1,6 @@
 import {
   Button, Form, Select, Space, Card, Divider,
-  Descriptions, Tag, App
+  Descriptions, Tag, App, Row, Col
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -31,7 +31,10 @@ export default function TicketForm() {
 
   const updateTicketMutation = useAsyncMutation({
     service: (values) => updateTicketAPI(ticketId, values),
-    invalidateQueries: [["tickets-list"]],
+    invalidateQueries: [
+      ["tickets-list"],
+      ["ticket", ticketId],
+    ],
   });
 
   // Lấy dữ liệu ticket an toàn
@@ -85,9 +88,12 @@ export default function TicketForm() {
   if (isError) {
     return (
       <Card title="Chi tiết vé" loading={false}>
-        <div className="text-center" style={{ minHeight: "40vh" }}>
-          <p>Không thể tải thông tin vé.</p>
-          <p>{error?.message || "Vui lòng thử lại sau."}</p>
+        <div style={{ textAlign: "center", minHeight: "40vh", padding: "40px 0" }}>
+          <p style={{ fontSize: "16px" }}>Không thể tải thông tin vé.</p>
+          <p style={{ color: "#ff4d4f" }}>{error?.message || "Vui lòng thử lại sau."}</p>
+          <Button type="primary" onClick={() => navigate(-1)} style={{ marginTop: 16 }}>
+            Quay lại
+          </Button>
         </div>
       </Card>
     );
@@ -95,6 +101,7 @@ export default function TicketForm() {
 
   return (
     <Card
+      className="movie-form-card"
       loading={loading || updateTicketMutation.isLoading}
       title={
         <Space>
@@ -103,7 +110,7 @@ export default function TicketForm() {
             onClick={() => navigate(-1)}
             type="text"
           />
-          <span>Chi tiết vé {ticket?._id || ticketId}</span>
+          <span>Chi tiết vé #{ticket?._id || ticketId}</span>
         </Space>
       }
     >
@@ -174,35 +181,33 @@ export default function TicketForm() {
             onFinish={handleSave}
             onValuesChange={handleFormChange}
           >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px",
-              }}
-            >
-              <Form.Item label="Phương thức thanh toán" name="paymentMethod">
-                <Select
-                  size="large"
-                  options={[
-                    { label: "Tiền mặt (Cash)", value: "cash" },
-                    { label: "Ví điện tử MoMo", value: "momo" },
-                    { label: "Cổng VNPay", value: "vnpay" },
-                  ]}
-                />
-              </Form.Item>
+            <Row gutter={24}>
+              <Col xs={24} md={12}>
+                <Form.Item label="Phương thức thanh toán" name="paymentMethod">
+                  <Select
+                    size="large"
+                    options={[
+                      { label: "Tiền mặt (Cash)", value: "cash" },
+                      { label: "Ví điện tử MoMo", value: "momo" },
+                      { label: "Cổng VNPay", value: "vnpay" },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
 
-              <Form.Item label="Trạng thái thanh toán" name="paymentStatus">
-                <Select
-                  size="large"
-                  options={[
-                    { label: "Đang chờ xử lý (Pending)", value: "Pending" },
-                    { label: "Thành công (Completed)", value: "Completed" },
-                    { label: "Đã thất bại (Failed)", value: "Failed" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
+              <Col xs={24} md={12}>
+                <Form.Item label="Trạng thái thanh toán" name="paymentStatus">
+                  <Select
+                    size="large"
+                    options={[
+                      { label: "Đang chờ xử lý (Pending)", value: "Pending" },
+                      { label: "Thành công (Completed)", value: "Completed" },
+                      { label: "Đã thất bại (Failed)", value: "Failed" },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
             <Form.Item style={{ marginTop: 24 }}>
               <Button
@@ -212,6 +217,7 @@ export default function TicketForm() {
                 size="large"
                 icon={<SaveOutlined />}
                 block
+                className="submit-btn"
               >
                 LƯU THÔNG TIN CẬP NHẬT
               </Button>
