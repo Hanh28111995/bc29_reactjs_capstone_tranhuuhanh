@@ -77,20 +77,13 @@ export default function BranchesTable() {
     );
   };
 
-  // 💡 Xử lý cập nhật dataSource an toàn, tránh mất dữ liệu khi đang lọc (search)
   const handleTableChange = (updatedList) => {
     if (searchText) {
-      // Nếu đang search, EditableProTable trả về danh sách đã lọc.
-      // Ta phải merge các item thay đổi ngược lại vào mảng gốc dataSource đầy đủ.
       setDataSource((prevDataSource) => {
         const updatedMap = new Map(updatedList.map((item) => [item._id, item]));
-
-        // Cập nhật các item cũ và giữ lại các item không hiển thị trong khung search
         const merged = prevDataSource.map(
           (item) => updatedMap.get(item._id) || item,
         );
-
-        // Thêm các item mới tạo (nếu có nằm trong danh sách lọc)
         updatedList.forEach((item) => {
           if (!prevDataSource.some((p) => p._id === item._id)) {
             merged.push(item);
@@ -107,7 +100,7 @@ export default function BranchesTable() {
     {
       title: "Tên rạp",
       dataIndex: "cinemaName",
-      width: "18%", // Tăng nhẹ để hiển thị trọn tên rạp
+      width: "18%",
       formItemProps: {
         rules: [{ required: true, message: "Không được để trống" }],
       },
@@ -115,7 +108,7 @@ export default function BranchesTable() {
     {
       title: "Tên chi nhánh",
       dataIndex: "branch",
-      width: "22%", // Thu hẹp một chút cho cân đối
+      width: "20%",
       formItemProps: {
         rules: [{ required: true, message: "Không được để trống" }],
       },
@@ -123,72 +116,32 @@ export default function BranchesTable() {
     {
       title: "Địa chỉ",
       dataIndex: "address",
-      // Bỏ width để cột Địa chỉ tự động chiếm phần không gian còn lại (địa chỉ thường dài)
       formItemProps: {
         rules: [{ required: true, message: "Không được để trống" }],
       },
     },
     {
-      title: "Tọa độ [Lng, Lat]",
-      dataIndex: "coordinates",
-      width: "22%",
-      // 1. Khi hiển thị bình thường: biến mảng thành chuỗi "lng, lat"
-      render: (val) => (Array.isArray(val) ? val.join(", ") : val),
-
-      // 2. Khi bắt đầu sửa: biến mảng thành chuỗi để ô input hiển thị đúng chữ "106.69, 10.75" thay vì object/mảng thô
-      renderFormItem: (schema, config, form) => {
-        const currentValue = form.getFieldValue(config.dataIndex);
-        const initialStr = Array.isArray(currentValue)
-          ? currentValue.join(", ")
-          : currentValue || "";
-
-        return (
-          <Input
-            defaultValue={initialStr}
-            placeholder="VD: 106.69, 10.75"
-            onChange={(e) => {
-              // Gán trực tiếp giá trị chuỗi người dùng đang gõ vào form
-              form.setFieldValue(config.dataIndex, e.target.value);
-            }}
-          />
-        );
-      },
-
-      // 3. Quy tắc kiểm tra đơn giản và chắc chắn không lỗi
+      title: "Kinh độ (Lng)",
+      dataIndex: ["coordinates", 0], // Trỏ phần tử đầu của mảng
+      width: "14%",
+      valueType: "digit", // Tự động chặn chữ, chỉ cho nhập số
       formItemProps: {
-        rules: [
-          { required: true, message: "Không được để trống" },
-          {
-            validator: (_, value) => {
-              if (!value)
-                return Promise.reject(new Error("Không được để trống"));
-
-              // Nếu value đang là mảng (trường hợp chưa sửa mà submit), chuyển về chuỗi để check
-              const strVal = Array.isArray(value)
-                ? value.join(",")
-                : String(value);
-              const parts = strVal.split(",");
-
-              if (
-                parts.length !== 2 ||
-                parts.some((p) => isNaN(Number(p.trim())))
-              ) {
-                return Promise.reject(
-                  new Error(
-                    "Phải gồm 2 số cách nhau bởi dấu phẩy (VD: 106.69, 10.75)",
-                  ),
-                );
-              }
-              return Promise.resolve();
-            },
-          },
-        ],
+        rules: [{ required: true, message: "Nhập Lng" }],
+      },
+    },
+    {
+      title: "Vĩ độ (Lat)",
+      dataIndex: ["coordinates", 1], // Trỏ phần tử thứ hai của mảng
+      width: "14%",
+      valueType: "digit",
+      formItemProps: {
+        rules: [{ required: true, message: "Nhập Lat" }],
       },
     },
     {
       title: "Thao tác",
       valueType: "option",
-      width: "12%", // Vừa đủ cho 2 nút Sửa / Xóa, gọn gàng hơn
+      width: "12%",
       render: (text, record, _, action) => {
         const isEditing = editableKeys.includes(record._id);
         if (isEditing) return null;
@@ -237,20 +190,7 @@ export default function BranchesTable() {
         .filter((item) => item._id?.toString().startsWith("new_"))
         .forEach((item) => {
           const { _id, ...payload } = item;
-
-          // Chuẩn hóa tọa độ cho bản ghi mới
-          if (payload.coordinates) {
-            if (typeof payload.coordinates === "string") {
-              payload.coordinates = payload.coordinates
-                .split(",")
-                .map((num) => Number(num.trim()));
-            } else if (Array.isArray(payload.coordinates)) {
-              payload.coordinates = payload.coordinates.map((num) =>
-                Number(num),
-              );
-            }
-          }
-
+          // Vì dùng 2 cột Lng/Lat, payload.coordinates đã tự động là mảng số [lng, lat]
           promises.push(addOneBranchApi(payload));
         });
 
@@ -258,22 +198,7 @@ export default function BranchesTable() {
       updatedIds.forEach((id) => {
         const item = dataSource.find((d) => d._id === id);
         if (item && !deleteIds.includes(id)) {
-          // Clone lại item để tránh làm thay đổi trực tiếp state của bảng
-          let payload = { ...item };
-
-          // Chuẩn hóa tọa độ cho bản ghi cập nhật
-          if (payload.coordinates) {
-            if (typeof payload.coordinates === "string") {
-              payload.coordinates = payload.coordinates
-                .split(",")
-                .map((num) => Number(num.trim()));
-            } else if (Array.isArray(payload.coordinates)) {
-              payload.coordinates = payload.coordinates.map((num) =>
-                Number(num),
-              );
-            }
-          }
-
+          const payload = { ...item };
           promises.push(updateBranhesApi(payload));
         }
       });
@@ -289,12 +214,14 @@ export default function BranchesTable() {
         description: "Hệ thống chi nhánh đã được cập nhật thành công.",
       });
 
-      // Invalidate query key chuẩn toàn cục
       queryClient.invalidateQueries({ queryKey: ["branches-list"] });
     } catch (error) {
       notification.error({
         message: "Lỗi",
-        description: "Lưu thất bại. Vui lòng kiểm tra lại hệ thống.",
+        description:
+          error.response?.data?.content ||
+          error.response?.data?.message ||
+          "Lưu thất bại. Vui lòng kiểm tra lại hệ thống.",
       });
     } finally {
       setIsSaving(false);
@@ -332,6 +259,7 @@ export default function BranchesTable() {
               cinemaName: "",
               branch: "",
               address: "",
+              coordinates: [0, 0], // Khởi tạo mặc định mảng 2 số tránh lỗi undefined
             }),
           }}
           editable={{
