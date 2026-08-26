@@ -40,7 +40,20 @@ export default function BranchesTable() {
   // Đồng bộ dữ liệu gốc vào local state khi fetch thành công
   useEffect(() => {
     if (data && data.length > 0) {
-      setDataSource(data);
+      const normalizedData = data.map((item) => {
+        let coords = [0, 0]; // Mặc định nếu không có
+        if (Array.isArray(item.coordinates) && item.coordinates.length >= 2) {
+          coords = [
+            Number(item.coordinates[0]) || 0,
+            Number(item.coordinates[1]) || 0,
+          ];
+        }
+        return {
+          ...item,
+          coordinates: coords,
+        };
+      });
+      setDataSource(normalizedData);
       setDeleteIds([]);
       setUpdatedIds([]);
     }
