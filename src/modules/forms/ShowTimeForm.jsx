@@ -124,7 +124,7 @@ export default function ShowtimeForm() {
     if (!selectedCinema) return [];
     const selectedBranch = branches.find((b) => b._id === selectedCinema);
     if (!selectedBranch) return [];
-    return theaters.filter((t) => t.cinemaName === selectedBranch.cinemaName);
+    return theaters.filter((t) => t.branch === selectedBranch.branch);
   }, [theaters, branches, selectedCinema]);
 
   // Hàm kiểm tra tổng hợp xem Form hoặc Ghế có thay đổi so với ban đầu hay không
