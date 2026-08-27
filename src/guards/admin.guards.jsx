@@ -9,7 +9,7 @@ export default function AdminGuards() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (userRole !== MaLoaiNguoiDung.QuanTri) {
+    if (userRole !== "admin") {
       notification.warning({
         message: "Cảnh báo",
         description: "Bạn không có quyền truy cập vào trang Admin",
