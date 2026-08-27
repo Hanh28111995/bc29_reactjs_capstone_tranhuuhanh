@@ -51,12 +51,12 @@ export default function ShowtimeForm() {
 
   const { state: rawMovies } = useAsync({
     service: fetchMovieListAPI,
-    queryKey: ["movies_list"],
+    queryKey: ["movies-list"],
   });
-  
+
   const { state: rawTheaters } = useAsync({
     service: fetchTheaterListAPI,
-    queryKey: ["theaters_list"],
+    queryKey: ["theaters-list"],
   });
 
   const movies = safeArray(rawMovies?.movies);
@@ -64,7 +64,7 @@ export default function ShowtimeForm() {
 
   const { state: rawBranches } = useAsync({
     service: getAllBranches,
-    queryKey: ["branches_list"],
+    queryKey: ["branches-list"],
   });
 
   const branches = useMemo(() => {
@@ -124,11 +124,7 @@ export default function ShowtimeForm() {
     if (!selectedCinema) return [];
     const selectedBranch = branches.find((b) => b._id === selectedCinema);
     if (!selectedBranch) return [];
-    return theaters.filter(
-      (t) =>
-        t.branch === selectedBranch.branch ||
-        t.cinemaName === selectedBranch.cinemaName,
-    );
+    return theaters.filter((t) => t.cinemaName === selectedBranch.cinemaName);
   }, [theaters, branches, selectedCinema]);
 
   // Hàm kiểm tra tổng hợp xem Form hoặc Ghế có thay đổi so với ban đầu hay không
@@ -182,10 +178,7 @@ export default function ShowtimeForm() {
       isEditMode
         ? updateShowTime({ id: params.id, ...payload })
         : addNewShowTime(payload),
-    invalidateQueries: [
-      ["showtimes_list"],
-      ["showtimes-detail", params.id],
-    ],
+    invalidateQueries: [["showtimes-list"], ["showtimes-detail", params.id]],
   });
 
   const handleSave = async (values) => {
