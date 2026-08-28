@@ -7,10 +7,24 @@ export const fetchHistoryAPI = (role) => {
   });
 };
 
+export const markAllNotificationsAsReadAPI = (role) => {
+  return request({
+    url: `/notifications/read-all`,
+    method: "PUT",
+  });
+};
+
 export const fetchNotificationAPI = (role) => {
   return request({
-    url: `/${role}/notifications`,
+    url: `/notifications`,
     method: "GET",
+  });
+};
+
+export const fetchChangeStatusNotificationAPI = (role, id) => {
+  return request({
+    url: `/notifications/read/${id}`,
+    method: "PUT",
   });
 };
 
@@ -30,18 +44,4 @@ export const formatNotificationsForStore = (notifications) => {
     status: noti.status ?? false,
     createdAt: noti.createdAt ? new Date(noti.createdAt) : new Date(),
   }));
-};
-
-export const fetchChangeStatusNotificationAPI = (role, id) => {
-  return request({
-    url: `/${role}/notifications/read/${id}`,
-    method: "PUT",
-  });
-};
-
-export const markAllNotificationsAsReadAPI = (role) => {
-  return request({
-    url: `/${role}/notifications/read-all`,
-    method: "PUT",
-  });
 };
