@@ -328,7 +328,11 @@ export default function HeroPage() {
                   ?.filter((item) => item._id === "6a895744e2eabfe092cb4c81")
                   .map((item) => (
                     <a key={item._id} href={`/promotion/${item._id}`}>
-                      <img src={item.banner} alt="Thuê rạp" />
+                      <img src={item.banner} alt="Thuê rạp"  
+                      style={{
+                        objectFit: "fill",
+                        objectPosition: "left",
+                      }}/>
                     </a>
                   ))}
               </div>
