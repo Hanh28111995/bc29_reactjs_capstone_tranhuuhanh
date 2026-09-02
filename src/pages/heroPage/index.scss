@@ -197,18 +197,24 @@
   margin: 0 auto;
   padding: 2rem 0;
   background: transparent !important; // 1. Set background trong suốt cho toàn section
-  .slick-prev {
- display: block;
-}
-
-.slick-next {
- display: block;
-}
 
   .movie-track {
     position: relative;
     width: 100%;
     background: transparent !important; // Trong suốt cho track
+    .slider-arrow {
+      .slick-arrow {
+          color:#333;
+      }
+
+      // .slick-prev {
+      //   // arrow trái
+      // }
+
+      // .slick-next {
+      //   // arrow phải
+      // }
+    }
 
     .slick-list {
       overflow: hidden !important;
@@ -409,7 +415,7 @@
   }
 
   /* Khớp chính xác các ô đặc biệt */
-  .item-wrap-large{
+  .item-wrap-large {
     grid-column: span 2;
     grid-row: span 1;
     display: grid;
@@ -429,15 +435,13 @@
     grid-template-rows: repeat(1, 2fr);
     gap: 20px;
   }
-    
 
   .item-x-large {
     grid-column: span 1;
     grid-row: span 3;
-    display:grid;
+    display: grid;
     gap: 20px;
   }
-  
 }
 
 /* Responsive cho thiết bị di động */
