@@ -204,6 +204,28 @@
     background: transparent !important;
     overflow: visible; // QUAN TRỌNG
 
+    .slider-arrow {
+      z-index: 2;
+      top: 50%;
+      right: auto;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      opacity: 1 !important;
+
+      &::before {
+        content: none;
+      }
+    }
+
+    .slider-arrow.prev-btn {
+      left: 10px;
+    }
+
+    .slider-arrow.next-btn {
+      right: 10px;
+    }
+
     .slick-slider {
       position: relative;
       display: block;
@@ -249,45 +271,45 @@
   }
 
   // ARROW CỦA REACT-SLICK
-  .slick-arrow {
-    position: absolute !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+  // .slick-arrow {
+  //   position: absolute !important;
+  //   top: 50% !important;
+  //   transform: translateY(-50%) !important;
 
-    z-index: 100 !important;
+  //   z-index: 100 !important;
 
-    width: 45px !important;
-    height: 45px !important;
+  //   width: 45px !important;
+  //   height: 45px !important;
 
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+  //   display: flex !important;
+  //   align-items: center;
+  //   justify-content: center;
 
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+  //   border-radius: 50%;
+  //   background: rgba(0, 0, 0, 0.7) !important;
+  //   border: 1px solid rgba(255, 255, 255, 0.3);
 
-    cursor: pointer;
+  //   cursor: pointer;
 
-    &::before {
-      font-size: 18px;
-      color: #fff;
-      opacity: 1;
-    }
+  //   &::before {
+  //     font-size: 18px;
+  //     color: #fff;
+  //     opacity: 1;
+  //   }
 
-    &:hover {
-      background: #e50914 !important;
-      border-color: #e50914;
-    }
-  }
+  //   &:hover {
+  //     background: #e50914 !important;
+  //     border-color: #e50914;
+  //   }
+  // }
 
-  .slick-prev {
-    left: 10px !important;
-  }
+  // .slick-prev {
+  //   left: 10px !important;
+  // }
 
-  .slick-next {
-    right: 10px !important;
-  }
+  // .slick-next {
+  //   right: 10px !important;
+  // }
 }
 
 .slider-arrow {
