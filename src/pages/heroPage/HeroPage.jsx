@@ -47,6 +47,27 @@ export default function HeroPage() {
       setIsMoved(false);
     }
   };
+
+  const PrevArrow = ({ onClick }) => (
+  <button
+    type="button"
+    className="slider-arrow prev-btn"
+    onClick={onClick}
+  >
+    <LeftOutlined />
+  </button>
+);
+
+const NextArrow = ({ onClick }) => (
+  <button
+    type="button"
+    className="slider-arrow next-btn"
+    onClick={onClick}
+  >
+    <RightOutlined />
+  </button>
+);
+
   const settings = {
   dots: false,
   infinite: true,
@@ -55,6 +76,9 @@ export default function HeroPage() {
   slidesToScroll: 1,
   arrows: true,
   swipe: true,
+
+  prevArrow: <PrevArrow />,
+  nextArrow: <NextArrow />,
 
   responsive: [
     {
