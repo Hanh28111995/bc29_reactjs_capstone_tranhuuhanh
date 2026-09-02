@@ -88,6 +88,9 @@
     }
     .box-office {
       width: 30%;
+      @media (max-width: 550px) {
+        width: 20%;
+      }
     }
   }
   .cinema-hero-container.moved {
@@ -469,7 +472,7 @@
   background-repeat: repeat;
   background-position: center;
   width: 100%;
-  padding: 50px 0;
+  padding: 5rem 0;
 
   .event-section {
     max-width: 1200px;
