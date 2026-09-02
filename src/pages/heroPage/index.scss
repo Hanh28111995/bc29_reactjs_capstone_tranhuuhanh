@@ -196,29 +196,23 @@
   max-width: 100vw;
   margin: 0 auto;
   padding: 2rem 0;
-  background: transparent !important; // 1. Set background trong suốt cho toàn section
+  background: transparent !important;
 
   .movie-track {
     position: relative;
     width: 100%;
-    background: transparent !important; // Trong suốt cho track
-    .slider-arrow {
-      .slick-arrow {
-          color:#333;
-      }
+    background: transparent !important;
+    overflow: visible; // QUAN TRỌNG
 
-      // .slick-prev {
-      //   // arrow trái
-      // }
-
-      // .slick-next {
-      //   // arrow phải
-      // }
+    .slick-slider {
+      position: relative;
+      display: block;
+      overflow: visible; // QUAN TRỌNG
     }
 
     .slick-list {
       overflow: hidden !important;
-      margin: 0 -10px; // Tạo khoảng đệm âm để cân đối khoảng cách giữa các item
+      margin: 0 -10px;
       background: transparent !important;
     }
 
@@ -229,9 +223,9 @@
     }
 
     .slick-slide {
-      padding: 0 10px; // 3. Khoảng cách (gap) giữa mỗi item (mỗi bên 10px = tổng 20px)
+      padding: 0 10px;
       box-sizing: border-box;
-      height: 150px !important; // 2. Chiều cao của item (bạn có thể thay đổi số này, ví dụ 500px)
+      height: 150px !important;
       background: transparent !important;
 
       > div {
@@ -239,7 +233,6 @@
         background: transparent !important;
       }
 
-      /* Style cho card phim bên trong */
       .movie-item {
         height: 100% !important;
         background: transparent !important;
@@ -255,74 +248,45 @@
     }
   }
 
-  /* 4. Style và hiển thị cho arrows khi set arrows: true trong react-slick */
+  // ARROW CỦA REACT-SLICK
   .slick-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    cursor: pointer;
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+
+    z-index: 100 !important;
+
+    width: 45px !important;
+    height: 45px !important;
+
     display: flex !important;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
 
-    &:hover {
-      background: #e50914;
-      border-color: #e50914;
-    }
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 
-    &.slick-prev {
-      left: 10px; // Nút mũi tên trái nằm sát mép trái
-    }
+    cursor: pointer;
 
-    &.slick-next {
-      right: 10px; // Nút mũi tên phải nằm sát mép phải
-    }
-
-    /* Ẩn chữ mặc định của slick nếu có (như "Previous" / "Next") */
-    font-size: 0;
     &::before {
       font-size: 18px;
       color: #fff;
+      opacity: 1;
+    }
+
+    &:hover {
+      background: #e50914 !important;
+      border-color: #e50914;
     }
   }
 
-  /* Trường hợp bạn dùng nút Custom Arrow bên ngoài component Slider */
-  .custom-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
+  .slick-prev {
+    left: 10px !important;
+  }
 
-    &:hover {
-      background: #e50914;
-      border-color: #e50914;
-    }
-
-    &.prev-btn {
-      left: 10px;
-    }
-    &.next-btn {
-      right: 10px;
-    }
+  .slick-next {
+    right: 10px !important;
   }
 }
 
