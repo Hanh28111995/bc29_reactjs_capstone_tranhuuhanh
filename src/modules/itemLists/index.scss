@@ -307,6 +307,11 @@
     @media (max-width: 1080px) {
       height: auto;
     }
+    @media (max-width: 500px) {
+      .promotion-release{
+        font-size: 1.5rem;
+      }
+    }
 
     .card-header-wrapper {
       position: relative;
