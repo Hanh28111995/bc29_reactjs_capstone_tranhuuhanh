@@ -11,6 +11,7 @@ import { fetchShowBannerAPI, fetchShowPromotionAPI } from "services/general";
 export default function HeroPage() {
   const bannerSliderRef = useRef(null);
   const trailerSliderRef = useRef(null);
+  const movieSliderRef = useRef(null);
   const [isMoved, setIsMoved] = useState(false);
   // Dùng useRef để lưu vị trí tọa độ khi bắt đầu kéo/vuốt
   const touchStartX = useRef(0);
@@ -48,26 +49,6 @@ export default function HeroPage() {
     }
   };
 
-  const PrevArrow = ({ onClick }) => (
-  <button
-    type="button"
-    className="slider-arrow prev-btn"
-    onClick={onClick}
-  >
-    <LeftOutlined />
-  </button>
-);
-
-const NextArrow = ({ onClick }) => (
-  <button
-    type="button"
-    className="slider-arrow next-btn"
-    onClick={onClick}
-  >
-    <RightOutlined />
-  </button>
-);
-
   const settings = {
   dots: false,
   infinite: true,
@@ -76,9 +57,6 @@ const NextArrow = ({ onClick }) => (
   slidesToScroll: 1,
   arrows: true,
   swipe: true,
-
-  prevArrow: <PrevArrow />,
-  nextArrow: <NextArrow />,
 
   responsive: [
     {
@@ -288,9 +266,25 @@ const NextArrow = ({ onClick }) => (
 
       <section className="movie-slider-section">
         <div className="movie-track">
-          <Slider {...settings}>           
+          <button
+            type="button"
+            className="slider-arrow prev-btn"
+            onClick={() => movieSliderRef.current?.slickPrev()}
+            aria-label="Phim trước"
+          >
+            <LeftOutlined />
+          </button>
+          <Slider ref={movieSliderRef} {...settings}>
             {caroucelList}
           </Slider>
+          <button
+            type="button"
+            className="slider-arrow next-btn"
+            onClick={() => movieSliderRef.current?.slickNext()}
+            aria-label="Phim tiếp theo"
+          >
+            <RightOutlined />
+          </button>
         </div>
       </section>
 
