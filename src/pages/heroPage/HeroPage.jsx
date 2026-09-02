@@ -423,7 +423,12 @@ export default function HeroPage() {
           </a>
           <div className="social-item verified">
             <span className="icon" aria-hidden="true"><SafetyCertificateFilled /></span>
-            <span>ĐÃ THÔNG BÁO BỘ CÔNG THƯƠNG</span>
+            <div className="text">
+              <span>ĐÃ THÔNG BÁO</span><br/>
+              <span>BỘ CÔNG THƯƠNG</span>              
+            </div>
+            
+            
           </div>
         </div>
 
