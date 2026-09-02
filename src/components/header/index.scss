@@ -2,7 +2,7 @@
 
 .header-top {
   background-color: rgb(218, 210, 180);
-  padding: 0.5rem 0; 
+  padding: 0.5rem 0;
 }
 .navbar {
   background-color: transparent;
@@ -92,6 +92,16 @@
     right: 20px;
     color: $color-white-1 !important;
     border-radius: 15px;
+    @media (max-width: 550px) {      
+      width: 9px;
+      height: 9px;
+      padding-top: 0px;
+      font-size: 8px;
+      font-weight: 700;
+      line-height: 7px;      
+      top: 7px;
+      right: 10px;      
+    }
   }
 }
 
