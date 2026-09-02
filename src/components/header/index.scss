@@ -1,6 +1,6 @@
 @import "./../../variable/variable";
 
-.header-top{
+.header-top {
   background-color: rgb(218, 210, 180);
   padding: 0.5rem 0;
 }
@@ -8,19 +8,21 @@
   background-color: transparent;
   border-top: 2px $color-1 solid;
 }
-.noti-icon img {  
-  margin: 10px auto;
-  width: 55vw;
+.noti-icon {
+  img {
+    margin: 10px auto;
+    width: 55vw;
+  }
   @media (min-width: 550px) {
-    width: 80vw;
+    img {
+      width: 80vw;
+    }
   }
 }
 
-.navbar-toggler{
+.navbar-toggler {
   display: none;
 }
-
-
 
 .navbar-collapse {
   ul li {
