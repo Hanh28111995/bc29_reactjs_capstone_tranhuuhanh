@@ -1,8 +1,7 @@
 .cinema-hero-section {
   position: relative;
-  min-width: 980px;
   border-top: 1px solid #e9e4d2;
-  min-height: 669px;
+  min-height: clamp(320px, 52vw, 669px);
   width: 100vw;
   overflow-x: hidden;
   .custom-arrow {
@@ -41,9 +40,10 @@
   }
   .cinema-hero-container {
     position: relative;
-    margin-top: 2rem;
+    margin-top: clamp(1rem, 3vw, 2rem);
     width: 120%;
-    height: 600px;
+    height: clamp(300px, 46vw, 600px);
+    min-width: 0;
     display: flex;
     transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
     transform: translateX(-10%);
@@ -247,7 +247,7 @@
     .slick-slide {
       padding: 0 10px;
       box-sizing: border-box;
-      height: 150px !important;
+      height: clamp(100px, 13vw, 150px) !important;
       background: transparent !important;
 
       > div {
@@ -271,45 +271,45 @@
   }
 
   // ARROW CỦA REACT-SLICK
-  // .slick-arrow {
-  //   position: absolute !important;
-  //   top: 50% !important;
-  //   transform: translateY(-50%) !important;
+  .slick-arrow {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
 
-  //   z-index: 100 !important;
+    z-index: 100 !important;
 
-  //   width: 45px !important;
-  //   height: 45px !important;
+    width: 45px !important;
+    height: 45px !important;
 
-  //   display: flex !important;
-  //   align-items: center;
-  //   justify-content: center;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 
-  //   border-radius: 50%;
-  //   background: rgba(0, 0, 0, 0.7) !important;
-  //   border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 
-  //   cursor: pointer;
+    cursor: pointer;
 
-  //   &::before {
-  //     font-size: 18px;
-  //     color: #fff;
-  //     opacity: 1;
-  //   }
+    &::before {
+      font-size: 18px;
+      color: #fff;
+      opacity: 1;
+    }
 
-  //   &:hover {
-  //     background: #e50914 !important;
-  //     border-color: #e50914;
-  //   }
-  // }
+    &:hover {
+      background: #e50914 !important;
+      border-color: #e50914;
+    }
+  }
 
-  // .slick-prev {
-  //   left: 10px !important;
-  // }
+  .slick-prev {
+    left: 10px !important;
+  }
 
-  // .slick-next {
-  //   right: 10px !important;
-  // }
+  .slick-next {
+    right: 10px !important;
+  }
 }
 
 .slider-arrow {
@@ -333,6 +333,135 @@
 
 .slider-arrow:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .cinema-hero-section {
+    min-height: clamp(300px, 58vw, 440px);
+
+    .custom-arrow {
+      width: 28px;
+      height: 72px;
+      font-size: 14px;
+
+      &.next-btn {
+        right: 6px;
+      }
+    }
+
+    .cinema-hero-container {
+      width: 120%;
+      height: clamp(280px, 47vw, 420px);
+
+      .box-office {
+        padding: 0 8px;
+
+        .head {
+          padding: 1rem 0;
+
+          h3 {
+            margin: 0.5rem;
+            font-size: 14px;
+          }
+        }
+
+        .ranking-list {
+          padding: 0 5px;
+
+          li {
+            gap: 6px;
+            padding: 10px 0;
+
+            .movie-name {
+              font-size: 11px;
+            }
+          }
+        }
+
+        .btn-ticket {
+          padding: 7px 4px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  .movie-slider-section {
+    padding: 1rem 0;
+
+    .movie-track {
+      .slider-arrow {
+        width: 34px;
+        height: 34px;
+        font-size: 22px;
+      }
+
+      .slider-arrow.prev-btn {
+        left: 6px;
+      }
+
+      .slider-arrow.next-btn {
+        right: 6px;
+      }
+
+      .slick-slide {
+        padding: 0 6px;
+      }
+
+      .slick-list {
+        margin: 0 -6px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .cinema-hero-section {
+    min-height: 260px;
+
+    .custom-arrow {
+      width: 24px;
+      height: 58px;
+      font-size: 12px;
+    }
+
+    .cinema-hero-container {
+      margin-top: 0.75rem;
+      height: 250px;
+
+      .box-office {
+        .head h3 {
+          font-size: 12px;
+        }
+
+        .ranking-list li {
+          padding: 7px 0;
+
+          .movie-name {
+            font-size: 9px;
+          }
+        }
+
+        .btn-ticket {
+          font-size: 10px;
+        }
+      }
+    }
+  }
+
+  .movie-slider-section {
+    .movie-track {
+      .slider-arrow {
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+      }
+
+      .slick-slide {
+        height: 100px !important;
+      }
+    }
+  }
 }
 
 .event-announcement-section {
