@@ -55,7 +55,7 @@ export default function HeroPage() {
   speed: 500,
   slidesToShow: 5,
   slidesToScroll: 1,
-  arrows: true,
+  arrows: false,
   swipe: true,
 
   responsive: [
@@ -150,8 +150,16 @@ export default function HeroPage() {
   console.log("Banner sau khi lọc (highlight=true):", banner);
   console.log("Promotion sau khi lọc (highlight=true):", promotion);
 
-  const caroucelList = rawBanner?.map((item, index) => (
-    <div className="movie-item" key={item._id || index}>
+  const movieItems = Array.isArray(rawBanner) ? rawBanner : [];
+  const carouselItems = movieItems.length
+    ? Array.from(
+        { length: Math.max(6, movieItems.length) },
+        (_, index) => movieItems[index % movieItems.length]
+      )
+    : [];
+
+  const caroucelList = carouselItems.map((item, index) => (
+    <div className="movie-item" key={`${item._id || "movie"}-${index}`}>
       <a href={`/movie/detail/${item.movie_id}`}>
         <img src={item.url} />
       </a>
