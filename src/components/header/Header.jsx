@@ -164,37 +164,26 @@ export default function Header() {
           </div>
         </>
       )}
-      <div className="header-top" style={{ backgroundColor: "#dad2b4" }}>
+      <div className="header-top" >
         {!userState.userInfor ? (
           <div className="d-flex align-items-center justify-content-end">
             <button
               onClick={() => navigate("/register")}
-              className="btn-more-infor my-2 my-sm-0 mr-2"
-              style={{
-                height: "40px",
-                width: "100px",
-                display: "inline-block",
-              }}
+              className="btn-more-infor my-2 my-sm-0 mr-2"              
             >
               {t("auth.register")}
             </button>
             <button
               onClick={() => navigate("/login")}
-              className="btn-more-infor my-2 my-sm-0 mr-2"
-              style={{
-                height: "40px",
-                width: "100px",
-                display: "inline-block",
-              }}
+              className="btn-more-infor my-2 my-sm-0 mr-2"              
             >
               {t("auth.login")}
             </button>
             <button
               className="btn-more-infor my-2 my-sm-0"
               style={{
-                height: "40px",
-                width: "120px",
-                display: "inline-block",
+                backgroundColor: "rgb(111, 98, 71, 0.5)",
+                borderRadius: "10px",
               }}
               onClick={handleToggleLanguage}
             >

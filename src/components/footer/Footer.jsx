@@ -1,51 +1,50 @@
-import React from 'react';
+import React from "react";
 import "./index.scss";
-import { FacebookFilled, YoutubeFilled, TwitterOutlined, InstagramOutlined } from '@ant-design/icons';
+import logoImage from "../../assets/images/logo_footer.gif";
 
 export default function Footer() {
-
   return (
     <footer className="moveek-footer">
-      <div className="footer-wrapper">
-        <div className="footer-top">
-          <div className="footer-col brand">
-            <h2 className="logo">CYBERSOFT<span>MOVIE</span></h2>
-            <p>Mạng xã hội điện ảnh, đặt vé và đánh giá phim hàng đầu Việt Nam.</p>
-            <div className="social-icons">
-              <FacebookFilled />
-              <YoutubeFilled />
-              <TwitterOutlined />
-              <InstagramOutlined />
-            </div>
-          </div>          
+      <div className="footer_inner">
+        {/* Logo */}
+        <img src={logoImage} />
+        {/* Các liên kết */}
+        <ul className="footer_link">
+          <li>
+            <a href="/membership" title="Membership">
+              Membership
+            </a>
+          </li>
 
-          <div className="footer-col">
-            <h4>Hệ Thống Rạp</h4>
-            <ul>
-              <li><a href="#">BHD Star Cineplex</a></li>
-              <li><a href="#">CGV Cinemas</a></li>
-              <li><a href="#">Lotte Cinema</a></li>
-              <li><a href="#">Galaxy Cinema</a></li>
-            </ul>
-          </div>
+          <li>
+            <a href="/privacy-policy" title="Personal data processing policy">
+              Personal data processing policy
+            </a>
+          </li>
 
-          <div className="footer-col">
-            <h4>Chăm Sóc Khách Hàng</h4>
-            <ul>
-              <li><a href="#">Hotline: 1900 xxxx</a></li>
-              <li><a href="#">Email: support@movie.vn</a></li>
-              <li><a href="#">Câu hỏi thường gặp</a></li>
-              <li><a href="#">Điều khoản sử dụng</a></li>
-            </ul>
-          </div>
+          <li>
+            <a href="/terms-of-use" title="Terms of Use">
+              Terms of Use
+            </a>
+          </li>
+        </ul>
+        {/* Thông tin công ty */}
+        <div class="company_info" bis_skin_checked="1">
+          <p>CÔNG TY TNHH LOTTE CINEMA VIỆT NAM</p>
+          <p>
+            Giấy CNĐKDN: 0302575928, đăng ký lần đầu ngày 02/05/2008, đăng ký
+            thay đổi lần thứ 10 ngày 30/03/2018, cấp bởi Sở KHĐT Thành phố Hồ
+            Chí Minh
+          </p>
+          <p>
+            Địa chỉ: Tầng 3, TTTM Lotte, số 469 đường Nguyễn Hữu Thọ, Phường Tân
+            Hưng, TPHCM, Việt Nam
+          </p>
+          <p>Hotline: (028) 3775 2524</p>
         </div>
-
-        <div className="footer-bottom">
-          <p>© 2026 CYBERSOFT MOVIE - Kết nối cộng đồng yêu điện ảnh.</p>
-        </div>
+        {/* Copyright */}
+        <p class="copy">COPYRIGHT © LOTTECINEMAVN.COM - ALL RIGHTS RESERVED.</p>        
       </div>
     </footer>
   );
-};
-
-
+}

@@ -56,7 +56,7 @@ export default function TheaterForm() {
     condition: !!params.theaterId,
   });
 
-  const theaterDetail = theaterDetailRaw?.theater ?? theaterDetailRaw;
+  const theaterDetail = theaterDetailRaw?.theater;
 
   const selectedCinema = Form.useWatch('cinemaName', form);
 

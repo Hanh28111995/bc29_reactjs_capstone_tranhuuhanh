@@ -1,26 +1,42 @@
 @import "./../../variable/variable";
 
+.header-top{
+  background-color: rgb(218, 210, 180);
+  padding: 0.5rem 0;
+}
 .navbar {
   background-color: transparent;
   border-top: 2px $color-1 solid;
 }
 .noti-icon img {  
-  margin-bottom: 15px;
-  transform: scaleX(1.3);
+  margin: 10px auto;
   width: 55vw;
 }
 
+.navbar-toggler{
+  display: none;
+}
+
+
+
 .navbar-collapse {
   ul li {
-    padding-left: 20px;
-    padding-right: 20px;
-    font-size: $fs-7;
+    padding: 0 1.5rem;
+    font-size: 1.5rem;
     font-weight: 500;
     border-left: 1px solid $color-2;
     &:first-child {
       border-left: none;
     }
   }
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  flex-direction: row !important;
+  justify-content: center;
+  width: 100%;
 }
 
 .nav-header {
