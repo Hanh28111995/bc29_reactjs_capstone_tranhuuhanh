@@ -213,22 +213,12 @@ export default function Header() {
               </p>
               <button
                 onClick={handleLogout}
-                className="btn-more-infor my-2 my-sm-0 mr-2"
-                style={{
-                  height: "40px",
-                  width: "100px",
-                  display: "inline-block",
-                }}
+                className="btn-more-infor my-2 my-sm-0 mr-2"                
               >
                 {t("auth.logout")}
               </button>
               <button
-                className="btn-more-infor my-2 my-sm-0"
-                style={{
-                  height: "40px",
-                  width: "120px",
-                  display: "inline-block",
-                }}
+                className="btn-more-infor my-2 my-sm-0"                
                 onClick={handleToggleLanguage}
               >
                 {t(`language.${i18n.language === "en" ? "vi" : "en"}`)}
