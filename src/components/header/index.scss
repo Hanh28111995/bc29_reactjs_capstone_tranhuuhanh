@@ -11,6 +11,9 @@
 .noti-icon img {  
   margin: 10px auto;
   width: 55vw;
+  @media (min-width: 550px) {
+    width: 80vw;
+  }
 }
 
 .navbar-toggler{

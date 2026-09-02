@@ -4,7 +4,14 @@ import SEO from "components/SEO";
 import "./index.scss";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import {
+  FacebookFilled,
+  LeftOutlined,
+  RightOutlined,
+  SafetyCertificateFilled,
+  TikTokFilled,
+  YoutubeFilled,
+} from "@ant-design/icons";
 import { useAsync } from "hooks/useAsync";
 import { fetchShowBannerAPI, fetchShowPromotionAPI } from "services/general";
 
@@ -73,13 +80,13 @@ export default function HeroPage() {
         slidesToScroll: 1,
       },
     },
-    {
-      breakpoint: 768,
-      settings: {
-        slidesToShow: 2,
-        slidesToScroll: 1,
-      },
-    },    
+    // {
+    //   breakpoint: 768,
+    //   settings: {
+    //     slidesToShow: 2,
+    //     slidesToScroll: 1,
+    //   },
+    // },    
   ],
 };
   const settings_child = {
@@ -394,28 +401,29 @@ export default function HeroPage() {
       <section className="announcement-section">
         <div className="social-bar">
           <a href="#" className="social-item youtube">
-            <span className="icon">▶</span>
+            <span className="icon" aria-hidden="true"><YoutubeFilled /></span>
             <div className="text">
               <small>youtube.com</small>
               <strong>/LotteCinemaVietnam</strong>
             </div>
           </a>
           <a href="#" className="social-item facebook">
-            <span className="icon">f</span>
+            <span className="icon" aria-hidden="true"><FacebookFilled /></span>
             <div className="text">
               <small>fb.com</small>
               <strong>/lottecinema</strong>
             </div>
           </a>
           <a href="#" className="social-item tiktok">
-            <span className="icon">🎵</span>
+            <span className="icon" aria-hidden="true"><TikTokFilled /></span>
             <div className="text">
               <small>tiktok.com</small>
               <strong>/@lottecinema.official</strong>
             </div>
           </a>
           <div className="social-item verified">
-            <span>✔ ĐÃ THÔNG BÁO BỘ CÔNG THƯƠNG</span>
+            <span className="icon" aria-hidden="true"><SafetyCertificateFilled /></span>
+            <span>ĐÃ THÔNG BÁO BỘ CÔNG THƯƠNG</span>
           </div>
         </div>
 
