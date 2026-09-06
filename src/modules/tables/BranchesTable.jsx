@@ -12,8 +12,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   SaveOutlined,
-  SearchOutlined,
-  PlusOutlined,
+  SearchOutlined,  
 } from "@ant-design/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import "./index.scss";
