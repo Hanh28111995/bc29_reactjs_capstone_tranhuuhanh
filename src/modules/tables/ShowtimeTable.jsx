@@ -181,7 +181,7 @@ export default function ShowtimeTable() {
                         style={{ width: 300 }}
                     />
                     <Space className='ml-auto' wrap>
-                        <Button
+                        {/* <Button
                             type={activeFilter === 'today' ? 'primary' : 'default'}
                             icon={<CalendarOutlined />}
                             onClick={() => handleFilterChange('today')}
@@ -194,7 +194,7 @@ export default function ShowtimeTable() {
                             onClick={() => handleFilterChange('upcoming')}
                         >
                             SẮP ĐẾN
-                        </Button>
+                        </Button> */}
                         <Button
                             type={activeFilter === 'all' ? 'primary' : 'default'}
                             icon={<CalendarOutlined />}
