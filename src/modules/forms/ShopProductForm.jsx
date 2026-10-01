@@ -353,9 +353,7 @@ export default function ShopProductForm() {
                             <Form.Item
                               {...restField}
                               name={[name, "branch"]}
-                              rules={[
-                                { required: true, message: "Chọn rạp" },
-                              ]}
+                              rules={[{ required: true, message: "Chọn rạp" }]}
                               style={{ width: 200, marginBottom: 0 }}
                             >
                               <Select
@@ -371,9 +369,7 @@ export default function ShopProductForm() {
                             <Form.Item
                               {...restField}
                               name={[name, "quantity"]}
-                              rules={[
-                                { required: true, message: "Nhập SL" },
-                              ]}
+                              rules={[{ required: true, message: "Nhập SL" }]}
                               style={{ marginBottom: 0 }}
                             >
                               <InputNumber
@@ -392,7 +388,9 @@ export default function ShopProductForm() {
                         ))}
                         <Button
                           type="dashed"
-                          onClick={() => add({ branch: undefined, quantity: 0 })}
+                          onClick={() =>
+                            add({ branch: undefined, quantity: 0 })
+                          }
                           block
                           icon={<PlusOutlined />}
                           disabled={branchOptions.length === 0}
@@ -449,21 +447,28 @@ export default function ShopProductForm() {
                   {fields.map(({ key, name, ...restField }) => (
                     <Space
                       key={key}
-                      style={{ display: "flex", marginBottom: 8 }}
-                      align="baseline"                      
+                      style={{
+                        display: "flex",
+                        marginBottom: 8,
+                        flexWrap: "wrap",
+                      }}
+                      align="baseline"
                     >
                       <Form.Item
                         {...restField}
                         name={[name, "name"]}
                         rules={[
                           { required: true, message: "Nhập tên tùy chọn" },
-                        ]}                        
+                        ]}
+                        style={{ width: 220, marginBottom: 0 }}
                       >
-                        <Input width="50px" placeholder="Tên tùy chọn (VD: Size, Màu)" />
+                        <Input placeholder="Tên tùy chọn (VD: Size, Màu)" />
                       </Form.Item>
+
                       <Form.Item
                         {...restField}
                         name={[name, "choices"]}
+                        style={{ width: 380, marginBottom: 0 }}
                         getValueFromEvent={(e) =>
                           e.target.value.split(",").map((s) => s.trim())
                         }
@@ -471,18 +476,21 @@ export default function ShopProductForm() {
                           value: Array.isArray(val) ? val.join(", ") : val,
                         })}
                       >
-                        <Input width="50px" placeholder="Các lựa chọn (cách nhau bởi dấu phẩy)" />
+                        <Input placeholder="Các lựa chọn (cách nhau bởi dấu phẩy)" />
                       </Form.Item>
+
                       <Form.Item
                         {...restField}
                         name={[name, "required"]}
                         valuePropName="checked"
+                        style={{ marginBottom: 0 }}
                       >
                         <Switch
                           checkedChildren="Bắt buộc"
                           unCheckedChildren="Tùy chọn"
                         />
                       </Form.Item>
+
                       <Button
                         type="text"
                         danger
