@@ -59,7 +59,7 @@ export default function ShopProductForm() {
   const [branchOptions, setBranchOptions] = useState([]);
   const [allBranchesMode, setAllBranchesMode] = useState(false);
 
-  // Lấy danh sách rạp từ API /admin/branch/all để chọn trong "Tồn kho theo từng rạp"
+  // Lấy danh sách rạp để chọn trong "Tồn kho theo từng rạp"
   useEffect(() => {
     getAllBranches()
       .then((res) => {
@@ -91,7 +91,7 @@ export default function ShopProductForm() {
     if (params.productId && params.productId !== "create") {
       const data = productDetail?.data || productDetail;
       if (data) {
-        // Chuyển đổi Object Map từ BE thành mảng [{ branch, quantity }] cho Form.List
+        // Chuyển Object Map từ BE thành mảng [{ branch, quantity }] cho Form.List
         let stockByBranchArray = [];
         if (Array.isArray(data.stockByBranch)) {
           stockByBranchArray = data.stockByBranch;
@@ -104,12 +104,14 @@ export default function ShopProductForm() {
           );
         }
 
-        // Nếu tồn kho đã khai cho toàn bộ rạp → bật sẵn chế độ "Chọn tất cả"
+        // Nếu đã khai tồn cho toàn bộ rạp → bật sẵn chế độ "Chọn tất cả"
         if (
           branchOptions.length > 0 &&
           stockByBranchArray.length >= branchOptions.length
         ) {
           setAllBranchesMode(true);
+        } else {
+          setAllBranchesMode(false);
         }
 
         const normalized = {
@@ -167,14 +169,10 @@ export default function ShopProductForm() {
   const handleSave = async (values) => {
     try {
       const formData = new FormData();
-      const payload = {
-        ...values,
-        options: values.options || [],
-        stockByBranch: values.stockByBranch || [],
-        active: Boolean(values.active),
-        highlight: Boolean(values.highlight),
-      };
-      let stockByBranch = payload.stockByBranch;
+
+      // BE yêu cầu stockByBranch không rỗng.
+      // Nếu chưa khai rạp nào → tự áp dụng toàn bộ rạp với số lượng = stock.
+      let stockByBranch = values.stockByBranch || [];
       if (stockByBranch.length === 0 && branchOptions.length > 0) {
         const stock = values.stock ?? 0;
         stockByBranch = branchOptions.map((branch) => ({
@@ -182,18 +180,20 @@ export default function ShopProductForm() {
           quantity: stock,
         }));
       }
-      payload.stockByBranch = stockByBranch;
+
+      const payload = {
+        ...values,
+        options: values.options || [],
+        stockByBranch,
+        active: Boolean(values.active),
+        highlight: Boolean(values.highlight),
+      };
 
       Object.keys(payload).forEach((key) => {
         if (payload[key] === null || payload[key] === undefined) return;
 
-        if (key === "options") {
+        if (key === "options" || key === "stockByBranch") {
           formData.append(key, JSON.stringify(payload[key]));
-        } else if (key === "stockByBranch") {
-          // Chỉ gửi khi có ít nhất 1 rạp — tránh xóa sạch Map cũ khi sửa sản phẩm
-          if (payload[key].length > 0) {
-            formData.append(key, JSON.stringify(payload[key]));
-          }
         } else {
           formData.append(key, payload[key]);
         }
@@ -240,6 +240,21 @@ export default function ShopProductForm() {
       setFile(fileUploaded);
       setIsChanged(true);
     };
+  };
+
+  const handleToggleAllBranches = (checked) => {
+    setAllBranchesMode(checked);
+    if (checked) {
+      const stock = form.getFieldValue("stock");
+      const allRows = branchOptions.map((branch) => ({
+        branch,
+        quantity: stock ?? 0,
+      }));
+      form.setFieldsValue({ stockByBranch: allRows });
+    } else {
+      form.setFieldsValue({ stockByBranch: [] });
+    }
+    setIsChanged(true);
   };
 
   return (
@@ -302,36 +317,96 @@ export default function ShopProductForm() {
               <Col xs={24} sm={14}>
                 <Checkbox
                   checked={allBranchesMode}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setAllBranchesMode(checked);
-                    if (checked) {
-                      const stock = form.getFieldValue("stock");
-                      const allRows = branchOptions.map((branch) => ({
-                        branch,
-                        quantity: stock ?? 0,
-                      }));
-                      form.setFieldsValue({ stockByBranch: allRows });
-                    } else {
-                      form.setFieldsValue({ stockByBranch: [] });
-                    }
-                  }}
+                  onChange={(e) => handleToggleAllBranches(e.target.checked)}
                 >
                   Chọn tất cả các rạp (áp dụng cho toàn bộ chi nhánh)
                 </Checkbox>
 
-                <div style={{ display: allBranchesMode ? "none" : "block" }}>
-                  <Form.Item label="Tồn kho theo từng rạp">
-                    <Form.List name="stockByBranch">
-                      {/* ...giữ nguyên ... */}
-                    </Form.List>
-                  </Form.Item>
+                {/* Ẩn bằng display — KHÔNG unmount, tránh mất value của Form.List */}
+                <div
+                  style={{
+                    display: allBranchesMode ? "none" : "block",
+                    marginTop: 12,
+                  }}
+                >
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: 8,
+                      color: "rgba(0,0,0,0.88)",
+                      fontSize: 14,
+                    }}
+                  >
+                    Tồn kho theo từng rạp
+                  </label>
+
+                  {/* Form.List đặt trực tiếp — KHÔNG bọc trong Form.Item có name */}
+                  <Form.List name="stockByBranch">
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map(({ key, name, ...restField }) => (
+                          <Space
+                            key={key}
+                            style={{ display: "flex", marginBottom: 8 }}
+                            align="baseline"
+                          >
+                            <Form.Item
+                              {...restField}
+                              name={[name, "branch"]}
+                              rules={[
+                                { required: true, message: "Chọn rạp" },
+                              ]}
+                              style={{ width: 200, marginBottom: 0 }}
+                            >
+                              <Select
+                                placeholder="Chọn rạp"
+                                options={branchOptions.map((b) => ({
+                                  value: b,
+                                  label: b,
+                                }))}
+                                showSearch
+                                optionFilterProp="label"
+                              />
+                            </Form.Item>
+                            <Form.Item
+                              {...restField}
+                              name={[name, "quantity"]}
+                              rules={[
+                                { required: true, message: "Nhập SL" },
+                              ]}
+                              style={{ marginBottom: 0 }}
+                            >
+                              <InputNumber
+                                min={0}
+                                placeholder="SL"
+                                style={{ width: 80 }}
+                              />
+                            </Form.Item>
+                            <Button
+                              type="text"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={() => remove(name)}
+                            />
+                          </Space>
+                        ))}
+                        <Button
+                          type="dashed"
+                          onClick={() => add({ branch: undefined, quantity: 0 })}
+                          block
+                          icon={<PlusOutlined />}
+                          disabled={branchOptions.length === 0}
+                        >
+                          Thêm rạp
+                        </Button>
+                      </>
+                    )}
+                  </Form.List>
                 </div>
-                {/* Khi chọn tất cả: vẫn hiện tóm tắt số rạp đã áp dụng */}
+
                 {allBranchesMode && (
                   <div style={{ marginTop: 8, color: "#52c41a" }}>
-                    Đã áp dụng tồn kho cho {branchOptions.length} rạp (
-                    {form.getFieldValue("stock") ?? 0} mỗi rạp)
+                    Đã áp dụng tồn kho cho {branchOptions.length} rạp
                   </div>
                 )}
               </Col>
