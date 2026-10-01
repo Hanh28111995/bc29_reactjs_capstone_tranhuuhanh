@@ -451,6 +451,7 @@ export default function ShopProductForm() {
                       key={key}
                       style={{ display: "flex", marginBottom: 8 }}
                       align="baseline"
+                      width="100%"
                     >
                       <Form.Item
                         {...restField}
