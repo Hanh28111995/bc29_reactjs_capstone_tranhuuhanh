@@ -29,6 +29,7 @@ const items = [
     getItem('Theaters', '/admin/theater-management'),
     getItem('Showtimes', '/admin/showtimes'),
     getItem('Tickets', '/admin/ticket-management'),
+    getItem('Coupons', '/admin/coupon-management'),
   ]),
   getItem('Tools', 'tools', <ToolOutlined />, [
     getItem('Schedule Generator', '/admin/tools/schedule-generator'),
