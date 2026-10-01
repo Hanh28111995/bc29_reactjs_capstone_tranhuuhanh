@@ -22,7 +22,7 @@
     .payment-methods {
       .method-group {
         width: 100%;
-        
+
         .ant-space {
           width: 100%;
         }
@@ -64,7 +64,7 @@
       p {
         font-size: 1.4rem;
         margin-bottom: 0.8rem;
-        
+
         b {
           font-weight: 600;
         }
@@ -96,11 +96,29 @@
       }
     }
   }
+  
+  .coupon-section {
+    margin-bottom: 1rem;
+    .coupon-applied {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: rgba(82, 196, 26, 0.08);
+      border: 1px dashed rgba(82, 196, 26, 0.4);
+      border-radius: 8px;
+    }
+  }
+  .discount-line {
+    .ant-typography {
+      display: block;
+    }
+  }
 
   /* Responsive Mobile < 500px */
   @media only screen and (max-width: 500px) {
     margin: 2rem auto;
-    
+
     .payment-container {
       display: flex;
       flex-direction: column-reverse; /* Chuyển thành 1 cột dọc */

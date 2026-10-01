@@ -11,6 +11,7 @@ import {
   Space,
   Modal,
   notification,
+  Input,
 } from "antd";
 
 import {
@@ -19,6 +20,7 @@ import {
   DollarOutlined,
   ArrowLeftOutlined,
   ExclamationCircleOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -29,6 +31,8 @@ import {
   fetchCreateVnpayPayment,
   fetchTicketBookingAPI,
 } from "services/ticket";
+
+import { fetchValidateCouponAPI } from "services/coupon";
 
 import {
   fetchNotificationAPI,
@@ -82,6 +86,15 @@ export default function Payment() {
   });
 
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCode, setAppliedCode] = useState(null);
+  const [discount, setDiscount] = useState(0);
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const subtotal =
+    bookingData?.reduce((total, el) => total + (el.price || 0), 0) || 0;
+
+  const totalAmount = Math.max(0, subtotal - discount);
 
   if (!bookingData) {
     return <div className="error-state">Không có dữ liệu đơn hàng</div>;
@@ -97,6 +110,41 @@ export default function Payment() {
     const formatted = formatNotificationsForStore(notiRes.data?.content);
 
     dispatch(setNotificationsAction(formatted));
+  };
+
+  const handleApplyCoupon = async () => {
+    const code = couponInput?.trim();
+    if (!code) {
+      return notification.warning({ message: "Vui lòng nhập mã giảm giá!" });
+    }
+
+    setCouponLoading(true);
+    try {
+      const res = await fetchValidateCouponAPI(code, subtotal);
+      const data = res.data?.content || {};
+
+      setAppliedCode(code.toUpperCase());
+      setDiscount(Number(data.discount) || 0);
+      notification.success({
+        message: "Áp dụng mã thành công",
+        description: `Bạn được giảm ${(Number(data.discount) || 0).toLocaleString()} VNĐ`,
+      });
+    } catch (error) {
+      setAppliedCode(null);
+      setDiscount(0);
+      notification.error({
+        message: "Mã giảm giá không hợp lệ",
+        description: error?.response?.data?.message || "Vui lòng kiểm tra lại mã",
+      });
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCode(null);
+    setDiscount(0);
+    setCouponInput("");
   };
 
   // Chế độ ĐẶT VÉ — tạo vé Pending, không qua cổng thanh toán
@@ -138,19 +186,12 @@ export default function Payment() {
               isBooked: true,
             })),
 
+            couponCode: appliedCode || null,
+
             paymentMethod: "cash",
 
             paymentStatus: "Pending",
           };
-
-          /* eslint-disable no-console */
-
-          console.debug("[PAYMENT] Trigger bookingMutation (reserve)", {
-            role: userState.userInfor?.user_inf.role,
-            payload,
-          });
-
-          /* eslint-enable no-console */
 
           await bookingMutation.mutateAsync({
             role: userState.userInfor?.user_inf.role,
@@ -214,17 +255,12 @@ export default function Payment() {
           isBooked: true,
         })),
 
+        couponCode: appliedCode || null,
+
         paymentMethod: paymentMethod,
 
         paymentStatus: "Pending",
       };
-
-      console.debug("[PAYMENT] Trigger bookingMutation (process)", {
-        role: userState.userInfor?.user_inf?.role,
-        payload,
-      });
-
-      /* eslint-enable no-console */
 
       const result = await bookingMutation.mutateAsync({
         role: userState.userInfor?.user_inf?.role,
@@ -265,7 +301,6 @@ export default function Payment() {
         await fetchCreateCashPayment(ticket);
 
         setTimeout(() => {
-          // 1. Lưu state vào sessionStorage để tab mới có thể đọc lại
           const paymentState = {
             payUrl: null,
             booking: ticket,
@@ -276,10 +311,8 @@ export default function Payment() {
             JSON.stringify(paymentState),
           );
 
-          // 2. Tạo đường dẫn URL
           const targetUrl = `/payment-result?status=success&method=cash&ticketId=${ticket._id}`;
 
-          // 3. Mở ở tab mới
           window.open(targetUrl, "_blank");
         }, 2000);
       }
@@ -388,16 +421,71 @@ export default function Payment() {
 
           <Divider />
 
+          {/* PHẦN NHẬP MÃ GIẢM GIÁ */}
+
+          <div className="coupon-section">
+            {!appliedCode ? (
+              <Space.Compact style={{ width: "100%" }}>
+                <Input
+                  prefix={<GiftOutlined />}
+                  placeholder="Nhập mã giảm giá (VD: GIAM20)"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  onPressEnter={handleApplyCoupon}
+                />
+                <Button
+                  type="primary"
+                  onClick={handleApplyCoupon}
+                  loading={couponLoading}
+                >
+                  Áp dụng
+                </Button>
+              </Space.Compact>
+            ) : (
+              <div className="coupon-applied">
+                <Text strong style={{ color: "var(--success)" }}>
+                  <GiftOutlined /> Mã {appliedCode} đã áp dụng
+                </Text>
+                <Button type="link" size="small" onClick={handleRemoveCoupon}>
+                  Xóa mã
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <Divider />
+
+          <div className="total-section">
+            <Text strong className="total-label">
+              Tạm tính:
+            </Text>
+
+            <Text className="total-amount">
+              {subtotal.toLocaleString()} VNĐ
+            </Text>
+          </div>
+
+          {discount > 0 && (
+            <div className="total-section discount-line">
+              <Text strong className="total-label">
+                Giảm giá:
+              </Text>
+
+              <Text type="danger" className="total-amount">
+                -{discount.toLocaleString()} VNĐ
+              </Text>
+            </div>
+          )}
+
+          <Divider />
+
           <div className="total-section">
             <Text strong className="total-label">
               Tổng cộng:
             </Text>
 
             <Title level={5} className="total-amount">
-              {bookingData
-                .reduce((total, el) => total + (el.price || 0), 0)
-                .toLocaleString()}{" "}
-              VNĐ
+              {totalAmount.toLocaleString()} VNĐ
             </Title>
           </div>
 
