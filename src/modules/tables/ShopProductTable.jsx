@@ -122,7 +122,7 @@ export default function ShopProductTable() {
           <Button 
             type="text" 
             icon={<EditOutlined style={{ color: '#1677ff' }} />} 
-            onClick={() => navigate(`/admin/shop-management/update/${record._id}`)} 
+            onClick={() => navigate(`/admin/shop-product-management/update/${record._id}`)} 
           />
           <Popconfirm title="Xóa sản phẩm này?" onConfirm={() => handleDelete(record._id)}>
             <Button 
@@ -147,7 +147,7 @@ export default function ShopProductTable() {
           className='add-btn' 
           type="primary" 
           icon={<PlusOutlined />} 
-          onClick={() => navigate('/admin/shop-management/create')}
+          onClick={() => navigate('/admin/shop-product-management/create')}
         >
           THÊM SẢN PHẨM
         </Button>
