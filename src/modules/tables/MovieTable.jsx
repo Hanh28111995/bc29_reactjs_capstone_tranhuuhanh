@@ -30,8 +30,7 @@ function MovieTable() {
 
   // 1. Gọi API danh sách mặc định (có phân trang) khi KHÔNG có keyword
   const { data: responseContent, loading: isLoadingList } = useAsync({
-    dependencies: [pagination.page, pagination.limit],
-    // Đồng bộ chuẩn queryKey tiền tố 'movies-list' theo đúng mẫu banner
+    dependencies: [pagination.page, pagination.limit],    
     queryKey: ["movies-list", pagination.page, pagination.limit],
     service: () =>
       fetchMovieListAPI({ page: pagination.page, limit: pagination.limit }),

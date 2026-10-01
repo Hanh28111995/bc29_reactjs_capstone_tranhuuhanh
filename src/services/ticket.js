@@ -1,6 +1,5 @@
 import { request } from "../configs/axios";
 
-
 const fetchCreateMomoPayment = (data) => {
   return request({
     url: `/payment/create_momo`,
@@ -67,7 +66,7 @@ const fetchTicketBookingAPI = (role, data) => {
 const fetchCancelTicketAPI = (role, data) => {
   if (role == "admin") role = "staff";
   return request({
-  url: `/${role}/ticket/cancelTicket`,
+    url: `/${role}/ticket/cancelTicket`,
     method: "POST",
     data,
   });
@@ -76,16 +75,24 @@ const fetchCancelTicketAPI = (role, data) => {
 const fetchCompletedTicketAPI = (role, data) => {
   if (role == "admin") role = "staff";
   return request({
-  url: `/${role}/ticket/completeTicket`,
+    url: `/${role}/ticket/completeTicket`,
     method: "POST",
     data,
+  });
+};
+
+const fetchCheckPayment = (id) => {
+  return request({ 
+    url: `/payment/status/${id}`, 
+    method: "GET" 
   });
 };
 
 export {
   fetchCancelTicketAPI,
   fetchCompletedTicketAPI,
-  fetchTicketBookingAPI,  
+  fetchCheckPayment,
+  fetchTicketBookingAPI,
   fetchCreateMomoPayment,
   fetchCreateCashPayment,
   fetchCreateVnpayPayment,

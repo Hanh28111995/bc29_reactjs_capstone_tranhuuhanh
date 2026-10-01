@@ -13,19 +13,13 @@ request.interceptors.request.use((config) => {
   if (userInfor?.user_token) {
     config.headers.Authorization = `Bearer ${userInfor.user_token}`;
   }
-  try {
-    // Lightweight debug: show outgoing request method/URL and trimmed data
-    // Kept minimal to avoid leaking secrets in prod logs
-    /* eslint-disable no-console */
+  try {    
     console.debug('[AXIOS REQUEST]', config.method?.toUpperCase(), config.url, {
       params: config.params,
       data: config.data,
       headers: config.headers && { ...config.headers },
-    });
-    /* eslint-enable no-console */
-  } catch (err) {
-    // ignore logging errors
-  }
+    });    
+  } catch (err) {    }
   return config;
 });
 
