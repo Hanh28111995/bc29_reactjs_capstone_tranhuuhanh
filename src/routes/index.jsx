@@ -1,10 +1,11 @@
 import React, { lazy } from "react";
 import { useRoutes, Navigate } from "react-router-dom";
 
-
 // --- Layouts ---
 import AdminLayout from "../layouts/AdminLayout";
 import HomeLayout from "../layouts/HomeLayout";
+import UpdateCoupon from "pages/admin/couponManagement/UpdateCoupon";
+import CouponManagement from "pages/admin/couponManagement/CouponManagement";
 
 // --- Guards ---
 const AuthGuards = lazy(() => import("guards/auth.guards"));
@@ -33,7 +34,9 @@ const Payment = lazy(() => import("pages/payment/Payment"));
 const PaymentResult = lazy(() => import("pages/payment/PaymentResult"));
 
 // --- Tool & Other Pages ---
-const ScheduleGenerator = lazy(() => import("pages/toolManagement/ScheduleGenerator"));
+const ScheduleGenerator = lazy(
+  () => import("pages/toolManagement/ScheduleGenerator"),
+);
 const PageNotFound = lazy(() => import("pages/PageNotFound/PageNotFound"));
 
 // --- Theater Management Pages ---
@@ -41,28 +44,58 @@ const SeatTypeTable = lazy(() => import("modules/tables/SeatTypesTable"));
 const BranchesTable = lazy(() => import("modules/tables/BranchesTable"));
 
 // --- Admin Management & Update Pages ---
-const ShowTimesManagement = lazy(() => import("pages/admin/showtimeManagement/ShowTimesManagement"));
-const TheatersManagement = lazy(() => import("pages/admin/theaterManagement/TheaterManagement"));
-const MovieManagement = lazy(() => import("pages/admin/movieManagement/MovieManagement"));
-const UpdateMovie = lazy(() => import("pages/admin/movieManagement/UpdateMovie"));
+const ShowTimesManagement = lazy(
+  () => import("pages/admin/showtimeManagement/ShowTimesManagement"),
+);
+const TheatersManagement = lazy(
+  () => import("pages/admin/theaterManagement/TheaterManagement"),
+);
+const MovieManagement = lazy(
+  () => import("pages/admin/movieManagement/MovieManagement"),
+);
+const UpdateMovie = lazy(
+  () => import("pages/admin/movieManagement/UpdateMovie"),
+);
 
-const UserManagement = lazy(() => import("pages/admin/userManagement/UserManagement"));
+const UserManagement = lazy(
+  () => import("pages/admin/userManagement/UserManagement"),
+);
 const UpdateUser = lazy(() => import("pages/admin/userManagement/UpdateUser"));
 
-const TicketManagement = lazy(() => import("pages/admin/ticketManagement/TicketManagement"));
-const UpdateTicket = lazy(() => import("pages/admin/ticketManagement/UpdateTicket"));
+const TicketManagement = lazy(
+  () => import("pages/admin/ticketManagement/TicketManagement"),
+);
+const UpdateTicket = lazy(
+  () => import("pages/admin/ticketManagement/UpdateTicket"),
+);
 
-const PromotionManagement = lazy(() => import("pages/admin/promotionManagement/PromotionManagement"));
-const UpdatePromotion = lazy(() => import("pages/admin/promotionManagement/UpdatePromotion"));
+const PromotionManagement = lazy(
+  () => import("pages/admin/promotionManagement/PromotionManagement"),
+);
+const UpdatePromotion = lazy(
+  () => import("pages/admin/promotionManagement/UpdatePromotion"),
+);
 
-const ShopProductManagement = lazy(() => import("pages/admin/shopManagement/ShopProductManagement"));
-const UpdateShopProduct = lazy(() => import("pages/admin/shopManagement/UpdateShopProduct"));
+const ShopProductManagement = lazy(
+  () => import("pages/admin/shopManagement/ShopProductManagement"),
+);
+const UpdateShopProduct = lazy(
+  () => import("pages/admin/shopManagement/UpdateShopProduct"),
+);
 
-const UpdateShowTime = lazy(() => import("pages/admin/showtimeManagement/UpdateShowTime"));
-const UpdateTheater = lazy(() => import("pages/admin/theaterManagement/UpdateTheater"));
+const UpdateShowTime = lazy(
+  () => import("pages/admin/showtimeManagement/UpdateShowTime"),
+);
+const UpdateTheater = lazy(
+  () => import("pages/admin/theaterManagement/UpdateTheater"),
+);
 
-const UpdateBanner = lazy(() => import("pages/admin/bannerManagement/UpdateBanner"));
-const BannerManagement = lazy(() => import("pages/admin/bannerManagement/BannerManagement"));
+const UpdateBanner = lazy(
+  () => import("pages/admin/bannerManagement/UpdateBanner"),
+);
+const BannerManagement = lazy(
+  () => import("pages/admin/bannerManagement/BannerManagement"),
+);
 
 export default function Router() {
   const routing = useRoutes([
@@ -77,7 +110,7 @@ export default function Router() {
         {
           path: "/movie-search",
           element: <MovieDetail />,
-        },        
+        },
         {
           path: "/movie-talk",
           element: <Home />,
@@ -101,7 +134,7 @@ export default function Router() {
         {
           path: "/movie/detail/:movieId",
           element: <MovieDtail />,
-        },        
+        },
         {
           path: "/promotion/:id",
           element: <PromotionDetail />,
@@ -184,7 +217,7 @@ export default function Router() {
             {
               path: "/admin/shop-management",
               element: <ShopProductManagement />,
-            },            
+            },
             {
               path: "/admin/tools/schedule-generator",
               element: <ScheduleGenerator />,
@@ -192,7 +225,11 @@ export default function Router() {
             {
               path: "/admin/tools/banner-generator",
               element: <BannerManagement />,
-            },            
+            },
+            {
+              path: "/admin/coupon-management",
+              element: <CouponManagement />,
+            },
 
             //////  Create Group //////
             {
@@ -222,6 +259,10 @@ export default function Router() {
             {
               path: "/admin/tools/banner-generator/create",
               element: <UpdateBanner />,
+            },
+            {
+              path: "/admin/coupon-management/create",
+              element: <UpdateCoupon />,
             },
 
             //////  Update Group //////
@@ -257,6 +298,11 @@ export default function Router() {
               path: "/admin/tools/banner-generator/update/:id",
               element: <UpdateBanner />,
             },
+            {
+              path: "/admin/coupon-management/update/:id",
+              element: <UpdateCoupon />,
+            },
+
             ////// Update & Create thao tac chung trong Table
             {
               path: "/admin/seat-types",
