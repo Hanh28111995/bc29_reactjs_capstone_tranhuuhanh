@@ -458,8 +458,9 @@ export default function ShopProductForm() {
                         rules={[
                           { required: true, message: "Nhập tên tùy chọn" },
                         ]}
+                        width="50%"
                       >
-                        <Input placeholder="Tên tùy chọn (VD: Size, Màu)" />
+                        <Input width="50%" placeholder="Tên tùy chọn (VD: Size, Màu)" />
                       </Form.Item>
                       <Form.Item
                         {...restField}
@@ -471,7 +472,7 @@ export default function ShopProductForm() {
                           value: Array.isArray(val) ? val.join(", ") : val,
                         })}
                       >
-                        <Input placeholder="Các lựa chọn (cách nhau bởi dấu phẩy)" />
+                        <Input width="50%" placeholder="Các lựa chọn (cách nhau bởi dấu phẩy)" />
                       </Form.Item>
                       <Form.Item
                         {...restField}
