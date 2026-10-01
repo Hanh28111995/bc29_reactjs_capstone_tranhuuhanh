@@ -450,18 +450,16 @@ export default function ShopProductForm() {
                     <Space
                       key={key}
                       style={{ display: "flex", marginBottom: 8 }}
-                      align="baseline"
-                      width="100%"
+                      align="baseline"                      
                     >
                       <Form.Item
                         {...restField}
                         name={[name, "name"]}
                         rules={[
                           { required: true, message: "Nhập tên tùy chọn" },
-                        ]}
-                        width="50%"
+                        ]}                        
                       >
-                        <Input width="50%" placeholder="Tên tùy chọn (VD: Size, Màu)" />
+                        <Input width="50px" placeholder="Tên tùy chọn (VD: Size, Màu)" />
                       </Form.Item>
                       <Form.Item
                         {...restField}
@@ -473,7 +471,7 @@ export default function ShopProductForm() {
                           value: Array.isArray(val) ? val.join(", ") : val,
                         })}
                       >
-                        <Input width="50%" placeholder="Các lựa chọn (cách nhau bởi dấu phẩy)" />
+                        <Input width="50px" placeholder="Các lựa chọn (cách nhau bởi dấu phẩy)" />
                       </Form.Item>
                       <Form.Item
                         {...restField}
