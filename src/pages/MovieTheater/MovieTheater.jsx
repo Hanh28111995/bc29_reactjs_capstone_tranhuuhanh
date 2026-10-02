@@ -90,8 +90,10 @@ function MovieTheater() {
   const [manuallySelectedCinemaId, setManuallySelectedCinemaId] = useState(null);
   const [userCoordinates, setUserCoordinates] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [cinemaSchedules, setCinemaSchedules] = useState([]);
   const [loadingSchedules, setLoadingSchedules] = useState(false);
+  const [activeTab, setActiveTab] = useState("schedule");
 
   const { state: rawLocations = [], loading: loadingLocations, isError: locationsError } = useAsync({
     service: fetchLocationListAPI,
@@ -105,7 +107,11 @@ function MovieTheater() {
     service: fetchShowBannerAPI,
     queryKey: ["cinema-banners", "active"],
   });
-  const { state: rawMovies = [] } = useAsync({
+  const {
+    state: rawMovies = [],
+    loading: loadingMovies,
+    isError: moviesError,
+  } = useAsync({
     service: fetchMovieListAPI,
     queryKey: ["movies-list", "cinema-page"],
   });
@@ -184,7 +190,9 @@ function MovieTheater() {
 
     let cancelled = false;
     setLoadingSchedules(true);
-    const currentMovies = movies.filter((movie) => movie.showing !== false);
+    const currentMovies = movies.filter((movie) =>
+      movie.showing !== false && (!selectedMovieId || movie._id === selectedMovieId)
+    );
 
     Promise.all(currentMovies.map(async (movie) => {
       try {
@@ -210,7 +218,7 @@ function MovieTheater() {
     return () => {
       cancelled = true;
     };
-  }, [selectedCinema, selectedDate, movies, currentRegionName]);
+  }, [selectedCinema, selectedDate, movies, selectedMovieId, currentRegionName]);
 
   const handleRegionSelect = (region) => {
     setSelectedRegion(region);
@@ -222,6 +230,7 @@ function MovieTheater() {
 
   const openDirections = () => {
     if (!selectedCinema) return;
+    setActiveTab("location");
     const coordinates = parseCoordinates(selectedCinema.coordinates);
     const destination = coordinates
       ? `${coordinates[0]},${coordinates[1]}`
@@ -239,6 +248,37 @@ function MovieTheater() {
   const amenityList = Array.isArray(amenities)
     ? amenities
     : String(amenities || "").split(",").map((item) => item.trim()).filter(Boolean);
+  const directionsText = selectedCinema
+    ? selectedCinema.directions || selectedCinema.direction || selectedCinema.howToGetThere || selectedCinema.route || selectedCinema.guide || ""
+    : "";
+
+  const parkingText = selectedCinema
+    ? selectedCinema.parking || selectedCinema.parkingInfo || selectedCinema.parkingLot || selectedCinema.parkingSpaces || ""
+    : "";
+
+  const normalizeUtilityText = (value) => {
+    if (!value) return "";
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => {
+          if (typeof item === "string") return item.trim();
+          if (item && typeof item === "object") {
+            return Object.entries(item)
+              .map(([key, val]) => `${key}: ${val}`)
+              .join("; ");
+          }
+          return "";
+        })
+        .filter(Boolean)
+        .join("\n");
+    }
+    if (typeof value === "object") {
+      return Object.entries(value)
+        .map(([key, val]) => `${key}: ${val}`)
+        .join("\n");
+    }
+    return String(value);
+  };
 
   if (loadingLocations || loadingCinemas || loadingBanners) {
     return <div className="cinema-page-loading"><Spin size="large" /></div>;
@@ -259,7 +299,57 @@ function MovieTheater() {
       label: "Lịch chiếu phim",
       children: (
         <div className="cinema-schedule-tab">
-          <Calendar onDateChange={setSelectedDate} />
+          <div className="cinema-movie-carousel-section">
+            <h2>Chọn phim</h2>
+            {moviesError ? (
+              <Empty description="Không thể tải danh sách phim lúc này." />
+            ) : (
+              <Spin spinning={loadingMovies}>
+                {movies.length > 0 ? (
+                  <Carousel
+                    className="cinema-movie-carousel"
+                    dots={false}
+                    arrows={movies.length > 4}
+                    slidesToShow={Math.min(movies.length, 4)}
+                    slidesToScroll={1}
+                    responsive={[
+                      { breakpoint: 900, settings: { slidesToShow: Math.min(movies.length, 3) } },
+                      { breakpoint: 600, settings: { slidesToShow: Math.min(movies.length, 2) } },
+                      { breakpoint: 400, settings: { slidesToShow: 1 } },
+                    ]}
+                  >
+                    {movies.map((movie) => {
+                      const movieId = movie._id;
+                      const movieTitle = movie.tenPhim || movie.title || "Phim";
+                      const movieImage = movie.banner || movie.poster || movie.image;
+                      const isSelected = selectedMovieId === movieId;
+
+                      return (
+                        <div className="cinema-movie-carousel-slide" key={movieId}>
+                          <button
+                            type="button"
+                            className={`cinema-movie-card${isSelected ? " is-selected" : ""}`}
+                            aria-pressed={isSelected}
+                            onClick={() => setSelectedMovieId(isSelected ? null : movieId)}
+                          >
+                            {movieImage ? (
+                              <img src={movieImage} alt={movieTitle} loading="lazy" />
+                            ) : (
+                              <span className="cinema-movie-card-placeholder">{movieTitle}</span>
+                            )}
+                            <span className="cinema-movie-card-title">{movieTitle}</span>
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </Carousel>
+                ) : !loadingMovies ? (
+                  <Empty description="Chưa có phim để hiển thị." />
+                ) : null}
+              </Spin>
+            )}
+          </div>
+          <Calendar onDateChange={setSelectedDate} isActive={activeTab === "schedule"} />
           <div className="age-rating-legend">
             <span><b className="age-rating-p">P</b> Mọi đối tượng</span>
             <span><b className="age-rating-c13">13</b> 13 tuổi trở lên</span>
@@ -308,7 +398,7 @@ function MovieTheater() {
       label: "Hướng dẫn đi tới rạp",
       children: selectedCinema ? (
         <div className="cinema-directions-tab">
-          <p>{selectedCinema.address}</p>
+          <p>{directionsText || selectedCinema.address || "Chưa có hướng dẫn đi tới rạp."}</p>
           <Button icon={<LinkOutlined />} onClick={openDirections}>Mở chỉ đường</Button>
         </div>
       ) : <Empty description="Chưa chọn rạp." />,
@@ -316,9 +406,33 @@ function MovieTheater() {
     {
       key: "amenities",
       label: "Tiện ích đi kèm",
-      children: amenityList.length ? (
-        <div className="cinema-amenities">{amenityList.map((amenity) => <span key={amenity}>{amenity}</span>)}</div>
-      ) : <Empty description="Chưa có thông tin tiện ích cho rạp này." />,
+      children: selectedCinema ? (
+        <div className="cinema-utility-list">
+          {parkingText && (
+            <div className="cinema-utility-row">
+              <div className="cinema-utility-icon cinema-utility-icon-car">🚗</div>
+              <div className="cinema-utility-content">
+                <div className="cinema-utility-title">Nơi đỗ xe</div>
+                <p>{normalizeUtilityText(parkingText)}</p>
+              </div>
+            </div>
+          )}
+
+          {amenityList.length > 0 && (
+            <div className="cinema-utility-row">
+              <div className="cinema-utility-icon cinema-utility-icon-info">i</div>
+              <div className="cinema-utility-content">
+                <div className="cinema-utility-title">Tiện ích đi kèm</div>
+                <p>{normalizeUtilityText(amenityList)}</p>
+              </div>
+            </div>
+          )}
+
+          {!parkingText && amenityList.length === 0 && (
+            <Empty description="Chưa có thông tin tiện ích cho rạp này." />
+          )}
+        </div>
+      ) : <Empty description="Chưa chọn rạp." />,
     },
   ];
 
@@ -367,8 +481,7 @@ function MovieTheater() {
       <div className="cinema-detail-container">
         {selectedCinema ? (
           <>
-            <header className="cinema-detail-header">
-              <div className="cinema-detail-poster" aria-hidden="true">{selectedCinema.cinemaName?.slice(0, 1) || "C"}</div>
+            <header className="cinema-detail-header">              
               <div className="cinema-detail-info">
                 <div className="cinema-detail-title-row">
                   <h1>{selectedCinema.branch}</h1>
@@ -383,7 +496,7 @@ function MovieTheater() {
                 </div>
               </div>
             </header>
-            <Tabs defaultActiveKey="schedule" items={tabItems} />
+            <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
           </>
         ) : (
           <div className="cinema-no-selection">

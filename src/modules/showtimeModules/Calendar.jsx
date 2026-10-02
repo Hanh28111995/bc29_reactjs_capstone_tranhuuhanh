@@ -6,11 +6,30 @@ import { isEqual } from 'constants/common';
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import "./index.scss";
 
-// Giữ nguyên các component Arrow (SampleNextArrow, SamplePrevArrow)
 const SampleNextArrow = props => {
   const { className, style, onClick } = props;
+
   return (
-    <div className={className} style={{ ...style, color: 'black', fontSize: '15px', right: '-50px', zIndex: '2' }} onClick={onClick}>
+    <div
+      className={`calendar-arrow calendar-arrow-next ${className || ''}`.trim()}
+      style={{
+        ...style,
+        color: 'black',
+        fontSize: '15px',
+        right: '-42px',
+        left: 'auto',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        zIndex: 2,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '24px',
+        height: '24px',
+        cursor: 'pointer',
+      }}
+      onClick={onClick}
+    >
       <RightOutlined />
     </div>
   );
@@ -18,8 +37,28 @@ const SampleNextArrow = props => {
 
 const SamplePrevArrow = props => {
   const { className, style, onClick } = props;
+
   return (
-    <div className={className} style={{ ...style, color: 'black', fontSize: '15px', left: '-50px', zIndex: '2' }} onClick={onClick}>
+    <div
+      className={`calendar-arrow calendar-arrow-prev ${className || ''}`.trim()}
+      style={{
+        ...style,
+        color: 'black',
+        fontSize: '15px',
+        left: '-42px',
+        right: 'auto',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        zIndex: 2,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '24px',
+        height: '24px',
+        cursor: 'pointer',
+      }}
+      onClick={onClick}
+    >
       <LeftOutlined />
     </div>
   );
@@ -30,17 +69,24 @@ const settings = {
   prevArrow: <SamplePrevArrow />
 };
 
-export default function Calendar({ onDateChange }) {
+export default function Calendar({ onDateChange, isActive = true }) {
   const { todayFormatted, daysShort, render_array_today, today } = useCalendar();
   const [showDays, setShowDays] = useState(formatDate1(today));
   const [showMonth, setShowMonth] = useState(formatDate2(today));
   const [showYear, setShowYear] = useState(formatDate4(today));
+  const [carouselKey, setCarouselKey] = useState(0);
 
   // State quản lý việc hiển thị Active trên UI
   const [appState, changeState] = useState({
     activeObject: null,
     object: render_array_today,
   });
+
+  useEffect(() => {
+    if (isActive) {
+      setCarouselKey((key) => key + 1);
+    }
+  }, [isActive]);
 
   // Tự động chọn ngày hôm nay khi lần đầu load trang
   useEffect(() => {
@@ -133,7 +179,7 @@ export default function Calendar({ onDateChange }) {
       </span>
       <Row justify="center">
         <Col>
-          <CarouselAntd arrows autoplay={false} {...settings} dots={false}>
+          <CarouselAntd key={carouselKey} arrows autoplay={false} {...settings} dots={false}>
             {bannerList}
           </CarouselAntd>
         </Col>

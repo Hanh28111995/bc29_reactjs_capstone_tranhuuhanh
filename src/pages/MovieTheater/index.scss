@@ -125,13 +125,28 @@
 
     .ant-tabs-nav {
         margin-bottom: 0;
-        background: #fff;
+        background: transparent;
+    }
+
+    .ant-tabs-nav-wrap {
+        justify-content: center;
+    }
+
+    .ant-tabs-nav-list {
+        gap: 8px;
     }
 
     .ant-tabs-tab {
+        margin: 0;
         padding: 12px 20px;
+        border: 1px solid #d9d9d9;
+        background: #fff;
         font-size: 12px;
         font-weight: 600;
+    }
+
+    .ant-tabs-tab:hover {
+        border-color: #b9aa7a;
     }
 
     .ant-tabs-tab-active .ant-tabs-tab-btn {
@@ -203,6 +218,84 @@
 .cinema-schedule-tab {
     .Calendar {
         margin: 8px 0 14px;
+    }
+}
+
+.cinema-movie-carousel-section {
+    margin-bottom: 18px;
+
+    h2 {
+        margin: 0 0 12px;
+        color: #27343c;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .cinema-movie-carousel {
+        padding: 0 28px;
+
+        .slick-slide > div {
+            height: 100%;
+        }
+
+        .slick-prev {
+            left: 0;
+            z-index: 1;
+        }
+
+        .slick-next {
+            right: 0;
+        }
+    }
+}
+
+.cinema-movie-carousel-slide {
+    height: 100%;
+    padding: 0 8px;
+}
+
+.cinema-movie-card {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    padding: 6px;
+    border: 1px solid transparent;
+    background: #fff;
+    color: #27343c;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+
+    img,
+    .cinema-movie-card-placeholder {
+        display: grid;
+        width: 100%;
+        aspect-ratio: 2 / 3;
+        place-items: center;
+        background: #e8e2cf;
+        color: #4f5c64;
+        font-size: 13px;
+        object-fit: cover;
+    }
+
+    .cinema-movie-card-title {
+        display: -webkit-box;
+        overflow: hidden;
+        min-height: 36px;
+        margin-top: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 18px;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    &:hover,
+    &.is-selected {
+        border-color: #b9aa7a;
+        box-shadow: 0 0 0 1px #b9aa7a;
     }
 }
 
@@ -324,16 +417,61 @@
     }
 }
 
-.cinema-amenities {
+.cinema-utility-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid #d9d6ce;
+}
 
-    span {
-        padding: 8px 12px;
-        border: 1px solid #e1e4e5;
+.cinema-utility-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid #d9d6ce;
+}
+
+.cinema-utility-icon {
+    display: grid;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1.5px solid #25282d;
+    border-radius: 50%;
+    background: #f9f7f2;
+    color: #1d1f23;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.cinema-utility-icon-car {
+    font-size: 18px;
+}
+
+.cinema-utility-icon-info {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 25px;
+}
+
+.cinema-utility-content {
+    flex: 1;
+
+    .cinema-utility-title {
+        margin-bottom: 8px;
+        color: #1d2328;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    p {
+        margin: 0;
         color: #4f5c64;
-        font-size: 12px;
+        font-size: 13px;
+        line-height: 1.7;
+        white-space: pre-line;
     }
 }
 

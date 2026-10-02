@@ -10,6 +10,23 @@
         content: "";
       }
     }
+
+    .calendar-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      pointer-events: auto;
+      line-height: 1;
+    }
+
+    .calendar-arrow-next {
+      right: -42px;
+    }
+
+    .calendar-arrow-prev {
+      left: -42px;
+    }
   }
 
   .table {
