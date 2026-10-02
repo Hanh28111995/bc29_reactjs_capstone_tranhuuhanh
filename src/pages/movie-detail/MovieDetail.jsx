@@ -51,6 +51,25 @@ const getRegionCinemas = (region, cinemas) => {
 
 const getRegionCinemaCount = (region, cinemas) => getRegionCinemas(region, cinemas).length;
 
+const getResponseArray = (response, collectionKeys = []) => {
+  const candidates = [
+    response?.data?.content,
+    response?.data?.data,
+    response?.data,
+    response?.content,
+    response,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+    for (const key of collectionKeys) {
+      if (Array.isArray(candidate?.[key])) return candidate[key];
+    }
+  }
+
+  return [];
+};
+
 const AGE_RATING_CLASSES = {
   P: "age-rating-p",
   C13: "age-rating-c13",
@@ -91,20 +110,28 @@ export default function MovieDetail() {
   // ---------- LOAD MOVIE LIST: /general/movie/all ----------
   useEffect(() => {
     fetchMovieListAPI().then((res) => {
-      const list = res?.data?.content || res?.data || [];
-      setMovieList(Array.isArray(list) ? list : []);
-    });
+      setMovieList(getResponseArray(res, ["movies", "movieList", "items"]));
+    }).catch(() => setMovieList([]));
   }, []);
 
   // ---------- LOAD ALL BRANCHES ----------
   useEffect(() => {
     fetchBranchesAPI()
       .then((res) => {
-        const data = res.data?.content || res.data?.data || res.data || [];
-        setAllBranches(Array.isArray(data) ? data : []);
+        setAllBranches(getResponseArray(res, ["cinemas", "branches", "cinemaBranches", "items"]));
       })
       .catch(() => setAllBranches([]));
   }, []);
+
+  useEffect(() => {
+    if (!selectedRegionName) {
+      setBranches([]);
+      return;
+    }
+
+    const region = areasList.find((item) => getRegionName(item) === selectedRegionName);
+    setBranches(getRegionCinemas(region, allBranches));
+  }, [selectedRegionName, areasList, allBranches]);
 
   // ---------- LOAD AREAS ----------
   const { state: rawAreasList = [], loading: IsLoading, isError: IsError } = useAsync({
@@ -129,8 +156,7 @@ export default function MovieDetail() {
   const loadBranchesByLocation = async (location) => {
     try {
       const res = await fetchBranchesAPI({ location });
-      const data = res.data?.content || res.data?.data || res.data || [];
-      const list = Array.isArray(data) ? data : [];
+      const list = getResponseArray(res, ["cinemas", "branches", "cinemaBranches", "items"]);
       const unique = Array.from(
         new Map(list.filter((x) => x?.branch).map((x) => [String(x.branch).trim(), { ...x, branch: String(x.branch).trim() }])).values(),
       );
@@ -142,7 +168,7 @@ export default function MovieDetail() {
   };
 
   // đảm bảo chọn đủ 4 mới fetch showtime
-  const canFetchShowtimes = Boolean(selectedRegionName && selectCity && selectedCinemaName && localDate && paramMovieId);
+  const canFetchShowtimes = Boolean(selectedRegionName && selectedCinemaName && localDate && paramMovieId);
 
   // ---------- SHOWTIMES ----------
   useEffect(() => {
@@ -160,8 +186,7 @@ export default function MovieDetail() {
           idMovie: paramMovieId,
           location: selectedRegionName,
         });
-        const data = res.data?.content || res.data || [];
-        setDataShowTimes(Array.isArray(data) ? data : []);
+        setDataShowTimes(getResponseArray(res, ["showtimes", "items"]));
       } catch (err) {
         console.error("Lỗi lấy suất chiếu:", err);
         setDataShowTimes([]);
@@ -196,8 +221,7 @@ export default function MovieDetail() {
           idMovie: paramMovieId,
           location: selectedRegionName,
         });
-        const content = response.data?.content || response.data || [];
-        return (Array.isArray(content) ? content : []).map((showtime) => ({
+        return getResponseArray(response, ["showtimes", "items"]).map((showtime) => ({
           ...showtime,
           cinemaBranch: cinema.branch,
         }));
@@ -336,7 +360,7 @@ export default function MovieDetail() {
                       return (
                         <button type="button" key={region._id || regionName || index}
                           className={`location-option${selectedRegionName === regionName ? " is-active" : ""}`}
-                          onClick={async () => { setSelectedRegionName(regionName); setSelectCity(null); setBranches([]); setSelectedCinemaName(null); setDataShowTimes([]); await loadBranchesByLocation(regionName); }}>
+                          onClick={() => { setSelectedRegionName(regionName); setSelectCity(null); setSelectedCinemaName(null); setDataShowTimes([]); }}>
                           <span>{regionName}</span>
                           <span className="location-count">{getRegionCinemaCount(region, allBranches)}</span>
                         </button>
