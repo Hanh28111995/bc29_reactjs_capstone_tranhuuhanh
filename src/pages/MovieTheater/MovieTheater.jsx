@@ -319,13 +319,8 @@ function MovieTheater() {
                     className="cinema-movie-carousel"
                     dots={false}
                     arrows={movies.length > 4}
-                    slidesToShow={Math.min(movies.length, 4)}
+                    variableWidth
                     slidesToScroll={1}
-                    responsive={[
-                      { breakpoint: 900, settings: { slidesToShow: Math.min(movies.length, 3) } },
-                      { breakpoint: 600, settings: { slidesToShow: Math.min(movies.length, 2) } },
-                      { breakpoint: 400, settings: { slidesToShow: 1 } },
-                    ]}
                   >
                     {movies.map((movie) => {
                       const movieId = movie._id;
@@ -334,7 +329,11 @@ function MovieTheater() {
                       const isSelected = selectedMovieId === movieId;
 
                       return (
-                        <div className="cinema-movie-carousel-slide" key={movieId}>
+                        <div
+                          className="cinema-movie-carousel-slide"
+                          key={movieId}
+                          style={{ width: "clamp(126px, 14vw, 150px)" }}
+                        >
                           <button
                             type="button"
                             className={`cinema-movie-card${isSelected ? " is-selected" : ""}`}

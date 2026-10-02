@@ -285,7 +285,7 @@
 
 .cinema-movie-carousel-slide {
     height: 100%;
-    padding: 0 8px;
+    padding: 0 6px;
 }
 
 .cinema-movie-card {
@@ -305,7 +305,7 @@
     .cinema-movie-card-placeholder {
         display: grid;
         width: 100%;
-        aspect-ratio: 2 / 3;
+        height: clamp(168px, 18vw, 200px);
         place-items: center;
         background: #e8e2cf;
         color: #4f5c64;

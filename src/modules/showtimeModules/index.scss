@@ -4,11 +4,9 @@
   }
 
   .ant-carousel {
-    .slick-next,
-    .slick-prev {
-      &::before {
-        content: "";
-      }
+    .slick-arrow::before {
+      display: none !important;
+      content: none !important;
     }
 
     .calendar-arrow {
