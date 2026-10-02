@@ -123,6 +123,15 @@ export default function MovieDetail() {
       .catch(() => setAllBranches([]));
   }, []);
 
+  // ---------- LOAD AREAS ----------
+  const { state: rawAreasList = [], loading: IsLoading, isError: IsError } = useAsync({
+    service: () => fetchLocationListAPI(),
+    queryKey: ["areas-list", "active"],
+  });
+
+  const areasList = safeArray(rawAreasList);
+  const activeRegionData = areasList?.find((region) => getRegionName(region) === selectedRegionName);
+
   useEffect(() => {
     if (!selectedRegionName) {
       setBranches([]);
@@ -132,15 +141,6 @@ export default function MovieDetail() {
     const region = areasList.find((item) => getRegionName(item) === selectedRegionName);
     setBranches(getRegionCinemas(region, allBranches));
   }, [selectedRegionName, areasList, allBranches]);
-
-  // ---------- LOAD AREAS ----------
-  const { state: rawAreasList = [], loading: IsLoading, isError: IsError } = useAsync({
-    service: () => fetchLocationListAPI(),
-    queryKey: ["areas-list", "active"],
-  });
-
-  const areasList = safeArray(rawAreasList);
-  const activeRegionData = areasList?.find((region) => getRegionName(region) === selectedRegionName);
 
   const spans = { col1: 6, col2: 6, col3: 6 };
 
