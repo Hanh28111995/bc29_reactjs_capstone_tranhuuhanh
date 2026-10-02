@@ -144,6 +144,7 @@ export default function MovieDetail() {
   const [movieList, setMovieList] = useState([]);
   const [dataShowTimes, setDataShowTimes] = useState([]);
   const [loadingInternal, setLoadingInternal] = useState(false);
+  const [activeTab, setActiveTab] = useState("booking");
   const [branchSearch, setBranchSearch] = useState("");
 
   // =========================
@@ -436,6 +437,28 @@ export default function MovieDetail() {
         }
         image={movieDetail?.hinhAnh}
       />
+      <div className="movie-detail-tabs" role="tablist" aria-label="Chọn chế độ xem">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "booking"}
+          className={activeTab === "booking" ? "is-active" : ""}
+          onClick={() => setActiveTab("booking")}
+        >
+          MUA VÉ XEM PHIM
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "schedule"}
+          className={activeTab === "schedule" ? "is-active" : ""}
+          onClick={() => setActiveTab("schedule")}
+        >
+          LỊCH CHIẾU PHIM
+        </button>
+      </div>
+      {activeTab === "booking" ? (
+        <>
       <Calendar onDateChange={(date) => setLocalDate(date)} />
       <div className="showtime-picker">
         <section className="picker-column location-column">
@@ -905,6 +928,50 @@ export default function MovieDetail() {
           </div>
         </div>
       </Card>
+
+        </>
+      ) : (
+        <section className="schedule-tab-content">
+          <Calendar onDateChange={(date) => setLocalDate(date)} />
+          <div className="results-heading">
+            <h2>Lịch chiếu phim</h2>
+            <p>
+              {localDate || "Chưa chọn ngày"}
+              {selectedCinemaName ? ` · ${selectedCinemaName}` : " · Chưa chọn rạp"}
+            </p>
+          </div>
+          <Spin spinning={loadingInternal}>
+            {groupedShowtimes.length ? (
+              groupedShowtimes.map((group) => (
+                <div className="room-schedule" key={group.name}>
+                  <h3>{selectedCinemaName} <span>{group.name}</span></h3>
+                  <div className="schedule-tab-list">
+                    {group.showtimes.map((showtime) => {
+                      const seats = Array.isArray(showtime.seats) ? showtime.seats : [];
+                      const availableSeats = seats.filter((seat) => !seat.isBooked).length;
+                      const isPast = dayjs(showtime.startTime?.replace("Z", "")).isBefore(dayjs());
+                      return (
+                        <div className="schedule-tab-row" key={showtime._id}>
+                          <span>{dayjs(showtime.startTime?.replace("Z", "")).format("HH:mm")}</span>
+                          <span>{availableSeats} / {seats.length} ghế trống</span>
+                          <Button
+                            disabled={isPast}
+                            onClick={() => navigate(`/booking/${showtime._id}`)}
+                          >
+                            Chọn suất
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <Empty description="Chọn rạp và ngày ở tab Mua vé xem phim để xem lịch chiếu" />
+            )}
+          </Spin>
+        </section>
+      )}
 
     </div>
   );

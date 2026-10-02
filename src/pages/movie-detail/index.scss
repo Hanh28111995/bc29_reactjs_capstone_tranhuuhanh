@@ -1,7 +1,50 @@
 .detailPage {
+  .movie-detail-tabs {
+    display: flex;
+    gap: 28px;
+    border-bottom: 1px solid #d7dcdf;
+    margin-bottom: 14px;
+
+    button {
+      padding: 10px 2px 9px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: #65717a;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button.is-active {
+      border-bottom-color: #263640;
+      color: #182832;
+    }
+  }
+
   .forPC,
   .forPhone {
     display: none;
+  }
+
+  .schedule-tab-content {
+    min-height: 360px;
+    padding: 8px 0 28px;
+  }
+
+  .schedule-tab-list {
+    border-top: 1px solid #d9dee1;
+  }
+
+  .schedule-tab-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 1fr) minmax(140px, 2fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 10px;
+    border-bottom: 1px solid #e6eaec;
+    color: #46535c;
+    font-size: 13px;
   }
 
   .showtime-picker {
@@ -209,6 +252,15 @@
 
 @media only screen and (max-width: 700px) {
   .detailPage {
+    .movie-detail-tabs {
+      gap: 18px;
+
+      button {
+        font-size: 11px;
+        white-space: nowrap;
+      }
+    }
+
     .showtime-picker {
       grid-template-columns: 1fr;
     }
@@ -237,6 +289,13 @@
 
     .schedule-table {
       min-width: 460px;
+    }
+
+    .schedule-tab-row {
+      grid-template-columns: 64px 1fr auto;
+      gap: 8px;
+      padding: 8px 4px;
+      font-size: 12px;
     }
   }
 }
