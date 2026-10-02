@@ -1,310 +1,358 @@
 import { useAsync, safeArray } from "hooks/useAsync";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Button,
+  Carousel,
+  Empty,
+  Spin,
+  Tabs,
+} from "antd";
 import {
   fetchBranchesAPI,
   fetchLocationListAPI,
-} from "../../services/general";
-import { Button } from "antd";
-import { AimOutlined, SyncOutlined } from "@ant-design/icons";
+  fetchMovieListAPI,
+  fetchShowBannerAPI,
+  fetchShowtimesAPI,
+} from "services/general";
+import { AimOutlined, EnvironmentOutlined, LinkOutlined, SyncOutlined } from "@ant-design/icons";
 import "./index.scss";
 import { useGeoLocationSelect } from "hooks/useGeoLocationSelect";
 import SEO from "components/SEO";
+import Calendar from "modules/showtimeModules/Calendar";
+import dayjs from "dayjs";
+import { getDistance } from "constants/common";
+
+const getRegionName = (region) => region?.vungMien || region?.name || region?.location || region?.city || "";
+
+const getRegionAreas = (region) => {
+  const areas = region?.cumRap || region?.districts || region?.areas || [];
+  return Array.isArray(areas)
+    ? areas.map((area) => typeof area === "string" ? area : area?.name || area?.location || area?.district).filter(Boolean)
+    : [];
+};
+
+const normalizeText = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+
+const getCinemasInRegion = (region, cinemas) => {
+  const areas = getRegionAreas(region).map(normalizeText);
+  const regionName = normalizeText(getRegionName(region));
+  return cinemas.filter((cinema) => {
+    const address = normalizeText(cinema.address);
+    return address.includes(regionName) || areas.some((area) => address.includes(area));
+  });
+};
+
+const parseCoordinates = (coordinates) => {
+  try {
+    const value = typeof coordinates === "string" ? JSON.parse(coordinates) : coordinates;
+    if (Array.isArray(value) && value.length >= 2) return value.map(Number);
+    if (value?.latitude != null && value?.longitude != null) return [Number(value.latitude), Number(value.longitude)];
+  } catch {
+    return null;
+  }
+  return null;
+};
+
+const normalizeDateForApi = (date) => {
+  if (!date) return "";
+  const match = String(date).match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  return match ? `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}` : date;
+};
 
 function MovieTheater() {
-  // =========================
-  // STATES
-  // =========================
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [selectedCinema, setSelectedCinema] = useState(null);
+  const [userCoordinates, setUserCoordinates] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [cinemaSchedules, setCinemaSchedules] = useState([]);
+  const [loadingSchedules, setLoadingSchedules] = useState(false);
 
-  const [selectedVungMien, setSelectedVungMien] = useState(null);
-  const [selectedDistrict, setSelectedDistrict] = useState("");
-
-  const [myLocation, setMyLocation] = useState({
-    district: "",
-    city: "",
-    road: "",
-    suburb: "",
-  });
-
-  // =========================
-  // LOCATIONS
-  // =========================
-
-  const {
-    state: rawLocations = [],
-    loading: isLocationsLoading,
-    isError: isLocationsError,
-    error: locationsError,
-  } = useAsync({
-    dependencies: [],
+  const { state: rawLocations = [], loading: loadingLocations, isError: locationsError } = useAsync({
     service: fetchLocationListAPI,
-    queryKey: ['areas-list', "active"]
+    queryKey: ["areas-list", "cinema-page"],
   });
-
-  const locations = safeArray(rawLocations);
-
-  // =========================
-  // CINEMAS
-  // =========================
-
-  const {
-    state: rawCinemas = [],
-    loading: isCinemasLoading,
-    isError: isCinemasError,
-    error: cinemasError,
-  } = useAsync({
-    dependencies: [],
+  const { state: rawCinemas = [], loading: loadingCinemas, isError: cinemasError } = useAsync({
     service: fetchBranchesAPI,
-    queryKey: ['branches-list', "active"]
+    queryKey: ["branches-list", "cinema-page"],
+  });
+  const { state: rawBanners = [], loading: loadingBanners } = useAsync({
+    service: fetchShowBannerAPI,
+    queryKey: ["cinema-banners", "active"],
+  });
+  const { state: rawMovies = [] } = useAsync({
+    service: fetchMovieListAPI,
+    queryKey: ["movies-list", "cinema-page"],
   });
 
-  const allCinemas = safeArray(rawCinemas);
-
-  // =========================
-  // GỘP LOADING
-  // =========================
-
-  const isLoading = isLocationsLoading || isCinemasLoading;
-
-  // =========================
-  // GỘP ERROR
-  // =========================
-
-  const isError = isLocationsError || isCinemasError;
-
-  const error = locationsError || cinemasError;
-
-  // =========================
-  // GEO LOCATION
-  // =========================
+  const locations = useMemo(() => {
+    const list = safeArray(rawLocations?.locations || rawLocations?.regions || rawLocations);
+    return list;
+  }, [rawLocations]);
+  const cinemas = useMemo(() => {
+    const list = safeArray(rawCinemas?.cinemas || rawCinemas?.branches || rawCinemas);
+    return list.map((cinema) => ({
+      ...cinema,
+      branch: cinema.branch || cinema.cinemaName || cinema.name,
+    })).filter((cinema) => cinema.branch);
+  }, [rawCinemas]);
+  const banners = useMemo(() => {
+    const list = safeArray(rawBanners?.banners || rawBanners?.items || rawBanners);
+    return list.map((item) => item.banner || item.image || item.url).filter(Boolean);
+  }, [rawBanners]);
+  const movies = useMemo(() => safeArray(rawMovies?.movies || rawMovies?.items || rawMovies), [rawMovies]);
+  const currentRegionName = getRegionName(selectedRegion);
+  const currentRegionCinemas = useMemo(
+    () => getCinemasInRegion(selectedRegion, cinemas),
+    [selectedRegion, cinemas],
+  );
 
   const { decision, isLocating, locate } = useGeoLocationSelect({
     locations,
-    cinemas: allCinemas,
+    cinemas,
     askOnMount: true,
-
-    onSelect: ({ region, district, raw }) => {
-      setSelectedVungMien(region);
-      setSelectedDistrict(district || "");
-
-      const locationInfo = {
-        road: raw?.address?.road || "",
-        suburb:
-          raw?.address?.suburb ||
-          raw?.address?.neighbourhood ||
-          "",
-        district: raw?.district || "",
-        city: raw?.city || "",
-      };
-
-      setMyLocation(locationInfo);
+    onSelect: ({ region, coords }) => {
+      setSelectedRegion(region || null);
+      setUserCoordinates(coords || null);
     },
-
     title: "Chia sẻ vị trí",
-    content:
-      "Bạn có muốn chia sẻ vị trí để tự động chọn khu vực không?",
+    content: "Bạn có muốn chọn rạp gần vị trí hiện tại không?",
   });
-
-  // =========================
-  // DEFAULT LOCATION
-  // =========================
 
   useEffect(() => {
-    if (decision !== "denied") return;
-    if (selectedVungMien) return;
-    if (!Array.isArray(locations) || locations.length === 0) return;
+    if (decision !== "denied" || selectedCinema || !locations.length || !cinemas.length) return;
+    const defaultRegion = locations.find((region) => normalizeText(getRegionName(region)).includes("hcm")) || locations[0];
+    const firstCinema = getCinemasInRegion(defaultRegion, cinemas)[0] || null;
+    setSelectedRegion(defaultRegion || null);
+    setSelectedCinema(firstCinema);
+  }, [decision, selectedCinema, locations, cinemas]);
 
-    const preferred =
-      locations.find((r) => r?.vungMien === "TP.HCM") ||
-      locations.find((r) =>
-        String(r?.vungMien || "")
-          .toLowerCase()
-          .includes("hcm"),
-      ) ||
-      locations[0];
+  useEffect(() => {
+    if (!selectedRegion || !userCoordinates || !currentRegionCinemas.length) return;
 
-    setSelectedVungMien(preferred || null);
+    let closestCinema = null;
+    let closestDistance = Infinity;
+    currentRegionCinemas.forEach((cinema) => {
+      const coordinates = parseCoordinates(cinema.coordinates);
+      if (!coordinates) return;
+      const distance = getDistance(
+        userCoordinates.latitude,
+        userCoordinates.longitude,
+        coordinates[0],
+        coordinates[1],
+      );
+      if (distance < closestDistance) {
+        closestCinema = cinema;
+        closestDistance = distance;
+      }
+    });
 
-    const firstDistrict = preferred?.cumRap?.[0] || "";
+    setSelectedCinema(closestCinema || currentRegionCinemas[0]);
+  }, [selectedRegion, userCoordinates, currentRegionCinemas]);
 
-    setSelectedDistrict(firstDistrict);
-  }, [decision, locations, selectedVungMien]);
+  useEffect(() => {
+    if (!selectedCinema || !selectedDate || !movies.length) {
+      setCinemaSchedules([]);
+      return undefined;
+    }
 
-  // =========================
-  // FILTER CINEMAS
-  // =========================
+    let cancelled = false;
+    setLoadingSchedules(true);
+    const currentMovies = movies.filter((movie) => movie.showing !== false);
 
-  const filteredCinemas = allCinemas.filter((cinema) => {
-    if (!selectedDistrict) return true;
+    Promise.all(currentMovies.map(async (movie) => {
+      try {
+        const response = await fetchShowtimesAPI({
+          branch: selectedCinema.branch,
+          date: normalizeDateForApi(selectedDate),
+          idMovie: movie._id,
+          location: currentRegionName,
+        });
+        const showtimes = safeArray(response?.data?.content || response?.data);
+        return showtimes.length ? [{ movie, showtimes }] : [];
+      } catch {
+        return [];
+      }
+    }))
+      .then((results) => {
+        if (!cancelled) setCinemaSchedules(results.flat());
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSchedules(false);
+      });
 
-    return String(cinema?.address || "")
-      .toLowerCase()
-      .includes(String(selectedDistrict).toLowerCase());
-  });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCinema, selectedDate, movies, currentRegionName]);
 
-  // =========================
-  // LOADING
-  // =========================
+  const handleRegionSelect = (region) => {
+    setSelectedRegion(region);
+    setUserCoordinates(null);
+    const firstCinema = getCinemasInRegion(region, cinemas)[0] || null;
+    setSelectedCinema(firstCinema);
+  };
 
-  if (isLoading) {
-    return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "50vh" }}
-      >
-        <p>Đang tải dữ liệu...</p>
-      </div>
+  const openDirections = () => {
+    if (!selectedCinema) return;
+    const coordinates = parseCoordinates(selectedCinema.coordinates);
+    const destination = coordinates
+      ? `${coordinates[0]},${coordinates[1]}`
+      : selectedCinema.address;
+    window.open(
+      `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination || "")}`,
+      "_blank",
+      "noopener,noreferrer",
     );
+  };
+
+  const amenities = selectedCinema
+    ? selectedCinema.amenities || selectedCinema.facilities || selectedCinema.utilities || []
+    : [];
+  const amenityList = Array.isArray(amenities)
+    ? amenities
+    : String(amenities || "").split(",").map((item) => item.trim()).filter(Boolean);
+
+  if (loadingLocations || loadingCinemas || loadingBanners) {
+    return <div className="cinema-page-loading"><Spin size="large" /></div>;
   }
 
-  // =========================
-  // ERROR
-  // =========================
-
-  if (isError) {
-    return (
-      <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải danh sách rạp.</p>
-
-        <p>
-          {error?.message || "Vui lòng thử lại sau."}
-        </p>
-      </div>
-    );
+  if (locationsError || cinemasError) {
+    return <div className="container py-5"><Empty description="Không thể tải thông tin rạp lúc này." /></div>;
   }
 
-  // =========================
-  // RENDER
-  // =========================
+  const coordinates = parseCoordinates(selectedCinema?.coordinates);
+  const mapSource = coordinates
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${coordinates[1] - 0.015}%2C${coordinates[0] - 0.01}%2C${coordinates[1] + 0.015}%2C${coordinates[0] + 0.01}&layer=mapnik&marker=${coordinates[0]}%2C${coordinates[1]}`
+    : null;
+
+  const tabItems = [
+    {
+      key: "schedule",
+      label: "Lịch chiếu phim",
+      children: (
+        <div className="cinema-schedule-tab">
+          <Calendar onDateChange={setSelectedDate} />
+          <div className="age-rating-legend">
+            <span><b className="age-rating-p">P</b> Mọi đối tượng</span>
+            <span><b className="age-rating-c13">13</b> 13 tuổi trở lên</span>
+            <span><b className="age-rating-c16">16</b> 16 tuổi trở lên</span>
+            <span><b className="age-rating-c18">18</b> 18 tuổi trở lên</span>
+          </div>
+          <Spin spinning={loadingSchedules}>
+            {cinemaSchedules.length ? cinemaSchedules.map(({ movie, showtimes }) => (
+              <article className="cinema-movie-schedule" key={movie._id}>
+                <h3>{movie.title || movie.tenPhim}</h3>
+                <div className="cinema-movie-format">2D <span>Phụ đề tiếng Anh</span></div>
+                <div className="cinema-times-grid">
+                  {showtimes.map((showtime) => {
+                    const seats = safeArray(showtime.seats);
+                    const available = seats.filter((seat) => !seat.isBooked).length;
+                    const isPast = dayjs(showtime.startTime).isBefore(dayjs());
+                    return (
+                      <div className="cinema-time-cell" key={showtime._id}>
+                        <small>{showtime.theater?.name || "Phòng chiếu"}</small>
+                        <Button disabled={isPast} onClick={() => window.location.assign(`/booking/${showtime._id}`)}>
+                          {dayjs(showtime.startTime).format("HH:mm")}
+                        </Button>
+                        <small>{available} / {seats.length} Ghế ngồi</small>
+                      </div>
+                    );
+                  })}
+                </div>
+              </article>
+            )) : <Empty description={selectedDate ? "Chưa có suất chiếu trong ngày này" : "Chọn ngày để xem lịch chiếu"} />}
+          </Spin>
+        </div>
+      ),
+    },
+    {
+      key: "location",
+      label: "Vị trí của rạp",
+      children: selectedCinema ? (
+        <div className="cinema-location-tab">
+          <p><EnvironmentOutlined /> {selectedCinema.address || "Chưa có địa chỉ rạp."}</p>
+          {mapSource ? <iframe title={`Bản đồ ${selectedCinema.branch}`} src={mapSource} loading="lazy" /> : <Empty description="Rạp chưa có tọa độ bản đồ." />}
+        </div>
+      ) : <Empty description="Chưa chọn rạp." />,
+    },
+    {
+      key: "directions",
+      label: "Hướng dẫn đi tới rạp",
+      children: selectedCinema ? (
+        <div className="cinema-directions-tab">
+          <p>{selectedCinema.address}</p>
+          <Button icon={<LinkOutlined />} onClick={openDirections}>Mở chỉ đường</Button>
+        </div>
+      ) : <Empty description="Chưa chọn rạp." />,
+    },
+    {
+      key: "amenities",
+      label: "Tiện ích đi kèm",
+      children: amenityList.length ? (
+        <div className="cinema-amenities">{amenityList.map((amenity) => <span key={amenity}>{amenity}</span>)}</div>
+      ) : <Empty description="Chưa có thông tin tiện ích cho rạp này." />,
+    },
+  ];
 
   return (
-    <div className="container px-0">
-      <SEO
-        title="Hệ thống rạp"
-        description="Tìm kiếm hệ thống rạp chiếu phim theo khu vực."
-      />
+    <main className="cinema-detail-page">
+      <SEO title={selectedCinema?.branch || "Hệ thống rạp"} description={selectedCinema?.address || "Thông tin hệ thống rạp chiếu phim."} />
+      <nav className="cinema-region-nav" aria-label="Chọn vùng">
+        {locations.map((region, index) => (
+          <button
+            type="button"
+            key={region._id || getRegionName(region) || index}
+            className={getRegionName(selectedRegion) === getRegionName(region) ? "is-active" : ""}
+            onClick={() => handleRegionSelect(region)}
+          >
+            {getRegionName(region)}
+          </button>
+        ))}
+      </nav>
 
-      {/* =========================
-          FILTER
-      ========================= */}
-
-      <div className="d-flex gap-3 my-4 align-items-center">
-        {/* VÙNG MIỀN */}
-
-        <select
-          className="form-select"
-          value={selectedVungMien?._id || ""}
-          onChange={(e) => {
-            const vung = locations.find(
-              (item) => item._id === e.target.value,
-            );
-
-            setSelectedVungMien(vung || null);
-            setSelectedDistrict("");
-          }}
-        >
-          <option value="">Chọn Tỉnh thành</option>
-
-          {locations.map((loc) => (
-            <option key={loc._id} value={loc._id}>
-              {loc.vungMien}
-            </option>
-          ))}
-        </select>
-
-        {/* QUẬN / HUYỆN */}
-
-        <select
-          className="form-select"
-          disabled={!selectedVungMien}
-          value={selectedDistrict}
-          onChange={(e) =>
-            setSelectedDistrict(e.target.value)
-          }
-        >
-          <option value="">Chọn Khu vực</option>
-
-          {selectedVungMien?.cumRap?.map((dist, index) => (
-            <option key={index} value={dist}>
-              {dist}
-            </option>
-          ))}
-        </select>
-
-        {/* VỊ TRÍ */}
-
-        <Button
-          type="default"
-          shape="round"
-          icon={
-            isLocating ? (
-              <SyncOutlined spin />
-            ) : (
-              <AimOutlined />
-            )
-          }
-          onClick={locate}
-          loading={isLocating}
-          disabled={isLocating}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            fontWeight: "500",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            border: "1px solid #dadce0",
-            color: "#1a73e8",
-            height: "40px",
-          }}
-        >
-          {isLocating
-            ? "Đang xác định..."
-            : "Vị trí của tôi"}
-        </Button>
-      </div>
-
-      {/* =========================
-          CURRENT LOCATION
-      ========================= */}
-
-      {myLocation.district && (
-        <div className="alert alert-info py-2">
-          Vị trí của bạn:{" "}
-          {myLocation.road && `${myLocation.road}, `}
-          {myLocation.suburb && `${myLocation.suburb}, `}
-          {myLocation.district}
-        </div>
+      {banners.length > 0 && (
+        <section className="cinema-banner-wrap" aria-label="Banner">
+          <Carousel autoplay={false} dots={banners.length > 1} arrows={banners.length > 1}>
+            {banners.map((source, index) => <img key={`${source}-${index}`} src={source} alt="Ưu đãi rạp chiếu phim" />)}
+          </Carousel>
+        </section>
       )}
 
-      {/* =========================
-          CINEMA LIST
-      ========================= */}
-
-      <div className="row mt-4">
-        {filteredCinemas.length > 0 ? (
-          filteredCinemas.map((cinema) => (
-            <div
-              key={cinema._id}
-              className="col-md-6 mb-3"
-            >
-              <div className="card p-3 shadow-sm">
-                <h5 className="text-primary">
-                  {cinema.branch}
-                </h5>
-
-                <p className="small text-muted mb-0">
-                  <i className="fas fa-map-pin me-2"></i>
-
-                  {cinema.address || "Chưa có địa chỉ"}
-                </p>
+      <div className="cinema-detail-container">
+        {selectedCinema ? (
+          <>
+            <header className="cinema-detail-header">
+              <div className="cinema-detail-poster" aria-hidden="true">{selectedCinema.cinemaName?.slice(0, 1) || "C"}</div>
+              <div className="cinema-detail-info">
+                <div className="cinema-detail-title-row">
+                  <h1>{selectedCinema.branch}</h1>
+                  <Button icon={isLocating ? <SyncOutlined spin /> : <AimOutlined />} onClick={locate} loading={isLocating}>
+                    Rạp gần tôi
+                  </Button>
+                </div>
+                <p>{selectedCinema.address || "Chưa cập nhật địa chỉ"}</p>
+                <div className="cinema-detail-meta">
+                  <span>Hệ thống: {selectedCinema.cinemaName || "Rạp chiếu phim"}</span>
+                  {coordinates && <span>Vị trí đã xác định</span>}
+                </div>
               </div>
-            </div>
-          ))
+            </header>
+            <Tabs defaultActiveKey="schedule" items={tabItems} />
+          </>
         ) : (
-          <div className="text-center w-100">
-            Không tìm thấy rạp nào ở khu vực này.
+          <div className="cinema-no-selection">
+            <Empty description={decision === "pending" ? "Đang xác định rạp gần bạn..." : "Chưa có rạp trong khu vực này."} />
+            <Button icon={<AimOutlined />} onClick={locate} loading={isLocating}>Tìm rạp gần tôi</Button>
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 

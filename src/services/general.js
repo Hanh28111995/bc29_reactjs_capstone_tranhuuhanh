@@ -27,6 +27,13 @@ const fetchMovieListAPI = () => {
   });
 };
 
+const fetchCinemaDetailAPI = (id) => {
+  return request({
+    url: `/general/cinema/${id}`,
+    method: "GET",
+  });
+};
+
 const fetchLocationListAPI = () => {
   return request({
     url: `/general/locations`,
@@ -101,6 +108,7 @@ export {
   fetchShowPromotionAPI,
   fetchPromotionDetailAPI,
   fetchMovieDetailAPI,
+  fetchCinemaDetailAPI,
   fetchLocationListAPI,
   fetchShowtimesAPI,
   fetchBranchesAPI,
