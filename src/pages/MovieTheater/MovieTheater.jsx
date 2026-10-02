@@ -319,8 +319,8 @@ function MovieTheater() {
                     className="cinema-movie-carousel"
                     dots={false}
                     arrows={movies.length > 4}
+                    infinite={false}
                     variableWidth
-                    slidesToScroll={1}
                   >
                     {movies.map((movie) => {
                       const movieId = movie._id;
