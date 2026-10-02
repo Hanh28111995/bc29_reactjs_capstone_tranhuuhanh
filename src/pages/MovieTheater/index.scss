@@ -128,15 +128,23 @@
         background: transparent;
     }
 
+    .ant-tabs-nav::before {
+        border-bottom: 0;
+    }
+
     .ant-tabs-nav-wrap {
-        justify-content: center;
+        width: 100%;
     }
 
     .ant-tabs-nav-list {
-        gap: 8px;
+        width: 100%;
+        gap: 0;
     }
 
     .ant-tabs-tab {
+        display: flex;
+        flex: 1 1 0;
+        justify-content: center;
         margin: 0;
         padding: 12px 20px;
         border: 1px solid #d9d9d9;
@@ -145,21 +153,29 @@
         font-weight: 600;
     }
 
+    .ant-tabs-tab + .ant-tabs-tab {
+        border-left: 0;
+    }
+
     .ant-tabs-tab:hover {
         border-color: #b9aa7a;
     }
 
+    .ant-tabs-tab-active {
+        background: #d0c39c;
+    }
+
     .ant-tabs-tab-active .ant-tabs-tab-btn {
-        color: #6c5b2f;
+        color: #26343d;
     }
 
     .ant-tabs-ink-bar {
-        background: #b9aa7a;
+        display: none;
     }
 
     .ant-tabs-content-holder {
         min-height: 300px;
-        padding: 16px;
+        padding: 16px 0;
         background: transparent;
     }
 }
@@ -216,13 +232,30 @@
 }
 
 .cinema-schedule-tab {
+    width: 100%;
+
     .Calendar {
+        width: 100%;
         margin: 8px 0 14px;
+
+        > .ant-row,
+        > .ant-row > .ant-col {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        .ant-carousel,
+        .slick-slider,
+        .slick-list,
+        .slick-slide > div {
+            width: 100%;
+        }
     }
 }
 
 .cinema-movie-carousel-section {
-    margin-bottom: 18px;
+    width: 100%;
+    margin: 18px 0;
 
     h2 {
         margin: 0 0 12px;
@@ -232,6 +265,7 @@
     }
 
     .cinema-movie-carousel {
+        width: 100%;
         padding: 0 28px;
 
         .slick-slide > div {
@@ -306,6 +340,7 @@
     margin: 4px 0 12px;
     padding: 10px 14px;
     border-bottom: 1px solid #e4e6e7;
+    background: #fff;
     color: #5d6970;
     font-size: 11px;
 

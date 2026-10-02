@@ -9,6 +9,7 @@ import {
 } from "antd";
 import {
   fetchBranchesAPI,
+  fetchCinemaDetailAPI,
   fetchLocationListAPI,
   fetchMovieListAPI,
   fetchShowBannerAPI,
@@ -115,6 +116,15 @@ function MovieTheater() {
     service: fetchMovieListAPI,
     queryKey: ["movies-list", "cinema-page"],
   });
+  const {
+    state: rawCinemaDetail,
+    loading: loadingCinemaDetail,
+    isError: cinemaDetailError,
+  } = useAsync({
+    service: () => fetchCinemaDetailAPI(selectedCinema?._id),
+    queryKey: ["cinema-detail", selectedCinema?._id],
+    enabled: Boolean(selectedCinema?._id),
+  });
 
   const locations = useMemo(() => {
     const list = safeArray(rawLocations?.locations || rawLocations?.regions || rawLocations);
@@ -137,6 +147,12 @@ function MovieTheater() {
     () => getCinemasInRegion(selectedRegion, cinemas),
     [selectedRegion, cinemas],
   );
+  const cinemaInfo = useMemo(() => {
+    const details = rawCinemaDetail?.cinema || rawCinemaDetail?.content || rawCinemaDetail;
+    return details && typeof details === "object"
+      ? { ...selectedCinema, ...details }
+      : selectedCinema;
+  }, [selectedCinema, rawCinemaDetail]);
 
   const { decision, isLocating, locate } = useGeoLocationSelect({
     locations,
@@ -228,32 +244,18 @@ function MovieTheater() {
     setSelectedCinema(firstCinema);
   };
 
-  const openDirections = () => {
-    if (!selectedCinema) return;
-    setActiveTab("location");
-    const coordinates = parseCoordinates(selectedCinema.coordinates);
-    const destination = coordinates
-      ? `${coordinates[0]},${coordinates[1]}`
-      : selectedCinema.address;
-    window.open(
-      `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination || "")}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
-  };
-
-  const amenities = selectedCinema
-    ? selectedCinema.amenities || selectedCinema.facilities || selectedCinema.utilities || []
+  const amenities = cinemaInfo
+    ? cinemaInfo.amenities
     : [];
   const amenityList = Array.isArray(amenities)
     ? amenities
-    : String(amenities || "").split(",").map((item) => item.trim()).filter(Boolean);
-  const directionsText = selectedCinema
-    ? selectedCinema.directions || selectedCinema.direction || selectedCinema.howToGetThere || selectedCinema.route || selectedCinema.guide || ""
+    : String(amenities || "").split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
+  const directionsText = cinemaInfo
+    ? cinemaInfo.directions || cinemaInfo.direction || cinemaInfo.howToGetThere || cinemaInfo.route || cinemaInfo.guide || ""
     : "";
 
-  const parkingText = selectedCinema
-    ? selectedCinema.parking || selectedCinema.parkingInfo || selectedCinema.parkingLot || selectedCinema.parkingSpaces || ""
+  const parkingText = cinemaInfo
+    ? cinemaInfo.parking
     : "";
 
   const normalizeUtilityText = (value) => {
@@ -299,6 +301,13 @@ function MovieTheater() {
       label: "Lịch chiếu phim",
       children: (
         <div className="cinema-schedule-tab">
+          <Calendar onDateChange={setSelectedDate} isActive={activeTab === "schedule"} />
+          <div className="age-rating-legend">
+            <span><b className="age-rating-p">P</b> Mọi đối tượng</span>
+            <span><b className="age-rating-c13">13</b> 13 tuổi trở lên</span>
+            <span><b className="age-rating-c16">16</b> 16 tuổi trở lên</span>
+            <span><b className="age-rating-c18">18</b> 18 tuổi trở lên</span>
+          </div>
           <div className="cinema-movie-carousel-section">
             <h2>Chọn phim</h2>
             {moviesError ? (
@@ -349,13 +358,6 @@ function MovieTheater() {
               </Spin>
             )}
           </div>
-          <Calendar onDateChange={setSelectedDate} isActive={activeTab === "schedule"} />
-          <div className="age-rating-legend">
-            <span><b className="age-rating-p">P</b> Mọi đối tượng</span>
-            <span><b className="age-rating-c13">13</b> 13 tuổi trở lên</span>
-            <span><b className="age-rating-c16">16</b> 16 tuổi trở lên</span>
-            <span><b className="age-rating-c18">18</b> 18 tuổi trở lên</span>
-          </div>
           <Spin spinning={loadingSchedules}>
             {cinemaSchedules.length ? cinemaSchedules.map(({ movie, showtimes }) => (
               <article className="cinema-movie-schedule" key={movie._id}>
@@ -389,6 +391,7 @@ function MovieTheater() {
       children: selectedCinema ? (
         <div className="cinema-location-tab">
           <p><EnvironmentOutlined /> {selectedCinema.address || "Chưa có địa chỉ rạp."}</p>
+          <Button icon={<LinkOutlined />} onClick={() => setActiveTab("location")}>Mở chỉ đường</Button>
           {mapSource ? <iframe title={`Bản đồ ${selectedCinema.branch}`} src={mapSource} loading="lazy" /> : <Empty description="Rạp chưa có tọa độ bản đồ." />}
         </div>
       ) : <Empty description="Chưa chọn rạp." />,
@@ -399,7 +402,6 @@ function MovieTheater() {
       children: selectedCinema ? (
         <div className="cinema-directions-tab">
           <p>{directionsText || selectedCinema.address || "Chưa có hướng dẫn đi tới rạp."}</p>
-          <Button icon={<LinkOutlined />} onClick={openDirections}>Mở chỉ đường</Button>
         </div>
       ) : <Empty description="Chưa chọn rạp." />,
     },
@@ -407,31 +409,35 @@ function MovieTheater() {
       key: "amenities",
       label: "Tiện ích đi kèm",
       children: selectedCinema ? (
-        <div className="cinema-utility-list">
-          {parkingText && (
-            <div className="cinema-utility-row">
-              <div className="cinema-utility-icon cinema-utility-icon-car">🚗</div>
-              <div className="cinema-utility-content">
-                <div className="cinema-utility-title">Nơi đỗ xe</div>
-                <p>{normalizeUtilityText(parkingText)}</p>
+        <Spin spinning={loadingCinemaDetail}>
+          <div className="cinema-utility-list">
+            {parkingText && (
+              <div className="cinema-utility-row">
+                <div className="cinema-utility-icon cinema-utility-icon-car">🚗</div>
+                <div className="cinema-utility-content">
+                  <div className="cinema-utility-title">Nơi đỗ xe</div>
+                  <p>{normalizeUtilityText(parkingText)}</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {amenityList.length > 0 && (
-            <div className="cinema-utility-row">
-              <div className="cinema-utility-icon cinema-utility-icon-info">i</div>
-              <div className="cinema-utility-content">
-                <div className="cinema-utility-title">Tiện ích đi kèm</div>
-                <p>{normalizeUtilityText(amenityList)}</p>
+            {amenityList.length > 0 && (
+              <div className="cinema-utility-row">
+                <div className="cinema-utility-icon cinema-utility-icon-info">i</div>
+                <div className="cinema-utility-content">
+                  <div className="cinema-utility-title">Tiện ích đi kèm</div>
+                  <p>{normalizeUtilityText(amenityList)}</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {!parkingText && amenityList.length === 0 && (
-            <Empty description="Chưa có thông tin tiện ích cho rạp này." />
-          )}
-        </div>
+            {!parkingText && amenityList.length === 0 && (
+              <Empty description={cinemaDetailError
+                ? "Không thể tải thông tin tiện ích của rạp."
+                : "Chưa có thông tin tiện ích cho rạp này."} />
+            )}
+          </div>
+        </Spin>
       ) : <Empty description="Chưa chọn rạp." />,
     },
   ];
