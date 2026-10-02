@@ -37,14 +37,23 @@ const normalizeText = (value) =>
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d")
     .replace(/Đ/g, "D")
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+
+const containsLocation = (address, location) => {
+  const normalizedLocation = normalizeText(location);
+  if (!normalizedLocation) return false;
+  return ` ${normalizeText(address)} `.includes(` ${normalizedLocation} `);
+};
 
 const getCinemasInRegion = (region, cinemas) => {
-  const areas = getRegionAreas(region).map(normalizeText);
-  const regionName = normalizeText(getRegionName(region));
+  const areas = getRegionAreas(region).map(normalizeText).filter(Boolean);
+  const regionName = getRegionName(region);
   return cinemas.filter((cinema) => {
-    const address = normalizeText(cinema.address);
-    return address.includes(regionName) || areas.some((area) => address.includes(area));
+    const address = `${cinema?.address || ""} ${cinema?.region || ""} ${cinema?.location || ""}`;
+    return containsLocation(address, regionName) || areas.some((area) => containsLocation(address, area));
   });
 };
 

@@ -63,8 +63,9 @@
 
 .cinema-branch-nav {
     position: absolute;
+    justify-content: center;
     right: 0;
-    bottom: 0;
+    top: 0;
     left: 0;
     z-index: 2;
     display: flex;
@@ -73,6 +74,11 @@
     padding: 7px max(24px, calc((100vw - 1140px) / 2));
     background: rgba(19, 29, 37, 0.78);
     scrollbar-width: thin;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-5px);
+    transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
 
     button {
         flex: 0 0 auto;
@@ -90,6 +96,25 @@
         border-color: rgba(255, 255, 255, 0.75);
         color: #fff;
         font-weight: 700;
+    }
+}
+
+.cinema-region-nav:hover + .cinema-banner-wrap .cinema-branch-nav,
+.cinema-region-nav:focus-within + .cinema-banner-wrap .cinema-branch-nav,
+.cinema-banner-wrap:hover .cinema-branch-nav,
+.cinema-banner-wrap:focus-within .cinema-branch-nav {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+@media (hover: none) {
+    .cinema-branch-nav {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: none;
     }
 }
 
