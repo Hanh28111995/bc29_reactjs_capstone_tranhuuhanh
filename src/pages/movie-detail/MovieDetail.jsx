@@ -444,7 +444,7 @@ export default function MovieDetail() {
               <Col flex={selectedCinemaName ? "1" : "0 0 80px"} style={{ borderLeft: "1px solid #f0f0f0", transition: "all 0.5s", backgroundColor: selectedCinemaName ? "#fff" : "#fafafa", display: "flex", flexDirection: "column" }}>
                 <h2 style={{ fontSize: 16, fontWeight: "bold", marginBottom: 16, textAlign: "center", opacity: selectedCinemaName ? 1 : 0, display: selectedCinemaName ? "block" : "none" }}>Suất chiếu</h2>
                 <Spin spinning={loadingInternal}>
-                  {renderSelectGrid()}
+                  {renderShowtimeGrid()}
                 </Spin>
               </Col>
             </Row>
@@ -474,7 +474,7 @@ export default function MovieDetail() {
               <div>
                 <label className="mobile-label">Suất chiếu</label>
                 <Spin spinning={loadingInternal}>
-                  {renderShowtimeMobile()}
+                  {renderShowtimeGrid()}
                 </Spin>
               </div>
             </div>
