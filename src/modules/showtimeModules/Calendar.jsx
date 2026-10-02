@@ -131,8 +131,8 @@ export default function Calendar({ onDateChange }) {
         <em>{showDays}</em>
         <span style={{ textTransform: 'capitalize' }}>&nbsp; Tháng {showMonth} Năm {showYear} </span>
       </span>
-      <Row justify="center" className='my-5'>
-        <Col span={16}>
+      <Row justify="center">
+        <Col>
           <CarouselAntd arrows autoplay={false} {...settings} dots={false}>
             {bannerList}
           </CarouselAntd>

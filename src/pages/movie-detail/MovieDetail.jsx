@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button, List, Card, Row, Col, Empty, Spin, Select, Input } from "antd";
 import { useAsync, safeArray } from "hooks/useAsync";
 import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { LockOutlined } from "@ant-design/icons";
 import {
   fetchShowtimesAPI,
   fetchBranchesAPI,
@@ -25,6 +27,13 @@ const getRegionAreas = (region) => {
         .map((area) => typeof area === "string" ? area : area?.name || area?.location || area?.district)
         .filter(Boolean)
     : [];
+};
+
+const AGE_RATING_CLASSES = {
+  P: "age-rating-p",
+  C13: "age-rating-c13",
+  C16: "age-rating-c16",
+  C18: "age-rating-c18",
 };
 
 function MovieCarousel({ movies, currentId, onSelect }) {
@@ -131,6 +140,7 @@ function MovieCarousel({ movies, currentId, onSelect }) {
 export default function MovieDetail() {
   const navigate = useNavigate();
   const param = useParams();
+  const userInfo = useSelector((state) => state.userReducer.userInfor);
 
   // =========================
   // STATE
@@ -427,6 +437,9 @@ export default function MovieDetail() {
     else groups.push({ name: roomName, showtimes: [showtime] });
     return groups;
   }, []);
+  const visibleBranches = branches.filter((item) =>
+    item.branch?.toLowerCase().includes(branchSearch.trim().toLowerCase()),
+  );
 
   return (
     <div className="detailPage py-3 container" style={{ flex: "1" }}>
@@ -461,7 +474,7 @@ export default function MovieDetail() {
         <>
       <Calendar onDateChange={(date) => setLocalDate(date)} />
       <div className="showtime-picker">
-        <section className="picker-column location-column">
+        <section className="picker-column cinema-main-column">
           <div className="picker-heading">
             <h2>Rạp</h2>
             <Select
@@ -481,41 +494,69 @@ export default function MovieDetail() {
               options={areasList.map((item) => getRegionName(item)).filter(Boolean).map((name) => ({ label: name, value: name }))}
             />
           </div>
-          <div className="location-list">
-            {getRegionAreas(activeRegionData).map((area) => (
-              <button
-                type="button"
-                key={area}
-                className={`location-option${selectCity === area ? " is-active" : ""}`}
-                onClick={async () => {
-                  setSelectCity(area);
-                  setBranches([]);
-                  setSelectedCinemaName(null);
-                  setDataShowTimes([]);
-                  await loadBranchesByLocation(area);
-                }}
-              >
-                <span>{area}</span>
-                {selectCity === area && <span className="location-count">{branches.length}</span>}
-              </button>
-            ))}
-          </div>
-        </section>
-        <section className="picker-column cinema-column">
-          <div className="picker-heading"><h2>Rạp chiếu phim của tôi</h2></div>
-          <div className="cinema-list">
-            {branches.length ? branches.map((item) => (
-              <button
-                type="button"
-                key={item._id || item.branch}
-                className={`cinema-option${selectedCinemaName === item.branch ? " is-active" : ""}`}
-                onClick={() => setSelectedCinemaName(item.branch)}
-              >
-                <span>{item.branch}</span>
-                {item.address && <small>{item.address}</small>}
-              </button>
-            )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={selectCity ? "Không có rạp trong khu vực này" : "Chọn khu vực"} />}
-          </div>
+
+          <section className="favorite-cinema-row">
+            <div>
+              <h3>Rạp yêu thích</h3>
+              <p>
+                {userInfo
+                  ? "Danh sách rạp yêu thích của bạn sẽ hiển thị tại đây."
+                  : "Đăng nhập để xem và quản lý rạp yêu thích."}
+              </p>
+            </div>
+            {!userInfo && (
+              <Button icon={<LockOutlined />} onClick={() => navigate("/login")}>
+                Đăng nhập
+              </Button>
+            )}
+          </section>
+
+          <section className="cinema-system-row">
+            <div className="system-heading">
+              <h3>Hệ thống rạp</h3>
+              <Input
+                aria-label="Tìm rạp"
+                placeholder="Tìm rạp"
+                allowClear
+                value={branchSearch}
+                onChange={(event) => setBranchSearch(event.target.value)}
+              />
+            </div>
+            <div className="system-cinema-content">
+              <div className="location-list">
+                {getRegionAreas(activeRegionData).map((area) => (
+                  <button
+                    type="button"
+                    key={area}
+                    className={`location-option${selectCity === area ? " is-active" : ""}`}
+                    onClick={async () => {
+                      setSelectCity(area);
+                      setBranches([]);
+                      setSelectedCinemaName(null);
+                      setDataShowTimes([]);
+                      await loadBranchesByLocation(area);
+                    }}
+                  >
+                    <span>{area}</span>
+                    {selectCity === area && <span className="location-count">{branches.length}</span>}
+                  </button>
+                ))}
+              </div>
+              <div className="cinema-list">
+                {visibleBranches.length ? visibleBranches.map((item) => (
+                  <button
+                    type="button"
+                    key={item._id || item.branch}
+                    className={`cinema-option${selectedCinemaName === item.branch ? " is-active" : ""}`}
+                    onClick={() => setSelectedCinemaName(item.branch)}
+                  >
+                    <span>{item.branch}</span>
+                    {item.address && <small>{item.address}</small>}
+                  </button>
+                )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={selectCity ? "Không có rạp trong khu vực này" : "Chọn khu vực"} />}
+              </div>
+            </div>
+          </section>
         </section>
         <section className="picker-column movie-column">
           <div className="picker-heading"><h2>Phim</h2></div>
@@ -527,7 +568,11 @@ export default function MovieDetail() {
                 className={`movie-option${param.movieId === movie._id ? " is-active" : ""}`}
                 onClick={() => movie._id !== param.movieId && navigate(`/movie/selectT/${movie._id}`)}
               >
-                {movie.tenPhim || movie.title}
+                {AGE_RATING_CLASSES[movie.ageRating?.toUpperCase()] && (
+                  <span className={`age-rating ${AGE_RATING_CLASSES[movie.ageRating.toUpperCase()]}`}>
+                    {movie.ageRating.toUpperCase()}
+                  </span>
+                )} {movie.title}
               </button>
             ))}
           </div>

@@ -1,9 +1,28 @@
 .detailPage {
+  position: relative;
+  isolation: isolate;
+  background: #f8f6ed;
+
+  &::before {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    background: #f8f6ed;
+    content: "";
+    transform: translateX(-50%);
+  }
+
   .movie-detail-tabs {
     display: flex;
+    justify-content: center;
     gap: 28px;
-    border-bottom: 1px solid #d7dcdf;
-    margin-bottom: 14px;
+    margin: -12px calc((100% - 100vw) / 2) 14px;
+    padding: 0 16px;
+    border-bottom: 1px solid #d1c7ac;
+    background: #ded4b8;
 
     button {
       padding: 10px 2px 9px;
@@ -49,8 +68,8 @@
 
   .showtime-picker {
     display: grid;
-    grid-template-columns: minmax(190px, 0.9fr) minmax(260px, 1.25fr) minmax(220px, 0.95fr);
-    min-height: 290px;
+    grid-template-columns: minmax(0, 1.6fr) minmax(240px, 0.9fr);
+    min-height: 390px;
     border-top: 2px solid #202c35;
     border-bottom: 1px solid #d4d9dc;
     background: #fff;
@@ -64,6 +83,11 @@
 
   .picker-column:last-child {
     border-right: 0;
+  }
+
+  .cinema-main-column {
+    display: flex;
+    flex-direction: column;
   }
 
   .picker-heading {
@@ -82,8 +106,101 @@
     }
   }
 
-  .location-column .ant-select {
+  .cinema-main-column > .picker-heading .ant-select {
     width: 130px;
+  }
+
+  .favorite-cinema-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 58px;
+    padding: 8px 0;
+    border-top: 1px solid #e3e6e8;
+    border-bottom: 1px solid #e3e6e8;
+
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h3 {
+      color: #25323a;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    p {
+      margin-top: 3px;
+      color: #68757e;
+      font-size: 11px;
+    }
+
+    .ant-btn {
+      flex: 0 0 auto;
+    }
+  }
+
+  .cinema-system-row {
+    flex: 1;
+    min-height: 0;
+    padding-top: 10px;
+  }
+
+  .system-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    h3 {
+      margin: 0;
+      color: #25323a;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .ant-input-affix-wrapper {
+      max-width: 190px;
+    }
+  }
+
+  .system-cinema-content {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.75fr) minmax(0, 1.6fr);
+    min-height: 210px;
+
+    .location-list {
+      max-height: 230px;
+      border-right: 1px solid #e3e6e8;
+    }
+
+    .cinema-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-content: start;
+      max-height: 230px;
+      padding-left: 10px;
+    }
+
+    .cinema-option {
+      min-height: 42px;
+      justify-content: center;
+      padding: 8px;
+      border: 1px solid #e4e7e9;
+      background: #f2f3f3;
+      text-align: center;
+
+      small {
+        display: none;
+      }
+    }
+
+    .ant-empty {
+      grid-column: 1 / -1;
+    }
   }
 
   .location-list,
@@ -135,9 +252,42 @@
   }
 
   .movie-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 11px 9px;
     color: #64717b;
     font-size: 12px;
+  }
+
+  .age-rating {
+    display: inline-flex;
+    flex: 0 0 20px;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .age-rating-p {
+    background: #07893e;
+  }
+
+  .age-rating-c13 {
+    background: #2874d8;
+  }
+
+  .age-rating-c16 {
+    background: #e88a19;
+  }
+
+  .age-rating-c18 {
+    background: #e02e35;
   }
 
   .location-option:hover,
@@ -269,6 +419,23 @@
       border-right: 0;
       border-bottom: 1px solid #d4d9dc;
       padding: 12px;
+    }
+
+    .system-cinema-content {
+      grid-template-columns: minmax(105px, 0.8fr) minmax(0, 1.2fr);
+    }
+
+    .system-cinema-content .cinema-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .favorite-cinema-row {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .system-heading .ant-input-affix-wrapper {
+      max-width: 150px;
     }
 
     .location-list,
