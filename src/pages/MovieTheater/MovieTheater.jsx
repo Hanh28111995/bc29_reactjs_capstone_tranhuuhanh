@@ -42,18 +42,28 @@ const normalizeText = (value) =>
     .trim()
     .replace(/\s+/g, " ");
 
-const containsLocation = (address, location) => {
-  const normalizedLocation = normalizeText(location);
-  if (!normalizedLocation) return false;
-  return ` ${normalizeText(address)} `.includes(` ${normalizedLocation} `);
+const normalizePlaceName = (value) => {
+  const normalized = normalizeText(value)
+    .replace(/^(thanh pho|tp|quan|huyen|phuong|p|thi xa|thi tran|district|city|province)\s+/, "")
+    .trim();
+
+  if (normalized.includes("ho chi minh") || normalized === "hcm" || normalized === "tphcm" || normalized === "sai gon") {
+    return "ho chi minh";
+  }
+  if (normalized === "ha noi" || normalized === "hanoi") return "ha noi";
+  return normalized;
 };
 
 const getCinemasInRegion = (region, cinemas) => {
-  const areas = getRegionAreas(region).map(normalizeText).filter(Boolean);
-  const regionName = getRegionName(region);
+  const areas = getRegionAreas(region).map(normalizePlaceName).filter(Boolean);
+  const regionName = normalizePlaceName(getRegionName(region));
   return cinemas.filter((cinema) => {
-    const address = `${cinema?.address || ""} ${cinema?.region || ""} ${cinema?.location || ""}`;
-    return containsLocation(address, regionName) || areas.some((area) => containsLocation(address, area));
+    const addressParts = `${cinema?.address || ""},${cinema?.region || ""},${cinema?.location || ""}`
+      .split(/[,;|]/)
+      .map(normalizePlaceName)
+      .filter(Boolean);
+
+    return addressParts.includes(regionName) || areas.some((area) => addressParts.includes(area));
   });
 };
 
@@ -77,6 +87,7 @@ const normalizeDateForApi = (date) => {
 function MovieTheater() {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedCinema, setSelectedCinema] = useState(null);
+  const [manuallySelectedCinemaId, setManuallySelectedCinemaId] = useState(null);
   const [userCoordinates, setUserCoordinates] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [cinemaSchedules, setCinemaSchedules] = useState([]);
@@ -127,6 +138,7 @@ function MovieTheater() {
     askOnMount: true,
     onSelect: ({ region, coords }) => {
       setSelectedRegion(region || null);
+      setManuallySelectedCinemaId(null);
       setUserCoordinates(coords || null);
     },
     title: "Chia sẻ vị trí",
@@ -202,6 +214,7 @@ function MovieTheater() {
 
   const handleRegionSelect = (region) => {
     setSelectedRegion(region);
+    setManuallySelectedCinemaId(null);
     setUserCoordinates(null);
     const firstCinema = getCinemasInRegion(region, cinemas)[0] || null;
     setSelectedCinema(firstCinema);
@@ -336,9 +349,12 @@ function MovieTheater() {
                 <button
                   type="button"
                   key={cinema._id || cinema.branch}
-                  className={selectedCinema?._id === cinema._id ? "is-active" : ""}
-                  aria-current={selectedCinema?._id === cinema._id ? "true" : undefined}
-                  onClick={() => setSelectedCinema(cinema)}
+                  className={manuallySelectedCinemaId === (cinema._id || cinema.branch) ? "is-active" : ""}
+                  aria-current={manuallySelectedCinemaId === (cinema._id || cinema.branch) ? "true" : undefined}
+                  onClick={() => {
+                    setSelectedCinema(cinema);
+                    setManuallySelectedCinemaId(cinema._id || cinema.branch);
+                  }}
                 >
                   {cinema.branch}
                 </button>
