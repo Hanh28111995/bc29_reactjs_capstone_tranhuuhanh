@@ -317,10 +317,25 @@ function MovieTheater() {
       </nav>
 
       {banners.length > 0 && (
-        <section className="cinema-banner-wrap" aria-label="Banner">
+        <section className="cinema-banner-wrap" aria-label="Banner và chọn rạp">
           <Carousel autoplay={false} dots={banners.length > 1} arrows={banners.length > 1}>
             {banners.map((source, index) => <img key={`${source}-${index}`} src={source} alt="Ưu đãi rạp chiếu phim" />)}
           </Carousel>
+          {currentRegionCinemas.length > 0 && (
+            <nav className="cinema-branch-nav" aria-label={`Rạp tại ${currentRegionName}`}>
+              {currentRegionCinemas.map((cinema) => (
+                <button
+                  type="button"
+                  key={cinema._id || cinema.branch}
+                  className={selectedCinema?._id === cinema._id ? "is-active" : ""}
+                  aria-current={selectedCinema?._id === cinema._id ? "true" : undefined}
+                  onClick={() => setSelectedCinema(cinema)}
+                >
+                  {cinema.branch}
+                </button>
+              ))}
+            </nav>
+          )}
         </section>
       )}
 
