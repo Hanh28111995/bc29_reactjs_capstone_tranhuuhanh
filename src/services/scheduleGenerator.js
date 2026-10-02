@@ -17,6 +17,12 @@ export const createScheduleAPI = (data) => {
   });
 };
 
+export const generateScheduleAPI = () => {
+  return request({
+    url: "/admin/schedule-generator/generate",
+    method: "POST",
+  });
+}
 
 export const updateScheduleAPI = (data) => {
   return request({

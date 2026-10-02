@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, List, Card, Row, Col, Empty, Spin, Select } from "antd";
+import { Button, List, Card, Row, Col, Empty, Spin, Select, Input } from "antd";
 import { useAsync, safeArray } from "hooks/useAsync";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -14,6 +14,18 @@ import { fetchLocationListAPI } from "services/general";
 import "./index.scss";
 import SEO from "components/SEO";
 import { useGeoLocationSelect } from "hooks/useGeoLocationSelect";
+
+const getRegionName = (region) =>
+  region?.vungMien || region?.name || region?.location || region?.city || region?.province || "";
+
+const getRegionAreas = (region) => {
+  const areas = region?.cumRap || region?.districts || region?.areas || region?.locations || [];
+  return Array.isArray(areas)
+    ? areas
+        .map((area) => typeof area === "string" ? area : area?.name || area?.location || area?.district)
+        .filter(Boolean)
+    : [];
+};
 
 function MovieCarousel({ movies, currentId, onSelect }) {
   const ref = useRef(null);
@@ -132,6 +144,7 @@ export default function MovieDetail() {
   const [movieList, setMovieList] = useState([]);
   const [dataShowTimes, setDataShowTimes] = useState([]);
   const [loadingInternal, setLoadingInternal] = useState(false);
+  const [branchSearch, setBranchSearch] = useState("");
 
   // =========================
   // LOAD MOVIE LIST
@@ -164,7 +177,7 @@ export default function MovieDetail() {
   };
 
   const activeRegionData = areasList?.find(
-    (region) => region.vungMien === selectedRegionName,
+    (region) => getRegionName(region) === selectedRegionName,
   );
 
   // =========================
@@ -204,6 +217,7 @@ export default function MovieDetail() {
             .map((x) => [
               String(x.branch).trim(),
               {
+                ...x,
                 branch: String(x.branch).trim(),
               },
             ]),
@@ -267,21 +281,17 @@ export default function MovieDetail() {
       areasList.length > 0
     ) {
       const preferredRegion =
-        areasList.find(
-          (r) => r?.vungMien === "TP.HCM",
-        ) ||
+        areasList.find((r) => getRegionName(r) === "TP.HCM") ||
         areasList.find((r) =>
-          String(r?.vungMien || "")
+          String(getRegionName(r))
             .toLowerCase()
             .includes("hcm"),
         ) ||
         areasList[0];
 
-      const regionName =
-        preferredRegion?.vungMien || null;
+      const regionName = getRegionName(preferredRegion) || null;
 
-      const firstCity =
-        preferredRegion?.cumRap?.[0] || null;
+      const firstCity = getRegionAreas(preferredRegion)[0] || null;
 
       setSelectedRegionName(regionName);
       setSelectCity(firstCity);
@@ -299,7 +309,6 @@ export default function MovieDetail() {
     selectedRegionName,
     decision,
   ]);
-
   // =========================
   // MOVIE DETAIL
   // =========================
@@ -410,6 +419,14 @@ export default function MovieDetail() {
   // RENDER
   // =========================
 
+  const groupedShowtimes = dataShowTimes.reduce((groups, showtime) => {
+    const roomName = showtime.theater?.name || "Phòng chiếu";
+    const group = groups.find((item) => item.name === roomName);
+    if (group) group.showtimes.push(showtime);
+    else groups.push({ name: roomName, showtimes: [showtime] });
+    return groups;
+  }, []);
+
   return (
     <div className="detailPage py-3 container" style={{ flex: "1" }}>
       <SEO
@@ -419,6 +436,119 @@ export default function MovieDetail() {
         }
         image={movieDetail?.hinhAnh}
       />
+      <Calendar onDateChange={(date) => setLocalDate(date)} />
+      <div className="showtime-picker">
+        <section className="picker-column location-column">
+          <div className="picker-heading">
+            <h2>Rạp</h2>
+            <Select
+              aria-label="Chọn khu vực"
+              placeholder="Chọn khu vực"
+              value={selectedRegionName || undefined}
+              onChange={async (name) => {
+                const region = areasList.find((item) => getRegionName(item) === name);
+                const firstArea = getRegionAreas(region)[0] || null;
+                setSelectedRegionName(name);
+                setSelectCity(firstArea);
+                setBranches([]);
+                setSelectedCinemaName(null);
+                setDataShowTimes([]);
+                if (firstArea) await loadBranchesByLocation(firstArea);
+              }}
+              options={areasList.map((item) => getRegionName(item)).filter(Boolean).map((name) => ({ label: name, value: name }))}
+            />
+          </div>
+          <div className="location-list">
+            {getRegionAreas(activeRegionData).map((area) => (
+              <button
+                type="button"
+                key={area}
+                className={`location-option${selectCity === area ? " is-active" : ""}`}
+                onClick={async () => {
+                  setSelectCity(area);
+                  setBranches([]);
+                  setSelectedCinemaName(null);
+                  setDataShowTimes([]);
+                  await loadBranchesByLocation(area);
+                }}
+              >
+                <span>{area}</span>
+                {selectCity === area && <span className="location-count">{branches.length}</span>}
+              </button>
+            ))}
+          </div>
+        </section>
+        <section className="picker-column cinema-column">
+          <div className="picker-heading"><h2>Rạp chiếu phim của tôi</h2></div>
+          <div className="cinema-list">
+            {branches.length ? branches.map((item) => (
+              <button
+                type="button"
+                key={item._id || item.branch}
+                className={`cinema-option${selectedCinemaName === item.branch ? " is-active" : ""}`}
+                onClick={() => setSelectedCinemaName(item.branch)}
+              >
+                <span>{item.branch}</span>
+                {item.address && <small>{item.address}</small>}
+              </button>
+            )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={selectCity ? "Không có rạp trong khu vực này" : "Chọn khu vực"} />}
+          </div>
+        </section>
+        <section className="picker-column movie-column">
+          <div className="picker-heading"><h2>Phim</h2></div>
+          <div className="movie-list">
+            {movieList.map((movie) => (
+              <button
+                type="button"
+                key={movie._id}
+                className={`movie-option${param.movieId === movie._id ? " is-active" : ""}`}
+                onClick={() => movie._id !== param.movieId && navigate(`/movie/selectT/${movie._id}`)}
+              >
+                {movie.tenPhim || movie.title}
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
+      <div className="selection-summary">
+        <span>Ngày <strong>{localDate || "Chọn ngày"}</strong></span>
+        <span>Rạp <strong>{selectedCinemaName || "Chọn rạp"}</strong></span>
+        <span>Phim <strong>{movieDetail?.tenPhim || "Đang tải phim"}</strong></span>
+      </div>
+      <section className="showtime-results">
+        <div className="results-heading">
+          <h2>Giờ chiếu</h2>
+          <p>Thời gian chiếu phim có thể chênh lệch 15 phút do chiến dịch quảng cáo.</p>
+        </div>
+        <Spin spinning={loadingInternal}>
+          {!selectedCinemaName ? <Empty description="Chọn rạp để xem lịch chiếu" /> : groupedShowtimes.length ? (
+            groupedShowtimes.map((group) => (
+              <div className="room-schedule" key={group.name}>
+                <h3>{selectedCinemaName} <span>{group.name}</span></h3>
+                <div className="schedule-table-wrap">
+                  <table className="schedule-table">
+                    <thead><tr><th>Phòng chiếu</th><th>Giờ chiếu</th><th>Ghế còn trống</th></tr></thead>
+                    <tbody>
+                      {group.showtimes.map((showtime) => {
+                        const seats = Array.isArray(showtime.seats) ? showtime.seats : [];
+                        const availableSeats = seats.filter((seat) => !seat.isBooked).length;
+                        const isPast = dayjs(showtime.startTime?.replace("Z", "")).isBefore(dayjs());
+                        return (
+                          <tr key={showtime._id}>
+                            <td>{group.name}</td>
+                            <td><Button disabled={isPast} onClick={() => navigate(`/booking/${showtime._id}`)}>{dayjs(showtime.startTime?.replace("Z", "")).format("HH:mm")}</Button></td>
+                            <td>{availableSeats} / {seats.length}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))
+          ) : <Empty description={localDate ? "Ngày này không có suất chiếu" : "Chọn ngày xem suất chiếu"} />}
+        </Spin>
+      </section>
       {/* <CinemaBooking dataSource={data} /> */}
       <Card
         style={{
@@ -776,16 +906,6 @@ export default function MovieDetail() {
         </div>
       </Card>
 
-      {/* Carousel phim — đổi movie */}
-      {movieList.length > 0 && (
-        <MovieCarousel
-          movies={movieList}
-          currentId={param.movieId}
-          onSelect={(id) => navigate(`/movie/selectT/${id}`)}
-        />
-      )}
-
-      <Calendar onDateChange={(date) => setLocalDate(date)} />
     </div>
   );
 }

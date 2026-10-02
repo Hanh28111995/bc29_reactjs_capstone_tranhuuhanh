@@ -1,25 +1,242 @@
 .detailPage {
-  .forPC {
-    display: block;
-  }
+  .forPC,
   .forPhone {
     display: none;
   }
-  .ant-row {
-    border-radius: 5px;
+
+  .showtime-picker {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.9fr) minmax(260px, 1.25fr) minmax(220px, 0.95fr);
+    min-height: 290px;
+    border-top: 2px solid #202c35;
+    border-bottom: 1px solid #d4d9dc;
+    background: #fff;
+  }
+
+  .picker-column {
+    min-width: 0;
+    padding: 14px 16px;
+    border-right: 1px solid #d4d9dc;
+  }
+
+  .picker-column:last-child {
+    border-right: 0;
+  }
+
+  .picker-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 36px;
+    margin-bottom: 8px;
+
+    h2 {
+      margin: 0;
+      color: #1f2933;
+      font-size: 16px;
+      font-weight: 700;
+    }
+  }
+
+  .location-column .ant-select {
+    width: 130px;
+  }
+
+  .location-list,
+  .cinema-list,
+  .movie-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 238px;
+    overflow-y: auto;
+  }
+
+  .location-option,
+  .cinema-option,
+  .movie-option {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid #edf0f2;
+    background: transparent;
+    color: #3e4a54;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .location-option {
+    display: flex;
+    justify-content: space-between;
+    padding: 9px 8px;
+    font-size: 13px;
+  }
+
+  .location-count {
+    color: #7a8791;
+    font-size: 11px;
+  }
+
+  .cinema-option {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 9px;
+    font-size: 13px;
+    font-weight: 600;
+
+    small {
+      color: #7a8791;
+      font-size: 11px;
+      font-weight: 400;
+    }
+  }
+
+  .movie-option {
+    padding: 11px 9px;
+    color: #64717b;
+    font-size: 12px;
+  }
+
+  .location-option:hover,
+  .cinema-option:hover,
+  .movie-option:hover,
+  .location-option.is-active,
+  .cinema-option.is-active,
+  .movie-option.is-active {
+    background: #f3f6f7;
+    color: #182832;
+  }
+
+  .location-option.is-active,
+  .cinema-option.is-active,
+  .movie-option.is-active {
+    box-shadow: inset 3px 0 #b74736;
+    font-weight: 700;
+  }
+
+  .selection-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 14px 10px;
+    color: #37434d;
+    font-size: 13px;
+
+    strong {
+      margin-left: 5px;
+      color: #17232b;
+      font-weight: 600;
+    }
+  }
+
+  .showtime-results {
+    padding: 12px 0 28px;
+  }
+
+  .results-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 10px 0 18px;
+
+    h2 {
+      margin: 0;
+      color: #202c35;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0;
+      color: #6c7881;
+      font-size: 11px;
+    }
+  }
+
+  .room-schedule {
+    margin: 0 10px 22px;
+
+    h3 {
+      margin: 0 0 8px;
+      color: #28343d;
+      font-size: 14px;
+      font-weight: 700;
+
+      span {
+        margin-left: 8px;
+        color: #68757e;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .schedule-table-wrap {
+    overflow-x: auto;
+  }
+
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+
+    th,
+    td {
+      min-width: 130px;
+      padding: 7px 10px;
+      border: 1px solid #d9dee1;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f4f6f7;
+      color: #505d66;
+      font-weight: 600;
+    }
+
+    td:first-child {
+      text-align: left;
+    }
+
+    .ant-btn {
+      height: 28px;
+      padding: 0 12px;
+      border-color: #d0d7dc;
+      color: #273640;
+    }
   }
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 700px) {
   .detailPage {
-    .forPC {
-      display: none;
+    .showtime-picker {
+      grid-template-columns: 1fr;
     }
-    .forPhone {
-      display: block;
+
+    .picker-column {
+      border-right: 0;
+      border-bottom: 1px solid #d4d9dc;
+      padding: 12px;
     }
-    h2 {
-      font-size: 1.5rem;
+
+    .location-list,
+    .cinema-list,
+    .movie-list {
+      max-height: 170px;
+    }
+
+    .results-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .selection-summary {
+      gap: 8px 16px;
+    }
+
+    .schedule-table {
+      min-width: 460px;
     }
   }
 }
