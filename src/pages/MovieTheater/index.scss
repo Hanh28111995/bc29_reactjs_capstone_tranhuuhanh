@@ -428,6 +428,10 @@
 }
 
 .cinema-location-tab {
+    > .ant-btn {
+        margin: 0 0 12px;
+    }
+
     p {
         display: flex;
         gap: 8px;
@@ -442,74 +446,88 @@
     }
 }
 
-.cinema-directions-tab {
+.cinema-info-table {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    flex-direction: column;
+    border-top: 1px solid #aaa69e;
+}
 
-    p {
-        color: #4f5c64;
-        font-size: 13px;
+.cinema-info-row {
+    display: flex;
+    align-items: stretch;
+    min-height: 120px;
+    border-bottom: 1px solid #d9d6ce;
+}
+
+.cinema-info-label {
+    display: grid;
+    flex: 0 0 128px;
+    align-content: center;
+    justify-items: center;
+    gap: 6px;
+    padding: 14px 10px;
+    background: #f7f4eb;
+    color: #161b20;
+    text-align: center;
+
+    > .anticon,
+    > .cinema-utility-icon {
+        font-size: 23px;
+    }
+
+    strong {
+        font-size: 12px;
+        line-height: 1.4;
     }
 }
 
-.cinema-utility-list {
+.cinema-info-content {
     display: flex;
-    flex-direction: column;
-    gap: 0;
-    border-top: 1px solid #d9d6ce;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 16px 20px;
+    color: #4f5c64;
+    font-size: 12px;
+    line-height: 1.7;
+    text-align: center;
+    overflow-wrap: anywhere;
+
+    > p {
+        margin: 0;
+        white-space: pre-line;
+    }
 }
 
-.cinema-utility-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 18px 0;
-    border-bottom: 1px solid #d9d6ce;
+.cinema-info-lines {
+    width: 100%;
+
+    p {
+        margin: 0 0 4px;
+        white-space: pre-line;
+    }
+
+    p:last-child {
+        margin-bottom: 0;
+    }
 }
 
 .cinema-utility-icon {
     display: grid;
-    flex: 0 0 42px;
-    width: 42px;
-    height: 42px;
+    width: 26px;
+    height: 26px;
     place-items: center;
     border: 1.5px solid #25282d;
     border-radius: 50%;
     background: #f9f7f2;
     color: #1d1f23;
-    font-size: 20px;
     font-weight: 700;
     line-height: 1;
 }
 
-.cinema-utility-icon-car {
-    font-size: 18px;
-}
-
 .cinema-utility-icon-info {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 25px;
-}
-
-.cinema-utility-content {
-    flex: 1;
-
-    .cinema-utility-title {
-        margin-bottom: 8px;
-        color: #1d2328;
-        font-size: 15px;
-        font-weight: 700;
-    }
-
-    p {
-        margin: 0;
-        color: #4f5c64;
-        font-size: 13px;
-        line-height: 1.7;
-        white-space: pre-line;
-    }
 }
 
 .cinema-no-selection {
@@ -563,12 +581,21 @@
         }
 
         .ant-tabs-content-holder {
-            padding: 10px;
+            padding: 10px 0;
         }
     }
 
-    .cinema-directions-tab {
-        align-items: flex-start;
-        flex-direction: column;
+    .cinema-info-label {
+        flex-basis: 92px;
+        padding: 12px 6px;
+
+        strong {
+            font-size: 10px;
+        }
+    }
+
+    .cinema-info-content {
+        padding: 12px 10px;
+        font-size: 11px;
     }
 }

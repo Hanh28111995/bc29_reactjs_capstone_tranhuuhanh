@@ -258,6 +258,22 @@ function MovieTheater() {
     ? cinemaInfo.parking
     : "";
 
+  const formatDirections = (value) => {
+    if (Array.isArray(value) || (value && typeof value === "object")) {
+      return normalizeUtilityText(value)
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+    }
+
+    return String(value || "")
+      .replace(/\s+(?=\+\s)/g, "\n")
+      .replace(/\s+(?=-\s*(?:Tuyến|Phí)\b)/gi, "\n")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+  };
+
   const normalizeUtilityText = (value) => {
     if (!value) return "";
     if (Array.isArray(value)) {
@@ -282,6 +298,20 @@ function MovieTheater() {
     return String(value);
   };
 
+  const directionsLines = formatDirections(directionsText);
+
+  const openDirections = () => {
+    if (!selectedCinema) return;
+
+    setActiveTab("location");
+    const coordinates = parseCoordinates(cinemaInfo?.coordinates || selectedCinema.coordinates);
+    const destination = coordinates
+      ? `${coordinates[0]},${coordinates[1]}`
+      : selectedCinema.address;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination || selectedCinema.branch || "")}`;
+    window.open(mapsUrl, "_blank", "noopener,noreferrer");
+  };
+
   if (loadingLocations || loadingCinemas || loadingBanners) {
     return <div className="cinema-page-loading"><Spin size="large" /></div>;
   }
@@ -290,7 +320,7 @@ function MovieTheater() {
     return <div className="container py-5"><Empty description="Không thể tải thông tin rạp lúc này." /></div>;
   }
 
-  const coordinates = parseCoordinates(selectedCinema?.coordinates);
+  const coordinates = parseCoordinates(cinemaInfo?.coordinates || selectedCinema?.coordinates);
   const mapSource = coordinates
     ? `https://www.openstreetmap.org/export/embed.html?bbox=${coordinates[1] - 0.015}%2C${coordinates[0] - 0.01}%2C${coordinates[1] + 0.015}%2C${coordinates[0] + 0.01}&layer=mapnik&marker=${coordinates[0]}%2C${coordinates[1]}`
     : null;
@@ -390,7 +420,7 @@ function MovieTheater() {
       children: selectedCinema ? (
         <div className="cinema-location-tab">
           <p><EnvironmentOutlined /> {selectedCinema.address || "Chưa có địa chỉ rạp."}</p>
-          <Button icon={<LinkOutlined />} onClick={() => setActiveTab("location")}>Mở chỉ đường</Button>
+          <Button icon={<LinkOutlined />} onClick={openDirections}>Mở chỉ đường</Button>
           {mapSource ? <iframe title={`Bản đồ ${selectedCinema.branch}`} src={mapSource} loading="lazy" /> : <Empty description="Rạp chưa có tọa độ bản đồ." />}
         </div>
       ) : <Empty description="Chưa chọn rạp." />,
@@ -399,8 +429,24 @@ function MovieTheater() {
       key: "directions",
       label: "Hướng dẫn đi tới rạp",
       children: selectedCinema ? (
-        <div className="cinema-directions-tab">
-          <p>{directionsText || selectedCinema.address || "Chưa có hướng dẫn đi tới rạp."}</p>
+        <div className="cinema-info-table cinema-directions-tab">
+          <div className="cinema-info-row">
+            <div className="cinema-info-label">
+              <EnvironmentOutlined />
+              <strong>Hướng dẫn đi tới rạp</strong>
+            </div>
+            <div className="cinema-info-content">
+              {directionsLines.length ? (
+                <div className="cinema-info-lines">
+                  {directionsLines.map((line, index) => (
+                    <p key={`${index}-${line}`}>{line.replace(/^[+-]\s*/, "")}</p>
+                  ))}
+                </div>
+              ) : (
+                <p>{selectedCinema.address || "Chưa có hướng dẫn đi tới rạp."}</p>
+              )}
+            </div>
+          </div>
         </div>
       ) : <Empty description="Chưa chọn rạp." />,
     },
@@ -409,22 +455,26 @@ function MovieTheater() {
       label: "Tiện ích đi kèm",
       children: selectedCinema ? (
         <Spin spinning={loadingCinemaDetail}>
-          <div className="cinema-utility-list">
+          <div className="cinema-info-table cinema-utility-list">
             {parkingText && (
-              <div className="cinema-utility-row">
-                <div className="cinema-utility-icon cinema-utility-icon-car">🚗</div>
-                <div className="cinema-utility-content">
-                  <div className="cinema-utility-title">Nơi đỗ xe</div>
+              <div className="cinema-info-row">
+                <div className="cinema-info-label">
+                  <span className="cinema-utility-icon cinema-utility-icon-car" aria-hidden="true">🚘</span>
+                  <strong>Nơi đỗ xe</strong>
+                </div>
+                <div className="cinema-info-content">
                   <p>{normalizeUtilityText(parkingText)}</p>
                 </div>
               </div>
             )}
 
             {amenityList.length > 0 && (
-              <div className="cinema-utility-row">
-                <div className="cinema-utility-icon cinema-utility-icon-info">i</div>
-                <div className="cinema-utility-content">
-                  <div className="cinema-utility-title">Tiện ích đi kèm</div>
+              <div className="cinema-info-row">
+                <div className="cinema-info-label">
+                  <span className="cinema-utility-icon cinema-utility-icon-info" aria-hidden="true">i</span>
+                  <strong>Tiện ích đi kèm</strong>
+                </div>
+                <div className="cinema-info-content">
                   <p>{normalizeUtilityText(amenityList)}</p>
                 </div>
               </div>
