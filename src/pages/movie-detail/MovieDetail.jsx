@@ -29,6 +29,29 @@ const getRegionAreas = (region) => {
     : [];
 };
 
+const normalizeLocationText = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+
+const getRegionCinemaCount = (region, cinemas) => {
+  const areas = getRegionAreas(region).map(normalizeLocationText).filter(Boolean);
+  const regionName = normalizeLocationText(getRegionName(region));
+
+  return cinemas.filter((cinema) => {
+    const address = normalizeLocationText(
+      `${cinema?.location || ""} ${cinema?.region || ""} ${cinema?.address || ""}`,
+    );
+    return areas.length
+      ? areas.some((area) => address.includes(area))
+      : address.includes(regionName);
+  }).length;
+};
+
 const AGE_RATING_CLASSES = {
   P: "age-rating-p",
   C13: "age-rating-c13",
@@ -149,6 +172,7 @@ export default function MovieDetail() {
   const [selectCity, setSelectCity] = useState(null);
   const [selectedCinemaName, setSelectedCinemaName] = useState(null);
   const [branches, setBranches] = useState([]);
+  const [allBranches, setAllBranches] = useState([]);
   const [localDate, setLocalDate] = useState(null);
   const [movieDetail, setMovieDetail] = useState(null);
   const [movieList, setMovieList] = useState([]);
@@ -165,6 +189,15 @@ export default function MovieDetail() {
       const list = res?.data?.content || res?.data || [];
       setMovieList(Array.isArray(list) ? list : []);
     });
+  }, []);
+
+  useEffect(() => {
+    fetchBranchesAPI()
+      .then((res) => {
+        const data = res.data?.content || res.data?.data || res.data || [];
+        setAllBranches(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setAllBranches([]));
   }, []);
 
   // =========================
@@ -262,16 +295,16 @@ export default function MovieDetail() {
 
     askOnMount: true,
 
-    onSelect: ({ regionName, district }) => {
+    onSelect: ({ regionName }) => {
       setSelectedRegionName(regionName || null);
-      setSelectCity(district || null);
+      setSelectCity(null);
 
       setBranches([]);
       setSelectedCinemaName(null);
       setDataShowTimes([]);
 
-      if (district) {
-        loadBranchesByLocation(district);
+      if (regionName) {
+        loadBranchesByLocation(regionName);
       }
     },
 
@@ -302,17 +335,15 @@ export default function MovieDetail() {
 
       const regionName = getRegionName(preferredRegion) || null;
 
-      const firstCity = getRegionAreas(preferredRegion)[0] || null;
-
       setSelectedRegionName(regionName);
-      setSelectCity(firstCity);
+      setSelectCity(null);
 
       setBranches([]);
       setSelectedCinemaName(null);
       setDataShowTimes([]);
 
-      if (firstCity) {
-        loadBranchesByLocation(firstCity);
+      if (regionName) {
+        loadBranchesByLocation(regionName);
       }
     }
   }, [
@@ -477,22 +508,6 @@ export default function MovieDetail() {
         <section className="picker-column cinema-main-column">
           <div className="picker-heading">
             <h2>Rạp</h2>
-            <Select
-              aria-label="Chọn khu vực"
-              placeholder="Chọn khu vực"
-              value={selectedRegionName || undefined}
-              onChange={async (name) => {
-                const region = areasList.find((item) => getRegionName(item) === name);
-                const firstArea = getRegionAreas(region)[0] || null;
-                setSelectedRegionName(name);
-                setSelectCity(firstArea);
-                setBranches([]);
-                setSelectedCinemaName(null);
-                setDataShowTimes([]);
-                if (firstArea) await loadBranchesByLocation(firstArea);
-              }}
-              options={areasList.map((item) => getRegionName(item)).filter(Boolean).map((name) => ({ label: name, value: name }))}
-            />
           </div>
 
           <section className="favorite-cinema-row">
@@ -513,7 +528,7 @@ export default function MovieDetail() {
 
           <section className="cinema-system-row">
             <div className="system-heading">
-              <h3>Hệ thống rạp</h3>
+              <h3>Vùng</h3>
               <Input
                 aria-label="Tìm rạp"
                 placeholder="Tìm rạp"
@@ -524,23 +539,29 @@ export default function MovieDetail() {
             </div>
             <div className="system-cinema-content">
               <div className="location-list">
-                {getRegionAreas(activeRegionData).map((area) => (
-                  <button
-                    type="button"
-                    key={area}
-                    className={`location-option${selectCity === area ? " is-active" : ""}`}
-                    onClick={async () => {
-                      setSelectCity(area);
-                      setBranches([]);
-                      setSelectedCinemaName(null);
-                      setDataShowTimes([]);
-                      await loadBranchesByLocation(area);
-                    }}
-                  >
-                    <span>{area}</span>
-                    {selectCity === area && <span className="location-count">{branches.length}</span>}
-                  </button>
-                ))}
+                {areasList.map((region, index) => {
+                  const regionName = getRegionName(region);
+                  if (!regionName) return null;
+
+                  return (
+                    <button
+                      type="button"
+                      key={region._id || regionName || index}
+                      className={`location-option${selectedRegionName === regionName ? " is-active" : ""}`}
+                      onClick={async () => {
+                        setSelectedRegionName(regionName);
+                        setSelectCity(null);
+                        setBranches([]);
+                        setSelectedCinemaName(null);
+                        setDataShowTimes([]);
+                        await loadBranchesByLocation(regionName);
+                      }}
+                    >
+                      <span>{regionName}</span>
+                      <span className="location-count">{getRegionCinemaCount(region, allBranches)}</span>
+                    </button>
+                  );
+                })}
               </div>
               <div className="cinema-list">
                 {visibleBranches.length ? visibleBranches.map((item) => (
