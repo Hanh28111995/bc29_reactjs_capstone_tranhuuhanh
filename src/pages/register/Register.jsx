@@ -1,5 +1,5 @@
 import { notification } from 'antd'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { createRef } from 'react'
 import { useNavigate } from "react-router-dom"
 import { registerApi } from 'services/user'
@@ -20,6 +20,8 @@ const DEFAULT_ERRORS = {
 export default function Register() {
     const navigate = useNavigate();
     const [valid, setValid] = useState({ isValid: true })
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const submittingRef = useRef(false)
     const [state, setState] = useState({
         values: DEFAULT_VALUES,
         errors: DEFAULT_ERRORS,
@@ -53,6 +55,7 @@ export default function Register() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (submittingRef.current) return;
 
         // Kiểm tra trực tiếp từ formRef hoặc event.target để lấy giá trị mới nhất
         const isFormValid = event.target.checkValidity();
@@ -68,6 +71,8 @@ export default function Register() {
 
         // Nếu FORM HỢP LỆ
         setValid({ isValid: true });
+        submittingRef.current = true;
+        setIsSubmitting(true);
         try {
             await registerApi(state.values);
             notification.success({ description: `Register success` });
@@ -76,6 +81,9 @@ export default function Register() {
             notification.warning({
                 description: `${err.response?.data?.message || "Đăng ký thất bại"}`,
             });
+        } finally {
+            submittingRef.current = false;
+            setIsSubmitting(false);
         }
     };
 
@@ -156,7 +164,7 @@ export default function Register() {
                 )}
             </div>
 
-            <button className='btn btn-success w-100'>REGISTER</button>
+            <button className='btn btn-success w-100' disabled={isSubmitting}>REGISTER</button>
 
         </form>
     )

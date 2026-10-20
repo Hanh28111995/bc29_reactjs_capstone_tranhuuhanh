@@ -10,25 +10,21 @@ export default function Checkout(props) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        let pollingInterval;
+        let cancelled = false;
+        let pollingTimeout;
 
         if (open && bookingId) {
-            pollingInterval = setInterval(async () => {
+            const poll = async () => {
                 try {
                     const response = await fetchCheckPayment(bookingId);
 
-                    // Sửa lỗi truy cập: response.data.content.status (theo log của bạn)
                     const currentStatus = response.data?.content?.status;
 
-                    // Nếu trạng thái đã thay đổi (thành công hoặc thất bại)
                     if (currentStatus === 'Paid' || currentStatus === 'Failed') {
-                        clearInterval(pollingInterval);
-
-                        // Cập nhật trạng thái cho cha để trigger việc đóng Modal và hiện Result
+                        if (cancelled) return;
                         const finalStatus = currentStatus === 'Paid' ? 'success' : 'error';
                         setStatus(finalStatus);
 
-                        // Điều hướng an toàn
                         navigate('/payment-result', {
                             state: {
                                 ...window.history.state?.usr,
@@ -37,15 +33,23 @@ export default function Checkout(props) {
                             },
                             replace: true
                         });
+                        return;
                     }
                 } catch (error) {
                     console.error("Lỗi Polling:", error);
                 }
-            }, 3000);
+
+                if (!cancelled) {
+                    pollingTimeout = setTimeout(poll, 3000);
+                }
+            };
+
+            poll();
         }
 
         return () => {
-            if (pollingInterval) clearInterval(pollingInterval);
+            cancelled = true;
+            if (pollingTimeout) clearTimeout(pollingTimeout);
         };
     }, [open, bookingId, navigate, setStatus]);
 

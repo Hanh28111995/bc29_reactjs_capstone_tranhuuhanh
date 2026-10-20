@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Card,
   Row,
@@ -56,6 +56,7 @@ export default function ScheduleGenerator() {
   const [generateDays, setGenerateDays] = useState(3);
   const [isActive, setIsActive] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const generationInProgressRef = useRef(false);
 
   const { state: rawMovies } = useAsync({
     service: fetchMovieListAPI,
@@ -159,6 +160,8 @@ export default function ScheduleGenerator() {
 
   // Validation và Submit
   const handleGenerate = async () => {
+    if (generationInProgressRef.current) return;
+
     if (selectedMovies.length === 0) {
       return notification.warning({ message: "Cần ít nhất 1 phim trong cấu hình" });
     }
@@ -194,6 +197,8 @@ export default function ScheduleGenerator() {
       isActive,
     };
 
+    generationInProgressRef.current = true;
+    setGenerating(true);
     try {
       await scheduleMutation.mutateAsync({
         payload,
@@ -201,7 +206,6 @@ export default function ScheduleGenerator() {
       });
 
       // Sau khi lưu config → gọi luôn generate suất chiếu
-      setGenerating(true);
       try {
         const res = await generateScheduleAPI();
         const data = res?.data?.content || res?.data || {};
@@ -214,11 +218,12 @@ export default function ScheduleGenerator() {
           message: "Cấu hình đã lưu",
           description: "Generate suất chiếu lỗi — cron hằng ngày sẽ tự lấp sau.",
         });
-      } finally {
-        setGenerating(false);
       }
     } catch (err) {
       // scheduleMutation onError đã xử lý
+    } finally {
+      generationInProgressRef.current = false;
+      setGenerating(false);
     }
   };
 

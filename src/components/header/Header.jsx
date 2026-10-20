@@ -18,7 +18,7 @@ import {
 } from "services/notificationAndHistory";
 import logoImage from "../../assets/images/h_ticket_cinema_logo.png";
 import "./index.scss";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Header() {
   const userState = useSelector((state) => state.userReducer);
@@ -50,6 +50,8 @@ export default function Header() {
 
   const notifications = userState.notifications || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
+  const markAllReadInProgressRef = useRef(false);
 
   // Hàm fetch dữ liệu
   const getNotifications = async () => {
@@ -76,12 +78,17 @@ export default function Header() {
   };
 
   const handleMarkAllAsRead = async () => {
-    if (!userId || !userRole) return;
+    if (!userId || !userRole || markAllReadInProgressRef.current) return;
+    markAllReadInProgressRef.current = true;
+    setIsMarkingAllRead(true);
     try {
       await markAllNotificationsAsReadAPI(userRole);
       dispatch(markAllNotificationsReadAction());
     } catch (error) {
       console.error("Lỗi khi đánh dấu tất cả đã đọc:", error);
+    } finally {
+      markAllReadInProgressRef.current = false;
+      setIsMarkingAllRead(false);
     }
   };
 
@@ -138,6 +145,7 @@ export default function Header() {
               <button
                 className="mark-all-read-btn"
                 onClick={handleMarkAllAsRead}
+                disabled={isMarkingAllRead}
                 title={t("notifications.markAllRead")}
               >
                 <i className="fa fa-check-double"></i>

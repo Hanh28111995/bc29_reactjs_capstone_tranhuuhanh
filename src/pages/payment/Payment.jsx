@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
@@ -90,6 +90,7 @@ export default function Payment() {
   const [appliedCode, setAppliedCode] = useState(null);
   const [discount, setDiscount] = useState(0);
   const [couponLoading, setCouponLoading] = useState(false);
+  const bookingFlowRef = useRef(false);
 
   const subtotal =
     bookingData?.reduce((total, el) => total + (el.price || 0), 0) || 0;
@@ -149,7 +150,10 @@ export default function Payment() {
 
   // Chế độ ĐẶT VÉ — tạo vé Pending, không qua cổng thanh toán
 
-  const handleReserve = async () => {
+  const handleReserve = () => {
+    if (bookingFlowRef.current) return;
+    bookingFlowRef.current = true;
+
     confirm({
       title: "Xác nhận đặt vé?",
 
@@ -160,6 +164,10 @@ export default function Payment() {
       okText: "Xác nhận",
 
       cancelText: "Hủy",
+
+      onCancel() {
+        bookingFlowRef.current = false;
+      },
 
       async onOk() {
         try {
@@ -203,18 +211,23 @@ export default function Payment() {
           navigate("/");
         } catch (error) {
           // handled in mutation onError
+        } finally {
+          bookingFlowRef.current = false;
         }
       },
     });
   };
 
   const handleFinishPayment = () => {
+    if (bookingFlowRef.current) return;
+
     if (!paymentMethod) {
       return notification.warning({
         message: "Vui lòng chọn phương thức thanh toán!",
       });
     }
 
+    bookingFlowRef.current = true;
     confirm({
       title: "Xác nhận đã thanh toán ?",
 
@@ -224,8 +237,12 @@ export default function Payment() {
 
       cancelText: "Hủy",
 
+      onCancel() {
+        bookingFlowRef.current = false;
+      },
+
       onOk() {
-        processBooking();
+        return processBooking();
       },
     });
   };
@@ -338,6 +355,8 @@ export default function Payment() {
       }
     } catch (error) {
       console.error("Qúa trình bị gián đoạn.", error);
+    } finally {
+      bookingFlowRef.current = false;
     }
   };
 

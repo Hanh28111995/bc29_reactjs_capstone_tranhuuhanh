@@ -173,7 +173,7 @@ export default function MovieDetail() {
   // ---------- SHOWTIMES ----------
   useEffect(() => {
     const fetchData = async () => {
-      if (!canFetchShowtimes) {
+      if (activeTab !== "booking" || !canFetchShowtimes) {
         setDataShowTimes([]);
         return;
       }
@@ -195,7 +195,7 @@ export default function MovieDetail() {
       }
     };
     fetchData();
-  }, [selectedCinemaName, localDate, paramMovieId, canFetchShowtimes]);
+  }, [activeTab, selectedCinemaName, localDate, paramMovieId, canFetchShowtimes]);
 
   useEffect(() => {
     if (activeTab !== "schedule" || !selectedRegionName || !localDate || !paramMovieId) {

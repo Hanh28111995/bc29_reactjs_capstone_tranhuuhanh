@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Form,
@@ -41,6 +41,7 @@ export default function CouponForm() {
   const params = useParams();
   const { notification } = App.useApp();
   const [isChanged, setIsChanged] = useState(false);
+  const saveInProgressRef = useRef(false);
   const [originalData, setOriginalData] = useState(null);
 
   // Lấy chi tiết bằng cách lọc trong list (BE không có API detail riêng)
@@ -83,6 +84,9 @@ export default function CouponForm() {
   });
 
   const handleSave = async (values) => {
+    if (saveInProgressRef.current) return;
+    saveInProgressRef.current = true;
+
     try {
       const payload = {
         ...values,
@@ -100,6 +104,8 @@ export default function CouponForm() {
         message: "Lỗi",
         description: error.response?.data?.message || "Có lỗi xảy ra!",
       });
+    } finally {
+      saveInProgressRef.current = false;
     }
   };
 
@@ -190,7 +196,8 @@ export default function CouponForm() {
             type="primary"
             htmlType="submit"
             icon={<SaveOutlined />}
-            disabled={!isChanged}
+            disabled={!isChanged || couponMutation.isLoading}
+            loading={couponMutation.isLoading}
             block
             size="large"
             className="submit-btn"
