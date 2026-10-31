@@ -7,8 +7,10 @@ import "./index.scss";
 import { useParams } from 'react-router-dom';
 import { useAsync } from 'hooks/useAsync';
 import { fetchMovieDetailAPI } from 'services/general';
+import { useTranslation } from "react-i18next";
 
 export default function MovieDtail() {
+  const { t } = useTranslation();
   const param = useParams();
 
   const {
@@ -34,8 +36,8 @@ export default function MovieDtail() {
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải thông tin phim.</p>
-        <p>{error?.message || 'Vui lòng thử lại sau.'}</p>
+        <p>{t("movies.loadError")}</p>
+        <p>{error?.message || t("common.tryAgain")}</p>
       </div>
     );
   }

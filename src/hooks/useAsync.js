@@ -31,6 +31,7 @@ export const useAsync = ({
   condition = true,
   queryKey,
   enabled = true,
+  trackLoading = true,
   ...options
 }) => {
   const [, setLoadingState] = useContext(LoadingContext);
@@ -55,8 +56,9 @@ export const useAsync = ({
   });
 
   useEffect(() => {
+    if (!trackLoading) return;
     setLoadingState({ isLoading: query.isFetching || query.isLoading });
-  }, [query.isFetching, query.isLoading, setLoadingState]);
+  }, [query.isFetching, query.isLoading, setLoadingState, trackLoading]);
 
   return {
     state: query.data,

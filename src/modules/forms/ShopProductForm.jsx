@@ -11,7 +11,6 @@ import {
   Row,
   Col,
   Space,
-  Divider,
   Select,
   Checkbox,
 } from "antd";
@@ -30,6 +29,7 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
+import ProductOptions from "./ProductOptions";
 import "./index.scss";
 
 const DEFAULT_VALUES = {
@@ -124,12 +124,31 @@ export default function ShopProductForm() {
           highlight: data.highlight ?? false,
           options: (data.options || []).map((opt) => ({
             ...opt,
+            required: Boolean(opt.required),
             choices: Array.isArray(opt.choices)
-              ? opt.choices
+              ? opt.choices.map((choice) =>
+                  typeof choice === "string"
+                    ? {
+                        value: choice,
+                        label: choice,
+                        price: 0,
+                        addPrice: 0,
+                      }
+                    : {
+                        ...choice,
+                        price: choice.price ?? 0,
+                        addPrice: choice.addPrice ?? 0,
+                      },
+                )
               : opt.choices
                 ? String(opt.choices)
                     .split(",")
-                    .map((s) => s.trim())
+                    .map((s) => ({
+                      value: s.trim(),
+                      label: s.trim(),
+                      price: 0,
+                      addPrice: 0,
+                    }))
                 : [],
           })),
         };
@@ -440,76 +459,7 @@ export default function ShopProductForm() {
               />
             </Form.Item>
 
-            <Divider orientation="left">Tùy chọn sản phẩm (Options)</Divider>
-            <Form.List name="options">
-              {(fields, { add, remove }) => (
-                <>
-                  {fields.map(({ key, name, ...restField }) => (
-                    <Space
-                      key={key}
-                      style={{
-                        display: "flex",
-                        marginBottom: 8,
-                        flexWrap: "wrap",
-                      }}
-                      align="baseline"
-                    >
-                      <Form.Item
-                        {...restField}
-                        name={[name, "name"]}
-                        rules={[
-                          { required: true, message: "Nhập tên tùy chọn" },
-                        ]}
-                        style={{ width: 220, marginBottom: 0 }}
-                      >
-                        <Input placeholder="Tên tùy chọn (VD: Size, Màu)" />
-                      </Form.Item>
-
-                      <Form.Item
-                        {...restField}
-                        name={[name, "choices"]}
-                        style={{ width: 380, marginBottom: 0 }}
-                        getValueFromEvent={(e) =>
-                          e.target.value.split(",").map((s) => s.trim())
-                        }
-                        getValueProps={(val) => ({
-                          value: Array.isArray(val) ? val.join(", ") : val,
-                        })}
-                      >
-                        <Input placeholder="Các lựa chọn (cách nhau bởi dấu phẩy)" />
-                      </Form.Item>
-
-                      <Form.Item
-                        {...restField}
-                        name={[name, "required"]}
-                        valuePropName="checked"
-                        style={{ marginBottom: 0 }}
-                      >
-                        <Switch
-                          checkedChildren="Bắt buộc"
-                          unCheckedChildren="Tùy chọn"
-                        />
-                      </Form.Item>
-
-                      <Button
-                        type="text"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => remove(name)}
-                      />
-                    </Space>
-                  ))}
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Thêm tùy chọn mới
-                  </Button>
-                </>
-              )}
-            </Form.List>
+            <ProductOptions />
           </Col>
 
           {/* Cột phải: Banner và Trạng thái */}

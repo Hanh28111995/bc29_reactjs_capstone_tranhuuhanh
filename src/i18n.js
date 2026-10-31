@@ -4,7 +4,7 @@ import en from "./locales/en.json";
 import vi from "./locales/vn.json";
 
 const storedLanguage = localStorage.getItem("lang");
-const defaultLanguage = storedLanguage || "vi";
+const defaultLanguage = storedLanguage === "en" ? "en" : "vi";
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -13,6 +13,7 @@ i18n.use(initReactI18next).init({
   },
   lng: defaultLanguage,
   fallbackLng: "vi",
+  supportedLngs: ["vi", "en"],
   interpolation: {
     escapeValue: false,
   },

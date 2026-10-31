@@ -4,8 +4,10 @@ import { Spin, Button, Result, message } from "antd";
 import { fetchCancelTicketAPI, fetchTicketByIdAPI } from "services/ticket";
 import { useSelector } from "react-redux";
 import { useAsync, useAsyncMutation } from "hooks/useAsync";
+import { useTranslation } from "react-i18next";
 
 export default function PaymentResult() {
+  const { t } = useTranslation();
   const userState = useSelector((state) => state.userReducer);
   const location = useLocation();
   const navigate = useNavigate();
@@ -45,7 +47,7 @@ export default function PaymentResult() {
     raw: true,
     onError: (error) => {
       console.error("Update Status Failed:", error);
-      message.error("Có lỗi xảy ra, vui lòng thử lại.");
+      message.error(t("paymentResult.errorTryAgain"));
     },
   });
 
@@ -79,7 +81,7 @@ export default function PaymentResult() {
       <div style={{ textAlign: "center", marginTop: 100 }}>
         <Spin
           size="large"
-          tip="Đang xác thực giao dịch từ cổng thanh toán..."
+          tip={t("paymentResult.verifyLoading")}
         />
       </div>
     );
@@ -97,31 +99,31 @@ export default function PaymentResult() {
           status="success"
           title={
             paymentMethod === "cash"
-              ? "Đặt Chỗ Giữ Ghế Thành Công!"
-              : "Thanh Toán Thành Công!"
+              ? t("paymentResult.reservedSuccess")
+              : t("paymentResult.paymentSuccess")
           }
           subTitle={
             paymentMethod === "cash"
-              ? "Vui lòng đến rạp trước giờ chiếu để thanh toán và nhận vé."
-              : "Cảm ơn bạn đã tin tưởng sử dụng dịch vụ đặt vé xem phim của chúng tôi."
+              ? t("paymentResult.cashInstructions")
+              : t("paymentResult.thankYou")
           }
           extra={[
             <Button type="primary" key="home" onClick={() => navigate("/")}>
-              Quay lại trang chủ
+              {t("paymentResult.home")}
             </Button>,
             <Button key="history" onClick={() => navigate("/user-management")}>
-              Lịch sử đặt vé
+              {t("paymentResult.history")}
             </Button>,
           ]}
         />
       ) : (
         <Result
           status="error"
-          title="Giao dịch không thành công"
-          subTitle="Giao dịch đã bị hủy hoặc có lỗi xảy ra trong quá trình xử lý thanh toán."
+          title={t("paymentResult.failureTitle")}
+          subTitle={t("paymentResult.failureDescription")}
           extra={[
             <Button type="primary" key="retry" onClick={() => navigate("/")}>
-              Quay lại trang chủ
+              {t("paymentResult.home")}
             </Button>,
           ]}
         />

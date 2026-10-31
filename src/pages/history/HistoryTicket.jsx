@@ -4,10 +4,12 @@ import { Table, Tag, Space, Card, Typography, Empty, Spin } from 'antd';
 import { fetchHistoryAPI } from 'services/notificationAndHistory';
 import { useAsync } from 'hooks/useAsync';
 import dayjs from 'dayjs';
+import { useTranslation } from "react-i18next";
 
 const { Title } = Typography;
 
 export default function HistoryTicket() {
+  const { t } = useTranslation();
   const userState = useSelector((state) => state.userReducer);
   const role = userState.userInfor?.user_inf?.role;
 
@@ -19,7 +21,7 @@ export default function HistoryTicket() {
 
   const columns = [
     {
-      title: 'Mã giao dịch',
+      title: t("history.transactionId"),
       key: 'transactionId',
       render: (_, record) => {
         const ticket = record.id_ticket;
@@ -27,7 +29,7 @@ export default function HistoryTicket() {
       },
     },
     {
-      title: 'Phim',
+      title: t("history.movie"),
       key: 'movie',
       render: (_, record) => {
         const ticket = record.id_ticket;
@@ -35,7 +37,7 @@ export default function HistoryTicket() {
       },
     },
     {
-      title: 'Rạp / Phòng',
+      title: t("history.theaterRoom"),
       key: 'theater',
       render: (_, record) => {
         const ticket = record.id_ticket;
@@ -47,7 +49,7 @@ export default function HistoryTicket() {
       },
     },
     {
-      title: 'Suất chiếu',
+      title: t("history.showtime"),
       key: 'startTime',
       render: (_, record) => {
         const ticket = record.id_ticket;
@@ -56,7 +58,7 @@ export default function HistoryTicket() {
       },
     },
     {
-      title: 'Ghế',
+      title: t("history.seats"),
       key: 'seats',
       render: (_, record) => {
         const ticket = record.id_ticket;
@@ -71,7 +73,7 @@ export default function HistoryTicket() {
       },
     },
     {
-      title: 'Tổng tiền',
+      title: t("history.total"),
       key: 'totalPrice',
       render: (_, record) => {
         const ticket = record.id_ticket;
@@ -81,24 +83,24 @@ export default function HistoryTicket() {
       },
     },
     {
-      title: 'Ghi chú',
+      title: t("history.note"),
       dataIndex: 'note',
       key: 'note',
       render: (note) => note || '—',
     },
     {
-      title: 'Trạng thái',
+      title: t("history.status"),
       dataIndex: 'ticketStatus',
       key: 'ticketStatus',
       render: (status) => {
         let color = 'gold';
         if (status?.toLowerCase() === 'confirmed') color = 'green';
         if (status?.toLowerCase() === 'cancelled') color = 'red';
-        return <Tag color={color}>{status?.toUpperCase() || 'PENDING'}</Tag>;
+        return <Tag color={color}>{status?.toUpperCase() || t("history.pending")}</Tag>;
       },
     },
     {
-      title: 'Ngày cập nhật',
+      title: t("history.updatedAt"),
       dataIndex: 'updatedAt',
       key: 'updatedAt',
       render: (date) => date ? dayjs(date).format('DD/MM/YYYY HH:mm') : '—',
@@ -108,7 +110,7 @@ export default function HistoryTicket() {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Spin size="large" tip="Đang tải lịch sử..." />
+        <Spin size="large" tip={t("history.loading")} />
       </div>
     );
   }
@@ -118,7 +120,7 @@ export default function HistoryTicket() {
       <Card
         title={
           <Title level={3} style={{ margin: 0 }}>
-            LỊCH SỬ ĐẶT VÉ
+            {t("history.title")}
           </Title>
         }
         bordered={false}
@@ -133,7 +135,7 @@ export default function HistoryTicket() {
             scroll={{ x: 800 }}
           />
         ) : (
-          <Empty description="Bạn chưa có lịch sử đặt vé nào." />
+          <Empty description={t("history.empty")} />
         )}
       </Card>
     </div>

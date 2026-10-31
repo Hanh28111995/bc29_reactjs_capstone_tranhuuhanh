@@ -9,8 +9,10 @@ import { notification, Modal, Input, Button, Spin, Space } from "antd";
 import { UserOutlined, SearchOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { MaLoaiNguoiDung } from "enums/common";
+import { useTranslation } from "react-i18next";
 
 export default function Booking() {
+  const { t } = useTranslation();
   const [danhSachGhe, setdanhSachGhe] = useState([]);
   const params = useParams();
   const navigate = useNavigate();
@@ -44,8 +46,8 @@ export default function Booking() {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
         <div className="text-center">
-          <p>Không thể tải thông tin suất chiếu.</p>
-          <p>{showtimeQueryError?.message || 'Vui lòng thử lại sau.'}</p>
+          <p>{t("booking.showtimeLoadError")}</p>
+          <p>{showtimeQueryError?.message || t("common.tryAgain")}</p>
         </div>
       </div>
     );
@@ -71,7 +73,7 @@ export default function Booking() {
       const res = await searchCustomerAPI(role, searchKeyword);
       setSearchResults(res.data.content || []);
     } catch {
-      notification.error({ message: "Tìm kiếm thất bại" });
+      notification.error({ message: t("booking.searchFailed") });
     } finally {
       setSearching(false);
     }
@@ -85,7 +87,7 @@ export default function Booking() {
   };
 
   const handleSubmitTicket = async (mode = "buy") => {
-    if (danhSachGhe.length === 0) return notification.warning({ message: "Vui lòng chọn ghế!" });
+    if (danhSachGhe.length === 0) return notification.warning({ message: t("booking.chooseSeats") });
     navigate(`/booking/payment/${params.id}`, {
       state: {
         bookingData: danhSachGhe,
@@ -107,46 +109,46 @@ export default function Booking() {
           </div> */}
 
           <div className="info-item">
-            <label>Tên phim:</label>
+            <label>{t("booking.movie")}</label>
             <p className="highlight">{data?.id_movie?.title}</p>
           </div>
 
           <div className="info-item">
-            <label>Tên rạp:</label>
+            <label>{t("booking.cinema")}</label>
             <p className="highlight">
               {data?.theater?.branch} <br />
-              <span>Phòng {data?.theater?.name}</span>
+              <span>{t("booking.room", { name: data?.theater?.name })}</span>
             </p>
           </div>
 
           <div className="info-item">
-            <label>Thời gian:</label>
+            <label>{t("booking.time")}</label>
             <p className="highlight">{dayjs(data?.startTime?.replace('Z', '')).format('DD/MM/YYYY HH:mm')}</p>
           </div>
 
           <div className="info-summary">
             <p className="selected-seats">
-              Ghế đã chọn: <span>{danhSachGhe.map(el => el.seatNumber).join(", ") || "Chưa chọn"}</span>
+              {t("booking.selectedSeats")} <span>{danhSachGhe.map(el => el.seatNumber).join(", ") || t("booking.noSeatSelected")}</span>
             </p>
             <p className="total-price">
-              Tổng tiền: <b>{danhSachGhe.reduce((total, el) => total + (el.price || 0), 0).toLocaleString()} VNĐ</b>
+              {t("booking.total")} <b>{danhSachGhe.reduce((total, el) => total + (el.price || 0), 0).toLocaleString()} {t("booking.currency")}</b>
             </p>
           </div>
 
           {/* Thông tin khách hàng */}
           <div className="info-item customer-info-box">
-            <label>Thông tin khách hàng:</label>
+            <label>{t("booking.customerInfo")}</label>
             {isStaff ? (
               customerInfo ? (
                 <div style={{ marginTop: 8 }}>
                   <p><b>{customerInfo.name || customerInfo.username}</b></p>
                   <p>{customerInfo.phone}</p>
                   <p>{customerInfo.email}</p>
-                  <Button size="small" onClick={() => setModalOpen(true)}>Đổi khách hàng</Button>
+                  <Button size="small" onClick={() => setModalOpen(true)}>{t("booking.changeCustomer")}</Button>
                 </div>
               ) : (
                 <Button icon={<UserOutlined />} onClick={() => setModalOpen(true)} style={{ marginTop: 8 }} block>
-                  Tìm khách hàng
+                  {t("booking.findCustomer")}
                 </Button>
               )
             ) : (
@@ -160,18 +162,18 @@ export default function Booking() {
 
           <Space direction="vertical" style={{ width: '100%' }}>
             <button className="btn-submit-booking" onClick={() => handleSubmitTicket("buy")}>
-              MUA VÉ
+              {t("booking.buyTickets")}
             </button>
             {!isStaff && (
               <button className="btn-submit-booking btn-reserve" onClick={() => handleSubmitTicket("reserve")}>
-                ĐẶT VÉ
+                {t("booking.reserveTickets")}
               </button>
             )}
           </Space>
         </div>
 
         <div className="booking-seats-area">
-          <div className="screen-divider">Màn hình</div>
+          <div className="screen-divider">{t("booking.screen")}</div>
           <Spin spinning={dataLoading}>
             <SeatsRendering
               data={data?.seats || []}
@@ -183,19 +185,18 @@ export default function Booking() {
         </div>
       </div>
 
-      {/* Modal tìm kiếm khách hàng */}
       <Modal
-        title="Tìm kiếm khách hàng"
+        title={t("booking.customerSearch")}
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         footer={null}
       >
         <Input.Search
-          placeholder="Nhập tên, SĐT hoặc email..."
+          placeholder={t("booking.customerPlaceholder")}
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
           onSearch={handleSearch}
-          enterButton={<Button icon={<SearchOutlined />} onClick={handleSearch}>Tìm</Button>}
+          enterButton={<Button icon={<SearchOutlined />} onClick={handleSearch}>{t("booking.search")}</Button>}
         />
         <Spin spinning={searching}>
           <div style={{ marginTop: 12, maxHeight: 300, overflowY: 'auto' }}>
@@ -213,7 +214,7 @@ export default function Booking() {
               </div>
             ))}
             {!searching && searchResults.length === 0 && searchKeyword && (
-              <p style={{ textAlign: 'center', color: '#aaa', marginTop: 16 }}>Không tìm thấy khách hàng</p>
+              <p style={{ textAlign: 'center', color: '#aaa', marginTop: 16 }}>{t("booking.customerNotFound")}</p>
             )}
           </div>
         </Spin>

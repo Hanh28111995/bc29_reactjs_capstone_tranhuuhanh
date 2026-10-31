@@ -46,12 +46,14 @@ import { useAsyncMutation } from "hooks/useAsync";
 import "./index.scss";
 
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 const { Title, Text } = Typography;
 
 const { confirm } = Modal;
 
 export default function Payment() {
+  const { t } = useTranslation();
   const userState = useSelector((state) => state.userReducer);
 
   const dispatch = useDispatch();
@@ -73,15 +75,15 @@ export default function Payment() {
     onError: (error) => {
       if (error?.response?.status === 409) {
         notification.error({
-          message: "Ghế đã được đặt",
+          message: t("payment.seatTaken"),
 
-          description: "Vui lòng chọn ghế khác.",
+          description: t("payment.chooseOtherSeat"),
         });
 
         return;
       }
 
-      notification.error({ message: "Đặt vé thất bại" });
+      notification.error({ message: t("payment.bookingFailed") });
     },
   });
 
@@ -98,7 +100,7 @@ export default function Payment() {
   const totalAmount = Math.max(0, subtotal - discount);
 
   if (!bookingData) {
-    return <div className="error-state">Không có dữ liệu đơn hàng</div>;
+    return <div className="error-state">{t("payment.orderMissing")}</div>;
   }
 
   const refreshNotificationsToStore = async () => {
@@ -116,7 +118,7 @@ export default function Payment() {
   const handleApplyCoupon = async () => {
     const code = couponInput?.trim();
     if (!code) {
-      return notification.warning({ message: "Vui lòng nhập mã giảm giá!" });
+      return notification.warning({ message: t("payment.enterCoupon") });
     }
 
     setCouponLoading(true);
@@ -127,15 +129,17 @@ export default function Payment() {
       setAppliedCode(code.toUpperCase());
       setDiscount(Number(data.discount) || 0);
       notification.success({
-        message: "Áp dụng mã thành công",
-        description: `Bạn được giảm ${(Number(data.discount) || 0).toLocaleString()} VNĐ`,
+        message: t("payment.couponApplied"),
+        description: t("payment.couponDiscount", {
+          amount: (Number(data.discount) || 0).toLocaleString(),
+        }),
       });
     } catch (error) {
       setAppliedCode(null);
       setDiscount(0);
       notification.error({
-        message: "Mã giảm giá không hợp lệ",
-        description: error?.response?.data?.message || "Vui lòng kiểm tra lại mã",
+        message: t("payment.couponInvalid"),
+        description: error?.response?.data?.message || t("payment.checkCoupon"),
       });
     } finally {
       setCouponLoading(false);
@@ -155,15 +159,15 @@ export default function Payment() {
     bookingFlowRef.current = true;
 
     confirm({
-      title: "Xác nhận đặt vé?",
+      title: t("payment.confirmReservation"),
 
-      content: "Vé sẽ được giữ chỗ, bạn thanh toán tại quầy khi đến rạp.",
+      content: t("payment.reservationInstructions"),
 
       icon: <ExclamationCircleOutlined />,
 
-      okText: "Xác nhận",
+      okText: t("payment.confirm"),
 
-      cancelText: "Hủy",
+      cancelText: t("payment.cancel"),
 
       onCancel() {
         bookingFlowRef.current = false;
@@ -223,19 +227,19 @@ export default function Payment() {
 
     if (!paymentMethod) {
       return notification.warning({
-        message: "Vui lòng chọn phương thức thanh toán!",
+        message: t("payment.chooseMethod"),
       });
     }
 
     bookingFlowRef.current = true;
     confirm({
-      title: "Xác nhận đã thanh toán ?",
+      title: t("payment.confirmPayment"),
 
       icon: <ExclamationCircleOutlined />,
 
-      okText: "Xác nhận",
+      okText: t("payment.confirm"),
 
-      cancelText: "Hủy",
+      cancelText: t("payment.cancel"),
 
       onCancel() {
         bookingFlowRef.current = false;
@@ -292,19 +296,19 @@ export default function Payment() {
 
       if (success) {
         notification.success({
-          message: "Thành công",
+          message: t("payment.success"),
 
-          description: "Đặt vé thành công!",
+          description: t("payment.bookingSuccess"),
         });
       } else {
         const errorMsg = result?.data?.message;
 
         notification.error({
-          message: "Đặt vé thất bại",
+          message: t("payment.bookingFailed"),
 
           description: Array.isArray(errorMsg)
             ? errorMsg.join(" | ")
-            : errorMsg || "Lỗi không xác định từ hệ thống",
+            : errorMsg || t("payment.unknownSystemError"),
         });
       }
 
@@ -339,7 +343,7 @@ export default function Payment() {
 
         const payUrl = getCode?.data?.content?.paymentUrl;
 
-        notification.success({ message: "Đang chuyển hướng đến MoMo..." });
+        notification.success({ message: t("payment.redirectingMomo") });
 
         setTimeout(() => window.open(payUrl, "_blank"), 2000);
       }
@@ -349,7 +353,7 @@ export default function Payment() {
 
         const payUrl = getCode?.data?.content?.paymentUrl;
 
-        notification.success({ message: "Đang chuyển hướng đến VNpay..." });
+        notification.success({ message: t("payment.redirectingVnpay") });
 
         setTimeout(() => window.open(payUrl, "_blank"), 2000);
       }
@@ -367,14 +371,14 @@ export default function Payment() {
         icon={<ArrowLeftOutlined />}
         onClick={() => navigate(`/booking/${params.id}`)}
       >
-        Quay lại
+        {t("common.back")}
       </Button>
 
       <div className="payment-container">
         {/* PHẦN CHỌN PHƯƠNG THỨC — ẩn khi mode=reserve */}
 
         {mode !== "reserve" && (
-          <Card className="payment-methods" title="Chọn phương thức thanh toán">
+          <Card className="payment-methods" title={t("payment.methodTitle")}>
             <Radio.Group
               onChange={(e) => setPaymentMethod(e.target.value)}
               value={paymentMethod}
@@ -385,11 +389,11 @@ export default function Payment() {
                   value="internet banking"
                   className="payment-radio-btn"
                 >
-                  <CreditCardOutlined /> Internet Banking - VNpay
+                  <CreditCardOutlined /> {t("payment.internetBanking")}
                 </Radio.Button>
 
                 <Radio.Button value="momo" className="payment-radio-btn">
-                  <WalletOutlined /> Ví MoMo
+                  <WalletOutlined /> {t("payment.momoWallet")}
                 </Radio.Button>
 
                 <Radio.Button
@@ -401,7 +405,7 @@ export default function Payment() {
                       : false
                   }
                 >
-                  <DollarOutlined /> Thanh toán tại quầy
+                  <DollarOutlined /> {t("payment.cashAtCinema")}
                 </Radio.Button>
               </Space>
             </Radio.Group>
@@ -410,32 +414,32 @@ export default function Payment() {
 
         {/* PHẦN THÔNG TIN ĐƠN HÀNG */}
 
-        <Card className="order-info" title="Thông tin đơn hàng">
+        <Card className="order-info" title={t("payment.orderTitle")}>
           <Title level={4} className="order-title">
             {movieInfor?.title}
           </Title>
 
           <p>
-            <b>Rạp:</b> {theater?.branch}
+            <b>{t("payment.cinema")}</b> {theater?.branch}
           </p>
 
           <p>
-            <b>Phòng:</b> {theater?.name}
+            <b>{t("payment.room")}</b> {theater?.name}
           </p>
 
           <p>
-            <b>Thời gian:</b>{" "}
+            <b>{t("payment.time")}</b>{" "}
             {dayjs(time?.replace("Z", "")).format("DD/MM/YYYY HH:mm")}
           </p>
 
           <Divider />
 
           <p>
-            <b>Ghế:</b> {bookingData?.map((el) => el.seatNumber).join(", ")}
+            <b>{t("payment.seats")}</b> {bookingData?.map((el) => el.seatNumber).join(", ")}
           </p>
 
           <p>
-            <b>Số lượng:</b> {bookingData.length} ghế
+            <b>{t("payment.seatCount")}</b> {bookingData.length} {t("payment.seatUnit")}
           </p>
 
           <Divider />
@@ -447,7 +451,7 @@ export default function Payment() {
               <Space.Compact style={{ width: "100%" }}>
                 <Input
                   prefix={<GiftOutlined />}
-                  placeholder="Nhập mã giảm giá (VD: GIAM20)"
+                  placeholder={t("payment.couponPlaceholder")}
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value)}
                   onPressEnter={handleApplyCoupon}
@@ -457,16 +461,16 @@ export default function Payment() {
                   onClick={handleApplyCoupon}
                   loading={couponLoading}
                 >
-                  Áp dụng
+                  {t("common.apply")}
                 </Button>
               </Space.Compact>
             ) : (
               <div className="coupon-applied">
                 <Text strong style={{ color: "var(--success)" }}>
-                  <GiftOutlined /> Mã {appliedCode} đã áp dụng
+                  <GiftOutlined /> {t("payment.couponApplied")}: {appliedCode}
                 </Text>
                 <Button type="link" size="small" onClick={handleRemoveCoupon}>
-                  Xóa mã
+                  {t("payment.couponRemove")}
                 </Button>
               </div>
             )}
@@ -476,22 +480,22 @@ export default function Payment() {
 
           <div className="total-section">
             <Text strong className="total-label">
-              Tạm tính:
+              {t("payment.subtotal")}
             </Text>
 
             <Text className="total-amount">
-              {subtotal.toLocaleString()} VNĐ
+              {subtotal.toLocaleString()} {t("booking.currency")}
             </Text>
           </div>
 
           {discount > 0 && (
             <div className="total-section discount-line">
               <Text strong className="total-label">
-                Giảm giá:
+                {t("payment.discount")}
               </Text>
 
               <Text type="danger" className="total-amount">
-                -{discount.toLocaleString()} VNĐ
+                -{discount.toLocaleString()} {t("booking.currency")}
               </Text>
             </div>
           )}
@@ -500,11 +504,11 @@ export default function Payment() {
 
           <div className="total-section">
             <Text strong className="total-label">
-              Tổng cộng:
+              {t("payment.grandTotal")}
             </Text>
 
             <Title level={5} className="total-amount">
-              {totalAmount.toLocaleString()} VNĐ
+              {totalAmount.toLocaleString()} {t("booking.currency")}
             </Title>
           </div>
 
@@ -517,7 +521,7 @@ export default function Payment() {
               onClick={handleReserve}
               loading={bookingMutation.isLoading}
             >
-              XÁC NHẬN ĐẶT VÉ
+              {t("payment.confirmReservationButton")}
             </Button>
           ) : (
             <Button
@@ -528,7 +532,7 @@ export default function Payment() {
               onClick={handleFinishPayment}
               loading={bookingMutation.isLoading}
             >
-              XÁC NHẬN THANH TOÁN
+              {t("payment.confirmPaymentButton")}
             </Button>
           )}
         </Card>

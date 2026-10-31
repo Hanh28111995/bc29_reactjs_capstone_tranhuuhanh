@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { LoadingContext } from "../../contexts/loading.context";
 import { Radio, Spin } from "antd";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 import "./index.scss";
 
 export default function MovieList(props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const rawMovieList = props.rawMovieList;
   const [, setLoadingState] = useContext(LoadingContext);
@@ -31,13 +33,13 @@ export default function MovieList(props) {
             className="custom-radio-group"
           >
             <Radio.Button value="a" onClick={() => setMovieListType("SHOWING")}>
-              Phim đang chiếu
+              {t("movies.nowShowing")}
             </Radio.Button>
             <Radio.Button
               value="b"
               onClick={() => setMovieListType("COMMING-SOON")}
             >
-              Phim sắp chiếu
+              {t("movies.comingSoon")}
             </Radio.Button>
           </Radio.Group>
         </div>
@@ -67,13 +69,13 @@ export default function MovieList(props) {
                     className="btn-more-infor"
                     onClick={() => navigate(`/movie/detail/${ele._id}`)}
                   >
-                    CHI TIẾT
+                    {t("movies.details")}
                   </button>
                   <button
                     className="btn-more-infor"
                     onClick={() => navigate(`/movie/selectT/${ele._id}`)}
                   >
-                    ĐẶT VÉ
+                    {t("movies.bookTickets")}
                   </button>
                 </div>
               </div>
@@ -81,7 +83,7 @@ export default function MovieList(props) {
               <div className="card-body-custom">
                 <h3 className="movie-title">{ele.tenPhim}</h3>
                 <h4 className="movie-release">
-                  <span>Khởi chiếu:</span>{" "}
+                  <span>{t("movies.releaseDate")}</span>{" "}
                   {dayjs(ele.releaseDate).format("DD/MM/YYYY")}
                 </h4>
               </div>

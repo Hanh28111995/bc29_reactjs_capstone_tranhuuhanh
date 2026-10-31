@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "./index.scss";
+import { useTranslation } from "react-i18next";
 
 export default function Detail(props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const starcount = () => {
@@ -39,25 +41,25 @@ export default function Detail(props) {
                 className="btn-booking"
                 onClick={() => navigate(`/movie/selectT/${props.movie._id}`)}
               >
-                ĐẶT VÉ
+                {t("movies.bookTickets")}
               </button>
             </div>
 
             {/* Cột phải: Thông tin */}
             <div className="col-6 col-md-7 col-lg-8 movie-info">
               <h2>{props.movie.title}</h2>
-              <p><span>Đánh giá:</span> {starcount()}</p>
-              <p><span>Ngày phát hành:</span> {dayjs(props.movie.releaseDate).format('DD/MM/YYYY')}</p>
-              <p><span>Đạo diễn:</span> {props.movie.director}</p>
-              <p><span>Thể loại:</span> {props.movie.genre}</p>
-              <p><span>Đối tượng:</span> </p>
+              <p><span>{t("movieDetail.rating")}</span> {starcount()}</p>
+              <p><span>{t("movieDetail.releaseDate")}</span> {dayjs(props.movie.releaseDate).format('DD/MM/YYYY')}</p>
+              <p><span>{t("movieDetail.director")}</span> {props.movie.director}</p>
+              <p><span>{t("movieDetail.genre")}</span> {props.movie.genre}</p>
+              <p><span>{t("movieDetail.audience")}</span> </p>
             </div>
           </div>
 
           {/* Dòng dưới: Tóm tắt */}
           <div className="row movie-summary">
             <p>
-              <span>Tóm tắt:</span><br />
+              <span>{t("movieDetail.summary")}</span><br />
               <p>{props.movie.describe}</p>
             </p>
           </div>

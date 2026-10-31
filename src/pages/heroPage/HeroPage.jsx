@@ -13,9 +13,11 @@ import {
   YoutubeFilled,
 } from "@ant-design/icons";
 import { useAsync } from "hooks/useAsync";
+import { useTranslation } from "react-i18next";
 import { fetchShowBannerAPI, fetchShowPromotionAPI } from "services/general";
 
 export default function HeroPage() {
+  const { t } = useTranslation();
   const bannerSliderRef = useRef(null);
   const trailerSliderRef = useRef(null);
   const movieSliderRef = useRef(null);
@@ -126,7 +128,7 @@ export default function HeroPage() {
         className="d-flex justify-content-center align-items-center"
         style={{ minHeight: "50vh" }}
       >
-        <p>Đang tải dữ liệu...</p>
+        <p>{t("common.loading")}</p>
       </div>
     );
   }
@@ -134,7 +136,7 @@ export default function HeroPage() {
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải dữ liệu trang chủ.</p>
+        <p>{t("home.loadError")}</p>
       </div>
     );
   }
@@ -185,8 +187,8 @@ export default function HeroPage() {
   return (
     <>
       <SEO
-        title="Trang chủ"
-        description="Chào mừng bạn đến với Movie Cybersoft - Hệ thống đặt vé xem phim trực tuyến."
+        title={t("home.title")}
+        description={t("home.seoDescription")}
         keywords="đặt vé xem phim, lịch chiếu phim, rạp chiếu phim, phim mới nhất"
       />
       <section className="cinema-hero-section">
@@ -243,7 +245,7 @@ export default function HeroPage() {
               </li>              
             </ol>
             <a href="#" className="btn-ticket">
-              Mua vé ngay
+              {t("home.buyTicketsNow")}
             </a>
           </div>
 
@@ -278,7 +280,7 @@ export default function HeroPage() {
             type="button"
             className="slider-arrow prev-btn"
             onClick={() => movieSliderRef.current?.slickPrev()}
-            aria-label="Phim trước"
+            aria-label={t("home.previousMovie")}
           >
             <LeftOutlined />
           </button>
@@ -289,7 +291,7 @@ export default function HeroPage() {
             type="button"
             className="slider-arrow next-btn"
             onClick={() => movieSliderRef.current?.slickNext()}
-            aria-label="Phim tiếp theo"
+            aria-label={t("home.nextMovie")}
           >
             <RightOutlined />
           </button>
@@ -298,7 +300,7 @@ export default function HeroPage() {
 
       <section className="event-announcement-section">
         <div className="event-section">
-          <h2 className="event-title">EVENT</h2>
+          <h2 className="event-title">{t("home.events")}</h2>
           <div className="event-grid">
             <div className="item-large">
               <div className="item-tall">
@@ -307,7 +309,7 @@ export default function HeroPage() {
                     ?.filter((item) => item._id === "6a894891772982422acdfa34")
                     .map((item) => (
                       <a key={item._id} href={`/promotion/${item._id}`}>
-                        <img src={item.banner} alt="Quyền lợi thành viên" />
+                        <img src={item.banner} alt={t("home.memberBenefits")} />
                       </a>
                     ))}
                 </div>
@@ -318,7 +320,7 @@ export default function HeroPage() {
                     ?.filter((item) => item._id === "6a894ac39a7896668a7e4c99")
                     .map((item) => (
                       <a key={item._id} href={`/promotion/${item._id}`}>
-                        <img src={item.banner} alt="FAMILY DAY THỨ 4 ƯU ĐÃI" />
+                        <img src={item.banner} alt={t("home.familyDayOffer")} />
                       </a>
                     ))}
                 </div>
@@ -331,7 +333,7 @@ export default function HeroPage() {
                     ?.filter((item) => item._id === "6a894bb09a7896668a7e4c9d")
                     .map((item) => (
                       <a key={item._id} href={`/promotion/${item._id}`}>
-                        <img src={item.banner} alt="THỨ 2 ƯU ĐÃI" />
+                        <img src={item.banner} alt={t("home.mondayOffer")} />
                       </a>
                     ))}
                 </div>
@@ -344,7 +346,7 @@ export default function HeroPage() {
                       <a key={item._id} href={`/promotion/${item._id}`}>
                         <img
                           src={item.banner}
-                          alt="Mua 02 vé xem phim 2D với giá 95,000đ"
+                          alt={t("home.movieTicketOffer")}
                         />
                       </a>
                     ))}
@@ -372,7 +374,7 @@ export default function HeroPage() {
                       <a key={item._id} href={`/promotion/${item._id}`}>
                         <img
                           src={item.banner}
-                          alt="Nạp L-Coin nhân đôi ưu đãi"
+                          alt={t("home.coinOffer")}
                         />
                       </a>
                     ))}
@@ -385,7 +387,7 @@ export default function HeroPage() {
                   ?.filter((item) => item._id === "6a895744e2eabfe092cb4c81")
                   .map((item) => (
                     <a key={item._id} href={`/promotion/${item._id}`}>
-                      <img src={item.banner} alt="Thuê rạp"  
+                      <img src={item.banner} alt={t("home.rentCinema")}
                       style={{
                         objectFit: "fill",
                         objectPosition: "left",
@@ -434,7 +436,7 @@ export default function HeroPage() {
 
         <div className="notice-bar">
           <div className="notice-content">
-            <span className="notice-label">Thông báo</span>
+            <span className="notice-label">{t("home.announcement")}</span>
             <div className="notice-ticker">
               <a href="#">Ly topper Spider-man (Merchandise) 🕸️🕷️</a>
             </div>

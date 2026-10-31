@@ -4,9 +4,11 @@ import { useParams } from "react-router-dom";
 import { useAsync } from "../../hooks/useAsync"; // Đã bổ sung import
 import { fetchPromotionDetailAPI } from "services/general"; // Đã bổ sung import
 import { LoadingContext } from "../../contexts/loading.context"; // Nếu có dùng global loading context
+import { useTranslation } from "react-i18next";
 
 
 export default function PromotionDetail() {
+  const { t } = useTranslation();
   const param = useParams();
   
   // Khai báo loadingState nếu component có dùng chung context
@@ -35,8 +37,8 @@ export default function PromotionDetail() {
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải thông tin khuyến mãi.</p> {/* Đã sửa text cho đúng context */}
-        <p>{error?.message || 'Vui lòng thử lại sau.'}</p>
+        <p>{t("promotions.detailLoadError")}</p>
+        <p>{error?.message || t("common.tryAgain")}</p>
       </div>
     );
   }

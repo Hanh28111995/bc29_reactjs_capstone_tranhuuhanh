@@ -269,27 +269,27 @@ export default function Header() {
           <ul className="navbar-nav mx-auto mt-2 mt-lg-0">
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/movie-search">
-                MUA VÉ
+                {t("navigation.booking")}
               </NavLink>
             </li>
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/movie-talk">
-                MOVIE TALK
+                {t("navigation.movieTalk")}
               </NavLink>
             </li>
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/movie-theater">
-                RẠP CHIẾU PHIM
+                {t("navigation.theaters")}
               </NavLink>
             </li>
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/promotion">
-                TIN MỚI & ƯU ĐÃI
+                {t("navigation.promotions")}
               </NavLink>
             </li>
             <li className="nav-item ">
               <NavLink className="nav-link nav-header" to="/store">
-                SHOP
+                {t("navigation.shop")}
               </NavLink>
             </li>
           </ul>

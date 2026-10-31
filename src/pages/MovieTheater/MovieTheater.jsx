@@ -22,6 +22,7 @@ import SEO from "components/SEO";
 import Calendar from "modules/showtimeModules/Calendar";
 import dayjs from "dayjs";
 import { getDistance } from "constants/common";
+import { useTranslation } from "react-i18next";
 
 const getRegionName = (region) => region?.vungMien || region?.name || region?.location || region?.city || "";
 
@@ -86,6 +87,7 @@ const normalizeDateForApi = (date) => {
 };
 
 function MovieTheater() {
+  const { t } = useTranslation();
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedCinema, setSelectedCinema] = useState(null);
   const [manuallySelectedCinemaId, setManuallySelectedCinemaId] = useState(null);
@@ -163,8 +165,8 @@ function MovieTheater() {
       setManuallySelectedCinemaId(null);
       setUserCoordinates(coords || null);
     },
-    title: "Chia sẻ vị trí",
-    content: "Bạn có muốn chọn rạp gần vị trí hiện tại không?",
+    title: t("cinema.shareLocation"),
+    content: t("cinema.nearbyPrompt"),
   });
 
   useEffect(() => {
@@ -317,7 +319,7 @@ function MovieTheater() {
   }
 
   if (locationsError || cinemasError) {
-    return <div className="container py-5"><Empty description="Không thể tải thông tin rạp lúc này." /></div>;
+    return <div className="container py-5"><Empty description={t("cinema.loadError")} /></div>;
   }
 
   const coordinates = parseCoordinates(cinemaInfo?.coordinates || selectedCinema?.coordinates);
@@ -328,20 +330,20 @@ function MovieTheater() {
   const tabItems = [
     {
       key: "schedule",
-      label: "Lịch chiếu phim",
+      label: t("cinema.showtimes"),
       children: (
         <div className="cinema-schedule-tab">
           <Calendar onDateChange={setSelectedDate} isActive={activeTab === "schedule"} />
           <div className="age-rating-legend">
-            <span><b className="age-rating-p">P</b> Mọi đối tượng</span>
-            <span><b className="age-rating-c13">13</b> 13 tuổi trở lên</span>
-            <span><b className="age-rating-c16">16</b> 16 tuổi trở lên</span>
-            <span><b className="age-rating-c18">18</b> 18 tuổi trở lên</span>
+            <span><b className="age-rating-p">P</b> {t("cinema.allAudiences")}</span>
+            <span><b className="age-rating-c13">13</b> {t("cinema.age13")}</span>
+            <span><b className="age-rating-c16">16</b> {t("cinema.age16")}</span>
+            <span><b className="age-rating-c18">18</b> {t("cinema.age18")}</span>
           </div>
           <div className="cinema-movie-carousel-section">
-            <h2>Chọn phim</h2>
+            <h2>{t("cinema.chooseMovie")}</h2>
             {moviesError ? (
-              <Empty description="Không thể tải danh sách phim lúc này." />
+              <Empty description={t("cinema.moviesLoadError")} />
             ) : (
               <Spin spinning={loadingMovies}>
                 {movies.length > 0 ? (
@@ -354,7 +356,7 @@ function MovieTheater() {
                   >
                     {movies.map((movie) => {
                       const movieId = movie._id;
-                      const movieTitle = movie.tenPhim || movie.title || "Phim";
+                      const movieTitle = movie.tenPhim || movie.title || t("history.movie");
                       const movieImage = movie.banner || movie.poster || movie.image;
                       const isSelected = selectedMovieId === movieId;
 
@@ -382,7 +384,7 @@ function MovieTheater() {
                     })}
                   </Carousel>
                 ) : !loadingMovies ? (
-                  <Empty description="Chưa có phim để hiển thị." />
+                  <Empty description={t("cinema.noMovies")} />
                 ) : null}
               </Spin>
             )}
@@ -391,7 +393,7 @@ function MovieTheater() {
             {cinemaSchedules.length ? cinemaSchedules.map(({ movie, showtimes }) => (
               <article className="cinema-movie-schedule" key={movie._id}>
                 <h3>{movie.title || movie.tenPhim}</h3>
-                <div className="cinema-movie-format">2D <span>Phụ đề tiếng Anh</span></div>
+                <div className="cinema-movie-format">2D <span>{t("cinema.subtitleEnglish")}</span></div>
                 <div className="cinema-times-grid">
                   {showtimes.map((showtime) => {
                     const seats = safeArray(showtime.seats);
@@ -399,41 +401,41 @@ function MovieTheater() {
                     const isPast = dayjs(showtime.startTime).isBefore(dayjs());
                     return (
                       <div className="cinema-time-cell" key={showtime._id}>
-                        <small>{showtime.theater?.name || "Phòng chiếu"}</small>
+                        <small>{showtime.theater?.name || t("cinema.screeningRoom")}</small>
                         <Button disabled={isPast} onClick={() => window.location.assign(`/booking/${showtime._id}`)}>
                           {dayjs(showtime.startTime).format("HH:mm")}
                         </Button>
-                        <small>{available} / {seats.length} Ghế ngồi</small>
+                        <small>{available} / {seats.length} {t("cinema.seats")}</small>
                       </div>
                     );
                   })}
                 </div>
               </article>
-            )) : <Empty description={selectedDate ? "Chưa có suất chiếu trong ngày này" : "Chọn ngày để xem lịch chiếu"} />}
+            )) : <Empty description={selectedDate ? t("cinema.noShowtimes") : t("cinema.chooseDate")} />}
           </Spin>
         </div>
       ),
     },
     {
       key: "location",
-      label: "Vị trí của rạp",
+      label: t("cinema.location"),
       children: selectedCinema ? (
         <div className="cinema-location-tab">
-          <p><EnvironmentOutlined /> {selectedCinema.address || "Chưa có địa chỉ rạp."}</p>
-          <Button icon={<LinkOutlined />} onClick={openDirections}>Mở chỉ đường</Button>
-          {mapSource ? <iframe title={`Bản đồ ${selectedCinema.branch}`} src={mapSource} loading="lazy" /> : <Empty description="Rạp chưa có tọa độ bản đồ." />}
+          <p><EnvironmentOutlined /> {selectedCinema.address || t("cinema.noAddress")}</p>
+          <Button icon={<LinkOutlined />} onClick={openDirections}>{t("cinema.openDirections")}</Button>
+          {mapSource ? <iframe title={`${t("cinema.location")} ${selectedCinema.branch}`} src={mapSource} loading="lazy" /> : <Empty description={t("cinema.noCoordinates")} />}
         </div>
-      ) : <Empty description="Chưa chọn rạp." />,
+      ) : <Empty description={t("cinema.noCinemaSelected")} />,
     },
     {
       key: "directions",
-      label: "Hướng dẫn đi tới rạp",
+      label: t("cinema.directions"),
       children: selectedCinema ? (
         <div className="cinema-info-table cinema-directions-tab">
           <div className="cinema-info-row">
             <div className="cinema-info-label">
               <EnvironmentOutlined />
-              <strong>Hướng dẫn đi tới rạp</strong>
+              <strong>{t("cinema.directions")}</strong>
             </div>
             <div className="cinema-info-content">
               {directionsLines.length ? (
@@ -443,16 +445,16 @@ function MovieTheater() {
                   ))}
                 </div>
               ) : (
-                <p>{selectedCinema.address || "Chưa có hướng dẫn đi tới rạp."}</p>
+                <p>{selectedCinema.address || t("cinema.noDirections")}</p>
               )}
             </div>
           </div>
         </div>
-      ) : <Empty description="Chưa chọn rạp." />,
+      ) : <Empty description={t("cinema.noCinemaSelected")} />,
     },
     {
       key: "amenities",
-      label: "Tiện ích đi kèm",
+      label: t("cinema.amenities"),
       children: selectedCinema ? (
         <Spin spinning={loadingCinemaDetail}>
           <div className="cinema-info-table cinema-utility-list">
@@ -460,7 +462,7 @@ function MovieTheater() {
               <div className="cinema-info-row">
                 <div className="cinema-info-label">
                   <span className="cinema-utility-icon cinema-utility-icon-car" aria-hidden="true">🚘</span>
-                  <strong>Nơi đỗ xe</strong>
+                  <strong>{t("cinema.parking")}</strong>
                 </div>
                 <div className="cinema-info-content">
                   <p>{normalizeUtilityText(parkingText)}</p>
@@ -472,7 +474,7 @@ function MovieTheater() {
               <div className="cinema-info-row">
                 <div className="cinema-info-label">
                   <span className="cinema-utility-icon cinema-utility-icon-info" aria-hidden="true">i</span>
-                  <strong>Tiện ích đi kèm</strong>
+                  <strong>{t("cinema.amenities")}</strong>
                 </div>
                 <div className="cinema-info-content">
                   <p>{normalizeUtilityText(amenityList)}</p>
@@ -482,19 +484,19 @@ function MovieTheater() {
 
             {!parkingText && amenityList.length === 0 && (
               <Empty description={cinemaDetailError
-                ? "Không thể tải thông tin tiện ích của rạp."
-                : "Chưa có thông tin tiện ích cho rạp này."} />
+                ? t("cinema.amenitiesLoadError")
+                : t("cinema.noAmenities")} />
             )}
           </div>
         </Spin>
-      ) : <Empty description="Chưa chọn rạp." />,
+      ) : <Empty description={t("cinema.noCinemaSelected")} />,
     },
   ];
 
   return (
     <main className="cinema-detail-page">
-      <SEO title={selectedCinema?.branch || "Hệ thống rạp"} description={selectedCinema?.address || "Thông tin hệ thống rạp chiếu phim."} />
-      <nav className="cinema-region-nav" aria-label="Chọn vùng">
+      <SEO title={selectedCinema?.branch || t("cinema.cinemaSystem")} description={selectedCinema?.address || t("cinema.cinemaDescription")} />
+      <nav className="cinema-region-nav" aria-label={t("cinema.regionLabel")}>
         {locations.map((region, index) => (
           <button
             type="button"
@@ -508,9 +510,9 @@ function MovieTheater() {
       </nav>
 
       {banners.length > 0 && (
-        <section className="cinema-banner-wrap" aria-label="Banner và chọn rạp">
+        <section className="cinema-banner-wrap" aria-label={t("cinema.bannerAndCinemaLabel")}>
           <Carousel autoplay={false} dots={banners.length > 1} arrows={banners.length > 1}>
-            {banners.map((source, index) => <img key={`${source}-${index}`} src={source} alt="Ưu đãi rạp chiếu phim" />)}
+            {banners.map((source, index) => <img key={`${source}-${index}`} src={source} alt={t("cinema.moviePromotions")} />)}
           </Carousel>
           {currentRegionCinemas.length > 0 && (
             <nav className="cinema-branch-nav" aria-label={`Rạp tại ${currentRegionName}`}>
@@ -541,13 +543,13 @@ function MovieTheater() {
                 <div className="cinema-detail-title-row">
                   <h1>{selectedCinema.branch}</h1>
                   <Button icon={isLocating ? <SyncOutlined spin /> : <AimOutlined />} onClick={locate} loading={isLocating}>
-                    Rạp gần tôi
+                    {t("cinema.nearMe")}
                   </Button>
                 </div>
-                <p>{selectedCinema.address || "Chưa cập nhật địa chỉ"}</p>
+                <p>{selectedCinema.address || t("cinema.noAddressUpdated")}</p>
                 <div className="cinema-detail-meta">
-                  <span>Hệ thống: {selectedCinema.cinemaName || "Rạp chiếu phim"}</span>
-                  {coordinates && <span>Vị trí đã xác định</span>}
+                  <span>{t("cinema.system")}: {selectedCinema.cinemaName || t("cinema.cinemaSystem")}</span>
+                  {coordinates && <span>{t("cinema.locationDetected")}</span>}
                 </div>
               </div>
             </header>
@@ -555,8 +557,8 @@ function MovieTheater() {
           </>
         ) : (
           <div className="cinema-no-selection">
-            <Empty description={decision === "pending" ? "Đang xác định rạp gần bạn..." : "Chưa có rạp trong khu vực này."} />
-            <Button icon={<AimOutlined />} onClick={locate} loading={isLocating}>Tìm rạp gần tôi</Button>
+            <Empty description={decision === "pending" ? t("cinema.locatingCinema") : t("cinema.noCinemaInRegion")} />
+            <Button icon={<AimOutlined />} onClick={locate} loading={isLocating}>{t("cinema.nearMe")}</Button>
           </div>
         )}
       </div>

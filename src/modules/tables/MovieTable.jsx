@@ -137,7 +137,7 @@ function MovieTable() {
         <Image
           src={text}
           className="movie-banner"
-          fallback="https://via.placeholder.com/60x90?text=No+Image"
+          fallback="https://via.placeholder.com/60x90?text=No+Banner"
         />
       ),
     },

@@ -7,8 +7,10 @@ import dayjs from "dayjs";
 
 import "./index.scss";
 import { fetchShowPromotionAPI } from "services/general";
+import { useTranslation } from "react-i18next";
 
 export default function PromotionList() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [, setLoadingState] = useContext(LoadingContext);
 
@@ -34,7 +36,7 @@ export default function PromotionList() {
         className="d-flex justify-content-center align-items-center"
         style={{ minHeight: "50vh" }}
       >
-        <p>Đang tải dữ liệu...</p>
+        <p>{t("common.loading")}</p>
       </div>
     );
   }
@@ -42,8 +44,8 @@ export default function PromotionList() {
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải danh sách promotion.</p>
-        <p>{error?.message || "Vui lòng thử lại sau."}</p>
+        <p>{t("promotions.loadError")}</p>
+        <p>{error?.message || t("common.tryAgain")}</p>
       </div>
     );
   }
@@ -81,11 +83,11 @@ export default function PromotionList() {
                 <p className="promotion-release text-muted mb-0 text-center">
                   {ele.startDate
                     ? dayjs(ele.startDate).format("DD/MM/YYYY")
-                    : "Đang cập nhật"}
+                    : t("common.updating")}
                   {" - "}
                   {ele.endDate
                     ? dayjs(ele.endDate).format("DD/MM/YYYY")
-                    : "Không thời hạn"}
+                    : t("promotions.noExpiry")}
                 </p>
               </div>
             </div>

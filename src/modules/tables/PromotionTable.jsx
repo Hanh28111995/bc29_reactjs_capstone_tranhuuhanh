@@ -76,7 +76,7 @@ function PromotionTable() {
       key: 'banner',
       width: '18%',
       render: (text) => (
-        <Image src={text} className="movie-banner" fallback="https://via.placeholder.com/120x60?text=No+Banner" />
+        <Image src={text} className="movie-banner" fallback="https://via.placeholder.com/60x90?text=No+Banner" />
       ),
     },
     {

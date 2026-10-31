@@ -11,8 +11,10 @@ import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "configs/firebase.config";
 import SEO from "components/SEO";
 import { fetchNotificationAPI, formatNotificationsForStore } from "services/notificationAndHistory";
+import { useTranslation } from "react-i18next";
 
 export default function Login() {
+  const { t } = useTranslation();
   const { closeLogin } = useAuth(); 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ export default function Login() {
     service: async (payload) => loginAPI(payload),
     raw: true,
     onError: (err) => {
-      const errorMsg = err.response?.data?.message || 'Đăng nhập thất bại';
+      const errorMsg = err.response?.data?.message || t("auth.loginFailed");
       notification.error({ description: errorMsg });
     },
   });
@@ -66,12 +68,12 @@ export default function Login() {
     try {
       const result = await loginMutation.mutateAsync(state);
       const userData = result.data.content;
-      notification.success({ description: "Đăng nhập thành công!" });
+      notification.success({ description: t("auth.loginSuccess") });
       await handleLoginSuccess(userData);
     } catch (err) {
       // lỗi hiển thị đã xử lý trong loginMutation.onError
       if (!err?.response) {
-        const errorMsg = err?.message || "Đăng nhập thất bại";
+        const errorMsg = err?.message || t("auth.loginFailed");
         notification.error({ description: errorMsg });
       }
     }
@@ -90,20 +92,20 @@ export default function Login() {
       const response = await loginGoogleAPI(idToken);
       const userData = response.data.content;
       
-      notification.success({ description: "Đăng nhập bằng Google thành công!" });
+      notification.success({ description: t("auth.googleLoginSuccess") });
       await handleLoginSuccess(userData);
     } catch (error) {
       console.error("Chi tiết lỗi Google Login:", error);
       
-      let errorMsg = "Đăng nhập bằng Google thất bại!";
+      let errorMsg = t("auth.googleLoginFailed");
       
       if (error.code === "auth/popup-closed-by-user") {
-        errorMsg = "Bạn đã đóng cửa sổ đăng nhập.";
+        errorMsg = t("auth.popupClosed");
       } else if (error.code === "auth/popup-blocked") {
-        errorMsg = "Trình duyệt đã chặn cửa sổ đăng nhập. Hãy cho phép popup.";
+        errorMsg = t("auth.popupBlocked");
       } else if (error.response) {
         // Lỗi từ phía Backend
-        errorMsg = `Backend Error (${error.response.status}): ${error.response.data?.message || "Lỗi xác thực token"}`;
+        errorMsg = `Backend Error (${error.response.status}): ${error.response.data?.message || t("auth.tokenAuthFailed")}`;
       } else {
         errorMsg = error.message;
       }
@@ -115,12 +117,12 @@ export default function Login() {
   return (
     <div className="mx-auto my-5 d-flex flex-column col-10 col-md-4">
       <SEO 
-        title="Đăng nhập" 
-        description="Đăng nhập để trải nghiệm đặt vé xem phim nhanh chóng và nhận nhiều ưu đãi."
+        title={t("auth.login")}
+        description={t("auth.loginToContinue")}
       />
       <form onSubmit={handleSubmit} style={{ caretColor: 'black' }} >
         <div className="form-group">
-          <label>Tài khoản</label>
+          <label>{t("auth.account")}</label>
           <input
             defaultValue={state.username}
             name="username"
@@ -130,7 +132,7 @@ export default function Login() {
           />
         </div>
         <div className="form-group">
-          <label>Mật khẩu</label>
+          <label>{t("auth.password")}</label>
           <input
             defaultValue={state.password}
             name="password"
@@ -140,18 +142,18 @@ export default function Login() {
           />
         </div>
         <button className="btn btn-success w-100" disabled={loginMutation.isLoading}>
-          {loginMutation.isLoading ? 'Đang đăng nhập...' : 'LOGIN'}
+          {loginMutation.isLoading ? t("auth.loggingIn") : t("auth.login").toUpperCase()}
         </button>
       </form>
       
-      <div className="text-center my-3">--- HOẶC ---</div>
+      <div className="text-center my-3">--- {t("common.or")} ---</div>
       
       <button 
         type="button" 
         className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center"
         onClick={handleGoogleLogin}
       >
-        <i className="fab fa-google mr-2"></i> Đăng nhập bằng Google
+        <i className="fab fa-google mr-2"></i> {t("auth.googleLogin")}
       </button>
     </div>
   );

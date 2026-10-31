@@ -5,8 +5,10 @@ import "./index.scss";
 import { fetchMovieListAPI } from "services/general";
 import { getBannerListAPI } from "services/banner";
 import { useAsync } from "hooks/useAsync";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
+  const { t } = useTranslation();
   const {
     state: rawBanner = [],
     loading: isBannerLoading,
@@ -34,7 +36,7 @@ export default function Home() {
         className="d-flex justify-content-center align-items-center"
         style={{ minHeight: "50vh" }}
       >
-        <p>Đang tải dữ liệu...</p>
+        <p>{t("common.loading")}</p>
       </div>
     );
   }
@@ -42,7 +44,7 @@ export default function Home() {
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải dữ liệu trang chủ.</p>
+        <p>{t("home.loadError")}</p>
       </div>
     );
   }

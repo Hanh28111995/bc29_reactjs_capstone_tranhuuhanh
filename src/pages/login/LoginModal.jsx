@@ -2,10 +2,12 @@ import { useAuth } from 'contexts/auth.context';
 import React from 'react';
 import { Modal } from 'antd';
 import Login from './Login';
+import { useTranslation } from "react-i18next";
 import "./index.scss";
 
 export default function LoginModal() {
     const { isLoginModalOpen, closeLogin } = useAuth();
+    const { t } = useTranslation();
 
     return (
         <Modal
@@ -20,8 +22,8 @@ export default function LoginModal() {
             <div className="overflow-hidden rounded-lg login-modal">
                 {/* Header trang trí nhẹ */}
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-center">
-                    <h2 className="text-2xl font-bold text-white">Chào mừng trở lại</h2>
-                    <p className="text-blue-100 mt-1">Vui lòng đăng nhập để tiếp tục</p>
+                    <h2 className="text-2xl font-bold text-white">{t("auth.welcomeBack")}</h2>
+                    <p className="text-blue-100 mt-1">{t("auth.loginToContinue")}</p>
                 </div>
 
                 {/* Phần chứa Form Login */}

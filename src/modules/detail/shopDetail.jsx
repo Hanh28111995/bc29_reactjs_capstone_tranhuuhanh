@@ -4,9 +4,11 @@ import { Spin, Select, InputNumber, Button, message } from "antd";
 import { useAsync } from "../../hooks/useAsync";
 import { LoadingContext } from "../../contexts/loading.context";
 import { fetchShopProductDetailAPI } from "services/general";
+import { useTranslation } from "react-i18next";
 
 
 export default function ShopDetail() {
+  const { t } = useTranslation();
   const param = useParams(); // Hoặc id_shop tùy thuộc route của bạn
   const navigate = useNavigate();
   const [loadingState] = useContext(LoadingContext) || [{}];
@@ -43,7 +45,7 @@ export default function ShopDetail() {
     );
 
     if (missingRequired) {
-      message.error("Vui lòng chọn đầy đủ các tùy chọn bắt buộc!");
+      message.error(t("shop.requiredOptions"));
       return;
     }
 
@@ -57,7 +59,7 @@ export default function ShopDetail() {
     };
 
     console.log("Buy Now data:", orderData);
-    message.success("Chuyển đến trang thanh toán...");
+    message.success(t("shop.checkoutRedirect"));
     // navigate('/checkout', { state: orderData });
   };
 
@@ -68,11 +70,11 @@ export default function ShopDetail() {
     );
 
     if (missingRequired) {
-      message.error("Vui lòng chọn đầy đủ các tùy chọn bắt buộc!");
+      message.error(t("shop.requiredOptions"));
       return;
     }
 
-    message.success("Đã thêm sản phẩm vào giỏ hàng!");
+    message.success(t("shop.addedToCart"));
   };
 
   if (isLoading) {
@@ -86,8 +88,8 @@ export default function ShopDetail() {
   if (isError) {
     return (
       <div className="text-center mt-5">
-        <p>Đã có lỗi khi tải thông tin sản phẩm.</p>
-        <p>{error?.message || "Vui lòng thử lại sau."}</p>
+        <p>{t("shop.detailLoadError")}</p>
+        <p>{error?.message || t("common.tryAgain")}</p>
       </div>
     );
   }
@@ -116,23 +118,23 @@ export default function ShopDetail() {
               <hr />
 
               <div className="row mb-2">
-                <div className="col-4 fw-bold">Nội dung</div>
-                <div className="col-8" dangerouslySetInnerHTML={{ __html: shopDetail.content || "Đang cập nhật" }} />
+                <div className="col-4 fw-bold">{t("common.content")}</div>
+                <div className="col-8" dangerouslySetInnerHTML={{ __html: shopDetail.content || t("common.updating") }} />
               </div>
 
               <div className="row mb-2">
-                <div className="col-4 fw-bold">Số lượng mua</div>
+                <div className="col-4 fw-bold">{t("common.quantity")}</div>
                 <div className="col-8">
                   {shopDetail.limitPerCustomer > 0 
-                    ? `Tối đa ${shopDetail.limitPerCustomer} sản phẩm/khách` 
-                    : "Không giới hạn"}
+                    ? t("shop.quantityLimit", { count: shopDetail.limitPerCustomer })
+                    : t("common.notLimited")}
                 </div>
               </div>
 
               <div className="row mb-2">
-                <div className="col-4 fw-bold">Hạn sử dụng</div>
+                <div className="col-4 fw-bold">{t("shop.expiryDays")}</div>
                 <div className="col-8">
-                  {shopDetail.expiryDays ? `★ ${shopDetail.expiryDays} ngày sau khi mua` : "Không thời hạn"}
+                  {shopDetail.expiryDays ? t("shop.expiryAfterPurchase", { count: shopDetail.expiryDays }) : t("shop.noExpiry")}
                 </div>
               </div>
             </div>
@@ -144,7 +146,7 @@ export default function ShopDetail() {
               <h3 className="h4 fw-bold mb-3">{shopDetail.title}</h3>
 
               <div className="d-flex justify-content-between align-items-center mb-4 py-2 border-bottom">
-                <span className="text-muted">Giá bán online</span>
+                <span className="text-muted">{t("shop.onlinePrice")}</span>
                 <span className="fs-4 fw-bold text-danger">
                   {shopDetail.price?.toLocaleString("vi-VN")} đ
                 </span>
@@ -160,7 +162,7 @@ export default function ShopDetail() {
                       </label>
                       <Select
                         className="w-100"
-                        placeholder={`-- Chọn ${opt.name} --`}
+                        placeholder={t("shop.chooseOption", { name: opt.name })}
                         onChange={(value) => handleOptionChange(opt.name, value)}
                         options={opt.choices?.map((choice) => ({
                           label: choice,
@@ -174,7 +176,7 @@ export default function ShopDetail() {
 
               {/* Chọn số lượng (SL) */}
               <div className="mb-4">
-                <label className="form-label fw-semibold">SL</label>
+                <label className="form-label fw-semibold">{t("shop.quantityShort")}</label>
                 <div className="w-100">
                   <InputNumber
                     min={1}
@@ -188,7 +190,7 @@ export default function ShopDetail() {
 
               {/* Tổng số tiền */}
               <div className="d-flex justify-content-between align-items-center mb-4 py-2 border-top border-bottom">
-                <span className="fw-bold fs-5">Tổng số</span>
+                <span className="fw-bold fs-5">{t("shop.totalAmount")}</span>
                 <span className="fs-4 fw-bold text-danger">
                   {((shopDetail.price || 0) * quantity).toLocaleString("vi-VN")} đ
                 </span>
@@ -197,13 +199,13 @@ export default function ShopDetail() {
               {/* Action Buttons */}
               <div className="d-grid gap-2">
                 <Button type="primary" size="large" className="bg-dark text-white fw-bold" onClick={handleBuyNow}>
-                  Mua ngay
+                  {t("shop.buyNow")}
                 </Button>
                 <Button size="large" className="fw-semibold" onClick={handleAddToCart}>
-                  Thêm vào giỏ
+                  {t("shop.addToCart")}
                 </Button>
                 <Button size="large" onClick={() => navigate(-1)}>
-                  Quay lại danh sách
+                  {t("shop.backToList")}
                 </Button>
               </div>
             </div>

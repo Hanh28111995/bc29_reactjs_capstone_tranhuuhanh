@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react'
 import { createRef } from 'react'
 import { useNavigate } from "react-router-dom"
 import { registerApi } from 'services/user'
+import { useTranslation } from "react-i18next";
 
 const DEFAULT_VALUES = {
     username: "",
@@ -18,6 +19,7 @@ const DEFAULT_ERRORS = {
     userphone: "",
 }
 export default function Register() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [valid, setValid] = useState({ isValid: true })
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -28,23 +30,22 @@ export default function Register() {
     });
 
     const handleChange = (event) => {
-        const { name, title, minLength, maxLength, pattern, value, validity } = event.target;
+        const { name, minLength, maxLength, pattern, value, validity } = event.target;
+        const field = t(`auth.${name === "username" ? "account" : name === "userphone" ? "phone" : name}`);
         let message = '';
 
-        // 1. Kiểm tra trống
         if (validity.valueMissing) {
-            message = `Vui lòng nhập ${title}`;
-        }
-        // 2. Kiểm tra độ dài
-        else if (validity.tooShort || validity.tooLong) {
-            message = `${title} phải từ ${minLength} đến ${maxLength} kí tự.`;
-        }
-        // 3. Kiểm tra định dạng (Pattern)
-        else if (pattern && !new RegExp(pattern).test(value)) {
-            if (name === 'username') message = `${title} không chứa kí tự đặc biệt.`;
-            else if (name === 'email') message = `${title} không hợp lệ.`;
-            else if (name === 'userphone') message = `${title} gồm các số từ 0-9.`;
-            else if (name === 'password') message = `${title} Ít nhất 1 chữ hoa, 1 chữ thường, 1 số, 1 ký tự đặc biệt.`;
+            message = t("auth.requiredField", { field });
+        } else if (validity.tooShort || validity.tooLong) {
+            message = t("auth.fieldLength", { field, min: minLength, max: maxLength });
+        } else if (pattern && !new RegExp(pattern).test(value)) {
+            const errorKey = {
+                username: "usernameInvalid",
+                email: "emailInvalid",
+                userphone: "phoneInvalid",
+                password: "passwordInvalid",
+            }[name];
+            if (errorKey) message = t(`auth.${errorKey}`, { field });
         }
 
         setState({
@@ -64,7 +65,7 @@ export default function Register() {
             // Nếu FORM KHÔNG HỢP LỆ
             setValid({ isValid: false });
             notification.error({
-                description: `Vui lòng nhập đầy đủ và chính xác thông tin`,
+                description: t("auth.invalidForm"),
             });
             return; // Dừng lại không gọi API
         }
@@ -75,11 +76,11 @@ export default function Register() {
         setIsSubmitting(true);
         try {
             await registerApi(state.values);
-            notification.success({ description: `Register success` });
+            notification.success({ description: t("auth.registerSuccess") });
             navigate("/login");
         } catch (err) {
             notification.warning({
-                description: `${err.response?.data?.message || "Đăng ký thất bại"}`,
+                description: `${err.response?.data?.message || t("auth.registerFailed")}`,
             });
         } finally {
             submittingRef.current = false;
@@ -94,9 +95,9 @@ export default function Register() {
             onSubmit={handleSubmit} style={{ caretColor: 'black' }}
         >
             <div className='form-group'>
-                <label>Tài khoản</label>
+                <label>{t("auth.account")}</label>
                 <input
-                    title='Username'
+                    title={t("auth.account")}
                     value={username}
                     required
                     name='username'
@@ -110,9 +111,9 @@ export default function Register() {
                 )}
             </div>
             <div className='form-group'>
-                <label>Mật khẩu</label>
+                <label>{t("auth.password")}</label>
                 <input
-                    title='Mật khẩu' // Nên để tiếng Việt để thông báo khớp với ngôn ngữ hiển thị
+                    title={t("auth.password")}
                     value={password}
                     required
                     name='password'
@@ -130,9 +131,9 @@ export default function Register() {
             </div>
 
             <div className='form-group'>
-                <label>Email</label>
+                <label>{t("auth.email")}</label>
                 <input
-                    title='Email'
+                    title={t("auth.email")}
                     value={email}
                     required
                     name='email'
@@ -146,9 +147,9 @@ export default function Register() {
                 )}
             </div>
             <div className='form-group'>
-                <label>Phone Number</label>
+                <label>{t("auth.phone")}</label>
                 <input
-                    title='Userphone'
+                    title={t("auth.phone")}
                     value={userphone}
                     required
                     name='userphone'
@@ -164,7 +165,9 @@ export default function Register() {
                 )}
             </div>
 
-            <button className='btn btn-success w-100' disabled={isSubmitting}>REGISTER</button>
+            <button className='btn btn-success w-100' disabled={isSubmitting}>
+                {isSubmitting ? t("auth.registering") : t("auth.register").toUpperCase()}
+            </button>
 
         </form>
     )
