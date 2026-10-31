@@ -258,8 +258,7 @@ export default function ShopProduct() {
                     <div className="store-product-image-placeholder">
                       <ShopOutlined />
                     </div>
-                  )}
-                  <span className="store-product-badge">LOTTE CINEMA</span>
+                  )}                  
                 </div>
                 <div className="store-product-info">
                   <h3 title={product.title}>{product.title || t("shop.productFallback")}</h3>
