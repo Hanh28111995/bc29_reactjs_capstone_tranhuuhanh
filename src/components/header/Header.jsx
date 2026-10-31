@@ -204,7 +204,7 @@ export default function Header() {
               style={{
                 fontSize: "1rem",
                 flexDirection: "row",
-                textAlign: "center",
+                alignItems: "center",
                 display: "flex",
               }}
             >
@@ -217,6 +217,7 @@ export default function Header() {
                   margin: "0 5rem",
                   pointerEvents: "none",
                   cursor: "default",
+                  fontWeight: "normal",
                 }}
               >
                 {t("auth.hello")} {userState.userInfor?.user_inf?.username}
