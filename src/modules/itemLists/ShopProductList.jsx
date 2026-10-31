@@ -75,7 +75,9 @@ export default function ShopProduct() {
 
   const filteredBranches = filters.area
     ? allBranches.filter((branch) => {
-        const selectedArea = locations.find((loc) => loc._id === filters.area);
+        const selectedArea = locations.find(
+          (loc) => loc.vungMien === filters.area,
+        );
 
         if (!selectedArea) return false;
 
@@ -125,7 +127,7 @@ export default function ShopProduct() {
                     }
                     options={locations.map((loc) => ({
                       label: loc.vungMien,
-                      value: loc._id,
+                      value: loc.vungMien,
                     }))}
                   />
                 </label>
@@ -145,7 +147,7 @@ export default function ShopProduct() {
                     }
                     options={filteredBranches.map((branch) => ({
                       label: branch.branch,
-                      value: branch._id,
+                      value: branch.branch,
                     }))}
                   />
                 </label>
