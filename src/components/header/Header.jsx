@@ -172,18 +172,18 @@ export default function Header() {
           </div>
         </>
       )}
-      <div className="header-top" >
+      <div className="header-top">
         {!userState.userInfor ? (
           <div className="d-flex align-items-center justify-content-end">
             <button
               onClick={() => navigate("/register")}
-              className="btn-more-infor my-2 my-sm-0 mr-2"              
+              className="btn-more-infor my-2 my-sm-0 mr-2"
             >
               {t("auth.register")}
             </button>
             <button
               onClick={() => navigate("/login")}
-              className="btn-more-infor my-2 my-sm-0 mr-2"              
+              className="btn-more-infor my-2 my-sm-0 mr-2"
             >
               {t("auth.login")}
             </button>
@@ -208,25 +208,27 @@ export default function Header() {
                 display: "flex",
               }}
             >
-              <p
-                className="my-0"
+              <button
+                className="btn-more-infor my-0"
                 style={{
                   alignItems: "center",
                   justifyContent: "center",
                   display: "flex",
                   margin: "0 5rem",
+                  pointerEvents: "none",
+                  cursor: "default",
                 }}
               >
                 {t("auth.hello")} {userState.userInfor?.user_inf?.username}
-              </p>
+              </button>
               <button
                 onClick={handleLogout}
-                className="btn-more-infor my-2 my-sm-0 mr-2"                
+                className="btn-more-infor my-2 my-sm-0 mr-2"
               >
                 {t("auth.logout")}
               </button>
               <button
-                className="btn-more-infor my-2 my-sm-0"                
+                className="btn-more-infor my-2 my-sm-0"
                 onClick={handleToggleLanguage}
               >
                 {t(`language.${i18n.language === "en" ? "vi" : "en"}`)}
@@ -247,10 +249,7 @@ export default function Header() {
       </div>
       <div className="noti-icon d-flex justify-content-center">
         <a className="navbar-brand" href="/">
-          <img
-            src={logoImage}
-            alt="HTheaterLogo"            
-          />
+          <img src={logoImage} alt="HTheaterLogo" />
         </a>
       </div>
       <nav className="navbar navbar-expand-lg navbar-light py-3">
