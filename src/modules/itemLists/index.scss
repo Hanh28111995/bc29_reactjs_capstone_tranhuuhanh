@@ -709,7 +709,7 @@
         font-weight: 650;
         line-height: 1.4;
         -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
+        // -webkit-line-clamp: 2;
       }
     }
 
@@ -1121,8 +1121,12 @@
   }
 
   .store-results {
-    width: min(91%, 172rem);
+    width: 95%;
     margin: 3rem auto;
+
+    @media (min-width: 1200px) {
+      width: 75%;
+    }
   }
 
   .store-setup-error {
