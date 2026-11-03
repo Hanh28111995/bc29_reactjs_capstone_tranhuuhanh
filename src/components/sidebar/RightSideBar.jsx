@@ -12,12 +12,14 @@ import "./index.scss";
 
 export default function RightSidebar({ cartCount = 0 }) {
   const [isScrolling, setIsScrolling] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true);
 
   // Lắng nghe sự kiện scroll và dùng debounce để xác định khi nào kết thúc scroll
   useEffect(() => {
     let scrollTimeout;
 
     const handleScroll = () => {
+      setIsAtTop(window.scrollY <= 0);
       setIsScrolling(true);
 
       clearTimeout(scrollTimeout);
@@ -26,6 +28,7 @@ export default function RightSidebar({ cartCount = 0 }) {
       }, 150);
     };
 
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -91,11 +94,12 @@ export default function RightSidebar({ cartCount = 0 }) {
         </li>
       </ul>
 
-      {/* Nút TOP */}
-      <a href="#" className="btn_top" title="TOP" onClick={scrollToTop}>
-        <span className="top-text">TOP</span>
-        <ArrowUpOutlined className="top-icon" />
-      </a>
+      {!isAtTop && (
+        <a href="#" className="btn_top" title="TOP" onClick={scrollToTop}>
+          <span className="top-text">TOP</span>
+          <ArrowUpOutlined className="top-icon" />
+        </a>
+      )}
     </div>
   );
 }
