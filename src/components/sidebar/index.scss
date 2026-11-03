@@ -8,16 +8,13 @@
   z-index: 1000;
   border-radius: 4px;
   overflow: hidden;
-  transition: top 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+  top: 30%;
+  transform: translateY(0);
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
 
   /* Trạng thái khi đang scroll */
   &.is-scrolling {
-    top: 20%;
-  }
-
-  /* Trạng thái khi kết thúc scroll (cố định ở 30% screen) */
-  &.at-rest {
-    top: 30%;
+    transform: translateY(-10vh);
   }
 
   ul {
