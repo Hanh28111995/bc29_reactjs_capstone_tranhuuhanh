@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import GoToTop from "routes/goToTop";
 import Footer from "../components/footer/Footer";
 import Header from "../components/header/Header";
@@ -10,6 +10,7 @@ import LoginModal from "pages/login/LoginModal";
 
 export default React.memo(function HomeLayout() {
   const userInfor = useSelector((state) => state.userReducer.userInfor);
+  const { pathname } = useLocation();
 
   return (
     <div
@@ -21,7 +22,7 @@ export default React.memo(function HomeLayout() {
         <LoginModal />
         <Outlet />
       </Suspense>
-      {userInfor && <RightSidebar />}
+      {userInfor && pathname !== "/" && <RightSidebar />}
       <Footer />
       <GoToTop />
     </div>
