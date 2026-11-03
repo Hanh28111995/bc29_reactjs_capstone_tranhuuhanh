@@ -66,7 +66,10 @@ const SamplePrevArrow = props => {
 
 const settings = {
   nextArrow: <SampleNextArrow />,
-  prevArrow: <SamplePrevArrow />
+  prevArrow: <SamplePrevArrow />,
+  swipe: true,
+  touchMove: true,
+  draggable: true,
 };
 
 export default function Calendar({ onDateChange, isActive = true }) {

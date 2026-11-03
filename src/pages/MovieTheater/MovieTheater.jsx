@@ -19,9 +19,11 @@ import { AimOutlined, EnvironmentOutlined, LinkOutlined, SyncOutlined } from "@a
 import "./index.scss";
 import { useGeoLocationSelect } from "hooks/useGeoLocationSelect";
 import SEO from "components/SEO";
+import FeaturedBannerCarousel from "components/featuredBanner/FeaturedBannerCarousel";
 import Calendar from "modules/showtimeModules/Calendar";
 import dayjs from "dayjs";
 import { getDistance } from "constants/common";
+import { CINEMA_TAB_KEYS, createCinemaTabItems } from "constants/cinemaTabs";
 import { useTranslation } from "react-i18next";
 
 const getRegionName = (region) => region?.vungMien || region?.name || region?.location || region?.city || "";
@@ -96,7 +98,7 @@ function MovieTheater() {
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [cinemaSchedules, setCinemaSchedules] = useState([]);
   const [loadingSchedules, setLoadingSchedules] = useState(false);
-  const [activeTab, setActiveTab] = useState("schedule");
+  const [activeTab, setActiveTab] = useState(CINEMA_TAB_KEYS.schedule);
 
   const { state: rawLocations = [], loading: loadingLocations, isError: locationsError } = useAsync({
     service: fetchLocationListAPI,
@@ -305,7 +307,7 @@ function MovieTheater() {
   const openDirections = () => {
     if (!selectedCinema) return;
 
-    setActiveTab("location");
+    setActiveTab(CINEMA_TAB_KEYS.location);
     const coordinates = parseCoordinates(cinemaInfo?.coordinates || selectedCinema.coordinates);
     const destination = coordinates
       ? `${coordinates[0]},${coordinates[1]}`
@@ -327,13 +329,13 @@ function MovieTheater() {
     ? `https://www.openstreetmap.org/export/embed.html?bbox=${coordinates[1] - 0.015}%2C${coordinates[0] - 0.01}%2C${coordinates[1] + 0.015}%2C${coordinates[0] + 0.01}&layer=mapnik&marker=${coordinates[0]}%2C${coordinates[1]}`
     : null;
 
-  const tabItems = [
-    {
-      key: "schedule",
-      label: t("cinema.showtimes"),
-      children: (
+  const tabContents = {
+    [CINEMA_TAB_KEYS.schedule]: (
         <div className="cinema-schedule-tab">
-          <Calendar onDateChange={setSelectedDate} isActive={activeTab === "schedule"} />
+          <Calendar
+            onDateChange={setSelectedDate}
+            isActive={activeTab === CINEMA_TAB_KEYS.schedule}
+          />
           <div className="age-rating-legend">
             <span><b className="age-rating-p">P</b> {t("cinema.allAudiences")}</span>
             <span><b className="age-rating-c13">13</b> {t("cinema.age13")}</span>
@@ -415,22 +417,14 @@ function MovieTheater() {
           </Spin>
         </div>
       ),
-    },
-    {
-      key: "location",
-      label: t("cinema.location"),
-      children: selectedCinema ? (
+    [CINEMA_TAB_KEYS.location]: selectedCinema ? (
         <div className="cinema-location-tab">
           <p><EnvironmentOutlined /> {selectedCinema.address || t("cinema.noAddress")}</p>
           <Button icon={<LinkOutlined />} onClick={openDirections}>{t("cinema.openDirections")}</Button>
           {mapSource ? <iframe title={`${t("cinema.location")} ${selectedCinema.branch}`} src={mapSource} loading="lazy" /> : <Empty description={t("cinema.noCoordinates")} />}
         </div>
       ) : <Empty description={t("cinema.noCinemaSelected")} />,
-    },
-    {
-      key: "directions",
-      label: t("cinema.directions"),
-      children: selectedCinema ? (
+    [CINEMA_TAB_KEYS.directions]: selectedCinema ? (
         <div className="cinema-info-table cinema-directions-tab">
           <div className="cinema-info-row">
             <div className="cinema-info-label">
@@ -451,11 +445,7 @@ function MovieTheater() {
           </div>
         </div>
       ) : <Empty description={t("cinema.noCinemaSelected")} />,
-    },
-    {
-      key: "amenities",
-      label: t("cinema.amenities"),
-      children: selectedCinema ? (
+    [CINEMA_TAB_KEYS.amenities]: selectedCinema ? (
         <Spin spinning={loadingCinemaDetail}>
           <div className="cinema-info-table cinema-utility-list">
             {parkingText && (
@@ -490,8 +480,8 @@ function MovieTheater() {
           </div>
         </Spin>
       ) : <Empty description={t("cinema.noCinemaSelected")} />,
-    },
-  ];
+  };
+  const tabItems = createCinemaTabItems(t, tabContents);
 
   return (
     <main className="cinema-detail-page">
@@ -510,10 +500,12 @@ function MovieTheater() {
       </nav>
 
       {banners.length > 0 && (
-        <section className="cinema-banner-wrap" aria-label={t("cinema.bannerAndCinemaLabel")}>
-          <Carousel autoplay={false} dots={banners.length > 1} arrows={banners.length > 1}>
-            {banners.map((source, index) => <img key={`${source}-${index}`} src={source} alt={t("cinema.moviePromotions")} />)}
-          </Carousel>
+        <FeaturedBannerCarousel
+          banners={banners}
+          ariaLabel={t("cinema.bannerAndCinemaLabel")}
+          imageAlt={t("cinema.moviePromotions")}
+          className="cinema-banner-wrap"
+        >
           {currentRegionCinemas.length > 0 && (
             <nav className="cinema-branch-nav" aria-label={`Rạp tại ${currentRegionName}`}>
               {currentRegionCinemas.map((cinema) => (
@@ -532,7 +524,7 @@ function MovieTheater() {
               ))}
             </nav>
           )}
-        </section>
+        </FeaturedBannerCarousel>
       )}
 
       <div className="cinema-detail-container">

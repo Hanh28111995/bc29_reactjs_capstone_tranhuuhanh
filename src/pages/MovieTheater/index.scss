@@ -36,31 +36,6 @@
     }
 }
 
-.cinema-banner-wrap {
-    position: relative;
-    width: 100%;
-    max-height: 320px;
-    overflow: hidden;
-    background: #e8e2cf;
-
-    .slick-slider,
-    .slick-list,
-    .slick-track,
-    .slick-slide,
-    .slick-slide > div {
-        height: 100%;
-        max-height: 320px;
-    }
-
-    img {
-        display: block;
-        width: 100%;
-        height: min(320px, 27vw);
-        min-height: 170px;
-        object-fit: cover;
-    }
-}
-
 .cinema-branch-nav {
     position: absolute;
     justify-content: center;
@@ -544,7 +519,7 @@
         gap: 14px;
     }
 
-    .cinema-banner-wrap img {
+    .featured-banner-carousel img {
         min-height: 150px;
         height: 34vw;
     }

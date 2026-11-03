@@ -24,11 +24,11 @@ export default function RightSidebar({ cartCount = 0 }) {
 
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        setIsScrolling(false); // Kết thúc scroll -> di chuyển về 30% viewport
-      }, 150);
+        setIsScrolling(false);
+      }, 300);
     };
 
-    handleScroll();
+    setIsAtTop(window.scrollY <= 0);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", handleScroll);

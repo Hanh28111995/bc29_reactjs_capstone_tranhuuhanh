@@ -8,7 +8,7 @@
   z-index: 1000;
   border-radius: 4px;
   overflow: hidden;
-  transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: top 0.15s cubic-bezier(0.25, 1, 0.5, 1);
 
   /* Trạng thái khi đang scroll */
   &.is-scrolling {
