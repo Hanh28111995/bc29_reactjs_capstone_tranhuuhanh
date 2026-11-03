@@ -267,6 +267,7 @@
     "expiryAfterPurchase": "★ {{count}} ngày sau khi mua",
     "noExpiry": "Không thời hạn",
     "expiryDays": "Hạn sử dụng",
+    "otherNotes": "Các lưu ý khác",
     "onlinePrice": "Giá bán online",
     "chooseOption": "-- Chọn {{name}} --",
     "quantityShort": "SL",

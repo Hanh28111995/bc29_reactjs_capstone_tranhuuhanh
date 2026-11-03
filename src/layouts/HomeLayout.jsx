@@ -3,10 +3,14 @@ import { Outlet } from "react-router-dom";
 import GoToTop from "routes/goToTop";
 import Footer from "../components/footer/Footer";
 import Header from "../components/header/Header";
+import RightSidebar from "../components/sidebar/RightSideBar";
+import { useSelector } from "react-redux";
 import "./index.scss";
 import LoginModal from "pages/login/LoginModal";
 
 export default React.memo(function HomeLayout() {
+  const userInfor = useSelector((state) => state.userReducer.userInfor);
+
   return (
     <div
       className="wrapper d-flex flex-column justify-content-between"
@@ -17,6 +21,7 @@ export default React.memo(function HomeLayout() {
         <LoginModal />
         <Outlet />
       </Suspense>
+      {userInfor && <RightSidebar />}
       <Footer />
       <GoToTop />
     </div>

@@ -5,6 +5,8 @@ import { useAsync } from "../../hooks/useAsync";
 import { LoadingContext } from "../../contexts/loading.context";
 import { fetchShopProductDetailAPI } from "services/general";
 import { useTranslation } from "react-i18next";
+import { ExclamationCircleFilled } from "@ant-design/icons";
+import "./index.scss";
 
 
 export default function ShopDetail() {
@@ -96,72 +98,94 @@ export default function ShopDetail() {
 
   return (
     <Spin spinning={loadingState?.isLoading || false} size="large">
-      <div className="homePage container my-5">
-        <div className="row">
-          {/* Cột bên trái: Banner và Mô tả / Nội dung chi tiết */}
-          <div className="col-md-7">
-            <div className="mb-4 text-center">
+      <div className="homePage shop-detail-container my-5">
+        <div className="shop-detail-panel row">
+          <section className="col-md-7 shop-detail-info">
+            <div className="shop-detail-banner">
               <img
                 src={shopDetail.banner}
                 alt={shopDetail.title}
-                className="img-fluid rounded shadow-sm"
-                style={{ width: "100%", maxHeight: "450px", objectFit: "cover" }}
+                className="img-fluid"
                 loading="lazy"
                 decoding="async"
               />
             </div>
 
-            {/* Mô tả ngắn / Content */}
-            <div className="shop-description-box p-3 bg-light rounded">
-              <p className="mb-3" dangerouslySetInnerHTML={{ __html: shopDetail.description }} />
-              
-              <hr />
+            <div className="shop-description-box">
+              <p
+                className="shop-short-description"
+                dangerouslySetInnerHTML={{
+                  __html: shopDetail.description || t("common.updating"),
+                }}
+              />
 
-              <div className="row mb-2">
-                <div className="col-4 fw-bold">{t("common.content")}</div>
-                <div className="col-8" dangerouslySetInnerHTML={{ __html: shopDetail.content || t("common.updating") }} />
-              </div>
-
-              <div className="row mb-2">
-                <div className="col-4 fw-bold">{t("common.quantity")}</div>
-                <div className="col-8">
-                  {shopDetail.limitPerCustomer > 0 
-                    ? t("shop.quantityLimit", { count: shopDetail.limitPerCustomer })
-                    : t("common.notLimited")}
+              <div className="shop-detail-meta">
+                <div className="shop-detail-meta-row">
+                  <strong>{t("common.content")}</strong>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: shopDetail.content || t("common.updating"),
+                    }}
+                  />
                 </div>
-              </div>
 
-              <div className="row mb-2">
-                <div className="col-4 fw-bold">{t("shop.expiryDays")}</div>
-                <div className="col-8">
-                  {shopDetail.expiryDays ? t("shop.expiryAfterPurchase", { count: shopDetail.expiryDays }) : t("shop.noExpiry")}
+                <div className="shop-detail-meta-row">
+                  <strong>{t("common.quantity")}</strong>
+                  <span>
+                    {shopDetail.limitPerCustomer > 0
+                      ? t("shop.quantityLimit", {
+                          count: shopDetail.limitPerCustomer,
+                        })
+                      : t("common.notLimited")}
+                  </span>
+                </div>
+
+                <div className="shop-detail-meta-row">
+                  <strong>{t("shop.expiryDays")}</strong>
+                  <span>
+                    {shopDetail.expiryDays
+                      ? t("shop.expiryAfterPurchase", {
+                          count: shopDetail.expiryDays,
+                        })
+                      : t("shop.noExpiry")}
+                  </span>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Cột bên phải: Thông tin đặt hàng, Options, Giá và Button */}
-          <div className="col-md-5">
-            <div className="shop-purchase-card p-4 border rounded shadow-sm bg-white">
+            <section className="shop-other-notes">
+              <h4>{t("shop.otherNotes")}</h4>
+              <div className="shop-other-note">
+                <ExclamationCircleFilled aria-hidden="true" />
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: shopDetail.description || t("common.updating"),
+                  }}
+                />
+              </div>
+            </section>
+          </section>
+
+          <aside className="col-md-5 shop-detail-order-column">
+            <div className="shop-purchase-card">
               <h3 className="h4 fw-bold mb-3">{shopDetail.title}</h3>
 
-              <div className="d-flex justify-content-between align-items-center mb-4 py-2 border-bottom">
+              <div className="shop-online-price">
                 <span className="text-muted">{t("shop.onlinePrice")}</span>
-                <span className="fs-4 fw-bold text-danger">
+                <strong>
                   {shopDetail.price?.toLocaleString("vi-VN")} đ
-                </span>
+                </strong>
               </div>
 
-              {/* Render danh sách options động từ Model */}
               {shopDetail.options && shopDetail.options.length > 0 && (
-                <div className="options-container mb-3">
+                <div className="shop-options">
                   {shopDetail.options.map((opt, index) => (
-                    <div className="mb-3" key={index}>
-                      <label className="form-label fw-semibold">
+                    <div className="shop-option" key={index}>
+                      <label>
                         {opt.name} {opt.required && <span className="text-danger">*</span>}
                       </label>
                       <Select
-                        className="w-100"
+                        className="shop-option-select"
                         placeholder={t("shop.chooseOption", { name: opt.name })}
                         onChange={(value) => handleOptionChange(opt.name, value)}
                         options={opt.choices?.map((choice) => ({
@@ -174,42 +198,37 @@ export default function ShopDetail() {
                 </div>
               )}
 
-              {/* Chọn số lượng (SL) */}
-              <div className="mb-4">
-                <label className="form-label fw-semibold">{t("shop.quantityShort")}</label>
-                <div className="w-100">
-                  <InputNumber
-                    min={1}
-                    max={shopDetail.stock > 0 ? shopDetail.stock : 99}
-                    value={quantity}
-                    onChange={(val) => setQuantity(val || 1)}
-                    className="w-100"
-                  />
-                </div>
+              <div className="shop-option shop-quantity">
+                <label>{t("shop.quantityShort")}</label>
+                <InputNumber
+                  min={1}
+                  max={shopDetail.stock > 0 ? shopDetail.stock : 99}
+                  value={quantity}
+                  onChange={(val) => setQuantity(val || 1)}
+                  className="shop-option-select"
+                />
               </div>
 
-              {/* Tổng số tiền */}
-              <div className="d-flex justify-content-between align-items-center mb-4 py-2 border-top border-bottom">
-                <span className="fw-bold fs-5">{t("shop.totalAmount")}</span>
-                <span className="fs-4 fw-bold text-danger">
+              <div className="shop-total">
+                <strong>{t("shop.totalAmount")}</strong>
+                <strong>
                   {((shopDetail.price || 0) * quantity).toLocaleString("vi-VN")} đ
-                </span>
+                </strong>
               </div>
 
-              {/* Action Buttons */}
-              <div className="d-grid gap-2">
-                <Button type="primary" size="large" className="bg-dark text-white fw-bold" onClick={handleBuyNow}>
+              <div className="shop-detail-actions">
+                <Button type="primary" onClick={handleBuyNow}>
                   {t("shop.buyNow")}
                 </Button>
-                <Button size="large" className="fw-semibold" onClick={handleAddToCart}>
+                <Button onClick={handleAddToCart}>
                   {t("shop.addToCart")}
                 </Button>
-                <Button size="large" onClick={() => navigate(-1)}>
+                <Button onClick={() => navigate(-1)}>
                   {t("shop.backToList")}
                 </Button>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </Spin>
