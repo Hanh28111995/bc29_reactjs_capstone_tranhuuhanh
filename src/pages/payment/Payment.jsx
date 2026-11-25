@@ -123,7 +123,7 @@ export default function Payment() {
 
     setCouponLoading(true);
     try {
-      const res = await fetchValidateCouponAPI(code, subtotal);
+      const res = await fetchValidateCouponAPI(userState.userInfor?.user_inf.role, code, subtotal);
       const data = res.data?.content || {};
 
       setAppliedCode(code.toUpperCase());

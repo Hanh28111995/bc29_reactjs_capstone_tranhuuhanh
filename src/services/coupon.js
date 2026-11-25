@@ -1,9 +1,9 @@
 import { request } from "../configs/axios";
 
 // ---------- Customer ----------
-const fetchValidateCouponAPI = (code, subtotal) => {
+const fetchValidateCouponAPI = (role, code, subtotal) => {
   return request({
-    url: `/customer/coupon/validate`,
+    url: `/${role}/coupon/validate`,
     method: "POST",
     data: { code, subtotal },
   });
