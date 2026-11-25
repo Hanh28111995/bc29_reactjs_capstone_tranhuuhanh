@@ -123,7 +123,11 @@ export default function Payment() {
 
     setCouponLoading(true);
     try {
-      const res = await fetchValidateCouponAPI(userState.userInfor?.user_inf.role, code, subtotal);
+      const res = await fetchValidateCouponAPI(
+        userState.userInfor?.user_inf.role,
+        code,
+        subtotal,
+      );
       const data = res.data?.content || {};
 
       setAppliedCode(code.toUpperCase());
@@ -340,12 +344,23 @@ export default function Payment() {
 
       if (keyword === "momo") {
         const getCode = await fetchCreateMomoPayment(ticket);
+        const payUrl =
+          getCode?.data?.content?.paymentUrl ||
+          getCode?.data?.content?.payUrl ||
+          getCode?.data?.payUrl;
 
-        const payUrl = getCode?.data?.content?.paymentUrl;
+        if (!payUrl) {
+          notification.error({
+            message: t("payment.bookingFailed"),
+            description:
+              getCode?.data?.message ||
+              "Không lấy được đường dẫn thanh toán MoMo",
+          });
+          return;
+        }
 
         notification.success({ message: t("payment.redirectingMomo") });
-
-        setTimeout(() => window.open(payUrl, "_blank"), 2000);
+        window.location.href = payUrl;
       }
 
       if (keyword === "internet banking") {
@@ -435,11 +450,13 @@ export default function Payment() {
           <Divider />
 
           <p>
-            <b>{t("payment.seats")}</b> {bookingData?.map((el) => el.seatNumber).join(", ")}
+            <b>{t("payment.seats")}</b>{" "}
+            {bookingData?.map((el) => el.seatNumber).join(", ")}
           </p>
 
           <p>
-            <b>{t("payment.seatCount")}</b> {bookingData.length} {t("payment.seatUnit")}
+            <b>{t("payment.seatCount")}</b> {bookingData.length}{" "}
+            {t("payment.seatUnit")}
           </p>
 
           <Divider />
