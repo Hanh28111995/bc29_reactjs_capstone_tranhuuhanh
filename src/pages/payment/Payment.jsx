@@ -292,7 +292,11 @@ export default function Payment() {
         payload,
       });
 
-      await refreshNotificationsToStore();
+      try {
+        await refreshNotificationsToStore();
+      } catch (notiErr) {
+        console.warn("Không thể cập nhật thông báo:", notiErr);
+      }
 
       const success = result?.data?.success;
 
@@ -343,24 +347,35 @@ export default function Payment() {
       }
 
       if (keyword === "momo") {
-        const getCode = await fetchCreateMomoPayment(ticket);
-        const payUrl =
-          getCode?.data?.content?.paymentUrl ||
-          getCode?.data?.content?.payUrl ||
-          getCode?.data?.payUrl;
+        try {
+          const getCode = await fetchCreateMomoPayment(ticket);
+          const payUrl =
+            getCode?.data?.content?.paymentUrl ||
+            getCode?.data?.content?.payUrl ||
+            getCode?.data?.payUrl;
 
-        if (!payUrl) {
+          if (!payUrl) {
+            notification.error({
+              message: t("payment.bookingFailed"),
+              description:
+                getCode?.data?.message ||
+                "Không lấy được đường dẫn thanh toán MoMo",
+            });
+            return;
+          }
+
+          notification.success({ message: t("payment.redirectingMomo") });
+          window.location.href = payUrl;
+        } catch (momoErr) {
+          console.error("Lỗi tạo thanh toán MoMo:", momoErr);
           notification.error({
             message: t("payment.bookingFailed"),
             description:
-              getCode?.data?.message ||
-              "Không lấy được đường dẫn thanh toán MoMo",
+              momoErr?.response?.data?.message ||
+              momoErr?.message ||
+              "Không thể khởi tạo thanh toán MoMo",
           });
-          return;
         }
-
-        notification.success({ message: t("payment.redirectingMomo") });
-        window.location.href = payUrl;
       }
 
       if (keyword === "internet banking") {
